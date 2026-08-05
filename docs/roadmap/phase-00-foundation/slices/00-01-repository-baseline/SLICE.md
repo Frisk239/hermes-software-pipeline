@@ -6,7 +6,7 @@ Phase: `phase-00`
 
 Status: `DRAFT`
 
-Document revision: `1`
+Document revision: `2`
 
 Base SHA: `9a73b39f2eb1653e7345b27a39760cb55ef95af4`
 
@@ -20,7 +20,7 @@ Clone the exact repository baseline on Windows or Linux, locate every normative 
 
 - establish portable line-ending policy;
 - add deterministic documentation and JSON Schema validation scripts;
-- validate UTF-8, replacement characters, Markdown fences, local links, ADR status, Schema syntax, meta-schema, `$id`, `$ref`, and JSON Pointer resolution;
+- validate UTF-8, replacement characters, Markdown fences, local links, ADR status, JSON parsing, `$id` uniqueness, local `$ref`, and JSON Pointer resolution using only the Python standard library;
 - add minimal positive and deliberately broken bootstrap fixtures for the checker itself;
 - add Windows/Linux GitHub Actions for the offline documentation/contract checks;
 - update baseline documentation only where required by the implemented checks;
@@ -43,7 +43,7 @@ This Slice changes no production Interface. It is bound by ADR-0024 for future P
 | ID | Trace | Observable result | Verification |
 | --- | --- | --- | --- |
 | `AC-01` | `BOOT-01` | A clean clone exposes all required root entry points and every indexed local documentation link resolves. | `docs-check` |
-| `AC-02` | `BOOT-02`, `XCON-01` | All 14 bootstrap Schemas parse, pass Draft 2020-12 validation, have unique `$id` values, and resolve every `$ref`/fragment through a standards-compliant registry. | `contracts-check` |
+| `AC-02` | `BOOT-02`, `XCON-01` | All 14 bootstrap Schemas parse, have unique `$id` values, and resolve every local/absolute `$ref` and JSON Pointer fragment to a declared Schema using only the Python standard library. Full Draft 2020-12 meta-schema validation remains owned by `slice-00-03`. | `contracts-check` |
 | `AC-03` | `BOOT-02` | A deliberately broken fixture is rejected with a stable nonzero exit and actionable bounded output. | `contracts-negative` |
 | `AC-04` | `BOOT-03`, `XPLAT-01` | The same offline check commands run on required Windows and Linux GitHub Actions jobs. | `workflow-check`, CI evidence |
 | `AC-05` | `XSEC-01` | Validation reads repository data only, performs no network access, executes no repository-provided shell string, and emits no secret or Project content. | design review and `scope-check` |

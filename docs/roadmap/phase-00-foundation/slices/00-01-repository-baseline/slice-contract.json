@@ -1,7 +1,7 @@
 {
   "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
   "schema_version": 1,
-  "document_revision": 1,
+  "document_revision": 2,
   "slice_id": "slice-00-01",
   "phase_id": "phase-00",
   "status": "DRAFT",
@@ -12,7 +12,7 @@
   "must_scope": [
     "Establish portable line-ending policy",
     "Add deterministic documentation and JSON Schema validation scripts",
-    "Validate UTF-8, replacement characters, Markdown fences, local links, ADR status, Schema syntax, meta-schema, $id, $ref, and JSON Pointer resolution",
+    "Validate UTF-8, replacement characters, Markdown fences, local links, ADR status, JSON parsing, $id uniqueness, local $ref, and JSON Pointer resolution using only the Python standard library",
     "Add positive and deliberately broken bootstrap fixtures for the checker",
     "Add Windows and Linux GitHub Actions for offline documentation and contract checks",
     "Synchronize baseline documentation affected by the checks"
@@ -81,7 +81,7 @@
         "BOOT-02",
         "XCON-01"
       ],
-      "observable_result": "All bootstrap Schemas parse, pass Draft 2020-12 validation, have unique $id values, and resolve every $ref and fragment through a standards-compliant registry.",
+      "observable_result": "All bootstrap Schemas parse, have unique $id values, and resolve every local or absolute $ref and JSON Pointer fragment to a declared Schema using only the Python standard library; full Draft 2020-12 meta-schema validation remains owned by slice-00-03.",
       "verification_command_ids": [
         "contracts-check"
       ]
@@ -221,5 +221,5 @@
     "The Base SHA or approved Phase Plan changes",
     "Required Windows and Linux behavior cannot be made equivalent"
   ],
-  "content_hash": "sha256:d6ba1de4d311bea862816aee4774bad481dca8f56ede3fb7c81134705e7fcf93"
+  "content_hash": "sha256:ab21b20dad31ca531c55b15e3555fe30e696d87e910cee00b01eba296e3f7ab5"
 }

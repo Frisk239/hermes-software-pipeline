@@ -48,7 +48,7 @@ This document prevents Roadmap capabilities, Phase outcomes, Slice acceptance cr
 | ID | Requirement | Owning Slice |
 | --- | --- | --- |
 | `BOOT-01` | A clean clone exposes product status, trust limits, governance, contribution, security, support, domain language, normative documentation, and Roadmap entry points without ambiguity. | `slice-00-01` |
-| `BOOT-02` | Offline checks validate governed text and bootstrap Schema integrity and deterministically reject representative broken fixtures. | `slice-00-01` |
+| `BOOT-02` | Dependency-free offline checks validate governed text, JSON parsing, Schema identity/reference integrity, and representative broken fixtures; full Draft 2020-12 semantics and generation drift remain `slice-00-03`. | `slice-00-01` |
 | `BOOT-03` | Required documentation and bootstrap-contract checks execute identically in Windows and Linux CI. | `slice-00-01` |
 
 ## Slice traceability rules
