@@ -1,2 +1,10 @@
 # Local clones used only for source and architecture comparison.
 /reference/
+# Managed virtual environment and Python bytecode.
+.venv/
+__pycache__/
+*.pyc
+# Standard tool caches.
+.pytest_cache/
+.ruff_cache/
+.hypothesis/

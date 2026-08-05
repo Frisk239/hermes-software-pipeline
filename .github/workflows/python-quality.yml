@@ -1,0 +1,63 @@
+# Managed Python quality checks (slice-00-02).
+# Installs the frozen uv 0.12.1 environment once, then runs every canonical
+# check and repeats frozen sync plus version/contract/architecture smoke
+# checks offline on the required Windows and Linux runners. The job is
+# read-only, persists no checkout credential, consumes no secret, and
+# limits network to checkout, tool setup, and the first frozen sync.
+name: python-quality
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  quality-checks:
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYRIGHT_PYTHON_GLOBAL_NODE: "0"
+      PYRIGHT_PYTHON_NODEJS_WHEEL: "1"
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@v9.0.0
+        with:
+          version: "0.12.1"
+          python-version: "3.12"
+      - name: Install frozen environment
+        run: uv sync --frozen --all-groups
+      - name: Format check
+        run: uv run --offline ruff format --check .
+      - name: Lint check
+        run: uv run --offline ruff check .
+      - name: Type check
+        run: uv run --offline pyright
+      - name: Unit tests
+        run: uv run --offline pytest
+      - name: Contract check
+        run: uv run --offline python -m hermes_pipeline.cli contracts check
+      - name: Architecture check
+        run: uv run --offline python -m hermes_pipeline.cli architecture check
+      - name: Documentation checks
+        run: uv run --offline python scripts/check_documentation.py
+      - name: Documentation negative fixtures
+        run: uv run --offline python scripts/check_documentation.py --self-test-negative
+      - name: Schema negative fixtures
+        run: uv run --offline python scripts/check_schemas.py --self-test-negative
+      - name: Workflow policy
+        run: uv run --offline python scripts/check_documentation.py --check-workflows
+      - name: Offline frozen sync
+        run: uv sync --frozen --all-groups --offline
+      - name: Offline version smoke
+        run: uv run --offline python -m hermes_pipeline.cli --version
+      - name: Offline contracts smoke
+        run: uv run --offline python -m hermes_pipeline.cli contracts check
+      - name: Offline architecture smoke
+        run: uv run --offline python -m hermes_pipeline.cli architecture check
+      - name: Repository artifact audit
+        run: uv run --offline python scripts/check_repository_artifacts.py

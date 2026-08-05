@@ -6,7 +6,7 @@ Hermes Software Pipeline is a planned Hermes plugin and managed local runtime fo
 
 **Design baseline in preparation — no runnable product exists yet.**
 
-The architecture and version 1 technology decisions are accepted. Phase 00 will establish the repository, contract toolchain, Python runtime skeleton, Hermes Shim, platform-security feasibility, and reproducible Windows/Linux checks. Do not install this repository expecting production Pipeline behavior.
+The architecture and version 1 technology decisions are accepted. Phase 00 has established the repository baseline, the bootstrap contract toolchain, and the managed Python quality skeleton (`hermes-pipeline` 0.1.0 under Python 3.12 and uv 0.12.1). The Hermes Shim, platform-security feasibility, and remaining Phase 00 slices are still pending. Do not install this repository expecting production Pipeline behavior.
 
 See:
 
@@ -66,12 +66,27 @@ The bootstrap checks are dependency-free and fully offline. Run them from the re
 python scripts/check_documentation.py
 python scripts/check_schemas.py
 python scripts/check_schemas.py --self-test-negative
-python scripts/check_documentation.py --check-workflow
+python scripts/check_documentation.py --check-workflows
+python scripts/check_repository_artifacts.py
 ```
 
-`scripts/check_documentation.py` validates governed text files: strict UTF-8 decoding, absence of replacement characters, balanced Markdown fences, resolvable local Markdown links confined to the repository root, terminal ADR status in `docs/adr/`, and the required root entry point files. `scripts/check_schemas.py` validates every committed Schema: JSON parsing, unique `$id` values under `https://schemas.hermes-pipeline.dev/`, resolution of every local or absolute `$ref` and JSON Pointer fragment, and an exact match of the declared `$id` set against the locked 14 bootstrap Schemas. Full Draft 2020-12 meta-schema validation is owned by slice-00-03. `--check-workflow` parses the workflow YAML with a strict grammar (rejecting unparsed trailing content, unterminated quotes, and unknown constructs) and verifies read-only `permissions: contents: read`, no persisted checkout credentials, an exact `matrix.os` axis bound to `runs-on: ${{ matrix.os }}`, and exactly the required offline commands on both Windows and Linux. `--self-test-negative` executes the checkers against deliberately broken fixtures, asserting stable nonzero exits, and all diagnostic output is sanitized and bounded.
+`scripts/check_documentation.py` validates governed text files: strict UTF-8 decoding, absence of replacement characters, balanced Markdown fences, resolvable local Markdown links confined to the repository root, terminal ADR status in `docs/adr/`, and the required root entry point files. Governed-file discovery honors the checked root's `.gitignore`, so ignored local content (`reference/` clones, `.venv`, and standard tool caches) is never scanned while unignored governed files still are. `scripts/check_schemas.py` validates every committed Schema: JSON parsing, unique `$id` values under `https://schemas.hermes-pipeline.dev/`, resolution of every local or absolute `$ref` and JSON Pointer fragment, and an exact match of the declared `$id` set against the locked 14 bootstrap Schemas. Full Draft 2020-12 meta-schema validation is owned by slice-00-03. `--check-workflows` parses both committed workflow files with a strict grammar (rejecting unparsed trailing content, unterminated quotes, and unknown constructs) and verifies read-only permissions, no persisted checkout credentials, exact Windows/Linux matrix binding, the frozen quality-command inventory, and the bundled-Node policy. `--self-test-negative` executes the checkers against deliberately broken fixtures, asserting stable nonzero exits, and all diagnostic output is sanitized and bounded. `scripts/check_repository_artifacts.py` fails if verification leaves bytecode or tool-cache artifacts in the source tree.
 
-Line endings are normalized to LF by the [.gitattributes](.gitattributes) policy, and CI runs the same commands on Windows and Linux via [documentation-contracts.yml](.github/workflows/documentation-contracts.yml).
+The managed Python 3.12 environment (ADR-0020) is frozen in `uv.lock`; the canonical quality checks are:
+
+```text
+uv sync --frozen --all-groups
+uv run ruff format --check .
+uv run ruff check .
+uv run pyright
+uv run pytest
+uv run python -m hermes_pipeline.cli contracts check
+uv run python -m hermes_pipeline.cli architecture check
+```
+
+`contracts check` delegates in-process to `scripts/check_schemas.py`; `architecture check` runs the standard-library AST import-boundary checker against `src/hermes_pipeline` (stable file/line/rule diagnostics, no `import-linter`). Those default repository checks intentionally require a Hermes Pipeline source checkout; a standalone installed console supports `--version`, and `architecture check --root <path>` remains explicit-path capable. Pyright uses its lockfile-provided `nodejs-wheel-binaries` runtime instead of ambient Node. CI sets `PYTHONDONTWRITEBYTECODE=1` for every verification process so the final artifact audit observes the source tree rather than bytecode generated by the verifier. After the environment is installed, the same checks rerun offline (for example `uv sync --frozen --all-groups --offline` and `uv run --offline python -m hermes_pipeline.cli --version`) with no credentials and no further network access.
+
+Line endings are normalized to LF by the [.gitattributes](.gitattributes) policy. CI runs the bootstrap checks on Windows and Linux via [documentation-contracts.yml](.github/workflows/documentation-contracts.yml) and the canonical quality checks via [python-quality.yml](.github/workflows/python-quality.yml).
 
 ## Development model
 

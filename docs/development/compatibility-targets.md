@@ -18,13 +18,32 @@ These are feasibility and CI targets for Phase 00, not a public support promise.
 
 | Component | Phase 00 target | Initial local observation |
 | --- | --- | --- |
-| CPython managed runtime | `>=3.12,<3.13` | Exact patch version will be frozen by `uv.lock`; local host currently has Python 3.13.9 and must not be treated as the managed runtime. |
+| CPython managed runtime | `>=3.12,<3.13` | `.python-version` and `uv.lock` constrain the Python 3.12 minor line; slice-00-02 locally exercised 3.12.10, while CI may resolve another compatible 3.12 patch. |
 | `uv` | compatible with `0.12.x`; exact version recorded by Slice | `0.12.1` |
 | Git | `>=2.45,<3`; exact binary/version recorded by each repository operation | `2.53.0.windows.2` |
 | Codex CLI | capability-probed; initial target `0.146.x` | `codex-cli 0.146.0` |
 | OpenCode CLI | capability-probed; initial target `1.18.x` | `1.18.12` |
 | Google Chrome | current stable capability-probed through Chrome DevTools MCP | `150.0.7871.187` |
 | Chrome DevTools MCP | exact package/server version selected and frozen by Slice 00-06 | Not yet selected; blocks the browser feasibility probe, not the documentation baseline. |
+
+## Slice-00-02 frozen Python quality resolution
+
+`uv.lock` freezes the complete resolution; direct constraints in
+`pyproject.toml` allow only compatible releases, so an unreviewed
+tool-major upgrade cannot enter through a fresh lock. Versions observed
+when slice-00-02 froze the lock on 2026-08-05:
+
+| Component | Frozen version | Role |
+| --- | --- | --- |
+| CPython managed runtime | `3.12.*` | `.python-version` selects 3.12; the local verification interpreter was 3.12.10. |
+| `uv` | `0.12.1` | Managed runtime and toolchain installer. |
+| `uv_build` | resolved by `uv.lock` build metadata | `pyproject.toml` build backend. |
+| Ruff | `0.16.1` | Formatting and linting. |
+| Pyright | `1.1.411` | Strict static type checking with the locked `nodejs` extra; the Python wrapper resolves `nodejs-wheel-binaries` before global Node, so verification requires no ambient or post-sync Node download. |
+| pytest | `8.4.2` | Unit tests. |
+| pytest-asyncio | `1.4.0` | Async smoke tests (`asyncio_mode = "auto"`). |
+| Hypothesis | `6.165.1` | Deterministic property smoke tests (`derandomize`). |
+| `hermes-pipeline` distribution | `0.1.0` | Package metadata is the sole version source. |
 
 ## Compatibility policy
 

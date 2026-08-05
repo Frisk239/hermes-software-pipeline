@@ -1,0 +1,65 @@
+# Hermes Software Pipeline — Python quality skeleton (slice-00-02).
+# The managed runtime is Python >=3.12,<3.13 under uv 0.12.1 (ADR-0020).
+# Runtime dependencies stay empty by design; the full development-tool
+# resolution is frozen in uv.lock. Direct constraints use compatible
+# release ranges so an unreviewed tool-major upgrade cannot slip in
+# without a lockfile change (Slice planning decision).
+[project]
+name = "hermes-pipeline"
+version = "0.1.0"
+description = "Deterministic software-engineering pipeline runtime for Hermes"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = "Apache-2.0"
+dependencies = []
+
+[project.scripts]
+hermes-pipeline-runtime = "hermes_pipeline.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.5,<1"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest~=8.4",
+    "pytest-asyncio~=1.0",
+    "hypothesis~=6.130",
+    "ruff~=0.12",
+    "pyright[nodejs]~=1.1.400",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+src = ["src", "tests"]
+# Approved Slice 00-02 boundary: the immutable Slice 00-01 Schema checker
+# and deliberately invalid bootstrap fixtures remain governed by their own
+# dependency-free self-tests. Every bootstrap script changed by this Slice is
+# included in the managed Ruff and Pyright quality gates below.
+extend-exclude = ["scripts/check_schemas.py", "scripts/fixtures"]
+cache-dir = ".venv/.ruff_cache"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["hermes_pipeline", "facilities", "check_documentation", "_check_common"]
+
+[tool.pyright]
+pythonVersion = "3.12"
+typeCheckingMode = "strict"
+include = [
+    "src",
+    "tests",
+    "scripts/_check_common.py",
+    "scripts/check_documentation.py",
+    "scripts/check_repository_artifacts.py",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-p no:cacheprovider"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
