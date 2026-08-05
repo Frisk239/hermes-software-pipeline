@@ -1,0 +1,23 @@
+name: documentation-contracts
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  bootstrap-checks:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python scripts/check_documentation.py && echo done
+      - run: python scripts/check_schemas.py
+      - run: python scripts/check_schemas.py --self-test-negative
+      - run: python scripts/check_documentation.py --check-workflow

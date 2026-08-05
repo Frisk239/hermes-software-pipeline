@@ -1,0 +1,6 @@
+# Cross-platform line-ending policy (slice-00-01)
+#
+# All text files are stored with LF in the repository and checked out with
+# LF on every platform. The `eol` attribute takes precedence over
+# `core.autocrlf`, so Windows and Linux checkouts are byte-identical.
+* text=auto eol=lf

@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.hermes-pipeline.dev/engineering/only-one/v1",
+  "type": "object",
+  "properties": {
+    "value": {
+      "type": "string"
+    }
+  }
+}

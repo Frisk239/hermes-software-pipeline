@@ -1,0 +1,25 @@
+# Negative workflow fixture: uncommented prose makes this invalid YAML.
+Runs the dependency-free bootstrap checkers on required Windows and Linux
+runners. The checks are read-only, offline, and use only the Python
+standard library.
+name: documentation-contracts
+on:
+  push:
+  pull_request:
+jobs:
+  bootstrap-checks:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run documentation checks
+        run: python scripts/check_documentation.py
+      - name: Run schema contract checks
+        run: python scripts/check_schemas.py
+      - name: Run schema negative fixture checks
+        run: python scripts/check_schemas.py --self-test-negative
+      - name: Verify workflow configuration
+        run: python scripts/check_documentation.py --check-workflow

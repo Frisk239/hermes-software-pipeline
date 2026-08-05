@@ -36,7 +36,7 @@ This is intentional progressive elaboration, not missing design: future implemen
 ## Recorded governance decisions and remaining authorization
 
 - ADR-0014 through ADR-0025 were accepted on 2026-08-05.
-- Repository name `hermes-software-pipeline`, product name `Hermes Software Pipeline`, and default branch `main` were approved on 2026-08-05; the GitHub repository has been renamed and the local `origin` URL still needs updating.
+- Repository name `hermes-software-pipeline`, product name `Hermes Software Pipeline`, and default branch `main` were approved on 2026-08-05; the GitHub repository has been renamed and the local `origin` URL points at `Frisk239/hermes-software-pipeline`.
 - Distribution name `hermes-pipeline`, import name `hermes_pipeline`, operator command tree `hermes pipeline`, and internal runtime entry point `hermes-pipeline-runtime` were standardized from the upstream Hermes plugin CLI contract.
 - Apache License 2.0 and `Frisk239` as the initial Repository Governance Owner were approved on 2026-08-05.
 - Creation of the initial documentation baseline commit on `main` still requires explicit authorization after the baseline audit passes.
@@ -71,18 +71,18 @@ Each item is bounded by existing Interfaces, invariants, and security rules. Mov
 
 ## Validation performed
 
-- all 76 governed text files decode as UTF-8 without replacement characters and have balanced Markdown fences;
-- every current JSON file parses;
-- all 14 current Schemas pass JSON Schema Draft 2020-12 meta-schema validation;
-- all local Schema references and JSON Pointer fragments resolve, and Schema `$id` values are unique;
+- governed text files decode as UTF-8 without replacement characters and have balanced Markdown fences;
+- every governed JSON file parses, all 14 current Schemas have unique `$id` values, and every local or absolute `$ref` and JSON Pointer fragment resolves;
 - all local Markdown links resolve;
 - all ADRs have terminal `accepted` or `superseded` status;
 - root baseline policy files exist;
 - CLI, health-endpoint, contract-source, webhook/polling, and provider terminology were reconciled;
-- the Git repository is on unborn `main`, has the configured public remote, and contains no commit yet.
+- the repository baseline commit exists on `main`, and the local `origin` points at `Frisk239/hermes-software-pipeline`.
+
+These validations are executable, dependency-free, and offline through `scripts/check_documentation.py` and `scripts/check_schemas.py` (introduced by slice-00-01), including deliberately broken bootstrap fixtures under `scripts/fixtures/`; the checkers also lock the 14 bootstrap Schema `$id` identities, require the root entry point files, confine local links to the repository root, validate the workflow YAML syntax plus read-only permissions and exact command/OS binding, and `--self-test-negative` executes them against the broken fixtures to prove stable nonzero exits with sanitized bounded output. The same commands run on Windows and Linux CI via `.github/workflows/documentation-contracts.yml`. Full Draft 2020-12 meta-schema validation and Pydantic-authoring adoption remain owned by slice-00-03.
 
 ## Readiness rule
 
 The project is **design-ready** when the human decisions above are recorded. It is **Phase-00 execution-ready** when a Base SHA and machine-valid Phase/Slice documents exist. It is **product-implementation-ready one Phase at a time** only after the previous Phase Closeout and current Phase Plan are approved.
 
-No claim of “fully specified” removes the need for empirical feasibility, current-repository planning, independent execution, or Codex review.
+No claim of "fully specified" removes the need for empirical feasibility, current-repository planning, independent execution, or Codex review.
