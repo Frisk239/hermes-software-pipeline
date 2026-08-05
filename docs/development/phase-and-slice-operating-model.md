@@ -73,7 +73,7 @@ Every `SLICE.md` contains:
 
 A Slice is ready only when an Executor can act without inventing product semantics, architecture, permissions, or acceptance criteria.
 
-The default work-in-progress limit is one executing Slice per Phase. Codex may permit parallel Slices only when their dependency graph, paths, Interfaces, and test fixtures are demonstrably independent.
+Work-in-progress is limited by real dependency and collision risk, not by the Phase boundary. Dependency-ready Slices may execute concurrently when their writable paths, Interfaces, migrations, generated artifacts, and test fixtures do not conflict; each active writable Slice receives its own Managed Worktree. Slices with overlapping authority or an unresolved integration order execute serially.
 
 ## Machine contracts
 
@@ -171,16 +171,18 @@ Codex owns Phase decomposition, Slice design, scope quality, Interface consisten
 
 ### Independent Executor Agent
 
-The Executor receives only the context needed for the assigned Slice:
+The Executor receives a compact governing context for the assigned Slice:
 
 - root constitution and Executor role contract;
 - Phase invariants and exact Slice Plan;
 - binding ADRs and relevant Module documentation;
-- permitted source view and Managed Worktree;
+- repository-wide read access and one writable Managed Worktree;
 - previous review findings for a rework attempt;
 - verification commands and result schema.
 
-The Executor may inspect and edit only within the assigned authority. It cannot change the Slice Plan, mark itself accepted, edit review artifacts, weaken tests, change ADR status, push, merge, or operate on the user working copy.
+The Context Manifest identifies the minimum authoritative inputs and records their digests; it does not hide the rest of the repository or prohibit supplementary read-only discovery. The Executor may inspect any tracked file, but may edit only the contract's permitted paths inside the assigned Managed Worktree. It cannot change the Slice Plan, mark itself accepted, edit review artifacts, weaken tests, change ADR status, push, merge, or operate on the user working copy.
+
+A Managed Worktree is a write-state and concurrency boundary, not a Phase-sized security sandbox. The default unit is one active writable Slice; rework attempts for that Slice reuse it after integrity reconciliation. Sequential Slices may use a newly created clean worktree at their own exact Base SHA, and accepted worktrees are removed after evidence and integration are durable. A Phase does not receive an extra worktree merely because it is a Phase.
 
 ### Git Custodian
 

@@ -40,6 +40,8 @@ runs/PIPE-0042/
 
 Fresh LLM context and fresh filesystem state are separate controls. PRD and Architecture always use independent Codex sessions, but they do not receive long-lived writable worktrees merely because they are different roles.
 
+A linked worktree isolates writable checkout state; it is not a confidentiality or process-security boundary. Linked worktrees still share the repository's object database, refs, and normally its Git configuration. Read access, write scope, credentials, network capability, and process isolation are therefore governed separately.
+
 The Controller creates an additional worktree or checkout only when at least one condition holds:
 
 - two writable Agents or Pipelines must operate concurrently;

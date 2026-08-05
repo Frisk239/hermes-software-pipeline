@@ -108,7 +108,7 @@ Any semantic change produces a new `document_revision` and content hash. An Exec
 
 ### Context Manifest
 
-A Context Manifest is the complete, ordered inventory of files and immutable facts given to one role. It records file digests and purpose, allowing review to prove which context was actually supplied without persisting hidden prompts or secrets.
+A Context Manifest is the ordered inventory of governing files and immutable facts supplied to one role. It records file digests and purpose, allowing review to prove which authority was used without persisting hidden prompts or secrets. It is not an exhaustive inventory of every file the role may read: supplementary tracked repository content may be inspected for discovery and verification, but cannot override the manifested authority or expand write scope.
 
 ### Execution Report
 

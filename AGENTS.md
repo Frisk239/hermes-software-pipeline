@@ -17,6 +17,8 @@ This repository builds a deterministic, recoverable software-engineering Pipelin
 3. Validate the generated Context Manifest.
 4. Stop if required decisions are proposed, context is missing, paths are outside authority, or the contract is internally inconsistent.
 
+The Context Manifest identifies governing inputs; it is not a read allowlist. Agents may inspect any tracked repository content needed to understand or verify the change, but content outside the governing set cannot override the approved contract. Read scope and write authority are separate: writes remain limited to the assigned worktree and permitted paths.
+
 The sole bootstrap exception is the initial documentation baseline before the repository has a commit: the Repository Governance Owner may authorize documentation, ADR, policy, and candidate-contract preparation, but no behavior-bearing implementation. After that baseline commit exists, all work follows the normal Phase/Slice process.
 
 ## Change rules

@@ -4,13 +4,13 @@ Slice ID: `slice-00-01`
 
 Phase: `phase-00`
 
-Status: `DRAFT`
+Status: `READY`
 
-Document revision: `3`
+Document revision: `5`
 
 Base SHA: `7f2bcff881e7d16477f0bc1ae0d2a6aa1de3cab0`
 
-Assigned Managed Worktree: pending Phase approval and Git Custodian assignment
+Assigned Managed Worktree: `C:/Users/a2691/AppData/Local/hermes/managed-worktrees/hermes-software-pipeline/slice-00-01`
 
 ## Operator path
 
@@ -46,8 +46,8 @@ This Slice changes no production Interface. It is bound by ADR-0024 for future P
 | `AC-02` | `BOOT-02`, `XCON-01` | All 14 bootstrap Schemas parse, have unique `$id` values, and resolve every local/absolute `$ref` and JSON Pointer fragment to a declared Schema using only the Python standard library. Full Draft 2020-12 meta-schema validation remains owned by `slice-00-03`. | `contracts-check` |
 | `AC-03` | `BOOT-02` | A deliberately broken fixture is rejected with a stable nonzero exit and actionable bounded output. | `contracts-negative` |
 | `AC-04` | `BOOT-03`, `XPLAT-01` | The same offline check commands run on required Windows and Linux GitHub Actions jobs. | `workflow-check`, CI evidence |
-| `AC-05` | `XSEC-01` | Validation reads repository data only, performs no network access, executes no repository-provided shell string, and emits no secret or Project content. | design review and `scope-check` |
-| `AC-06` | approved Slice scope | The Candidate changes no runtime/application path and contains no production behavior. | `scope-check` |
+| `AC-05` | `XSEC-01` | Validation reads repository data only, performs no network access, executes no repository-provided shell string, and emits no secret or Project content. | design review, `scope-check`, and `changed-paths` |
+| `AC-06` | approved Slice scope | The Candidate changes no runtime/application path and contains no production behavior. | `scope-check` and `changed-paths` |
 
 ## Required evidence
 

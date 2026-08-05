@@ -1,0 +1,179 @@
+{
+  "schema_id": "https://schemas.hermes-pipeline.dev/engineering/context-manifest/v1",
+  "schema_version": 1,
+  "manifest_id": "ctx_slice-00-01_executor_r1",
+  "role": "EXECUTOR",
+  "slice_id": "slice-00-01",
+  "base_sha": "7f2bcff881e7d16477f0bc1ae0d2a6aa1de3cab0",
+  "assembled_at": "2026-08-05T04:53:03.863Z",
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "digest": "sha256:884333bb1387c4abd448c1ee37e66b8d05549b9e1c9aea0bb94b256945edff4c",
+      "purpose": "Repository constitution and read-write authority split"
+    },
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:97960150474d5b0c2b459770f48299f4d897bb30b91f9de5f13d73d027d915b4",
+      "purpose": "Repository context and domain vocabulary"
+    },
+    {
+      "path": "docs/agents/roles/executor.md",
+      "digest": "sha256:46925379abdc01916be1faa690b0641737ef9cbe695d3930441f0f23a417ee17",
+      "purpose": "Binding Executor role contract"
+    },
+    {
+      "path": "docs/roadmap/TRACEABILITY.md",
+      "digest": "sha256:cc858ef5387503b2154d59c0dc5ad7aeb934fb69e073d07ab53cf828271f1182",
+      "purpose": "Requirement and verification traceability"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/PHASE.md",
+      "digest": "sha256:5acb46cdc68794bf69e5c708fb9813048f3d19170a7502f4f82a0f77de7d8f0d",
+      "purpose": "Phase 00 human-readable scope"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/phase-plan.json",
+      "digest": "sha256:34035ae526cb363e8b8a009fbea7a0246dd87c33337f1086cf079cfa2d5aea3f",
+      "purpose": "Approved Phase 00 machine contract"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-01-repository-baseline/SLICE.md",
+      "digest": "sha256:bebac3320104a1b2e25407063f7b35b98e7c82709aa49df603ac5a9ff9a40c17",
+      "purpose": "READY Slice 00-01 human contract"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-01-repository-baseline/slice-contract.json",
+      "digest": "sha256:ca84c3359c249a34e6dadce3912a7be76117a31ece0b0239a4842f0307e65b9c",
+      "purpose": "READY Slice 00-01 machine contract"
+    },
+    {
+      "path": "docs/development/phase-and-slice-operating-model.md",
+      "digest": "sha256:1f6e55ae6ede38d4eef94406fffece93f2b5d803ba208de3129ae1e2d3d1b5ad",
+      "purpose": "Parallel Slice and Managed Worktree operating rules"
+    },
+    {
+      "path": "docs/development/coding-and-test-standard.md",
+      "digest": "sha256:b4d689f55b2d20c9fcbc9ba25578fb61471d970b49a5a91ddf50d6bab907b83a",
+      "purpose": "Coding and testing standards"
+    },
+    {
+      "path": "docs/development/ci-and-testing.md",
+      "digest": "sha256:a8ff9a2f9a4cfa189263df85e647de08a70d22df4148211d9c5be06d7b024ad1",
+      "purpose": "CI topology and test ownership"
+    },
+    {
+      "path": "docs/development/compatibility-targets.md",
+      "digest": "sha256:fda7f1049554814971ca24d6f9bfbddb64aa6584a36c609cf973e0d57f61fcdd",
+      "purpose": "Windows and Linux compatibility targets"
+    },
+    {
+      "path": "docs/architecture/data-and-api-contracts.md",
+      "digest": "sha256:bda7ff9a2fdac790a6744d5304df16ea62ebb1fc0d5f71c50724bd63682033b8",
+      "purpose": "Context Manifest semantics and content hashing"
+    },
+    {
+      "path": "docs/design/git-isolation-and-protection.md",
+      "digest": "sha256:3632dde01f589031e3a9f6f30254e235025fc1818bd1f618cadabdb6587ffbc8",
+      "purpose": "Worktree, Git, and capability boundary"
+    },
+    {
+      "path": "schemas/README.md",
+      "digest": "sha256:a6eae2244e2e6fef13d3b2cdc11a3adb5b5a4297084d30d501a357ab38febd95",
+      "purpose": "Schema registry policy and bootstrap boundary"
+    },
+    {
+      "path": "schemas/common/definitions.schema.json",
+      "digest": "sha256:84acc4306cec634b6a47307922575bb8611ce2e67e3ca69ac2968a52106ee4d8",
+      "purpose": "Shared Schema definitions"
+    },
+    {
+      "path": "schemas/engineering/context-manifest.schema.json",
+      "digest": "sha256:6e3c354e6d5f7a1167d3c7e09d66f3369bb3fff80f7b6e1c35a852518e71a732",
+      "purpose": "Context Manifest contract"
+    },
+    {
+      "path": "schemas/engineering/execution-report.schema.json",
+      "digest": "sha256:e0733dec906737170bffba0d82a2ca1e3c5ce4d09c5e4b88f9a659bb56c46ebf",
+      "purpose": "Executor evidence output contract"
+    },
+    {
+      "path": "schemas/engineering/slice-contract.schema.json",
+      "digest": "sha256:068e2ce358ecbb8330751e0ca4264d0e122021ad0843908902b6c6c24dc2aedd",
+      "purpose": "Slice Contract contract"
+    }
+  ],
+  "facts": [
+    {
+      "name": "assigned_worktree",
+      "value": "C:/Users/a2691/AppData/Local/hermes/managed-worktrees/hermes-software-pipeline/slice-00-01",
+      "source": "Git Custodian PASS report"
+    },
+    {
+      "name": "worktree_mode",
+      "value": "detached",
+      "source": "Git Custodian PASS report"
+    },
+    {
+      "name": "repository_read_scope",
+      "value": "all tracked files",
+      "source": "AGENTS.md and Executor role contract"
+    },
+    {
+      "name": "manifest_semantics",
+      "value": "governing context, not a read allowlist",
+      "source": "data-and-api-contracts.md"
+    },
+    {
+      "name": "contract_revision",
+      "value": 5,
+      "source": "slice-contract.json"
+    },
+    {
+      "name": "contract_hash",
+      "value": "sha256:11d3e7844e3ae349b751a93993ca3005d16055f58366b6d1a6d0d5670139d74e",
+      "source": "slice-contract.json canonical content hash"
+    },
+    {
+      "name": "phase_plan_attestation",
+      "value": "engapr_phase-00_20260805_01",
+      "source": "phase-plan.json"
+    },
+    {
+      "name": "phase_base_sha",
+      "value": "9a73b39f2eb1653e7345b27a39760cb55ef95af4",
+      "source": "phase-plan.json"
+    },
+    {
+      "name": "planning_context_root",
+      "value": "C:/Users/a2691/AppData/Local/hermes/hermes-software-pipeline",
+      "source": "Planner dispatch"
+    },
+    {
+      "name": "planning_parent_sha",
+      "value": "434beab328c214006110b356035baefe21559d96",
+      "source": "Planner repository HEAD before READY dispatch commit"
+    },
+    {
+      "name": "network_allowed",
+      "value": false,
+      "source": "Slice contract prohibited_actions"
+    },
+    {
+      "name": "dependency_install_allowed",
+      "value": false,
+      "source": "Slice contract out_of_scope and stop_conditions"
+    },
+    {
+      "name": "executor_git_mutation_allowed",
+      "value": false,
+      "source": "Slice contract prohibited_actions"
+    },
+    {
+      "name": "previous_review_findings",
+      "value": "none",
+      "source": "Planner dispatch"
+    }
+  ],
+  "content_hash": "sha256:c35e625d7db81429770d31a3d4c9091e251183ae17cb59b850c0c4ac8d7fa27f"
+}

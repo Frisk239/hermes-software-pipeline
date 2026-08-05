@@ -1,13 +1,13 @@
 {
   "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
   "schema_version": 1,
-  "document_revision": 3,
+  "document_revision": 5,
   "slice_id": "slice-00-01",
   "phase_id": "phase-00",
-  "status": "DRAFT",
+  "status": "READY",
   "predecessors": [],
   "base_sha": "7f2bcff881e7d16477f0bc1ae0d2a6aa1de3cab0",
-  "assigned_worktree": "PENDING: assigned after Phase approval",
+  "assigned_worktree": "C:/Users/a2691/AppData/Local/hermes/managed-worktrees/hermes-software-pipeline/slice-00-01",
   "operator_path": "Clone the exact baseline on Windows or Linux, locate every normative entry point, run offline documentation and contract checks, and observe deterministic rejection of a broken Schema fixture.",
   "must_scope": [
     "Establish portable line-ending policy",
@@ -114,7 +114,8 @@
       ],
       "observable_result": "Validation reads repository data only, performs no network access, executes no repository-provided shell string, and emits no secret or Project content.",
       "verification_command_ids": [
-        "scope-check"
+        "scope-check",
+        "changed-paths"
       ]
     },
     {
@@ -124,7 +125,8 @@
       ],
       "observable_result": "The Candidate changes no runtime or application path and contains no production behavior.",
       "verification_command_ids": [
-        "scope-check"
+        "scope-check",
+        "changed-paths"
       ]
     }
   ],
@@ -182,8 +184,17 @@
       "argv": [
         "git",
         "diff",
-        "--check",
-        "7f2bcff881e7d16477f0bc1ae0d2a6aa1de3cab0..HEAD"
+        "--check"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 30000
+    },
+    {
+      "command_id": "changed-paths",
+      "argv": [
+        "git",
+        "status",
+        "--short"
       ],
       "working_directory": ".",
       "timeout_ms": 30000
@@ -221,5 +232,5 @@
     "The Base SHA or approved Phase Plan changes",
     "Required Windows and Linux behavior cannot be made equivalent"
   ],
-  "content_hash": "sha256:475a5fb7e3beffb590482901df094f66a521245b5c4bd9f1612fb9b3f895a118"
+  "content_hash": "sha256:11d3e7844e3ae349b751a93993ca3005d16055f58366b6d1a6d0d5670139d74e"
 }
