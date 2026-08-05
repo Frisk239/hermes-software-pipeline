@@ -1,7 +1,7 @@
 {
   "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
   "schema_version": 1,
-  "document_revision": 2,
+  "document_revision": 4,
   "slice_id": "slice-00-02",
   "phase_id": "phase-00",
   "status": "READY",
@@ -18,10 +18,12 @@
     "Create the architecture package layout fixed by system-and-module-design.md without business behavior",
     "Configure Ruff, Pyright, pytest, pytest-asyncio, and Hypothesis centrally and freeze the full resolution",
     "Provide deterministic UTC clock, identity-sequence, temporary-root, async, and Hypothesis fixtures and tests",
-    "Implement a standard-library AST architecture checker with stable positive and negative coverage",
+    "Implement a standard-library AST architecture checker that enforces the accepted inward dependency direction with stable positive and negative coverage",
     "Delegate the contracts check command directly to the existing bootstrap Schema checker without shell execution",
     "Correct governed-file discovery so ignored reference, virtual-environment, and tool-cache content is excluded while unignored content remains checked",
-    "Add a separate read-only Windows and Linux python-quality workflow without changing documentation-contracts.yml",
+    "Add a separate read-only Windows and Linux python-quality workflow, validate both required workflows locally, and do not change documentation-contracts.yml",
+    "Use Pyright's locked nodejs extra and force its bundled Node runtime so no ambient or post-sync Node download is required",
+    "Suppress verification bytecode and tool caches outside .venv and add an explicit final repository-artifact audit",
     "Document exact frozen and offline commands and synchronize compatibility targets"
   ],
   "out_of_scope": [
@@ -57,6 +59,7 @@
     "tests/",
     "scripts/_check_common.py",
     "scripts/check_documentation.py",
+    "scripts/check_repository_artifacts.py",
     "scripts/fixtures/"
   ],
   "prohibited_actions": [
@@ -102,8 +105,8 @@
     {
       "criterion_id": "AC-03",
       "trace_ids": ["BOOT-03", "XPLAT-01"],
-      "observable_result": "After dependency installation, frozen sync and version, contract, and architecture smoke checks run offline without credentials.",
-      "verification_command_ids": ["offline-sync", "offline-version", "offline-contracts", "offline-architecture"]
+      "observable_result": "After dependency installation, frozen sync and version, contract, architecture, and type checks require no public network: uv is offline and Pyright uses its locked bundled Node runtime without ambient Node or post-sync downloads.",
+      "verification_command_ids": ["type-check", "offline-sync", "offline-version", "offline-contracts", "offline-architecture"]
     },
     {
       "criterion_id": "AC-04",
@@ -114,14 +117,14 @@
     {
       "criterion_id": "AC-05",
       "trace_ids": ["XARCH-01"],
-      "observable_result": "The AST checker accepts the package skeleton and deterministically rejects forbidden absolute, relative, dynamic, and adapter-to-core import fixtures.",
+      "observable_result": "The AST checker accepts Adapters importing inward-facing Interfaces and deterministically rejects forbidden absolute, relative, dynamic, core-to-Adapter, Controller-framework/provider/filesystem, and Shim import fixtures.",
       "verification_command_ids": ["architecture-check", "unit-check"]
     },
     {
       "criterion_id": "AC-06",
       "trace_ids": ["XTEST-01"],
       "observable_result": "Clock, identity, temporary-root, async, and Hypothesis smoke tests are deterministic and leave no repository artifact.",
-      "verification_command_ids": ["unit-check", "changed-paths"]
+      "verification_command_ids": ["unit-check", "artifact-check", "changed-paths"]
     },
     {
       "criterion_id": "AC-07",
@@ -132,8 +135,8 @@
     {
       "criterion_id": "AC-08",
       "trace_ids": ["XSEC-01"],
-      "observable_result": "Required workflows are read-only, persist no checkout credential, consume no secret, and perform no network operation after installation.",
-      "verification_command_ids": ["workflow-policy"]
+      "observable_result": "Both required workflows are structurally validated, read-only, persist no checkout credential, consume no secret, and require no public network after installation; OS-level network capability enforcement remains owned by slice-00-06.",
+      "verification_command_ids": ["workflow-policy", "artifact-check"]
     },
     {
       "criterion_id": "AC-09",
@@ -149,7 +152,10 @@
     "Forbidden absolute import fixture",
     "Forbidden relative import fixture",
     "Forbidden dynamic import fixture",
-    "Adapter-to-core reverse dependency fixture",
+    "Adapter importing an inward-facing Interface is accepted",
+    "Core-to-Adapter reverse dependency fixture",
+    "Controller provider SDK fixture",
+    "Controller pathlib and concrete filesystem fixture",
     "Deterministic UTC clock fixture",
     "Deterministic identity sequence fixture",
     "Temporary-root cleanup fixture",
@@ -158,7 +164,7 @@
     "Ignored reference directory with invalid governed text",
     "Ignored virtual environment and tool cache with invalid governed text",
     "Unignored invalid governed text remains rejected",
-    "No cache or bytecode artifact remains after verification"
+    "No cache or bytecode artifact remains outside .venv or deliberate fixtures after verification"
   ],
   "demonstration": "On the exact Candidate, Windows and Linux jobs install the frozen environment, execute every canonical check, repeat frozen sync and version, contract, and architecture smoke checks offline, and prove negative architecture and ignored-path fixtures without modifying the checkout.",
   "verification_commands": [
@@ -172,13 +178,14 @@
     {"command_id": "docs-check", "argv": ["python", "scripts/check_documentation.py"], "working_directory": ".", "timeout_ms": 120000},
     {"command_id": "docs-negative", "argv": ["python", "scripts/check_documentation.py", "--self-test-negative"], "working_directory": ".", "timeout_ms": 120000},
     {"command_id": "bootstrap-checks", "argv": ["python", "scripts/check_schemas.py", "--self-test-negative"], "working_directory": ".", "timeout_ms": 120000},
-    {"command_id": "workflow-policy", "argv": ["python", "scripts/check_documentation.py", "--check-workflow"], "working_directory": ".", "timeout_ms": 120000},
+    {"command_id": "workflow-policy", "argv": ["python", "scripts/check_documentation.py", "--check-workflows"], "working_directory": ".", "timeout_ms": 120000},
     {"command_id": "offline-sync", "argv": ["uv", "sync", "--frozen", "--all-groups", "--offline"], "working_directory": ".", "timeout_ms": 300000},
     {"command_id": "offline-version", "argv": ["uv", "run", "--offline", "python", "-m", "hermes_pipeline.cli", "--version"], "working_directory": ".", "timeout_ms": 120000},
     {"command_id": "offline-contracts", "argv": ["uv", "run", "--offline", "python", "-m", "hermes_pipeline.cli", "contracts", "check"], "working_directory": ".", "timeout_ms": 120000},
     {"command_id": "offline-architecture", "argv": ["uv", "run", "--offline", "python", "-m", "hermes_pipeline.cli", "architecture", "check"], "working_directory": ".", "timeout_ms": 120000},
     {"command_id": "scope-check", "argv": ["git", "diff", "--check"], "working_directory": ".", "timeout_ms": 30000},
-    {"command_id": "changed-paths", "argv": ["git", "status", "--short"], "working_directory": ".", "timeout_ms": 30000}
+    {"command_id": "changed-paths", "argv": ["git", "status", "--short"], "working_directory": ".", "timeout_ms": 30000},
+    {"command_id": "artifact-check", "argv": ["python", "scripts/check_repository_artifacts.py"], "working_directory": ".", "timeout_ms": 30000}
   ],
   "required_evidence": [
     "Exact Base and Candidate SHAs and Slice Contract revision/hash",
@@ -187,7 +194,7 @@
     "Bounded output, exit code, start time, and duration for every local command",
     "Windows and Linux CI run and job URLs bound to the Candidate",
     "Positive and negative architecture, deterministic-fixture, ignored-path, and bootstrap regression results",
-    "Proof that offline commands ran only after dependency installation and consumed no credential",
+    "Proof that post-sync commands required no public network, uv remained offline, bundled Node was forced, and no credential was consumed",
     "Cache and bytecode artifact scan",
     "Residual risks and compatibility limitations",
     "Machine-valid Execution Report, Review Verdict, and Closeout inputs or an explicit schema limitation"
@@ -218,18 +225,18 @@
       "risk_id": "R-04",
       "description": "Pyright or the selected build backend requires an undeclared external runtime or new dependency family.",
       "impact": "HIGH",
-      "mitigation": "Use locked PyPI artifacts and uv_build; stop rather than installing an ambient Node or alternative backend.",
-      "trigger": "A required check needs system Node, another build backend, or a dependency outside the approved tool set."
+      "mitigation": "Use locked PyPI artifacts, uv_build, and Pyright's nodejs extra; force the bundled Node strategy and stop rather than using ambient or downloaded Node.",
+      "trigger": "A required check needs system Node, downloads Node after sync, uses another build backend, or needs a dependency outside the approved tool set."
     }
   ],
   "retry_budget": 3,
   "stop_conditions": [
     "A new runtime, build, architecture-check, or tool dependency family is required",
-    "A required check needs credentials, public network after installation, shell-string execution, or ambient Node",
+    "A required check needs credentials, public network after installation, shell-string execution, ambient Node, or a post-sync Node download",
     "Implementation requires paths outside permitted_paths or changes documentation-contracts.yml, Schemas, accepted ADRs, or planning records",
     "Accepted package names, Python range, architecture rules, or Phase exit semantics must change",
     "The Base SHA changes or required Windows and Linux behavior cannot be equivalent",
     "The bootstrap checker correction cannot distinguish ignored local content from governed unignored content without weakening clean-clone coverage"
   ],
-  "content_hash": "sha256:12087b5023641570a04510896f18d91a52b185b80ee0a15ca579c4f4f43a8c0e"
+  "content_hash": "sha256:9b0fbb62936bd03a9f434d6570144b3771d7ced141e055f76df0360af04e6b2c"
 }

@@ -1,11 +1,11 @@
 {
   "schema_id": "https://schemas.hermes-pipeline.dev/engineering/context-manifest/v1",
   "schema_version": 1,
-  "manifest_id": "ctx_slice-00-02_executor_r2",
+  "manifest_id": "ctx_slice-00-02_executor_r3",
   "role": "EXECUTOR",
   "slice_id": "slice-00-02",
   "base_sha": "6c9623a3a8ad6a124d5d4a1bcddce94a5938e0b4",
-  "assembled_at": "2026-08-05T07:15:01.791Z",
+  "assembled_at": "2026-08-05T09:09:43.285Z",
   "files": [
     {"path": "AGENTS.md", "digest": "sha256:884333bb1387c4abd448c1ee37e66b8d05549b9e1c9aea0bb94b256945edff4c", "purpose": "Repository constitution and authority boundaries"},
     {"path": "CONTEXT.md", "digest": "sha256:97960150474d5b0c2b459770f48299f4d897bb30b91f9de5f13d73d027d915b4", "purpose": "Canonical product and domain vocabulary"},
@@ -14,8 +14,8 @@
     {"path": "docs/roadmap/phase-00-foundation/PHASE.md", "digest": "sha256:5acb46cdc68794bf69e5c708fb9813048f3d19170a7502f4f82a0f77de7d8f0d", "purpose": "Approved Phase 00 outcome, invariants, and exits"},
     {"path": "docs/roadmap/phase-00-foundation/phase-plan.json", "digest": "sha256:34035ae526cb363e8b8a009fbea7a0246dd87c33337f1086cf079cfa2d5aea3f", "purpose": "Approved Phase 00 machine plan"},
     {"path": "docs/roadmap/phase-00-foundation/slices/00-01-repository-baseline/CLOSEOUT.md", "digest": "sha256:9d365267fa747208bfef1d9c71b372045eec931fda67a222ac72c15bcb61b72d", "purpose": "Accepted predecessor capability, evidence, and debt"},
-    {"path": "docs/roadmap/phase-00-foundation/slices/00-02-python-quality-skeleton/SLICE.md", "digest": "sha256:328bac891fbb365a4ae2fc0211467d8d4d831d0c3b00be90bc4569b78cb3dc95", "purpose": "READY human-readable Slice contract"},
-    {"path": "docs/roadmap/phase-00-foundation/slices/00-02-python-quality-skeleton/slice-contract.json", "digest": "sha256:8aa4a487f669dd8f922dea044679920119f1686afd2637571ab4cccd7852e861", "purpose": "READY machine-valid Slice contract"},
+    {"path": "docs/roadmap/phase-00-foundation/slices/00-02-python-quality-skeleton/SLICE.md", "digest": "sha256:f7e2d7c1922eab9786fe0e5c0e3e97a4b7101032d50a6e68863e4a84e90efadb", "purpose": "READY human-readable Slice contract"},
+    {"path": "docs/roadmap/phase-00-foundation/slices/00-02-python-quality-skeleton/slice-contract.json", "digest": "sha256:c7b6f024fd5124b20861b90d8be916be790324edf466bd3ebd74ef85622d0866", "purpose": "READY machine-valid Slice contract"},
     {"path": "docs/development/phase-and-slice-operating-model.md", "digest": "sha256:1f6e55ae6ede38d4eef94406fffece93f2b5d803ba208de3129ae1e2d3d1b5ad", "purpose": "Slice lifecycle, worktree, evidence, and review rules"},
     {"path": "docs/development/coding-and-test-standard.md", "digest": "sha256:b4d689f55b2d20c9fcbc9ba25578fb61471d970b49a5a91ddf50d6bab907b83a", "purpose": "Python coding and deterministic test standard"},
     {"path": "docs/development/ci-and-testing.md", "digest": "sha256:8953023372b964f8edecb5a68158677c3c9712d0d239219261c65782093496bf", "purpose": "CI, branch, test-layer, and release-gate rules"},
@@ -35,8 +35,8 @@
     {"name": "assigned_worktree", "value": "C:/Users/a2691/AppData/Local/hermes/managed-worktrees/hermes-software-pipeline/slice-00-02", "source": "slice-contract.json"},
     {"name": "repository_read_scope", "value": "all tracked files", "source": "AGENTS.md and Executor role contract"},
     {"name": "manifest_semantics", "value": "governing context, not a read allowlist", "source": "phase-and-slice-operating-model.md"},
-    {"name": "contract_revision", "value": 2, "source": "slice-contract.json"},
-    {"name": "contract_hash", "value": "sha256:12087b5023641570a04510896f18d91a52b185b80ee0a15ca579c4f4f43a8c0e", "source": "slice-contract.json canonical content hash"},
+    {"name": "contract_revision", "value": 4, "source": "slice-contract.json"},
+    {"name": "contract_hash", "value": "sha256:9b0fbb62936bd03a9f434d6570144b3771d7ced141e055f76df0360af04e6b2c", "source": "slice-contract.json canonical content hash"},
     {"name": "predecessor_candidate_sha", "value": "0d946abf73736d6a03c6b33433714c51b79dadaa", "source": "Slice 00-01 Closeout"},
     {"name": "predecessor_integrated_sha", "value": "6c9623a3a8ad6a124d5d4a1bcddce94a5938e0b4", "source": "Slice 00-01 Closeout and PR #1"},
     {"name": "managed_python", "value": ">=3.12,<3.13", "source": "ADR-0020 and compatibility-targets.md"},
@@ -46,7 +46,7 @@
     {"name": "network_after_install_allowed", "value": false, "source": "slice-contract.json"},
     {"name": "credentials_allowed", "value": false, "source": "slice-contract.json"},
     {"name": "executor_git_mutation_allowed", "value": false, "source": "slice-contract.json"},
-    {"name": "previous_review_findings", "value": "none", "source": "Planner dispatch"}
+    {"name": "previous_review_findings", "value": "Standards P1 ambient Node, inverted Adapter direction, incomplete Controller boundary, unverifiable offline claim; Spec P1 incomplete CI/workflow validation and artifact audit; Spec P2 Python patch overstatement", "source": "Review attempt 1"}
   ],
-  "content_hash": "sha256:27a1f8d85809fc004bb65d7ae26540c23b7aa0bef2abeb5880dab819af51c332"
+  "content_hash": "sha256:67570ecae45f341a3e8686dcec9be1d5373501992ee7d6fe7614ad3f36fc9724"
 }
