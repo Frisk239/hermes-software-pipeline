@@ -38,13 +38,13 @@ Updating or removing the Git checkout must not delete Pipeline state. Purging du
 The repository default branch must always be safe for production source installation:
 
 ```text
-main       latest stable release; default install source
-next       integration branch
-feature/*  short-lived development branches targeting next
-release/*  optional release stabilization branches
+main       integrated review-gated source
+feature/*  short-lived development branches targeting main
+release/*  optional stabilization branches targeting main
+signed tag immutable stable release identity
 ```
 
-Direct pushes to `main` and `next` are prohibited. A release moves through a reviewed Release PR from `next` to `main`, then receives a signed semantic-version tag and release manifest.
+Direct pushes to `main` are prohibited. Development changes reach `main` only through reviewed Pull Requests. A `main` commit becomes installable only after the complete Release Gate succeeds and the exact commit receives a signed semantic-version tag and release manifest.
 
 CI success on a development commit does not make it an installed update. An update becomes available only when a stable release has been published.
 
