@@ -1,7 +1,7 @@
 {
   "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
   "schema_version": 1,
-  "document_revision": 1,
+  "document_revision": 2,
   "slice_id": "slice-00-02",
   "phase_id": "phase-00",
   "status": "READY",
@@ -231,5 +231,5 @@
     "The Base SHA changes or required Windows and Linux behavior cannot be equivalent",
     "The bootstrap checker correction cannot distinguish ignored local content from governed unignored content without weakening clean-clone coverage"
   ],
-  "content_hash": "sha256:314c75d4dadfa4a3a93f31e3f167431f28cb9f10474c12de1c43aa6e121e407d"
+  "content_hash": "sha256:12087b5023641570a04510896f18d91a52b185b80ee0a15ca579c4f4f43a8c0e"
 }

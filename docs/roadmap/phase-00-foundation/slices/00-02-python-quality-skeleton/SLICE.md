@@ -6,7 +6,7 @@ Phase: `phase-00`
 
 Status: `READY`
 
-Document revision: `1`
+Document revision: `2`
 
 Predecessor: `slice-00-01` accepted at `6c9623a3a8ad6a124d5d4a1bcddce94a5938e0b4`
 
