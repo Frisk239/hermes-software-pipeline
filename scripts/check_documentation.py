@@ -41,18 +41,19 @@ data. It never executes repository content.
 from __future__ import annotations
 
 import argparse
-from collections import Counter
 import os
 import re
 import subprocess
 import sys
+from collections import Counter
 from pathlib import Path
+from typing import Any, cast
 
 # Keep the worktree free of __pycache__ artifacts: the checker imports a
 # local module, and bytecode caching must not leave untracked files behind.
 sys.dont_write_bytecode = True
 
-from _check_common import (
+from _check_common import (  # noqa: E402
     Reporter,
     fixture_roots,
     is_path_ignored,
@@ -186,11 +187,28 @@ SCHEME_RE = re.compile(r"^[a-zA-Z][a-zA-Z0-9+.\-]*:")
 FRONTMATTER_LIMIT = 10
 KEY_RE = re.compile(r"^([A-Za-z0-9_.-]+):(?:\s*(.*))?$")
 FLOW_SEQ_RE = re.compile(r"^\[(.*)\]$")
-SECRETS_CONTEXT_RE = re.compile(r"\$\{\{\s*secrets\s*\.", re.IGNORECASE)
+# A workflow may use either dot or bracket notation (and may nest the
+# reference in a larger expression), so reject any Actions expression that
+# names the secrets context rather than matching only ``secrets.NAME``.
+SECRETS_CONTEXT_RE = re.compile(r"\$\{\{[^}]*\bsecrets\b[^}]*\}\}", re.IGNORECASE)
 
 
 class WorkflowSyntaxError(Exception):
     """The workflow file violates the strict YAML-subset grammar."""
+
+
+def _as_mapping(value: object) -> dict[str, Any] | None:
+    """Return a YAML mapping with its untrusted values kept at the boundary."""
+    if not isinstance(value, dict):
+        return None
+    return cast(dict[str, Any], value)
+
+
+def _as_sequence(value: object) -> list[Any] | None:
+    """Return a YAML sequence with its untrusted values kept at the boundary."""
+    if not isinstance(value, list):
+        return None
+    return cast(list[Any], value)
 
 
 # --------------------------------------------------------------------------
@@ -417,7 +435,9 @@ def _plain_scalar(value: str, lineno: int) -> str:
     return value.split(" #", 1)[0].strip()
 
 
-def _parse_mapping(cleaned: list[tuple[int, str]], index: int, indent: int):
+def _parse_mapping(
+    cleaned: list[tuple[int, str]], index: int, indent: int
+) -> tuple[dict[str, Any], int]:
     """Parse mapping lines at exactly `indent`; stop at shallower lines."""
     mapping: dict[str, object] = {}
     while index < len(cleaned):
@@ -462,15 +482,17 @@ def _parse_mapping(cleaned: list[tuple[int, str]], index: int, indent: int):
                     block_lines.append(raw2[child_indent:])
                     index += 1
             mapping[key] = "\n".join(block_lines)
-        elif FLOW_SEQ_RE.match(value):
-            inner = FLOW_SEQ_RE.match(value).group(1).strip()
+        elif flow_match := FLOW_SEQ_RE.match(value):
+            inner = flow_match.group(1).strip()
             mapping[key] = [item.strip() for item in inner.split(",")] if inner else []
         else:
             mapping[key] = _plain_scalar(value, lineno)
     return mapping, index
 
 
-def _parse_sequence(cleaned: list[tuple[int, str]], index: int, indent: int):
+def _parse_sequence(
+    cleaned: list[tuple[int, str]], index: int, indent: int
+) -> tuple[list[Any], int]:
     """Parse sequence items at exactly `indent` (lines starting with '-')."""
     items: list[object] = []
     while index < len(cleaned):
@@ -501,7 +523,7 @@ def _parse_sequence(cleaned: list[tuple[int, str]], index: int, indent: int):
                 child_indent = _indent(cleaned[index][1])
                 item[key], index = _parse_block(cleaned, index, child_indent)
             elif value == "|":
-                block_lines = []
+                block_lines: list[str] = []
                 if index < len(cleaned) and _indent(cleaned[index][1]) > current_indent:
                     child_indent = _indent(cleaned[index][1])
                     while index < len(cleaned):
@@ -533,15 +555,17 @@ def _parse_sequence(cleaned: list[tuple[int, str]], index: int, indent: int):
     return items, index
 
 
-def _parse_block(cleaned: list[tuple[int, str]], index: int, indent: int):
+def _parse_block(
+    cleaned: list[tuple[int, str]], index: int, indent: int
+) -> tuple[dict[str, Any] | list[Any], int]:
     """Dispatch to mapping or sequence parsing based on the next line."""
-    lineno, raw = cleaned[index]
+    _lineno, raw = cleaned[index]
     if raw.strip().startswith("- "):
         return _parse_sequence(cleaned, index, indent)
     return _parse_mapping(cleaned, index, indent)
 
 
-def parse_workflow(text: str) -> dict[str, object]:
+def parse_workflow(text: str) -> dict[str, Any]:
     """Parse the strict workflow subset into a dict.
 
     Raises WorkflowSyntaxError on any violation. Supports mappings, plain
@@ -603,12 +627,14 @@ def check_workflow(root: Path, report: Reporter) -> None:
         report.issue(f"{workflow}: invalid workflow YAML ({exc})")
         return
 
+    _check_no_secret_context(workflow, text, report)
+
     unknown = set(document) - ALLOWED_WORKFLOW_TOP_LEVEL
     for key in sorted(unknown):
         report.issue(f"{workflow}: unknown top-level key {key!r}")
 
-    on_value = document.get("on")
-    if not isinstance(on_value, dict) or set(on_value) != REQUIRED_WORKFLOW_ON:
+    on_value = _as_mapping(document.get("on"))
+    if on_value is None or set(on_value) != REQUIRED_WORKFLOW_ON:
         report.issue(
             f"{workflow}: 'on:' must map exactly the push and pull_request triggers"
         )
@@ -618,8 +644,8 @@ def check_workflow(root: Path, report: Reporter) -> None:
             "additional configuration"
         )
 
-    permissions = document.get("permissions")
-    if not isinstance(permissions, dict):
+    permissions = _as_mapping(document.get("permissions"))
+    if permissions is None:
         report.issue(f"{workflow}: missing read-only 'permissions:' block")
     elif permissions != {"contents": "read"}:
         report.issue(
@@ -627,13 +653,14 @@ def check_workflow(root: Path, report: Reporter) -> None:
             f"(got {permissions!r})"
         )
 
-    jobs = document.get("jobs")
-    if not isinstance(jobs, dict) or not jobs:
+    jobs = _as_mapping(document.get("jobs"))
+    if jobs is None or not jobs:
         report.issue(f"{workflow}: no job blocks found under 'jobs:'")
         return
 
-    for job_name, job in jobs.items():
-        if not isinstance(job, dict):
+    for job_name, raw_job in jobs.items():
+        job = _as_mapping(raw_job)
+        if job is None:
             report.issue(f"{workflow}: job {job_name!r} must be a mapping")
             continue
         for key in sorted(set(job) - ALLOWED_WORKFLOW_JOB):
@@ -668,8 +695,8 @@ def check_quality_workflow(root: Path, report: Reporter) -> None:
 
     for key in sorted(set(document) - ALLOWED_WORKFLOW_TOP_LEVEL):
         report.issue(f"{workflow}: unknown top-level key {key!r}")
-    on_value = document.get("on")
-    if not isinstance(on_value, dict) or set(on_value) != REQUIRED_WORKFLOW_ON:
+    on_value = _as_mapping(document.get("on"))
+    if on_value is None or set(on_value) != REQUIRED_WORKFLOW_ON:
         report.issue(
             f"{workflow}: 'on:' must map exactly the push and pull_request triggers"
         )
@@ -678,29 +705,25 @@ def check_quality_workflow(root: Path, report: Reporter) -> None:
             f"{workflow}: push and pull_request triggers must not contain "
             "additional configuration"
         )
-    if document.get("permissions") != {"contents": "read"}:
-        report.issue(
-            f"{workflow}: permissions must be exactly {{'contents': 'read'}}"
-        )
-    if SECRETS_CONTEXT_RE.search(text):
-        report.issue(f"{workflow}: workflow must not consume GitHub secrets")
+    permissions = _as_mapping(document.get("permissions"))
+    if permissions != {"contents": "read"}:
+        report.issue(f"{workflow}: permissions must be exactly {{'contents': 'read'}}")
+    _check_no_secret_context(workflow, text, report)
 
-    jobs = document.get("jobs")
-    if not isinstance(jobs, dict) or set(jobs) != {"quality-checks"}:
-        report.issue(
-            f"{workflow}: jobs must contain exactly the 'quality-checks' job"
-        )
+    jobs = _as_mapping(document.get("jobs"))
+    if jobs is None or set(jobs) != {"quality-checks"}:
+        report.issue(f"{workflow}: jobs must contain exactly the 'quality-checks' job")
         return
-    job = jobs["quality-checks"]
-    if not isinstance(job, dict):
+    job = _as_mapping(jobs["quality-checks"])
+    if job is None:
         report.issue(f"{workflow}: job 'quality-checks' must be a mapping")
         return
     for key in sorted(set(job) - ALLOWED_QUALITY_WORKFLOW_JOB):
         report.issue(f"{workflow}: job 'quality-checks' has unknown key {key!r}")
-    raw_env = job.get("env")
+    raw_env = _as_mapping(job.get("env"))
     normalized_env = (
         {key: str(value).strip("\"'") for key, value in raw_env.items()}
-        if isinstance(raw_env, dict)
+        if raw_env is not None
         else raw_env
     )
     if normalized_env != REQUIRED_QUALITY_ENV:
@@ -719,17 +742,24 @@ def check_workflows(root: Path, report: Reporter) -> None:
     check_quality_workflow(root, report)
 
 
+def _check_no_secret_context(workflow: Path, text: str, report: Reporter) -> None:
+    """Reject GitHub Actions secret-context interpolation in either workflow."""
+    if SECRETS_CONTEXT_RE.search(text):
+        report.issue(f"{workflow}: workflow must not consume GitHub secrets")
+
+
 def _check_quality_job_commands(
-    workflow: Path, job: dict[str, object], report: Reporter
+    workflow: Path, job: dict[str, Any], report: Reporter
 ) -> None:
     """Require the exact quality command multiset, including repeated smokes."""
-    steps = job.get("steps")
-    if not isinstance(steps, list):
+    steps = _as_sequence(job.get("steps"))
+    if steps is None:
         report.issue(f"{workflow}: job 'quality-checks' has no steps list")
         return
     commands: list[str] = []
-    for step in steps:
-        if not isinstance(step, dict):
+    for raw_step in steps:
+        step = _as_mapping(raw_step)
+        if step is None:
             report.issue(f"{workflow}: job 'quality-checks' has a malformed step")
             continue
         for key in sorted(set(step) - ALLOWED_WORKFLOW_STEP):
@@ -750,9 +780,7 @@ def _check_quality_job_commands(
                 )
             run = step.get("run")
             if not isinstance(run, str) or not run.strip():
-                report.issue(
-                    f"{workflow}: job 'quality-checks' has an empty run step"
-                )
+                report.issue(f"{workflow}: job 'quality-checks' has an empty run step")
             else:
                 commands.append(run.strip())
     if Counter(commands) != Counter(REQUIRED_QUALITY_WORKFLOW_COMMANDS):
@@ -763,22 +791,23 @@ def _check_quality_job_commands(
 
 
 def _check_quality_action_steps(
-    workflow: Path, job: dict[str, object], report: Reporter
+    workflow: Path, job: dict[str, Any], report: Reporter
 ) -> None:
     """Require checkout and setup-uv exactly once with safe frozen settings."""
-    steps = job.get("steps")
-    if not isinstance(steps, list):
+    steps = _as_sequence(job.get("steps"))
+    if steps is None:
         return
     counts = {CHECKOUT_ACTION: 0, SETUP_UV_ACTION: 0}
-    for step in steps:
-        if not isinstance(step, dict) or "uses" not in step:
+    for raw_step in steps:
+        step = _as_mapping(raw_step)
+        if step is None or "uses" not in step:
             continue
         uses = step.get("uses")
-        with_block = step.get("with")
+        with_block = _as_mapping(step.get("with"))
         if uses == CHECKOUT_ACTION:
             counts[CHECKOUT_ACTION] += 1
             if not (
-                isinstance(with_block, dict)
+                with_block is not None
                 and set(with_block) == {"persist-credentials"}
                 and with_block.get("persist-credentials")
                 in PERSIST_CREDENTIALS_DISABLED
@@ -790,10 +819,9 @@ def _check_quality_action_steps(
         elif uses == SETUP_UV_ACTION:
             counts[SETUP_UV_ACTION] += 1
             if not (
-                isinstance(with_block, dict)
+                with_block is not None
                 and set(with_block) == {"version", "python-version"}
-                and str(with_block.get("version")).strip("\"'")
-                == REQUIRED_UV_VERSION
+                and str(with_block.get("version")).strip("\"'") == REQUIRED_UV_VERSION
                 and str(with_block.get("python-version")).strip("\"'")
                 == REQUIRED_PYTHON_VERSION
             ):
@@ -809,20 +837,21 @@ def _check_quality_action_steps(
 
 
 def _check_job_os_coverage(
-    workflow: Path, job_name: str, job: dict[str, object], report: Reporter
+    workflow: Path, job_name: str, job: dict[str, Any], report: Reporter
 ) -> None:
     """The matrix must declare an 'os' axis covering both required runners
     and runs-on must bind exactly to that axis expression."""
-    strategy = job.get("strategy")
-    matrix: dict[str, object] = {}
-    if isinstance(strategy, dict):
+    strategy = _as_mapping(job.get("strategy"))
+    matrix: dict[str, Any] = {}
+    if strategy is not None:
         for key in sorted(set(strategy) - ALLOWED_WORKFLOW_STRATEGY):
             report.issue(
                 f"{workflow}: job {job_name!r} has unknown strategy key {key!r}"
             )
         candidate = strategy.get("matrix")
-        if isinstance(candidate, dict):
-            matrix = candidate
+        parsed_matrix = _as_mapping(candidate)
+        if parsed_matrix is not None:
+            matrix = parsed_matrix
         elif candidate is not None:
             report.issue(f"{workflow}: job {job_name!r} 'matrix' must be a mapping")
     if set(matrix) != {MATRIX_OS_KEY}:
@@ -830,8 +859,8 @@ def _check_job_os_coverage(
             f"{workflow}: job {job_name!r} matrix must contain only "
             f"the '{MATRIX_OS_KEY}' axis"
         )
-    os_values = matrix.get(MATRIX_OS_KEY)
-    if not isinstance(os_values, list):
+    os_values = _as_sequence(matrix.get(MATRIX_OS_KEY))
+    if os_values is None:
         report.issue(
             f"{workflow}: job {job_name!r} must declare a matrix "
             f"'{MATRIX_OS_KEY}' list axis"
@@ -852,7 +881,7 @@ def _check_job_os_coverage(
 
 
 def _check_job_commands(
-    workflow: Path, job_name: str, job: dict[str, object], report: Reporter
+    workflow: Path, job_name: str, job: dict[str, Any], report: Reporter
 ) -> None:
     """Every run step must be exactly one required offline command.
 
@@ -860,13 +889,14 @@ def _check_job_commands(
     ('&&', ';', '|') and decorated commands are not exact members and are
     rejected.
     """
-    steps = job.get("steps")
-    if not isinstance(steps, list):
+    steps = _as_sequence(job.get("steps"))
+    if steps is None:
         report.issue(f"{workflow}: job {job_name!r} has no steps list")
         return
     run_commands: list[str] = []
-    for step in steps:
-        if not isinstance(step, dict):
+    for raw_step in steps:
+        step = _as_mapping(raw_step)
+        if step is None:
             report.issue(f"{workflow}: job {job_name!r} has a malformed step")
             continue
         for key in sorted(set(step) - ALLOWED_WORKFLOW_STEP):
@@ -904,16 +934,17 @@ def _check_job_commands(
 
 
 def _check_action_steps(
-    workflow: Path, job_name: str, job: dict[str, object], report: Reporter
+    workflow: Path, job_name: str, job: dict[str, Any], report: Reporter
 ) -> None:
     """Require the two approved action steps with exact safe configuration."""
-    steps = job.get("steps")
-    if not isinstance(steps, list):
+    steps = _as_sequence(job.get("steps"))
+    if steps is None:
         return
     checkout_count = 0
     setup_count = 0
-    for step in steps:
-        if not isinstance(step, dict):
+    for raw_step in steps:
+        step = _as_mapping(raw_step)
+        if step is None:
             continue
         uses = step.get("uses")
         if uses is None:
@@ -921,11 +952,11 @@ def _check_action_steps(
         if not isinstance(uses, str):
             report.issue(f"{workflow}: job {job_name!r} has non-string action")
             continue
-        with_block = step.get("with")
+        with_block = _as_mapping(step.get("with"))
         if uses == CHECKOUT_ACTION:
             checkout_count += 1
             disabled = (
-                isinstance(with_block, dict)
+                with_block is not None
                 and set(with_block) == {"persist-credentials"}
                 and with_block.get("persist-credentials")
                 in PERSIST_CREDENTIALS_DISABLED
@@ -938,7 +969,7 @@ def _check_action_steps(
         elif uses == SETUP_PYTHON_ACTION:
             setup_count += 1
             configured = (
-                isinstance(with_block, dict)
+                with_block is not None
                 and set(with_block) == {"python-version"}
                 and str(with_block.get("python-version")).strip("\"'")
                 == REQUIRED_PYTHON_VERSION
@@ -1023,7 +1054,7 @@ def run_self_test_negative(root: Path) -> tuple[list[str], bool]:
     ignored_fixture = root / "scripts" / "fixtures" / "ignored-paths"
     if not ignored_fixture.is_dir():
         return [
-            f"fixture inventory: FAIL (missing scripts/fixtures/ignored-paths)"
+            "fixture inventory: FAIL (missing scripts/fixtures/ignored-paths)"
         ], False
     doc_fixtures.append(("ignored-paths", ignored_fixture, True))
 
@@ -1035,7 +1066,7 @@ def run_self_test_negative(root: Path) -> tuple[list[str], bool]:
         )
         run_case(
             f"docs/{name}",
-            [sys.executable, str(script), "--root", str(path)] + extra,
+            [sys.executable, str(script), "--root", str(path), *extra],
             should_pass,
         )
     for name, path, should_pass in workflow_fixtures:

@@ -22,9 +22,7 @@ def find_artifacts(root: Path = REPOSITORY_ROOT) -> list[str]:
     """Return stable root-relative paths for forbidden generated artifacts."""
     findings: list[str] = []
     fixture_root = root / "scripts" / "fixtures"
-    for dirpath, dirnames, filenames in os.walk(
-        root, topdown=True, followlinks=False
-    ):
+    for dirpath, dirnames, filenames in os.walk(root, topdown=True, followlinks=False):
         current = Path(dirpath)
         if current == fixture_root or current.is_relative_to(fixture_root):
             dirnames[:] = []

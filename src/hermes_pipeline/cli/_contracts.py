@@ -8,15 +8,22 @@ bootstrap checker remains the single Schema-validation authority.
 
 from __future__ import annotations
 
-import importlib.util
 import sys
+from collections.abc import Callable
+from typing import cast
 
-from ._bootstrap import EXIT_CHECK_FAIL, repo_root
+from ._bootstrap import EXIT_CHECK_FAIL, isolated_script_module, repo_root
 
 
 def run_contracts_check(argv: list[str]) -> int:
     """Run the bootstrap Schema checker in-process with the given argv."""
     root = repo_root()
+    if root is None:
+        print(
+            "contracts check: FAIL (requires a Hermes Pipeline source checkout)",
+            file=sys.stderr,
+        )
+        return EXIT_CHECK_FAIL
     scripts = root / "scripts"
     script = scripts / "check_schemas.py"
     if not script.is_file():
@@ -25,21 +32,20 @@ def run_contracts_check(argv: list[str]) -> int:
             file=sys.stderr,
         )
         return EXIT_CHECK_FAIL
-    # The bootstrap module imports its helper with a bare name, so the
-    # scripts directory must be importable for this process only.
-    sys.path.insert(0, str(scripts))
     try:
-        spec = importlib.util.spec_from_file_location("check_schemas", script)
-        if spec is None or spec.loader is None:
-            print(
-                "contracts check: FAIL (cannot load bootstrap checker)",
-                file=sys.stderr,
-            )
-            return EXIT_CHECK_FAIL
-        module = importlib.util.module_from_spec(spec)
-        sys.modules["check_schemas"] = module
-        spec.loader.exec_module(module)
-        return int(module.main(argv))
-    finally:
-        sys.modules.pop("check_schemas", None)
-        sys.path.pop(0)
+        with isolated_script_module("check_schemas", script) as module:
+            main = getattr(module, "main", None)
+            if not callable(main):
+                print(
+                    "contracts check: FAIL (bootstrap checker has no main entry)",
+                    file=sys.stderr,
+                )
+                return EXIT_CHECK_FAIL
+            checker_main = cast(Callable[[list[str]], int], main)
+            return checker_main(argv)
+    except (ImportError, OSError) as exc:
+        print(
+            f"contracts check: FAIL (cannot load bootstrap checker: {exc})",
+            file=sys.stderr,
+        )
+        return EXIT_CHECK_FAIL

@@ -38,7 +38,7 @@
 - `.gitattributes` — cross-platform LF line-ending policy.
 - `.gitignore` — ignored local content (`reference/`, `.venv/`, bytecode, tool caches); governed-file discovery honors it.
 - `pyproject.toml` / `uv.lock` / `.python-version` — managed Python `>=3.12,<3.13` under uv 0.12.1 with the frozen development-tool resolution (Ruff, Pyright, pytest, pytest-asyncio, Hypothesis).
-- `src/hermes_pipeline/` — the installable distribution `hermes-pipeline` 0.1.0 with the fixed Module package layout and the `hermes-pipeline-runtime` / `python -m hermes_pipeline.cli` entry points (`--version`, `contracts check`, `architecture check`).
+- `src/hermes_pipeline/` — the installable distribution `hermes-pipeline` 0.1.0 with the fixed Module package layout and the `hermes-pipeline-runtime` / `python -m hermes_pipeline.cli` entry points. `--version` is standalone; default repository checks (`contracts check`, `architecture check`) require a source checkout, while `architecture check --root <path>` accepts an explicit package root.
 - `scripts/check_documentation.py` — dependency-free governed-text checker (UTF-8, replacement characters, Markdown fences, root-confined local links, ADR status, required root entry points; both workflow YAML files, read-only permissions, exact command/OS binding, and bundled-Node policy via `--check-workflows`; `.gitignore`-aware discovery).
 - `scripts/check_schemas.py` — dependency-free Schema integrity checker (JSON parsing, `$id` uniqueness and locked 14-Schema identity set, `$ref` and JSON Pointer resolution).
 - `scripts/fixtures/` — positive and deliberately broken bootstrap fixtures for the checkers; `--self-test-negative` executes the checkers against them and asserts nonzero exits with sanitized bounded output.

@@ -5,10 +5,11 @@ Supported surface, deliberately small:
 - ``--version`` prints the installed distribution version (sole version
   source: package metadata) and exits 0;
 - ``contracts check`` delegates in-process to the existing bootstrap Schema
-  checker ``scripts/check_schemas.py`` (no second validation logic, no
-  shell string);
+  checker ``scripts/check_schemas.py`` from a source checkout (no second
+  validation logic, no shell string);
 - ``architecture check`` runs the standard-library AST import-boundary
-  checker against ``src/hermes_pipeline``.
+  checker against ``src/hermes_pipeline`` in a source checkout, or against
+  an explicit ``--root`` path.
 
 Exit codes are stable: 0 success, 1 check failure, 2 usage error.
 """
@@ -41,11 +42,19 @@ def _usage_error(message: str) -> int:
 
 
 def _run_architecture_check(argv: list[str]) -> int:
-    root = repo_root() / DEFAULT_PACKAGE_ROOT
     if argv:
         if argv[0] != "--root" or len(argv) != 2:
             return _usage_error("architecture check accepts only --root <path>")
         root = Path(argv[1]).resolve()
+    else:
+        repository = repo_root()
+        if repository is None:
+            print(
+                "architecture check: FAIL (requires a Hermes Pipeline source checkout)",
+                file=sys.stderr,
+            )
+            return EXIT_CHECK_FAIL
+        root = repository / DEFAULT_PACKAGE_ROOT
     diagnostics = check_package_tree(root)
     if diagnostics:
         print("architecture check: FAIL")

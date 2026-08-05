@@ -213,10 +213,7 @@ def _segments_match(pattern: tuple[str, ...], target: tuple[str, ...]) -> bool:
         if pi == len(pattern):
             return ti == len(target)
         if pattern[pi] == "**":
-            for skip in range(len(target) - ti + 1):
-                if match(pi + 1, ti + skip):
-                    return True
-            return False
+            return any(match(pi + 1, ti + skip) for skip in range(len(target) - ti + 1))
         if ti == len(target):
             return False
         return _segment_regex(pattern[pi]).fullmatch(target[ti]) is not None and match(

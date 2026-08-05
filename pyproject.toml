@@ -33,10 +33,11 @@ dev = [
 line-length = 88
 target-version = "py312"
 src = ["src", "tests"]
-# The bootstrap scripts (slice-00-01) and their fixtures are validated by
-# the documentation/contract checkers and their negative self-tests, not
-# by the managed quality tools; the fixtures are deliberately broken.
-extend-exclude = ["scripts"]
+# Approved Slice 00-02 boundary: the immutable Slice 00-01 Schema checker
+# and deliberately invalid bootstrap fixtures remain governed by their own
+# dependency-free self-tests. Every bootstrap script changed by this Slice is
+# included in the managed Ruff and Pyright quality gates below.
+extend-exclude = ["scripts/check_schemas.py", "scripts/fixtures"]
 cache-dir = ".venv/.ruff_cache"
 
 [tool.ruff.lint]
@@ -48,7 +49,13 @@ known-first-party = ["hermes_pipeline", "facilities", "check_documentation", "_c
 [tool.pyright]
 pythonVersion = "3.12"
 typeCheckingMode = "strict"
-include = ["src", "tests"]
+include = [
+    "src",
+    "tests",
+    "scripts/_check_common.py",
+    "scripts/check_documentation.py",
+    "scripts/check_repository_artifacts.py",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

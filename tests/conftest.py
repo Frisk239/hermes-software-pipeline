@@ -1,16 +1,15 @@
 """Shared test setup (slice-00-02).
 
-Adds the repository root and the bootstrap ``scripts/`` directory to the
-import path so tests can drive the dependency-free checkers in-process,
-and exposes the deterministic facilities: a frozen UTC clock, an identity
-sequence, and an auto-cleaned temporary root.
+Exposes deterministic facilities: a frozen UTC clock, an identity sequence,
+and an auto-cleaned temporary root. Bootstrap scripts are loaded only through
+the CLI's isolated loader in the individual tests, so test collection never
+mutates interpreter import state.
 """
 
 from __future__ import annotations
 
 import os
 import shutil
-import sys
 import tempfile
 from collections.abc import Iterator
 from datetime import UTC, datetime
@@ -27,9 +26,6 @@ _REPO_ROOT = Path(__file__).resolve().parents[1]
 os.environ.setdefault(
     "HYPOTHESIS_STORAGE_DIRECTORY", str(_REPO_ROOT / ".venv" / ".hypothesis")
 )
-for _entry in (str(_REPO_ROOT / "scripts"), str(_REPO_ROOT)):
-    if _entry not in sys.path:
-        sys.path.insert(0, _entry)
 
 
 @pytest.fixture

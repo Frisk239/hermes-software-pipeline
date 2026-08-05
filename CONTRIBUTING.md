@@ -39,7 +39,7 @@ uv run python -m hermes_pipeline.cli contracts check
 uv run python -m hermes_pipeline.cli architecture check
 ```
 
-The managed runtime is Python `>=3.12,<3.13` under `uv 0.12.1`; the full development-tool resolution is frozen in `uv.lock`, and the same checks run offline after installation (`uv run --offline ...` and `uv sync --frozen --all-groups --offline`). `contracts check` delegates in-process to the bootstrap Schema checker; `architecture check` runs the standard-library AST import-boundary checker. CI runs these checks on Windows and Linux via `.github/workflows/python-quality.yml`.
+The managed runtime is Python `>=3.12,<3.13` under `uv 0.12.1`; the full development-tool resolution is frozen in `uv.lock`, and the same checks run offline after installation (`uv run --offline ...` and `uv sync --frozen --all-groups --offline`). `contracts check` delegates in-process to the bootstrap Schema checker; `architecture check` runs the standard-library AST import-boundary checker. Their default repository targets intentionally require a Hermes Pipeline source checkout; a standalone installed console supports `--version`, while `architecture check --root <path>` remains explicit-path capable. Set `PYTHONDONTWRITEBYTECODE=1` for a final local artifact audit; CI already supplies it to every job process. CI runs these checks on Windows and Linux via `.github/workflows/python-quality.yml`.
 
 The slice-00-01 bootstrap checks are dependency-free and offline:
 
