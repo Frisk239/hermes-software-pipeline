@@ -119,7 +119,7 @@ CHECKOUT_ACTION = "actions/checkout@v4"
 SETUP_PYTHON_ACTION = "actions/setup-python@v5"
 REQUIRED_PYTHON_VERSION = "3.12"
 PERSIST_CREDENTIALS_DISABLED = ("false", False)
-SETUP_UV_ACTION = "astral-sh/setup-uv@v9"
+SETUP_UV_ACTION = "astral-sh/setup-uv@v9.0.0"
 REQUIRED_UV_VERSION = "0.12.1"
 REQUIRED_QUALITY_ENV = {
     "PYTHONDONTWRITEBYTECODE": "1",
