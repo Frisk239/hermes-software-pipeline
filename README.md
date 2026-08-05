@@ -58,6 +58,21 @@ hermes gateway restart
 
 These commands do not exist in the repository yet. Phase 00 must prove the exact Hermes installation and lifecycle contract before they are documented as supported.
 
+## Repository checks
+
+The bootstrap checks are dependency-free and fully offline. Run them from the repository root on Windows or Linux:
+
+```text
+python scripts/check_documentation.py
+python scripts/check_schemas.py
+python scripts/check_schemas.py --self-test-negative
+python scripts/check_documentation.py --check-workflow
+```
+
+`scripts/check_documentation.py` validates governed text files: strict UTF-8 decoding, absence of replacement characters, balanced Markdown fences, resolvable local Markdown links confined to the repository root, terminal ADR status in `docs/adr/`, and the required root entry point files. `scripts/check_schemas.py` validates every committed Schema: JSON parsing, unique `$id` values under `https://schemas.hermes-pipeline.dev/`, resolution of every local or absolute `$ref` and JSON Pointer fragment, and an exact match of the declared `$id` set against the locked 14 bootstrap Schemas. Full Draft 2020-12 meta-schema validation is owned by slice-00-03. `--check-workflow` parses the workflow YAML with a strict grammar (rejecting unparsed trailing content, unterminated quotes, and unknown constructs) and verifies read-only `permissions: contents: read`, no persisted checkout credentials, an exact `matrix.os` axis bound to `runs-on: ${{ matrix.os }}`, and exactly the required offline commands on both Windows and Linux. `--self-test-negative` executes the checkers against deliberately broken fixtures, asserting stable nonzero exits, and all diagnostic output is sanitized and bounded.
+
+Line endings are normalized to LF by the [.gitattributes](.gitattributes) policy, and CI runs the same commands on Windows and Linux via [documentation-contracts.yml](.github/workflows/documentation-contracts.yml).
+
 ## Development model
 
 Development proceeds one approved Engineering Slice at a time:

@@ -33,6 +33,14 @@
 - `docs/roadmap/TRACEABILITY.md`;
 - `docs/roadmap/phase-00-foundation/`.
 
+## Repository checks
+
+- `.gitattributes` — cross-platform LF line-ending policy.
+- `scripts/check_documentation.py` — dependency-free governed-text checker (UTF-8, replacement characters, Markdown fences, root-confined local links, ADR status, required root entry points; workflow YAML syntax, read-only permissions, exact command/OS binding via `--check-workflow`).
+- `scripts/check_schemas.py` — dependency-free Schema integrity checker (JSON parsing, `$id` uniqueness and locked 14-Schema identity set, `$ref` and JSON Pointer resolution).
+- `scripts/fixtures/` — positive and deliberately broken bootstrap fixtures for the checkers; `--self-test-negative` executes the checkers against them and asserts nonzero exits with sanitized bounded output.
+- `.github/workflows/documentation-contracts.yml` — the same offline checks on Windows and Linux runners.
+
 ## Supporting material
 
 - `docs/research/` records dated evidence and may inform a decision but is not normative.

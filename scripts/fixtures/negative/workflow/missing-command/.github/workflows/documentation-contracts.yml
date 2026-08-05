@@ -1,0 +1,28 @@
+# Negative workflow fixture: valid YAML structure but one required offline
+# command is missing from the steps.
+name: documentation-contracts
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  bootstrap-checks:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run documentation checks
+        run: python scripts/check_documentation.py
+      - name: Run schema contract checks
+        run: python scripts/check_schemas.py
+      - name: Verify workflow configuration
+        run: python scripts/check_documentation.py --check-workflow

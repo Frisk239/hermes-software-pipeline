@@ -41,6 +41,17 @@ uv run python -m hermes_pipeline.cli architecture check
 
 Until the Phase 00 skeleton exists, a Slice Contract must state the exact bootstrap checks it introduces. A documentation-only change must at minimum validate UTF-8 decoding, local links, ADR status consistency, JSON parsing, and JSON Schema meta-schema/reference integrity.
 
+The slice-00-01 bootstrap checks are dependency-free and offline:
+
+```text
+python scripts/check_documentation.py
+python scripts/check_schemas.py
+python scripts/check_schemas.py --self-test-negative
+python scripts/check_documentation.py --check-workflow
+```
+
+`scripts/check_documentation.py` checks governed text files (UTF-8, replacement characters, Markdown fences, root-confined local links, ADR status, required root entry points); `scripts/check_schemas.py` checks the committed Schemas (JSON parsing, `$id` uniqueness and the locked 14-Schema identity set, `$ref` and JSON Pointer resolution). `--check-workflow` validates the workflow YAML syntax and verifies read-only permissions, no persisted checkout credentials, the exact `matrix.os`/`runs-on` binding, and exactly the required commands on Windows and Linux; `--self-test-negative` executes the checkers against the broken fixtures in `scripts/fixtures/` and asserts stable nonzero exits with sanitized bounded output.
+
 ## Pull requests
 
 A pull request must state:

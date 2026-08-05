@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.hermes-pipeline.dev/engineering/bad-array-index/v1",
+  "type": "object",
+  "$defs": {
+    "items": ["zero", "one"]
+  },
+  "properties": {
+    "leadingZero": {
+      "$ref": "#/$defs/items/01"
+    },
+    "minusZero": {
+      "$ref": "#/$defs/items/-0"
+    }
+  }
+}

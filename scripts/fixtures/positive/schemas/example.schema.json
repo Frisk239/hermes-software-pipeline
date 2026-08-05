@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.hermes-pipeline.dev/engineering/example/v1",
+  "title": "Positive Fixture Example Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["digest"],
+  "properties": {
+    "digest": {
+      "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"
+    },
+    "firstRole": {
+      "$ref": "#/$defs/roles/0"
+    }
+  },
+  "$defs": {
+    "roles": ["viewer", "editor"]
+  }
+}

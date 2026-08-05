@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.hermes-pipeline.dev/engineering/broken/v1",
+  "type": "object",
+  "properties": {
+    "digest": {
+      "$ref": "#/$defs/sha256"
+    }
+  }
+}

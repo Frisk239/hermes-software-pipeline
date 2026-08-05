@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.hermes-pipeline.dev/common/definitions/v1",
+  "title": "Positive Fixture Common Definitions",
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "fileReference": {
+      "type": "object",
+      "required": ["path", "digest"],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "digest": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    }
+  }
+}
