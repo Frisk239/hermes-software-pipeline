@@ -1,12 +1,12 @@
 {
   "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
   "schema_version": 1,
-  "document_revision": 2,
+  "document_revision": 3,
   "slice_id": "slice-00-01",
   "phase_id": "phase-00",
   "status": "DRAFT",
   "predecessors": [],
-  "base_sha": "9a73b39f2eb1653e7345b27a39760cb55ef95af4",
+  "base_sha": "7f2bcff881e7d16477f0bc1ae0d2a6aa1de3cab0",
   "assigned_worktree": "PENDING: assigned after Phase approval",
   "operator_path": "Clone the exact baseline on Windows or Linux, locate every normative entry point, run offline documentation and contract checks, and observe deterministic rejection of a broken Schema fixture.",
   "must_scope": [
@@ -183,7 +183,7 @@
         "git",
         "diff",
         "--check",
-        "9a73b39f2eb1653e7345b27a39760cb55ef95af4..HEAD"
+        "7f2bcff881e7d16477f0bc1ae0d2a6aa1de3cab0..HEAD"
       ],
       "working_directory": ".",
       "timeout_ms": 30000
@@ -221,5 +221,5 @@
     "The Base SHA or approved Phase Plan changes",
     "Required Windows and Linux behavior cannot be made equivalent"
   ],
-  "content_hash": "sha256:ab21b20dad31ca531c55b15e3555fe30e696d87e910cee00b01eba296e3f7ab5"
+  "content_hash": "sha256:475a5fb7e3beffb590482901df094f66a521245b5c4bd9f1612fb9b3f895a118"
 }

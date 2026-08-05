@@ -6,9 +6,9 @@ Phase: `phase-00`
 
 Status: `DRAFT`
 
-Document revision: `2`
+Document revision: `3`
 
-Base SHA: `9a73b39f2eb1653e7345b27a39760cb55ef95af4`
+Base SHA: `7f2bcff881e7d16477f0bc1ae0d2a6aa1de3cab0`
 
 Assigned Managed Worktree: pending Phase approval and Git Custodian assignment
 
