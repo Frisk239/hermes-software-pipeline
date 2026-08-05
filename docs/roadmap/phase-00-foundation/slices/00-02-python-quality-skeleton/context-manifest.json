@@ -15,7 +15,7 @@
     {"path": "docs/roadmap/phase-00-foundation/phase-plan.json", "digest": "sha256:34035ae526cb363e8b8a009fbea7a0246dd87c33337f1086cf079cfa2d5aea3f", "purpose": "Approved Phase 00 machine plan"},
     {"path": "docs/roadmap/phase-00-foundation/slices/00-01-repository-baseline/CLOSEOUT.md", "digest": "sha256:9d365267fa747208bfef1d9c71b372045eec931fda67a222ac72c15bcb61b72d", "purpose": "Accepted predecessor capability, evidence, and debt"},
     {"path": "docs/roadmap/phase-00-foundation/slices/00-02-python-quality-skeleton/SLICE.md", "digest": "sha256:b17e53471d3589a70209f6550d23e7dd3ecf3b86a078ffeb3d2d42ed06b14b1e", "purpose": "READY human-readable Slice contract"},
-    {"path": "docs/roadmap/phase-00-foundation/slices/00-02-python-quality-skeleton/slice-contract.json", "digest": "sha256:db933095c63d8593e824d9babc196c93f4df7ea3ea046947865cacd40ca5c874", "purpose": "READY machine-valid Slice contract"},
+    {"path": "docs/roadmap/phase-00-foundation/slices/00-02-python-quality-skeleton/slice-contract.json", "digest": "sha256:dd220728c3148d63e8f406042d26003089aaf605c5ce7364ac1195f847cd08df", "purpose": "READY machine-valid Slice contract"},
     {"path": "docs/development/phase-and-slice-operating-model.md", "digest": "sha256:1f6e55ae6ede38d4eef94406fffece93f2b5d803ba208de3129ae1e2d3d1b5ad", "purpose": "Slice lifecycle, worktree, evidence, and review rules"},
     {"path": "docs/development/coding-and-test-standard.md", "digest": "sha256:b4d689f55b2d20c9fcbc9ba25578fb61471d970b49a5a91ddf50d6bab907b83a", "purpose": "Python coding and deterministic test standard"},
     {"path": "docs/development/ci-and-testing.md", "digest": "sha256:8953023372b964f8edecb5a68158677c3c9712d0d239219261c65782093496bf", "purpose": "CI, branch, test-layer, and release-gate rules"},
@@ -36,7 +36,7 @@
     {"name": "repository_read_scope", "value": "all tracked files", "source": "AGENTS.md and Executor role contract"},
     {"name": "manifest_semantics", "value": "governing context, not a read allowlist", "source": "phase-and-slice-operating-model.md"},
     {"name": "contract_revision", "value": 3, "source": "slice-contract.json"},
-    {"name": "contract_hash", "value": "sha256:9c17b02ae2e017430e9cc465fab9bb6772a3f1f815317b9ba7670261355ed066", "source": "slice-contract.json canonical content hash"},
+    {"name": "contract_hash", "value": "sha256:164b5787e28dc129e4f2e6ae317ecccc2f6eb28088a84e33d75f2a029affb7c8", "source": "slice-contract.json canonical content hash"},
     {"name": "predecessor_candidate_sha", "value": "0d946abf73736d6a03c6b33433714c51b79dadaa", "source": "Slice 00-01 Closeout"},
     {"name": "predecessor_integrated_sha", "value": "6c9623a3a8ad6a124d5d4a1bcddce94a5938e0b4", "source": "Slice 00-01 Closeout and PR #1"},
     {"name": "managed_python", "value": ">=3.12,<3.13", "source": "ADR-0020 and compatibility-targets.md"},
@@ -48,5 +48,5 @@
     {"name": "executor_git_mutation_allowed", "value": false, "source": "slice-contract.json"},
     {"name": "previous_review_findings", "value": "Standards P1 ambient Node, inverted Adapter direction, incomplete Controller boundary, unverifiable offline claim; Spec P1 incomplete CI/workflow validation and artifact audit; Spec P2 Python patch overstatement", "source": "Review attempt 1"}
   ],
-  "content_hash": "sha256:210d22cbcc8d91077b84ed9ab5ac0955c47290b568dd6210439705a348517ba1"
+  "content_hash": "sha256:254c411c2a172d9b09d52263b93aa171f04bb7a025b63857049ffa12a72eb738"
 }

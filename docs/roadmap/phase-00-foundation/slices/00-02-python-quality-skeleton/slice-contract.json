@@ -60,7 +60,6 @@
     "scripts/_check_common.py",
     "scripts/check_documentation.py",
     "scripts/check_repository_artifacts.py",
-    "scripts/run_pyright.py",
     "scripts/fixtures/"
   ],
   "prohibited_actions": [
@@ -107,7 +106,7 @@
       "criterion_id": "AC-03",
       "trace_ids": ["BOOT-03", "XPLAT-01"],
       "observable_result": "After dependency installation, frozen sync and version, contract, architecture, and type checks require no public network: uv is offline and Pyright uses its locked bundled Node runtime without ambient Node or post-sync downloads.",
-      "verification_command_ids": ["offline-sync", "offline-version", "offline-contracts", "offline-architecture"]
+      "verification_command_ids": ["type-check", "offline-sync", "offline-version", "offline-contracts", "offline-architecture"]
     },
     {
       "criterion_id": "AC-04",
@@ -172,7 +171,7 @@
     {"command_id": "frozen-sync", "argv": ["uv", "sync", "--frozen", "--all-groups"], "working_directory": ".", "timeout_ms": 600000},
     {"command_id": "format-check", "argv": ["uv", "run", "ruff", "format", "--check", "."], "working_directory": ".", "timeout_ms": 120000},
     {"command_id": "lint-check", "argv": ["uv", "run", "ruff", "check", "."], "working_directory": ".", "timeout_ms": 120000},
-    {"command_id": "type-check", "argv": ["uv", "run", "--offline", "python", "scripts/run_pyright.py"], "working_directory": ".", "timeout_ms": 180000},
+    {"command_id": "type-check", "argv": ["uv", "run", "pyright"], "working_directory": ".", "timeout_ms": 180000},
     {"command_id": "unit-check", "argv": ["uv", "run", "pytest"], "working_directory": ".", "timeout_ms": 300000},
     {"command_id": "contracts-check", "argv": ["uv", "run", "python", "-m", "hermes_pipeline.cli", "contracts", "check"], "working_directory": ".", "timeout_ms": 120000},
     {"command_id": "architecture-check", "argv": ["uv", "run", "python", "-m", "hermes_pipeline.cli", "architecture", "check"], "working_directory": ".", "timeout_ms": 120000},
@@ -239,5 +238,5 @@
     "The Base SHA changes or required Windows and Linux behavior cannot be equivalent",
     "The bootstrap checker correction cannot distinguish ignored local content from governed unignored content without weakening clean-clone coverage"
   ],
-  "content_hash": "sha256:9c17b02ae2e017430e9cc465fab9bb6772a3f1f815317b9ba7670261355ed066"
+  "content_hash": "sha256:164b5787e28dc129e4f2e6ae317ecccc2f6eb28088a84e33d75f2a029affb7c8"
 }
