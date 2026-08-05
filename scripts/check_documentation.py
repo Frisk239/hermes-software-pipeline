@@ -19,10 +19,20 @@ keys, and unexpected indentation) and verifies that a job covers both
 command. This is a deterministic structural check; it does not execute the
 workflow.
 
+``--check-workflows`` applies the same syntax, runner, permissions, checkout,
+credential, action-version, environment, and exact-command policies to both
+the documentation and Python quality workflows.
+
 ``--self-test-negative`` executes the checker as a subprocess against the
 bootstrap fixtures and asserts that positive fixtures exit 0 and every
 deliberately broken fixture exits nonzero, proving the CLI's stable exit
 behavior rather than reusing in-process state.
+
+Governed-file discovery honors the checked root's ``.gitignore``: ignored
+local content (``reference/`` clones, virtual environments, and standard
+tool caches) is never scanned, while governed files that are not ignored
+remain scanned, so equivalent unignored invalid content still fails
+(AC-07, slice-00-02 correction to slice-00-01).
 
 The checker is read-only, offline, and treats repository text as untrusted
 data. It never executes repository content.
@@ -31,6 +41,8 @@ data. It never executes repository content.
 from __future__ import annotations
 
 import argparse
+from collections import Counter
+import os
 import re
 import subprocess
 import sys
@@ -40,7 +52,14 @@ from pathlib import Path
 # local module, and bytecode caching must not leave untracked files behind.
 sys.dont_write_bytecode = True
 
-from _check_common import Reporter, fixture_roots, render_bounded_lines, repo_root
+from _check_common import (
+    Reporter,
+    fixture_roots,
+    is_path_ignored,
+    load_ignore_rules,
+    render_bounded_lines,
+    repo_root,
+)
 
 # Exit codes: 0 = pass, 1 = check failure.
 EXIT_OK = 0
@@ -82,11 +101,13 @@ REQUIRED_WORKFLOW_COMMANDS = (
 )
 
 WORKFLOW_PATH = Path(".github/workflows/documentation-contracts.yml")
+QUALITY_WORKFLOW_PATH = Path(".github/workflows/python-quality.yml")
 
 # Allowed keys in the strict workflow grammar.
 ALLOWED_WORKFLOW_TOP_LEVEL = {"name", "on", "permissions", "jobs"}
 REQUIRED_WORKFLOW_ON = {"push", "pull_request"}
 ALLOWED_WORKFLOW_JOB = {"strategy", "runs-on", "steps"}
+ALLOWED_QUALITY_WORKFLOW_JOB = {"env", "strategy", "runs-on", "steps"}
 ALLOWED_WORKFLOW_STRATEGY = {"fail-fast", "matrix"}
 ALLOWED_WORKFLOW_STEP = {"uses", "name", "run", "with"}
 
@@ -98,6 +119,31 @@ CHECKOUT_ACTION = "actions/checkout@v4"
 SETUP_PYTHON_ACTION = "actions/setup-python@v5"
 REQUIRED_PYTHON_VERSION = "3.12"
 PERSIST_CREDENTIALS_DISABLED = ("false", False)
+SETUP_UV_ACTION = "astral-sh/setup-uv@v9"
+REQUIRED_UV_VERSION = "0.12.1"
+REQUIRED_QUALITY_ENV = {
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYRIGHT_PYTHON_GLOBAL_NODE": "0",
+    "PYRIGHT_PYTHON_NODEJS_WHEEL": "1",
+}
+REQUIRED_QUALITY_WORKFLOW_COMMANDS = (
+    "uv sync --frozen --all-groups",
+    "uv run --offline ruff format --check .",
+    "uv run --offline ruff check .",
+    "uv run --offline pyright",
+    "uv run --offline pytest",
+    "uv run --offline python -m hermes_pipeline.cli contracts check",
+    "uv run --offline python -m hermes_pipeline.cli architecture check",
+    "uv run --offline python scripts/check_documentation.py",
+    "uv run --offline python scripts/check_documentation.py --self-test-negative",
+    "uv run --offline python scripts/check_schemas.py --self-test-negative",
+    "uv run --offline python scripts/check_documentation.py --check-workflows",
+    "uv sync --frozen --all-groups --offline",
+    "uv run --offline python -m hermes_pipeline.cli --version",
+    "uv run --offline python -m hermes_pipeline.cli contracts check",
+    "uv run --offline python -m hermes_pipeline.cli architecture check",
+    "uv run --offline python scripts/check_repository_artifacts.py",
+)
 
 REQUIRED_DOC_NEGATIVE_FIXTURES = frozenset(
     {
@@ -109,6 +155,7 @@ REQUIRED_DOC_NEGATIVE_FIXTURES = frozenset(
         "proposed-adr",
         "replacement-char",
         "unbalanced-fence",
+        "unignored-invalid",
     }
 )
 REQUIRED_WORKFLOW_NEGATIVE_FIXTURES = frozenset(
@@ -139,6 +186,7 @@ SCHEME_RE = re.compile(r"^[a-zA-Z][a-zA-Z0-9+.\-]*:")
 FRONTMATTER_LIMIT = 10
 KEY_RE = re.compile(r"^([A-Za-z0-9_.-]+):(?:\s*(.*))?$")
 FLOW_SEQ_RE = re.compile(r"^\[(.*)\]$")
+SECRETS_CONTEXT_RE = re.compile(r"\$\{\{\s*secrets\s*\.", re.IGNORECASE)
 
 
 class WorkflowSyntaxError(Exception):
@@ -149,28 +197,48 @@ class WorkflowSyntaxError(Exception):
 # Governed text checks
 # --------------------------------------------------------------------------
 
+
 def governed_text_files(root: Path, report: Reporter) -> list[Path]:
-    """All governed text files under root, excluding .git and, when scanning
-    the repository root, the deliberately broken self-test fixtures."""
+    """All governed text files under root, excluding .git, the deliberately
+    broken self-test fixtures, and paths ignored by the root .gitignore.
+
+    Pruning uses the checked root's own ignore rules, so fixture roots and
+    non-Git roots behave exactly like the repository root: ignored local
+    content never reaches the scanner, and governed unignored files are
+    always scanned (AC-07).
+    """
     repo = repo_root()
     fixture_tree = repo / "scripts" / "fixtures"
+    rules = load_ignore_rules(root)
     files: list[Path] = []
-    for path in sorted(root.rglob("*")):
-        if root == repo and path.is_relative_to(fixture_tree):
+    for dirpath, dirnames, filenames in os.walk(root, topdown=True, followlinks=False):
+        current = Path(dirpath)
+        if root == repo and current.is_relative_to(fixture_tree):
+            dirnames[:] = []
             continue
-        governed = path.suffix in GOVERNED_SUFFIXES or path.name in GOVERNED_NAMES
-        if path.is_symlink():
-            if governed:
-                report.issue(f"{path}: governed file must not be a symbolic link")
-            continue
-        if not path.is_file():
-            continue
-        if any(part == ".git" for part in path.parts):
-            continue
-        if not path.resolve().is_relative_to(root):
-            report.issue(f"{path}: governed file resolves outside the checked root")
-            continue
-        if governed:
+        if ".git" in dirnames:
+            dirnames.remove(".git")
+        kept_dirs: list[str] = []
+        for name in dirnames:
+            rel = current.relative_to(root) / name
+            if not is_path_ignored(rel.as_posix(), rules):
+                kept_dirs.append(name)
+        dirnames[:] = kept_dirs
+        for name in filenames:
+            path = current / name
+            rel = current.relative_to(root) / name
+            governed = path.suffix in GOVERNED_SUFFIXES or path.name in GOVERNED_NAMES
+            if is_path_ignored(rel.as_posix(), rules):
+                continue
+            if path.is_symlink():
+                if governed:
+                    report.issue(f"{path}: governed file must not be a symbolic link")
+                continue
+            if not governed:
+                continue
+            if not path.resolve().is_relative_to(root):
+                report.issue(f"{path}: governed file resolves outside the checked root")
+                continue
             files.append(path)
     return files
 
@@ -187,9 +255,7 @@ def check_utf8(path: Path, report: Reporter) -> str | None:
     return text
 
 
-def check_markdown(
-    root: Path, path: Path, text: str, report: Reporter
-) -> None:
+def check_markdown(root: Path, path: Path, text: str, report: Reporter) -> None:
     """Balanced fences and resolvable local links in one Markdown file."""
     lines = text.splitlines()
     fence_lines = [i + 1 for i, line in enumerate(lines) if FENCE_RE.match(line)]
@@ -234,9 +300,7 @@ def _check_link(
     # checked root: a link must never probe the host filesystem (AC-05).
     resolved = (path.parent / path_part).resolve()
     if not resolved.is_relative_to(root):
-        report.issue(
-            f"{path}:{lineno}: local link escapes the checked root: {target}"
-        )
+        report.issue(f"{path}:{lineno}: local link escapes the checked root: {target}")
     elif not resolved.exists():
         report.issue(f"{path}:{lineno}: local link does not resolve: {target}")
 
@@ -274,7 +338,7 @@ def check_adr_status(root: Path, report: Reporter) -> None:
                 closed = True
                 break
             if stripped.startswith("status:"):
-                status = stripped[len("status:"):].strip().strip('"\'')
+                status = stripped[len("status:") :].strip().strip("\"'")
         if not closed:
             report.issue(f"{path}: unterminated YAML frontmatter")
             continue
@@ -325,6 +389,7 @@ def check_documentation(
 # Strict workflow YAML-subset parser
 # --------------------------------------------------------------------------
 
+
 def _indent(raw: str) -> int:
     return len(raw) - len(raw.lstrip(" "))
 
@@ -345,14 +410,10 @@ def _plain_scalar(value: str, lineno: int) -> str:
     if value.startswith(('"', "'")):
         quote = value[0]
         if not value.endswith(quote) or len(value) < 2:
-            raise WorkflowSyntaxError(
-                f"line {lineno}: unterminated quoted scalar"
-            )
+            raise WorkflowSyntaxError(f"line {lineno}: unterminated quoted scalar")
         return value
     if value.startswith("["):
-        raise WorkflowSyntaxError(
-            f"line {lineno}: unterminated flow sequence"
-        )
+        raise WorkflowSyntaxError(f"line {lineno}: unterminated flow sequence")
     return value.split(" #", 1)[0].strip()
 
 
@@ -432,7 +493,11 @@ def _parse_sequence(cleaned: list[tuple[int, str]], index: int, indent: int):
         if key_value is not None:
             item: dict[str, object] = {}
             key, value = key_value
-            if not value and index < len(cleaned) and _indent(cleaned[index][1]) > current_indent:
+            if (
+                not value
+                and index < len(cleaned)
+                and _indent(cleaned[index][1]) > current_indent
+            ):
                 child_indent = _indent(cleaned[index][1])
                 item[key], index = _parse_block(cleaned, index, child_indent)
             elif value == "|":
@@ -510,6 +575,7 @@ def parse_workflow(text: str) -> dict[str, object]:
 # Workflow configuration check
 # --------------------------------------------------------------------------
 
+
 def check_workflow(root: Path, report: Reporter) -> None:
     """The CI workflow is syntactically valid and covers both required OS.
 
@@ -544,8 +610,7 @@ def check_workflow(root: Path, report: Reporter) -> None:
     on_value = document.get("on")
     if not isinstance(on_value, dict) or set(on_value) != REQUIRED_WORKFLOW_ON:
         report.issue(
-            f"{workflow}: 'on:' must map exactly the push and pull_request "
-            "triggers"
+            f"{workflow}: 'on:' must map exactly the push and pull_request triggers"
         )
     elif any(value is not None for value in on_value.values()):
         report.issue(
@@ -578,6 +643,171 @@ def check_workflow(root: Path, report: Reporter) -> None:
         _check_action_steps(workflow, job_name, job, report)
 
 
+def check_quality_workflow(root: Path, report: Reporter) -> None:
+    """Validate the Python quality workflow against its frozen CI policy."""
+    workflow = root / QUALITY_WORKFLOW_PATH
+    if workflow.is_symlink():
+        report.issue(f"{workflow}: workflow file must not be a symbolic link")
+        return
+    if not workflow.is_file():
+        report.issue(f"{workflow}: workflow file missing")
+        return
+    if not workflow.resolve().is_relative_to(root):
+        report.issue(f"{workflow}: workflow file resolves outside the checked root")
+        return
+    try:
+        text = workflow.read_text(encoding="utf-8")
+    except UnicodeDecodeError as exc:
+        report.issue(f"{workflow}: not valid UTF-8 ({exc.reason} at byte {exc.start})")
+        return
+    try:
+        document = parse_workflow(text)
+    except WorkflowSyntaxError as exc:
+        report.issue(f"{workflow}: invalid workflow YAML ({exc})")
+        return
+
+    for key in sorted(set(document) - ALLOWED_WORKFLOW_TOP_LEVEL):
+        report.issue(f"{workflow}: unknown top-level key {key!r}")
+    on_value = document.get("on")
+    if not isinstance(on_value, dict) or set(on_value) != REQUIRED_WORKFLOW_ON:
+        report.issue(
+            f"{workflow}: 'on:' must map exactly the push and pull_request triggers"
+        )
+    elif any(value is not None for value in on_value.values()):
+        report.issue(
+            f"{workflow}: push and pull_request triggers must not contain "
+            "additional configuration"
+        )
+    if document.get("permissions") != {"contents": "read"}:
+        report.issue(
+            f"{workflow}: permissions must be exactly {{'contents': 'read'}}"
+        )
+    if SECRETS_CONTEXT_RE.search(text):
+        report.issue(f"{workflow}: workflow must not consume GitHub secrets")
+
+    jobs = document.get("jobs")
+    if not isinstance(jobs, dict) or set(jobs) != {"quality-checks"}:
+        report.issue(
+            f"{workflow}: jobs must contain exactly the 'quality-checks' job"
+        )
+        return
+    job = jobs["quality-checks"]
+    if not isinstance(job, dict):
+        report.issue(f"{workflow}: job 'quality-checks' must be a mapping")
+        return
+    for key in sorted(set(job) - ALLOWED_QUALITY_WORKFLOW_JOB):
+        report.issue(f"{workflow}: job 'quality-checks' has unknown key {key!r}")
+    raw_env = job.get("env")
+    normalized_env = (
+        {key: str(value).strip("\"'") for key, value in raw_env.items()}
+        if isinstance(raw_env, dict)
+        else raw_env
+    )
+    if normalized_env != REQUIRED_QUALITY_ENV:
+        report.issue(
+            f"{workflow}: job 'quality-checks' env must be exactly "
+            f"{REQUIRED_QUALITY_ENV!r}"
+        )
+    _check_job_os_coverage(workflow, "quality-checks", job, report)
+    _check_quality_job_commands(workflow, job, report)
+    _check_quality_action_steps(workflow, job, report)
+
+
+def check_workflows(root: Path, report: Reporter) -> None:
+    """Validate every governed GitHub Actions workflow."""
+    check_workflow(root, report)
+    check_quality_workflow(root, report)
+
+
+def _check_quality_job_commands(
+    workflow: Path, job: dict[str, object], report: Reporter
+) -> None:
+    """Require the exact quality command multiset, including repeated smokes."""
+    steps = job.get("steps")
+    if not isinstance(steps, list):
+        report.issue(f"{workflow}: job 'quality-checks' has no steps list")
+        return
+    commands: list[str] = []
+    for step in steps:
+        if not isinstance(step, dict):
+            report.issue(f"{workflow}: job 'quality-checks' has a malformed step")
+            continue
+        for key in sorted(set(step) - ALLOWED_WORKFLOW_STEP):
+            report.issue(
+                f"{workflow}: job 'quality-checks' step has unknown key {key!r}"
+            )
+        has_run = "run" in step
+        has_uses = "uses" in step
+        if has_run == has_uses:
+            report.issue(
+                f"{workflow}: job 'quality-checks' step must contain exactly "
+                "one of 'run' or 'uses'"
+            )
+        if has_run:
+            if step.get("with") is not None:
+                report.issue(
+                    f"{workflow}: job 'quality-checks' run step cannot contain 'with'"
+                )
+            run = step.get("run")
+            if not isinstance(run, str) or not run.strip():
+                report.issue(
+                    f"{workflow}: job 'quality-checks' has an empty run step"
+                )
+            else:
+                commands.append(run.strip())
+    if Counter(commands) != Counter(REQUIRED_QUALITY_WORKFLOW_COMMANDS):
+        report.issue(
+            f"{workflow}: job 'quality-checks' run commands must match the "
+            "frozen quality command inventory exactly"
+        )
+
+
+def _check_quality_action_steps(
+    workflow: Path, job: dict[str, object], report: Reporter
+) -> None:
+    """Require checkout and setup-uv exactly once with safe frozen settings."""
+    steps = job.get("steps")
+    if not isinstance(steps, list):
+        return
+    counts = {CHECKOUT_ACTION: 0, SETUP_UV_ACTION: 0}
+    for step in steps:
+        if not isinstance(step, dict) or "uses" not in step:
+            continue
+        uses = step.get("uses")
+        with_block = step.get("with")
+        if uses == CHECKOUT_ACTION:
+            counts[CHECKOUT_ACTION] += 1
+            if not (
+                isinstance(with_block, dict)
+                and set(with_block) == {"persist-credentials"}
+                and with_block.get("persist-credentials")
+                in PERSIST_CREDENTIALS_DISABLED
+            ):
+                report.issue(
+                    f"{workflow}: checkout step must set only "
+                    "with.persist-credentials: false"
+                )
+        elif uses == SETUP_UV_ACTION:
+            counts[SETUP_UV_ACTION] += 1
+            if not (
+                isinstance(with_block, dict)
+                and set(with_block) == {"version", "python-version"}
+                and str(with_block.get("version")).strip("\"'")
+                == REQUIRED_UV_VERSION
+                and str(with_block.get("python-version")).strip("\"'")
+                == REQUIRED_PYTHON_VERSION
+            ):
+                report.issue(
+                    f"{workflow}: setup-uv step must pin uv "
+                    f"{REQUIRED_UV_VERSION} and Python {REQUIRED_PYTHON_VERSION}"
+                )
+        else:
+            report.issue(f"{workflow}: unsupported action {uses!r}")
+    for action, count in counts.items():
+        if count != 1:
+            report.issue(f"{workflow}: must use {action} exactly once")
+
+
 def _check_job_os_coverage(
     workflow: Path, job_name: str, job: dict[str, object], report: Reporter
 ) -> None:
@@ -587,7 +817,9 @@ def _check_job_os_coverage(
     matrix: dict[str, object] = {}
     if isinstance(strategy, dict):
         for key in sorted(set(strategy) - ALLOWED_WORKFLOW_STRATEGY):
-            report.issue(f"{workflow}: job {job_name!r} has unknown strategy key {key!r}")
+            report.issue(
+                f"{workflow}: job {job_name!r} has unknown strategy key {key!r}"
+            )
         candidate = strategy.get("matrix")
         if isinstance(candidate, dict):
             matrix = candidate
@@ -638,9 +870,7 @@ def _check_job_commands(
             report.issue(f"{workflow}: job {job_name!r} has a malformed step")
             continue
         for key in sorted(set(step) - ALLOWED_WORKFLOW_STEP):
-            report.issue(
-                f"{workflow}: job {job_name!r} step has unknown key {key!r}"
-            )
+            report.issue(f"{workflow}: job {job_name!r} step has unknown key {key!r}")
         has_run = "run" in step
         has_uses = "uses" in step
         if has_run == has_uses:
@@ -652,9 +882,7 @@ def _check_job_commands(
             continue
         run = step["run"]
         if step.get("with") is not None:
-            report.issue(
-                f"{workflow}: job {job_name!r} run step cannot contain 'with'"
-            )
+            report.issue(f"{workflow}: job {job_name!r} run step cannot contain 'with'")
         if not isinstance(run, str) or not run.strip():
             report.issue(f"{workflow}: job {job_name!r} has an empty run step")
             continue
@@ -666,9 +894,9 @@ def _check_job_commands(
             )
             continue
         run_commands.append(command)
-    if len(run_commands) != len(REQUIRED_WORKFLOW_COMMANDS) or set(
-        run_commands
-    ) != set(REQUIRED_WORKFLOW_COMMANDS):
+    if len(run_commands) != len(REQUIRED_WORKFLOW_COMMANDS) or set(run_commands) != set(
+        REQUIRED_WORKFLOW_COMMANDS
+    ):
         report.issue(
             f"{workflow}: job {job_name!r} must run each required offline "
             "command exactly once"
@@ -730,14 +958,14 @@ def _check_action_steps(
         )
     if setup_count != 1:
         report.issue(
-            f"{workflow}: job {job_name!r} must use "
-            f"{SETUP_PYTHON_ACTION} exactly once"
+            f"{workflow}: job {job_name!r} must use {SETUP_PYTHON_ACTION} exactly once"
         )
 
 
 # --------------------------------------------------------------------------
 # Self-test
 # --------------------------------------------------------------------------
+
 
 def run_self_test_negative(root: Path) -> tuple[list[str], bool]:
     """Execute the checker as a subprocess against the bootstrap fixtures.
@@ -753,9 +981,7 @@ def run_self_test_negative(root: Path) -> tuple[list[str], bool]:
     def run_case(name: str, argv: list[str], should_pass: bool) -> None:
         nonlocal all_ok
         try:
-            proc = subprocess.run(
-                argv, capture_output=True, text=True, timeout=30
-            )
+            proc = subprocess.run(argv, capture_output=True, text=True, timeout=30)
         except subprocess.TimeoutExpired:
             ok = False
             proc = None
@@ -793,6 +1019,13 @@ def run_self_test_negative(root: Path) -> tuple[list[str], bool]:
         )
     except ValueError as exc:
         return [f"fixture inventory: FAIL ({exc})"], False
+
+    ignored_fixture = root / "scripts" / "fixtures" / "ignored-paths"
+    if not ignored_fixture.is_dir():
+        return [
+            f"fixture inventory: FAIL (missing scripts/fixtures/ignored-paths)"
+        ], False
+    doc_fixtures.append(("ignored-paths", ignored_fixture, True))
 
     for name, path, should_pass in doc_fixtures:
         extra = (
@@ -836,9 +1069,16 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--check-workflow",
         action="store_true",
-        help="validate the CI workflow syntax and Windows/Linux command mapping",
+        help="validate the documentation CI workflow (backward-compatible)",
+    )
+    parser.add_argument(
+        "--check-workflows",
+        action="store_true",
+        help="validate all governed CI workflows and exact command mappings",
     )
     args = parser.parse_args(argv)
+    if args.check_workflow and args.check_workflows:
+        parser.error("--check-workflow and --check-workflows are mutually exclusive")
 
     repository = repo_root()
     root = Path(args.root).resolve() if args.root else repository
@@ -848,6 +1088,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.check_workflow:
         if not report.has_issues:
             check_workflow(root, report)
+    elif args.check_workflows:
+        if not report.has_issues:
+            check_workflows(root, report)
     else:
         if not report.has_issues:
             check_documentation(
@@ -872,10 +1115,12 @@ def main(argv: list[str] | None = None) -> int:
         return EXIT_FAIL
     if args.self_test_negative:
         print(render_bounded_lines(self_test_lines))
-    if args.check_workflow:
+    if args.check_workflow or args.check_workflows:
         print("check_documentation: workflow configuration OK")
     else:
-        print(f"check_documentation: OK ({report.scanned} governed text file(s) checked)")
+        print(
+            f"check_documentation: OK ({report.scanned} governed text file(s) checked)"
+        )
     return EXIT_OK
 
 

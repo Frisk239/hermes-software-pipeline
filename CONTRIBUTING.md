@@ -27,7 +27,7 @@ Open a discussion before preparing changes that alter product scope, architectur
 
 ## Development commands
 
-The canonical command set will be introduced by Phase 00:
+The canonical command set is established by Phase 00 (slice-00-02):
 
 ```text
 uv sync --frozen --all-groups
@@ -39,7 +39,7 @@ uv run python -m hermes_pipeline.cli contracts check
 uv run python -m hermes_pipeline.cli architecture check
 ```
 
-Until the Phase 00 skeleton exists, a Slice Contract must state the exact bootstrap checks it introduces. A documentation-only change must at minimum validate UTF-8 decoding, local links, ADR status consistency, JSON parsing, and JSON Schema meta-schema/reference integrity.
+The managed runtime is Python `>=3.12,<3.13` under `uv 0.12.1`; the full development-tool resolution is frozen in `uv.lock`, and the same checks run offline after installation (`uv run --offline ...` and `uv sync --frozen --all-groups --offline`). `contracts check` delegates in-process to the bootstrap Schema checker; `architecture check` runs the standard-library AST import-boundary checker. CI runs these checks on Windows and Linux via `.github/workflows/python-quality.yml`.
 
 The slice-00-01 bootstrap checks are dependency-free and offline:
 
@@ -47,10 +47,11 @@ The slice-00-01 bootstrap checks are dependency-free and offline:
 python scripts/check_documentation.py
 python scripts/check_schemas.py
 python scripts/check_schemas.py --self-test-negative
-python scripts/check_documentation.py --check-workflow
+python scripts/check_documentation.py --check-workflows
+python scripts/check_repository_artifacts.py
 ```
 
-`scripts/check_documentation.py` checks governed text files (UTF-8, replacement characters, Markdown fences, root-confined local links, ADR status, required root entry points); `scripts/check_schemas.py` checks the committed Schemas (JSON parsing, `$id` uniqueness and the locked 14-Schema identity set, `$ref` and JSON Pointer resolution). `--check-workflow` validates the workflow YAML syntax and verifies read-only permissions, no persisted checkout credentials, the exact `matrix.os`/`runs-on` binding, and exactly the required commands on Windows and Linux; `--self-test-negative` executes the checkers against the broken fixtures in `scripts/fixtures/` and asserts stable nonzero exits with sanitized bounded output.
+`scripts/check_documentation.py` checks governed text files (UTF-8, replacement characters, Markdown fences, root-confined local links, ADR status, required root entry points) and honors the checked root's `.gitignore`, so ignored `reference/`, `.venv`, and tool-cache content is never scanned while unignored governed files still are; `scripts/check_schemas.py` checks the committed Schemas (JSON parsing, `$id` uniqueness and the locked 14-Schema identity set, `$ref` and JSON Pointer resolution). `--check-workflows` validates both workflow YAML files and verifies read-only permissions, no persisted checkout credentials, exact Windows/Linux matrix binding, the frozen quality-command inventory, and the bundled-Node policy; `scripts/check_repository_artifacts.py` rejects generated source-tree cache and bytecode artifacts. `--self-test-negative` executes the checkers against the broken fixtures in `scripts/fixtures/` and asserts stable nonzero exits with sanitized bounded output.
 
 ## Pull requests
 

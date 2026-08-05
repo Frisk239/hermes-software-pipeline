@@ -1,0 +1,11 @@
+# Positive ignored-path fixture (slice-00-02).
+# The checker must not scan anything this .gitignore ignores, while every
+# governed unignored file (docs/guide.md, new-governed.md, this file)
+# remains scanned.
+/reference/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.hypothesis/

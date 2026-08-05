@@ -36,10 +36,15 @@
 ## Repository checks
 
 - `.gitattributes` — cross-platform LF line-ending policy.
-- `scripts/check_documentation.py` — dependency-free governed-text checker (UTF-8, replacement characters, Markdown fences, root-confined local links, ADR status, required root entry points; workflow YAML syntax, read-only permissions, exact command/OS binding via `--check-workflow`).
+- `.gitignore` — ignored local content (`reference/`, `.venv/`, bytecode, tool caches); governed-file discovery honors it.
+- `pyproject.toml` / `uv.lock` / `.python-version` — managed Python `>=3.12,<3.13` under uv 0.12.1 with the frozen development-tool resolution (Ruff, Pyright, pytest, pytest-asyncio, Hypothesis).
+- `src/hermes_pipeline/` — the installable distribution `hermes-pipeline` 0.1.0 with the fixed Module package layout and the `hermes-pipeline-runtime` / `python -m hermes_pipeline.cli` entry points (`--version`, `contracts check`, `architecture check`).
+- `scripts/check_documentation.py` — dependency-free governed-text checker (UTF-8, replacement characters, Markdown fences, root-confined local links, ADR status, required root entry points; both workflow YAML files, read-only permissions, exact command/OS binding, and bundled-Node policy via `--check-workflows`; `.gitignore`-aware discovery).
 - `scripts/check_schemas.py` — dependency-free Schema integrity checker (JSON parsing, `$id` uniqueness and locked 14-Schema identity set, `$ref` and JSON Pointer resolution).
 - `scripts/fixtures/` — positive and deliberately broken bootstrap fixtures for the checkers; `--self-test-negative` executes the checkers against them and asserts nonzero exits with sanitized bounded output.
+- `scripts/check_repository_artifacts.py` — source-tree cache and bytecode audit run after verification.
 - `.github/workflows/documentation-contracts.yml` — the same offline checks on Windows and Linux runners.
+- `.github/workflows/python-quality.yml` — the frozen uv environment, bundled Pyright Node runtime, canonical quality checks (format, lint, type, unit, contract, architecture, bootstrap checks, artifact audit), and offline sync/version/contract/architecture smokes on Windows and Linux.
 
 ## Supporting material
 
