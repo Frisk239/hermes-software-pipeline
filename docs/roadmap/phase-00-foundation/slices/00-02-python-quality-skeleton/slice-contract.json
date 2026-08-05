@@ -1,7 +1,7 @@
 {
   "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
   "schema_version": 1,
-  "document_revision": 3,
+  "document_revision": 4,
   "slice_id": "slice-00-02",
   "phase_id": "phase-00",
   "status": "READY",
@@ -124,7 +124,7 @@
       "criterion_id": "AC-06",
       "trace_ids": ["XTEST-01"],
       "observable_result": "Clock, identity, temporary-root, async, and Hypothesis smoke tests are deterministic and leave no repository artifact.",
-      "verification_command_ids": ["unit-check", "changed-paths"]
+      "verification_command_ids": ["unit-check", "artifact-check", "changed-paths"]
     },
     {
       "criterion_id": "AC-07",
@@ -238,5 +238,5 @@
     "The Base SHA changes or required Windows and Linux behavior cannot be equivalent",
     "The bootstrap checker correction cannot distinguish ignored local content from governed unignored content without weakening clean-clone coverage"
   ],
-  "content_hash": "sha256:164b5787e28dc129e4f2e6ae317ecccc2f6eb28088a84e33d75f2a029affb7c8"
+  "content_hash": "sha256:9b0fbb62936bd03a9f434d6570144b3771d7ced141e055f76df0360af04e6b2c"
 }
