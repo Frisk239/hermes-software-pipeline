@@ -4,8 +4,8 @@ These are planning-level Slice definitions. Codex expands only the next dependen
 
 The current draft contract for the next Slice is:
 
-- `00-01-repository-baseline/SLICE.md`;
-- `00-01-repository-baseline/slice-contract.json`.
+- `00-02-python-quality-skeleton/SLICE.md`;
+- `00-02-python-quality-skeleton/slice-contract.json`.
 
 ## 00-01 Repository baseline
 

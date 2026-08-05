@@ -5,15 +5,14 @@ This document defines the minimum engineering standard for changes to the plugin
 ## Branch and review policy
 
 ```text
-feature/* → Pull Request → next
-next      → Release PR   → main
-main      → signed tag   → stable release
+feature/* → Pull Request → main
+main      → release gate → signed tag → stable release
 ```
 
-- Direct pushes to `main` and `next` are prohibited.
+- Direct pushes to `main` are prohibited.
 - Every change is reviewed through a Pull Request.
-- `main` always represents the latest stable source-installable release.
-- A merge to `main` must produce a versioned release; development snapshots are not installed from `main`.
+- `main` is the integrated, review-gated source branch; a merge does not by itself publish a release.
+- Production installation and update discovery use only signed, versioned releases that pass the Release Gate.
 - At least one maintainer review is required, with additional approval for security, state-machine, migration, and release-workflow changes.
 
 ## Runtime dependency rule
@@ -249,7 +248,7 @@ A change is complete only when:
 
 ## Prohibited release shortcuts
 
-- No direct release from `next` without a reviewed Release PR.
+- No release from an arbitrary `main` commit without the complete Release Gate and signed tag.
 - No auto-update exposure from a passing development build.
 - No production CI dependence on real user Projects.
 - No mandatory PR check that requires paid model credentials.

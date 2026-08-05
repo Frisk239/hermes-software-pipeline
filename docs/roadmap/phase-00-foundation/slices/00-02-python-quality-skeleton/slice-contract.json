@@ -1,0 +1,235 @@
+{
+  "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
+  "schema_version": 1,
+  "document_revision": 2,
+  "slice_id": "slice-00-02",
+  "phase_id": "phase-00",
+  "status": "READY",
+  "predecessors": [
+    "slice-00-01"
+  ],
+  "base_sha": "6c9623a3a8ad6a124d5d4a1bcddce94a5938e0b4",
+  "assigned_worktree": "C:/Users/a2691/AppData/Local/hermes/managed-worktrees/hermes-software-pipeline/slice-00-02",
+  "operator_path": "Install the exact frozen Python 3.12 environment once, then run formatting, lint, type, unit, contract, architecture, and offline integration checks on Windows and Linux without credentials or further network access.",
+  "must_scope": [
+    "Add pyproject.toml, a committed cross-platform uv.lock, .python-version, and an installable src/hermes_pipeline skeleton",
+    "Use Python >=3.12,<3.13, uv 0.12.1, the uv_build backend, and no runtime dependency",
+    "Expose version 0.1.0 from installed metadata and the hermes-pipeline-runtime and python -m hermes_pipeline.cli entry points",
+    "Create the architecture package layout fixed by system-and-module-design.md without business behavior",
+    "Configure Ruff, Pyright, pytest, pytest-asyncio, and Hypothesis centrally and freeze the full resolution",
+    "Provide deterministic UTC clock, identity-sequence, temporary-root, async, and Hypothesis fixtures and tests",
+    "Implement a standard-library AST architecture checker with stable positive and negative coverage",
+    "Delegate the contracts check command directly to the existing bootstrap Schema checker without shell execution",
+    "Correct governed-file discovery so ignored reference, virtual-environment, and tool-cache content is excluded while unignored content remains checked",
+    "Add a separate read-only Windows and Linux python-quality workflow without changing documentation-contracts.yml",
+    "Document exact frozen and offline commands and synchronize compatibility targets"
+  ],
+  "out_of_scope": [
+    "Controller rules, HTTP transport, database tables, migrations, LangGraph, Hermes Shim, runtime supervision, Agent, browser, or provider behavior",
+    "Pydantic authoring, generated Schema or OpenAPI drift, RFC 8785 implementation, compatibility migrations, or Slice 00-03 Schema fixtures",
+    "Production CLI semantics beyond version, contract-check, and architecture-check bootstrap commands",
+    "Runtime dependencies, import-linter, or another package, build, or tool family",
+    "Release publication, tags, deployment, branch protection, or acceptance of later Slices"
+  ],
+  "interfaces": [
+    "Distribution hermes-pipeline and import package hermes_pipeline",
+    "Console entry point hermes-pipeline-runtime",
+    "Module entry point python -m hermes_pipeline.cli",
+    "Bootstrap subcommands contracts check and architecture check",
+    "Installed distribution metadata is the sole version source"
+  ],
+  "binding_adrs": [
+    "ADR-0018",
+    "ADR-0020",
+    "ADR-0024"
+  ],
+  "permitted_paths": [
+    ".gitignore",
+    ".python-version",
+    ".github/workflows/python-quality.yml",
+    "README.md",
+    "CONTRIBUTING.md",
+    "docs/README.md",
+    "docs/development/compatibility-targets.md",
+    "pyproject.toml",
+    "uv.lock",
+    "src/",
+    "tests/",
+    "scripts/_check_common.py",
+    "scripts/check_documentation.py",
+    "scripts/fixtures/"
+  ],
+  "prohibited_actions": [
+    "Modify .gitattributes, .github/workflows/documentation-contracts.yml, schemas, accepted ADRs, Phase or Slice planning, review, evidence, or closeout records",
+    "Add runtime dependencies, import-linter, Controller behavior, HTTP, persistence, LangGraph, Hermes Shim, Agent, browser, or provider code",
+    "Use credentials or public network after the dependency installation step",
+    "Execute repository-provided shell strings or add ambient filesystem, Git, network, secret, or process authority",
+    "Commit, push, merge, rebase, reset, clean, stash, alter remotes, Git configuration, hooks, branches, tags, or the user working copy",
+    "Weaken, skip, delete, or mark existing checks to make the Candidate pass"
+  ],
+  "implications": {
+    "data": [
+      "No runtime or Project data is created; deterministic test data remains under temporary roots"
+    ],
+    "migration": [
+      "No runtime migration; the repository gains its first managed Python environment and lockfile"
+    ],
+    "compatibility": [
+      "Managed runtime is Python >=3.12,<3.13 with uv 0.12.1 and one cross-platform lockfile",
+      "Required CI behavior is equivalent on Windows and Linux"
+    ],
+    "security": [
+      "Workflows use contents read permission, persist no checkout credential, consume no secret, and run offline after installation",
+      "Architecture and documentation checkers use fixed arguments and bounded diagnostics"
+    ],
+    "documentation": [
+      "README, contribution commands, documentation map, and compatibility targets describe the implemented skeleton and exact commands"
+    ]
+  },
+  "acceptance_criteria": [
+    {
+      "criterion_id": "AC-01",
+      "trace_ids": ["EC-00-01", "XPLAT-01"],
+      "observable_result": "uv sync --frozen --all-groups succeeds from the committed lock on required Windows and Linux runners.",
+      "verification_command_ids": ["frozen-sync"]
+    },
+    {
+      "criterion_id": "AC-02",
+      "trace_ids": ["EC-00-02"],
+      "observable_result": "Ruff format, Ruff lint, Pyright, pytest, contract, architecture, and bootstrap regression commands all pass.",
+      "verification_command_ids": ["format-check", "lint-check", "type-check", "unit-check", "contracts-check", "architecture-check", "bootstrap-checks"]
+    },
+    {
+      "criterion_id": "AC-03",
+      "trace_ids": ["BOOT-03", "XPLAT-01"],
+      "observable_result": "After dependency installation, frozen sync and version, contract, and architecture smoke checks run offline without credentials.",
+      "verification_command_ids": ["offline-sync", "offline-version", "offline-contracts", "offline-architecture"]
+    },
+    {
+      "criterion_id": "AC-04",
+      "trace_ids": ["XCON-01"],
+      "observable_result": "CLI version, installed distribution metadata, and hermes_pipeline.__version__ all report 0.1.0 from one metadata source.",
+      "verification_command_ids": ["unit-check", "offline-version"]
+    },
+    {
+      "criterion_id": "AC-05",
+      "trace_ids": ["XARCH-01"],
+      "observable_result": "The AST checker accepts the package skeleton and deterministically rejects forbidden absolute, relative, dynamic, and adapter-to-core import fixtures.",
+      "verification_command_ids": ["architecture-check", "unit-check"]
+    },
+    {
+      "criterion_id": "AC-06",
+      "trace_ids": ["XTEST-01"],
+      "observable_result": "Clock, identity, temporary-root, async, and Hypothesis smoke tests are deterministic and leave no repository artifact.",
+      "verification_command_ids": ["unit-check", "changed-paths"]
+    },
+    {
+      "criterion_id": "AC-07",
+      "trace_ids": ["BOOT-01"],
+      "observable_result": "Ignored reference, virtual-environment, and tool-cache content cannot break documentation checks while equivalent unignored invalid content is rejected.",
+      "verification_command_ids": ["docs-check", "docs-negative"]
+    },
+    {
+      "criterion_id": "AC-08",
+      "trace_ids": ["XSEC-01"],
+      "observable_result": "Required workflows are read-only, persist no checkout credential, consume no secret, and perform no network operation after installation.",
+      "verification_command_ids": ["workflow-policy"]
+    },
+    {
+      "criterion_id": "AC-09",
+      "trace_ids": ["EC-00-02"],
+      "observable_result": "The Candidate contains no business, transport, persistence, workflow-engine, Shim, Agent, browser, or provider behavior.",
+      "verification_command_ids": ["changed-paths", "scope-check"]
+    }
+  ],
+  "required_tests": [
+    "Installed metadata and CLI version consistency",
+    "CLI success, usage-error, and unknown-command exits",
+    "Architecture checker positive package tree",
+    "Forbidden absolute import fixture",
+    "Forbidden relative import fixture",
+    "Forbidden dynamic import fixture",
+    "Adapter-to-core reverse dependency fixture",
+    "Deterministic UTC clock fixture",
+    "Deterministic identity sequence fixture",
+    "Temporary-root cleanup fixture",
+    "pytest-asyncio smoke test",
+    "Hypothesis deterministic property smoke test",
+    "Ignored reference directory with invalid governed text",
+    "Ignored virtual environment and tool cache with invalid governed text",
+    "Unignored invalid governed text remains rejected",
+    "No cache or bytecode artifact remains after verification"
+  ],
+  "demonstration": "On the exact Candidate, Windows and Linux jobs install the frozen environment, execute every canonical check, repeat frozen sync and version, contract, and architecture smoke checks offline, and prove negative architecture and ignored-path fixtures without modifying the checkout.",
+  "verification_commands": [
+    {"command_id": "frozen-sync", "argv": ["uv", "sync", "--frozen", "--all-groups"], "working_directory": ".", "timeout_ms": 600000},
+    {"command_id": "format-check", "argv": ["uv", "run", "ruff", "format", "--check", "."], "working_directory": ".", "timeout_ms": 120000},
+    {"command_id": "lint-check", "argv": ["uv", "run", "ruff", "check", "."], "working_directory": ".", "timeout_ms": 120000},
+    {"command_id": "type-check", "argv": ["uv", "run", "pyright"], "working_directory": ".", "timeout_ms": 180000},
+    {"command_id": "unit-check", "argv": ["uv", "run", "pytest"], "working_directory": ".", "timeout_ms": 300000},
+    {"command_id": "contracts-check", "argv": ["uv", "run", "python", "-m", "hermes_pipeline.cli", "contracts", "check"], "working_directory": ".", "timeout_ms": 120000},
+    {"command_id": "architecture-check", "argv": ["uv", "run", "python", "-m", "hermes_pipeline.cli", "architecture", "check"], "working_directory": ".", "timeout_ms": 120000},
+    {"command_id": "docs-check", "argv": ["python", "scripts/check_documentation.py"], "working_directory": ".", "timeout_ms": 120000},
+    {"command_id": "docs-negative", "argv": ["python", "scripts/check_documentation.py", "--self-test-negative"], "working_directory": ".", "timeout_ms": 120000},
+    {"command_id": "bootstrap-checks", "argv": ["python", "scripts/check_schemas.py", "--self-test-negative"], "working_directory": ".", "timeout_ms": 120000},
+    {"command_id": "workflow-policy", "argv": ["python", "scripts/check_documentation.py", "--check-workflow"], "working_directory": ".", "timeout_ms": 120000},
+    {"command_id": "offline-sync", "argv": ["uv", "sync", "--frozen", "--all-groups", "--offline"], "working_directory": ".", "timeout_ms": 300000},
+    {"command_id": "offline-version", "argv": ["uv", "run", "--offline", "python", "-m", "hermes_pipeline.cli", "--version"], "working_directory": ".", "timeout_ms": 120000},
+    {"command_id": "offline-contracts", "argv": ["uv", "run", "--offline", "python", "-m", "hermes_pipeline.cli", "contracts", "check"], "working_directory": ".", "timeout_ms": 120000},
+    {"command_id": "offline-architecture", "argv": ["uv", "run", "--offline", "python", "-m", "hermes_pipeline.cli", "architecture", "check"], "working_directory": ".", "timeout_ms": 120000},
+    {"command_id": "scope-check", "argv": ["git", "diff", "--check"], "working_directory": ".", "timeout_ms": 30000},
+    {"command_id": "changed-paths", "argv": ["git", "status", "--short"], "working_directory": ".", "timeout_ms": 30000}
+  ],
+  "required_evidence": [
+    "Exact Base and Candidate SHAs and Slice Contract revision/hash",
+    "Changed-path manifest and staged-tree path comparison",
+    "Exact uv and Python versions and committed uv.lock digest",
+    "Bounded output, exit code, start time, and duration for every local command",
+    "Windows and Linux CI run and job URLs bound to the Candidate",
+    "Positive and negative architecture, deterministic-fixture, ignored-path, and bootstrap regression results",
+    "Proof that offline commands ran only after dependency installation and consumed no credential",
+    "Cache and bytecode artifact scan",
+    "Residual risks and compatibility limitations",
+    "Machine-valid Execution Report, Review Verdict, and Closeout inputs or an explicit schema limitation"
+  ],
+  "risks": [
+    {
+      "risk_id": "R-01",
+      "description": "One lockfile or tool configuration resolves or behaves differently on Windows and Linux.",
+      "impact": "HIGH",
+      "mitigation": "Freeze the complete uv resolution and run identical commands on both required systems.",
+      "trigger": "A required job cannot sync frozen or disagrees with the other platform."
+    },
+    {
+      "risk_id": "R-02",
+      "description": "The quality skeleton accidentally introduces runtime behavior or freezes premature public Interfaces.",
+      "impact": "HIGH",
+      "mitigation": "Limit package bodies to metadata, CLI check dispatch, and architecture validation; enforce changed-path and code review.",
+      "trigger": "Acceptance requires Controller, transport, persistence, Shim, Agent, provider, or product behavior."
+    },
+    {
+      "risk_id": "R-03",
+      "description": "Ignored local environments or research clones bypass or destabilize governed-file validation.",
+      "impact": "MEDIUM",
+      "mitigation": "Define repository-root discovery against tracked and non-ignored files and cover ignored and unignored fixtures.",
+      "trigger": "A clean tracked tree produces different documentation results because of ignored local content."
+    },
+    {
+      "risk_id": "R-04",
+      "description": "Pyright or the selected build backend requires an undeclared external runtime or new dependency family.",
+      "impact": "HIGH",
+      "mitigation": "Use locked PyPI artifacts and uv_build; stop rather than installing an ambient Node or alternative backend.",
+      "trigger": "A required check needs system Node, another build backend, or a dependency outside the approved tool set."
+    }
+  ],
+  "retry_budget": 3,
+  "stop_conditions": [
+    "A new runtime, build, architecture-check, or tool dependency family is required",
+    "A required check needs credentials, public network after installation, shell-string execution, or ambient Node",
+    "Implementation requires paths outside permitted_paths or changes documentation-contracts.yml, Schemas, accepted ADRs, or planning records",
+    "Accepted package names, Python range, architecture rules, or Phase exit semantics must change",
+    "The Base SHA changes or required Windows and Linux behavior cannot be equivalent",
+    "The bootstrap checker correction cannot distinguish ignored local content from governed unignored content without weakening clean-clone coverage"
+  ],
+  "content_hash": "sha256:12087b5023641570a04510896f18d91a52b185b80ee0a15ca579c4f4f43a8c0e"
+}
