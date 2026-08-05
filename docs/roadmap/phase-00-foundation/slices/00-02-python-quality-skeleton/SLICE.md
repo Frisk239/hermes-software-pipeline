@@ -6,7 +6,7 @@ Phase: `phase-00`
 
 Status: `READY`
 
-Document revision: `2`
+Document revision: `3`
 
 Predecessor: `slice-00-01` accepted at `6c9623a3a8ad6a124d5d4a1bcddce94a5938e0b4`
 
@@ -26,10 +26,10 @@ From a clean Windows or Linux checkout, install the exact frozen Python 3.12 dev
 - create the architecture package layout already fixed by `docs/architecture/system-and-module-design.md`, without implementing business behavior;
 - configure Ruff, Pyright, pytest, pytest-asyncio, and Hypothesis centrally in `pyproject.toml` and freeze their full resolution in `uv.lock`;
 - provide deterministic UTC clock, identity-sequence, and temporary-root pytest fixtures;
-- implement a standard-library AST architecture checker with stable diagnostics and deliberately invalid fixtures;
+- implement a standard-library AST architecture checker that enforces the accepted inward dependency direction, with stable diagnostics and deliberately invalid fixtures;
 - expose `contracts check` as a direct Python delegation to the existing bootstrap Schema checker and `architecture check` as the canonical architecture gate;
 - make repository-root documentation discovery ignore `reference/`, `.venv`, and standard tool caches while still checking governed unignored files, with positive and negative regression tests;
-- add a separate read-only Windows/Linux `python-quality.yml` workflow without weakening or changing `documentation-contracts.yml`;
+- add a separate read-only Windows/Linux `python-quality.yml` workflow, validate both required workflows locally, and do not weaken or change `documentation-contracts.yml`;
 - document exact frozen and offline commands and keep compatibility targets synchronized.
 
 ## Out of scope
@@ -55,12 +55,12 @@ From a clean Windows or Linux checkout, install the exact frozen Python 3.12 dev
 | --- | --- | --- |
 | `AC-01` | `EC-00-01`, `XPLAT-01` | `uv sync --frozen --all-groups` succeeds from the committed lock on required Windows and Linux runners. |
 | `AC-02` | `EC-00-02` | Ruff format, Ruff lint, Pyright, pytest, contract, architecture, and bootstrap regression commands all pass. |
-| `AC-03` | `BOOT-03` | After the install step, frozen sync and CLI integration checks rerun with `--offline` and no credentials. |
+| `AC-03` | `BOOT-03` | After the install step, frozen sync and CLI integration checks require no public network: uv is offline and Pyright uses a locked bundled Node runtime rather than an ambient or downloaded binary. |
 | `AC-04` | `XCON-01` | `--version`, installed distribution metadata, and `hermes_pipeline.__version__` all report `0.1.0`. |
-| `AC-05` | `XARCH-01` | The AST checker accepts the skeleton and deterministically rejects forbidden absolute, relative, dynamic, and adapter-to-core import fixtures. |
+| `AC-05` | `XARCH-01` | The AST checker accepts Adapters importing inward-facing Interfaces and deterministically rejects forbidden absolute, relative, dynamic, core-to-Adapter, Controller-framework/provider/filesystem, and Shim import fixtures. |
 | `AC-06` | `XTEST-01` | Clock, identity, temp-root, async, and Hypothesis smoke tests are deterministic and leave no repository artifact. |
 | `AC-07` | `BOOT-01` | Ignored `reference/`, `.venv`, and tool-cache content cannot break documentation checks, while equivalent unignored invalid content is rejected. |
-| `AC-08` | `XSEC-01` | Workflows are read-only, persist no checkout credential, consume no secret, and required tests perform no network operation after installation. |
+| `AC-08` | `XSEC-01` | Both workflows are structurally validated, read-only, persist no checkout credential, consume no secret, and require no public network after installation; OS-level network capability enforcement remains owned by Slice 00-06. |
 | `AC-09` | approved Slice scope | Changed paths contain no business, transport, persistence, workflow-engine, Shim, Agent, browser, or provider behavior. |
 
 ## Required demonstration
@@ -72,4 +72,6 @@ On the exact Candidate, both Windows and Linux jobs install the frozen environme
 - Branch flow is `feature/*` through reviewed Pull Request to `main`; signed releases remain separately gated.
 - The ignored-path regression is an authorized correction to Slice 00-01, not a waiver.
 - Architecture enforcement uses the Python standard library AST and no `import-linter`.
+- Pyright uses its locked `nodejs` extra and is forced away from ambient Node; downloading Node after the frozen sync is a failure.
+- Final verification runs with bytecode/cache suppression and an explicit repository-artifact audit.
 - Exact package resolution belongs in `uv.lock`; direct dependency constraints in `pyproject.toml` must be narrow enough to prevent an unreviewed tool-major upgrade.
