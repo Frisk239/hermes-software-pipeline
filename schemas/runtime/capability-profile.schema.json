@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.hermes-pipeline.dev/runtime/capability-profile/v1",
+  "title": "Stage Capability Profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_id", "schema_version", "profile_id", "profile_revision", "stage_type", "filesystem", "executables", "network", "secrets", "browser", "resources", "side_effects", "content_hash"],
+  "properties": {
+    "schema_id": {"const": "https://schemas.hermes-pipeline.dev/runtime/capability-profile/v1"},
+    "schema_version": {"const": 1},
+    "profile_id": {"type": "string", "pattern": "^cap_[A-Za-z0-9_-]+$"},
+    "profile_revision": {"type": "integer", "minimum": 1},
+    "stage_type": {"enum": ["PRD", "ARCHITECTURE", "DEVELOPMENT", "E2E", "ACCEPTANCE"]},
+    "filesystem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["read_roots", "write_roots"],
+      "properties": {
+        "read_roots": {"type": "array", "items": {"type": "string"}},
+        "write_roots": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "executables": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+    "network": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "allow"],
+      "properties": {
+        "mode": {"enum": ["DENY_ALL", "ALLOW_LIST"]},
+        "allow": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "secrets": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+    "browser": {"enum": ["NONE", "CHROME_DEVTOOLS_MCP"]},
+    "resources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["wall_time_ms", "output_bytes", "processes"],
+      "properties": {
+        "wall_time_ms": {"type": "integer", "minimum": 1000},
+        "output_bytes": {"type": "integer", "minimum": 1024},
+        "processes": {"type": "integer", "minimum": 1}
+      }
+    },
+    "side_effects": {"type": "array", "uniqueItems": true, "items": {"enum": ["NONE", "LOCAL_BUILD", "LOCAL_TEST", "BROWSER_TEST"]}},
+    "content_hash": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"}
+  }
+}

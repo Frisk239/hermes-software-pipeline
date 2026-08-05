@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.hermes-pipeline.dev/engineering/review-verdict/v1",
+  "title": "Engineering Review Verdict",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_id", "schema_version", "verdict_id", "slice_id", "contract_revision", "review_attempt", "base_sha", "candidate_sha", "context_manifest_hash", "evidence_bundle_hash", "verdict", "axes", "findings", "reviewed_at", "content_hash"],
+  "properties": {
+    "schema_id": {"const": "https://schemas.hermes-pipeline.dev/engineering/review-verdict/v1"},
+    "schema_version": {"const": 1},
+    "verdict_id": {"type": "string", "pattern": "^review_[A-Za-z0-9_-]+$"},
+    "slice_id": {"type": "string"},
+    "contract_revision": {"type": "integer", "minimum": 1},
+    "review_attempt": {"type": "integer", "minimum": 1},
+    "base_sha": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/gitSha"},
+    "candidate_sha": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/gitSha"},
+    "context_manifest_hash": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"},
+    "evidence_bundle_hash": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"},
+    "verdict": {"enum": ["PASS", "REWORK", "BLOCKED_CONTRACT"]},
+    "axes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["spec", "standards", "evidence", "scope_safety"],
+      "properties": {
+        "spec": {"enum": ["PASS", "FAIL", "BLOCKED"]},
+        "standards": {"enum": ["PASS", "FAIL", "BLOCKED"]},
+        "evidence": {"enum": ["PASS", "FAIL", "BLOCKED"]},
+        "scope_safety": {"enum": ["PASS", "FAIL", "BLOCKED"]}
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["finding_id", "severity", "axis", "evidence", "requirement_ref", "required_correction"],
+        "properties": {
+          "finding_id": {"type": "string", "pattern": "^F-[0-9]{2,}$"},
+          "severity": {"enum": ["BLOCKER", "MAJOR", "MINOR"]},
+          "axis": {"enum": ["SPEC", "STANDARDS", "EVIDENCE", "SCOPE_SAFETY"]},
+          "evidence": {"type": "string", "minLength": 1},
+          "requirement_ref": {"type": "string", "minLength": 1},
+          "required_correction": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "reviewed_at": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/utcTimestamp"},
+    "content_hash": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"verdict": {"const": "PASS"}}},
+      "then": {
+        "properties": {
+          "findings": {"maxItems": 0},
+          "axes": {
+            "properties": {
+              "spec": {"const": "PASS"},
+              "standards": {"const": "PASS"},
+              "evidence": {"const": "PASS"},
+              "scope_safety": {"const": "PASS"}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"verdict": {"enum": ["REWORK", "BLOCKED_CONTRACT"]}}},
+      "then": {"properties": {"findings": {"minItems": 1}}}
+    }
+  ]
+}

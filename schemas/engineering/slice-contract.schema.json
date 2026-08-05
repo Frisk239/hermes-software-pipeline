@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
+  "title": "Engineering Slice Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_id", "schema_version", "document_revision", "slice_id", "phase_id", "status", "predecessors", "base_sha", "assigned_worktree", "operator_path", "must_scope", "out_of_scope", "interfaces", "binding_adrs", "permitted_paths", "prohibited_actions", "implications", "acceptance_criteria", "required_tests", "demonstration", "verification_commands", "required_evidence", "risks", "retry_budget", "stop_conditions", "content_hash"],
+  "properties": {
+    "schema_id": {"const": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1"},
+    "schema_version": {"const": 1},
+    "document_revision": {"type": "integer", "minimum": 1},
+    "slice_id": {"type": "string", "pattern": "^slice-[0-9]{2,}-[0-9]{2,}$"},
+    "phase_id": {"type": "string", "pattern": "^phase-[0-9]{2,}$"},
+    "status": {"enum": ["DRAFT", "READY", "EXECUTING", "SUBMITTED", "ACCEPTED", "REWORK", "BLOCKED"]},
+    "predecessors": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^slice-[0-9]{2,}-[0-9]{2,}$"}},
+    "base_sha": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/gitSha"},
+    "assigned_worktree": {"type": "string", "minLength": 1, "maxLength": 1024},
+    "operator_path": {"type": "string", "minLength": 1},
+    "must_scope": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "out_of_scope": {"type": "array", "items": {"type": "string"}},
+    "interfaces": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "binding_adrs": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^ADR-[0-9]{4}$"}},
+    "permitted_paths": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "prohibited_actions": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "implications": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["data", "migration", "compatibility", "security", "documentation"],
+      "properties": {
+        "data": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "migration": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "compatibility": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "security": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "documentation": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "acceptance_criteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["criterion_id", "trace_ids", "observable_result", "verification_command_ids"],
+        "properties": {
+          "criterion_id": {"type": "string", "pattern": "^AC-[0-9]{2,}$"},
+          "trace_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+          "observable_result": {"type": "string", "minLength": 1},
+          "verification_command_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+        }
+      }
+    },
+    "required_tests": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "demonstration": {"type": "string", "minLength": 1},
+    "verification_commands": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["command_id", "argv", "working_directory", "timeout_ms"],
+        "properties": {
+          "command_id": {"type": "string", "minLength": 1},
+          "argv": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+          "working_directory": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/relativePath"},
+          "timeout_ms": {"type": "integer", "minimum": 1000, "maximum": 3600000}
+        }
+      }
+    },
+    "required_evidence": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+    "risks": {"type": "array", "items": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/engineeringRisk"}},
+    "retry_budget": {"type": "integer", "minimum": 0, "maximum": 10},
+    "stop_conditions": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "content_hash": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"}
+  }
+}

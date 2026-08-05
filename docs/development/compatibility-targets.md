@@ -1,0 +1,42 @@
+# Phase 00 Compatibility Targets
+
+Snapshot date: 2026-08-05
+
+These are feasibility and CI targets for Phase 00, not a public support promise. Slice Contracts bind exact probed versions and evidence. Phase Closeout converts successful targets into a versioned compatibility statement or records a superseding decision.
+
+## Host and plugin surface
+
+| Component | Phase 00 target | Evidence/status |
+| --- | --- | --- |
+| Hermes Agent release | `v2026.8.3` | Current upstream release on 2026-08-05; plugin and lifecycle probe baseline. |
+| Hermes Agent main reference | commit `aec331899e4748739927fddf02a54327e64419a0` | Current upstream `main` inspected for plugin CLI and gateway hooks; research reference only. |
+| Hermes host Python | `>=3.11,<3.14` | Declared by the pinned Hermes release. Shim tests cover 3.11, 3.12, and 3.13 where runners are available. |
+| Hermes plugin CLI | `ctx.register_cli_command(name="pipeline", ...)` → `hermes pipeline ...` | Confirmed by the pinned upstream plugin authoring contract. |
+| Supported host OS | Windows and Linux | Both required for Phase exit; macOS is not a version 1 support target. |
+
+## Managed runtime and tool probes
+
+| Component | Phase 00 target | Initial local observation |
+| --- | --- | --- |
+| CPython managed runtime | `>=3.12,<3.13` | Exact patch version will be frozen by `uv.lock`; local host currently has Python 3.13.9 and must not be treated as the managed runtime. |
+| `uv` | compatible with `0.12.x`; exact version recorded by Slice | `0.12.1` |
+| Git | `>=2.45,<3`; exact binary/version recorded by each repository operation | `2.53.0.windows.2` |
+| Codex CLI | capability-probed; initial target `0.146.x` | `codex-cli 0.146.0` |
+| OpenCode CLI | capability-probed; initial target `1.18.x` | `1.18.12` |
+| Google Chrome | current stable capability-probed through Chrome DevTools MCP | `150.0.7871.187` |
+| Chrome DevTools MCP | exact package/server version selected and frozen by Slice 00-06 | Not yet selected; blocks the browser feasibility probe, not the documentation baseline. |
+
+## Compatibility policy
+
+- Exact dependency versions and hashes belong in `uv.lock`; this document records tested product/tool ranges.
+- Every Adapter performs version and capability detection before readiness.
+- A matching version number without required structured output, cancellation, isolation, or protocol behavior is unsupported.
+- Required CI does not download moving dependencies after the frozen environment is prepared.
+- Phase 00 records minimum/maximum verified versions and failure behavior in `CLOSEOUT.md`.
+- Later changes outside a verified range require a compatibility Slice, updated fixtures, and migration/rollback evidence where applicable.
+
+## Source references
+
+- Hermes release: <https://github.com/NousResearch/hermes-agent/releases/tag/v2026.8.3>
+- Hermes inspected commit: <https://github.com/NousResearch/hermes-agent/commit/aec331899e4748739927fddf02a54327e64419a0>
+- Hermes plugin authoring guide at the inspected commit: <https://github.com/NousResearch/hermes-agent/blob/aec331899e4748739927fddf02a54327e64419a0/website/docs/developer-guide/plugins/index.md>

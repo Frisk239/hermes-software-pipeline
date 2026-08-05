@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.hermes-pipeline.dev/runtime/artifact-manifest/v1",
+  "title": "Artifact Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_id", "schema_version", "artifact_id", "logical_role", "media_type", "byte_size", "content_digest", "producer", "source_identity", "provenance", "sensitivity", "retention_class", "created_at", "manifest_digest"],
+  "properties": {
+    "schema_id": {"const": "https://schemas.hermes-pipeline.dev/runtime/artifact-manifest/v1"},
+    "schema_version": {"const": 1},
+    "artifact_id": {"type": "string", "pattern": "^art_[A-Za-z0-9_-]+$"},
+    "logical_role": {"type": "string", "minLength": 1},
+    "media_type": {"type": "string", "minLength": 3},
+    "byte_size": {"type": "integer", "minimum": 0},
+    "content_digest": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"},
+    "document_schema_id": {"type": "string", "format": "uri"},
+    "document_schema_version": {"type": "integer", "minimum": 1},
+    "producer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stage_attempt_id", "execution_run_id", "lease_generation"],
+      "properties": {
+        "stage_attempt_id": {"type": "string", "pattern": "^att_[A-Za-z0-9_-]+$"},
+        "execution_run_id": {"type": "string", "pattern": "^run_[A-Za-z0-9_-]+$"},
+        "lease_generation": {"type": "integer", "minimum": 1}
+      }
+    },
+    "source_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "planning_base_sha": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/gitSha"},
+        "candidate_sha": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/gitSha"},
+        "integration_base_sha": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/gitSha"},
+        "integration_candidate_sha": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/gitSha"}
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workflow_version", "runtime_version", "capability_profile_hash"],
+      "properties": {
+        "workflow_version": {"type": "string"},
+        "runtime_version": {"type": "string"},
+        "capability_profile_hash": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"},
+        "tool": {"type": "string"},
+        "tool_version": {"type": "string"},
+        "model": {"type": "string"}
+      }
+    },
+    "sensitivity": {"enum": ["PUBLIC", "PROJECT", "RESTRICTED", "SECRET_DERIVED"]},
+    "retention_class": {"enum": ["EPHEMERAL", "PIPELINE", "AUDIT", "LEGAL_HOLD"]},
+    "created_at": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/utcTimestamp"},
+    "manifest_digest": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"}
+  }
+}

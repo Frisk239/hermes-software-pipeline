@@ -1,0 +1,67 @@
+schema_version: 1
+retrieved_at: "2026-08-05"
+directory: reference
+update_policy: manual
+rules:
+  tracked: false
+  read_only_reference: true
+  production_dependency: false
+  copy_requires_license_review: true
+
+repositories:
+  - name: codex
+    repository: openai/codex
+    url: https://github.com/openai/codex
+    commit: 5d89ab65dc9d4d0c55796c11df112b54157922b4
+    license: Apache-2.0
+    discovery_star_snapshot: 103937
+    purpose: Codex CLI execution, permission, sandbox, approval, session, and AGENTS.md contracts.
+    focus_paths:
+      - codex-rs/core/src/config/permissions.rs
+      - codex-rs/core/src/exec_policy.rs
+      - codex-rs/core/src/tools/approvals.rs
+      - codex-rs/core/src/agents_md.rs
+      - codex-rs/core/src/session
+
+  - name: opencode
+    repository: anomalyco/opencode
+    url: https://github.com/anomalyco/opencode
+    commit: 66fdd51f0d6db8e47e876721c855ea155043b74c
+    license: MIT
+    discovery_star_snapshot: 193361
+    purpose: OpenCode CLI integration, session, permission, MCP, plugin, Git, and worktree contracts.
+    focus_paths:
+      - packages/opencode/src/session
+      - packages/opencode/src/permission
+      - packages/opencode/src/mcp
+      - packages/opencode/src/plugin
+      - packages/opencode/src/git
+      - packages/opencode/src/worktree
+
+  - name: software-agent-sdk
+    repository: OpenHands/software-agent-sdk
+    url: https://github.com/OpenHands/software-agent-sdk
+    commit: 0c8f97aab8a22d438bdea45ae3963e6050a9374c
+    license: MIT
+    discovery_star_snapshot: 959
+    purpose: Durable event log, conversation state, ownership lease, security policy, tools, and server boundaries.
+    focus_paths:
+      - openhands-sdk/openhands/sdk/conversation/event_store.py
+      - openhands-sdk/openhands/sdk/conversation/state.py
+      - openhands-agent-server/openhands/agent_server/conversation_lease.py
+      - openhands-sdk/openhands/sdk/security
+      - openhands-sdk/openhands/sdk/tool
+
+  - name: langgraph
+    repository: langchain-ai/langgraph
+    url: https://github.com/langchain-ai/langgraph
+    commit: b2926a0ff9589c28c7e01fe7cdbb337b86d5a4b4
+    license: MIT
+    discovery_star_snapshot: 38888
+    purpose: Durable checkpoint, interrupt and resume, retry, pending-write, and replay semantics.
+    focus_paths:
+      - libs/langgraph/langgraph/types.py
+      - libs/langgraph/langgraph/_internal/_retry.py
+      - libs/langgraph/langgraph/pregel
+      - libs/checkpoint/langgraph/checkpoint/base
+      - libs/checkpoint-sqlite
