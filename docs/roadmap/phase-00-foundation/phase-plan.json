@@ -1,0 +1,349 @@
+{
+  "schema_id": "https://schemas.hermes-pipeline.dev/engineering/phase-plan/v1",
+  "schema_version": 1,
+  "document_revision": 1,
+  "phase_id": "phase-00",
+  "title": "Engineering Foundation and Technology Lock",
+  "status": "APPROVED",
+  "owner": "Frisk239",
+  "base_sha": "9a73b39f2eb1653e7345b27a39760cb55ef95af4",
+  "outcome": "A clean clone validates its design and machine contracts, bootstraps a thin Hermes Shim plus separately managed Python runtime, and runs deterministic Windows/Linux checks without implementing production Pipeline behavior.",
+  "prerequisites": [
+    "Initial documentation baseline commit exists on main",
+    "Repository, product, package, license, and governance identities are accepted",
+    "ADR-0014 through ADR-0025 are accepted",
+    "Phase 00 compatibility targets are recorded"
+  ],
+  "accepted_adrs": [
+    "ADR-0001",
+    "ADR-0002",
+    "ADR-0003",
+    "ADR-0004",
+    "ADR-0007",
+    "ADR-0008",
+    "ADR-0010",
+    "ADR-0012",
+    "ADR-0013",
+    "ADR-0014",
+    "ADR-0015",
+    "ADR-0016",
+    "ADR-0017",
+    "ADR-0018",
+    "ADR-0019",
+    "ADR-0020",
+    "ADR-0021",
+    "ADR-0022",
+    "ADR-0023",
+    "ADR-0024",
+    "ADR-0025"
+  ],
+  "module_boundaries": [
+    "Thin Hermes Shim and authenticated Control Interface",
+    "Managed-runtime packaging and lifecycle",
+    "Versioned contract authoring and generation toolchain",
+    "Controller transaction and persistence feasibility seams",
+    "Stage Executor and LangGraph authority boundary",
+    "Runtime Broker capability enforcement",
+    "Repository structure, architecture checks, deterministic fakes, and CI"
+  ],
+  "slices": [
+    {
+      "slice_id": "slice-00-01",
+      "title": "Repository baseline",
+      "depends_on": [],
+      "owns_exit_criteria": [],
+      "demonstration": "A clean Windows or Linux clone identifies every normative entry point and rejects a deliberately broken Schema fixture."
+    },
+    {
+      "slice_id": "slice-00-02",
+      "title": "Python quality skeleton",
+      "depends_on": [
+        "slice-00-01"
+      ],
+      "owns_exit_criteria": [
+        "EC-00-01",
+        "EC-00-02"
+      ],
+      "demonstration": "The frozen canonical commands pass from a clean clone without credentials or public network after dependency installation."
+    },
+    {
+      "slice_id": "slice-00-03",
+      "title": "Contract toolchain",
+      "depends_on": [
+        "slice-00-02"
+      ],
+      "owns_exit_criteria": [
+        "EC-00-03"
+      ],
+      "demonstration": "Valid fixtures round-trip and generated Schema/OpenAPI output has zero drift while invalid and secret-canary fixtures fail deterministically."
+    },
+    {
+      "slice_id": "slice-00-04",
+      "title": "Domain and persistence spikes",
+      "depends_on": [
+        "slice-00-03"
+      ],
+      "owns_exit_criteria": [
+        "EC-00-04",
+        "EC-00-05",
+        "EC-00-06"
+      ],
+      "demonstration": "Fault injection restarts at every durable boundary without duplicate transition or stale advancement."
+    },
+    {
+      "slice_id": "slice-00-05",
+      "title": "Hermes Shim and runtime spike",
+      "depends_on": [
+        "slice-00-02",
+        "slice-00-03"
+      ],
+      "owns_exit_criteria": [
+        "EC-00-07",
+        "EC-00-11"
+      ],
+      "demonstration": "A real Hermes Gateway delivers one authenticated fake command exactly once and either process can restart without forging or losing an acknowledged result."
+    },
+    {
+      "slice_id": "slice-00-06",
+      "title": "Agent and runtime security spikes",
+      "depends_on": [
+        "slice-00-02",
+        "slice-00-03"
+      ],
+      "owns_exit_criteria": [
+        "EC-00-08",
+        "EC-00-09",
+        "EC-00-10"
+      ],
+      "demonstration": "A hostile fixture cannot mutate Git, escape authorized roots, inherit a canary secret, or leave a child process alive after fencing."
+    },
+    {
+      "slice_id": "slice-00-07",
+      "title": "Foundation integration",
+      "depends_on": [
+        "slice-00-04",
+        "slice-00-05",
+        "slice-00-06"
+      ],
+      "owns_exit_criteria": [
+        "EC-00-12"
+      ],
+      "demonstration": "A clean install runs a fake command from Hermes through the Shim/runtime and back, survives restart, exposes health evidence, and passes all mandatory checks on the exact Candidate."
+    }
+  ],
+  "invariants": [
+    "The Hermes-loaded Shim remains dependency-light and has no Pipeline authority",
+    "The managed runtime owns Controller state and exposes only authenticated loopback Interfaces",
+    "Controller domain code has no LangGraph or Adapter dependency",
+    "LangGraph is confined to Stage execution",
+    "Agents have no Git mutation or remote credentials",
+    "All external behavior is behind a typed Interface with a deterministic fake",
+    "Required CI uses no live model, provider credential, or public network",
+    "Every Slice is independently reviewable and leaves mandatory checks green"
+  ],
+  "acceptance_dimensions": {
+    "testing": [
+      "Deterministic Windows/Linux required checks use no live model, provider credential, or public network"
+    ],
+    "migration": [
+      "Bootstrap Schema adoption, SQLite migration seam, and rollback feasibility are recorded; no production-state migration occurs"
+    ],
+    "security": [
+      "Negative tests prove path, process, environment, secret, descriptor, Agent, browser, and Git authority boundaries"
+    ],
+    "documentation": [
+      "README, policies, contract fixtures, commands, compatibility targets, feasibility decisions, and Closeout remain synchronized"
+    ],
+    "demonstration": [
+      "A real Hermes load reaches the isolated fake runtime and a complete fake command path survives restart on the exact integrated Candidate"
+    ]
+  },
+  "exit_criteria": [
+    {
+      "criterion_id": "EC-00-01",
+      "observable_result": "The frozen uv environment synchronizes on supported Windows and Linux runners.",
+      "owner_slice_ids": [
+        "slice-00-02",
+        "slice-00-07"
+      ]
+    },
+    {
+      "criterion_id": "EC-00-02",
+      "observable_result": "Formatting, lint, type, unit, contract, architecture, and offline integration checks pass.",
+      "owner_slice_ids": [
+        "slice-00-02",
+        "slice-00-03",
+        "slice-00-07"
+      ]
+    },
+    {
+      "criterion_id": "EC-00-03",
+      "observable_result": "Every committed Schema has valid and invalid fixtures plus a reproducible Pydantic, Schema, and OpenAPI drift check.",
+      "owner_slice_ids": [
+        "slice-00-03",
+        "slice-00-07"
+      ]
+    },
+    {
+      "criterion_id": "EC-00-04",
+      "observable_result": "The Controller transaction spike proves atomic Inbox, Event, projection, and Outbox behavior, deduplication, revision conflict, crash recovery, and stale fencing.",
+      "owner_slice_ids": [
+        "slice-00-04",
+        "slice-00-07"
+      ]
+    },
+    {
+      "criterion_id": "EC-00-05",
+      "observable_result": "SQLite workload evidence supports the declared version 1 concurrency envelope or triggers a replacement ADR.",
+      "owner_slice_ids": [
+        "slice-00-04",
+        "slice-00-07"
+      ]
+    },
+    {
+      "criterion_id": "EC-00-06",
+      "observable_result": "LangGraph checkpoint and replay evidence proves it cannot independently advance Pipeline state.",
+      "owner_slice_ids": [
+        "slice-00-04",
+        "slice-00-07"
+      ]
+    },
+    {
+      "criterion_id": "EC-00-07",
+      "observable_result": "A real Hermes installation loads the Shim and reaches a fake managed runtime through protected loopback transport.",
+      "owner_slice_ids": [
+        "slice-00-05",
+        "slice-00-07"
+      ]
+    },
+    {
+      "criterion_id": "EC-00-08",
+      "observable_result": "Codex and OpenCode Adapters prove structured output, timeout, cancellation, bounded logs, and error classification.",
+      "owner_slice_ids": [
+        "slice-00-06",
+        "slice-00-07"
+      ]
+    },
+    {
+      "criterion_id": "EC-00-09",
+      "observable_result": "An OpenCode E2E probe uses Chrome DevTools MCP in a clean Verification Sandbox without Git authority.",
+      "owner_slice_ids": [
+        "slice-00-06",
+        "slice-00-07"
+      ]
+    },
+    {
+      "criterion_id": "EC-00-10",
+      "observable_result": "Security tests cover descriptor permissions, path escape, environment leakage, shell avoidance, secret canaries, and process-tree cleanup.",
+      "owner_slice_ids": [
+        "slice-00-05",
+        "slice-00-06",
+        "slice-00-07"
+      ]
+    },
+    {
+      "criterion_id": "EC-00-11",
+      "observable_result": "The hermes pipeline setup, doctor, start, status, and stop commands operate idempotently for the non-production skeleton.",
+      "owner_slice_ids": [
+        "slice-00-05",
+        "slice-00-07"
+      ]
+    },
+    {
+      "criterion_id": "EC-00-12",
+      "observable_result": "Accepted decisions, feasibility results, limitations, exact commands, residual risks, and Phase 1 prerequisites are recorded in CLOSEOUT.md.",
+      "owner_slice_ids": [
+        "slice-00-07"
+      ]
+    }
+  ],
+  "exclusions": [
+    "Real Pipeline state-machine behavior",
+    "Live Feishu or GitHub production operations",
+    "Real Project RBAC and approval workflows",
+    "Production Agent prompts or model-quality acceptance",
+    "Remote publication, PR creation, merge, deployment, or dashboard",
+    "Destructive migration or automatic update application"
+  ],
+  "risks": [
+    {
+      "risk_id": "R-01",
+      "description": "Hermes cannot safely load or supervise the Thin Shim and managed-runtime topology.",
+      "impact": "CRITICAL",
+      "mitigation": "Prove real source installation and lifecycle before product code.",
+      "trigger": "The Shim requires unmanaged third-party imports or cannot recover after restart."
+    },
+    {
+      "risk_id": "R-02",
+      "description": "Windows or Linux cannot enforce a required Agent capability boundary.",
+      "impact": "CRITICAL",
+      "mitigation": "Run hostile fixtures on both systems and fail closed for unsupported profiles.",
+      "trigger": "A fixture escapes authorized roots, inherits a canary, or leaves an unfenced process."
+    },
+    {
+      "risk_id": "R-03",
+      "description": "SQLite cannot meet the declared single-Workspace workload or recovery envelope.",
+      "impact": "HIGH",
+      "mitigation": "Measure queue depth, latency, WAL, backup, disk-full, and crash behavior.",
+      "trigger": "Limits exceed the declared envelope or an acknowledged command is lost or duplicated."
+    },
+    {
+      "risk_id": "R-04",
+      "description": "LangGraph replay duplicates a Controller transition.",
+      "impact": "HIGH",
+      "mitigation": "Persist command identity and receipt and fault-inject every checkpoint boundary.",
+      "trigger": "Replay appends a second business Event."
+    },
+    {
+      "risk_id": "R-05",
+      "description": "Codex or OpenCode structured or cancellation interfaces are unstable.",
+      "impact": "HIGH",
+      "mitigation": "Pin versions, capability-probe, classify errors, and preserve fallback evidence.",
+      "trigger": "Required structured result or process-tree cleanup cannot be guaranteed."
+    },
+    {
+      "risk_id": "R-06",
+      "description": "Bootstrap contract candidates drift from the future Pydantic authoring source.",
+      "impact": "MEDIUM",
+      "mitigation": "Complete adoption and zero-drift checks in slice-00-03 before behavior-bearing spikes.",
+      "trigger": "Generated output differs without an explicit contract version change."
+    },
+    {
+      "risk_id": "R-07",
+      "description": "External provider polling or Feishu interception assumptions differ from real Hermes or GitHub behavior.",
+      "impact": "MEDIUM",
+      "mitigation": "Use pinned upstream evidence and isolated real integration probes.",
+      "trigger": "Callback interception or conditional polling cannot be made idempotent."
+    }
+  ],
+  "stop_conditions": [
+    "The Hermes plugin surface cannot safely host the Thin Shim",
+    "A supported platform cannot enforce required process or path boundaries",
+    "SQLite fails the declared workload or recovery proof",
+    "Codex or OpenCode lacks a stable structured and cancellation Interface",
+    "Chrome MCP cannot be isolated from development authority",
+    "A new dependency family, public service, or privileged helper becomes necessary",
+    "Repository identity or licensing blocks public distribution"
+  ],
+  "phase_gate": {
+    "reviewer_role": "CODEX_PLANNER_DESIGNER_REVIEWER",
+    "required_evidence": [
+      "Every accepted Slice Closeout",
+      "Phase integration Evidence Bundle",
+      "Windows and Linux CI results",
+      "Feasibility decision reports",
+      "Draft Phase Closeout"
+    ],
+    "allowed_verdicts": [
+      "PASS",
+      "REWORK",
+      "BLOCKED_CONTRACT"
+    ]
+  },
+  "human_approval": {
+    "required": true,
+    "status": "APPROVED",
+    "attestation_id": "engapr_phase-00_20260805_01"
+  },
+  "content_hash": "sha256:6651feae1a21c9b5b6ca5003caa2c4b37bd8ff59995a4d0f241cb5f8b6481144"
+}

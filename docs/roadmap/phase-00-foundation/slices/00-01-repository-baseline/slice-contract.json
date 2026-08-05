@@ -1,0 +1,225 @@
+{
+  "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
+  "schema_version": 1,
+  "document_revision": 1,
+  "slice_id": "slice-00-01",
+  "phase_id": "phase-00",
+  "status": "DRAFT",
+  "predecessors": [],
+  "base_sha": "9a73b39f2eb1653e7345b27a39760cb55ef95af4",
+  "assigned_worktree": "PENDING: assigned after Phase approval",
+  "operator_path": "Clone the exact baseline on Windows or Linux, locate every normative entry point, run offline documentation and contract checks, and observe deterministic rejection of a broken Schema fixture.",
+  "must_scope": [
+    "Establish portable line-ending policy",
+    "Add deterministic documentation and JSON Schema validation scripts",
+    "Validate UTF-8, replacement characters, Markdown fences, local links, ADR status, Schema syntax, meta-schema, $id, $ref, and JSON Pointer resolution",
+    "Add positive and deliberately broken bootstrap fixtures for the checker",
+    "Add Windows and Linux GitHub Actions for offline documentation and contract checks",
+    "Synchronize baseline documentation affected by the checks"
+  ],
+  "out_of_scope": [
+    "Python package or runtime skeleton, pyproject.toml, or uv.lock",
+    "Ruff, Pyright, pytest, Hypothesis, or application unit tests",
+    "Pydantic authoring models or generated-model drift",
+    "Hermes Shim, HTTP server, database, LangGraph, Agent, browser, Git mutation, or provider behavior",
+    "Acceptance of Phase 00 or any later Slice"
+  ],
+  "interfaces": [
+    "No production Interface change",
+    "Bootstrap documentation and Schema validation command contract"
+  ],
+  "binding_adrs": [
+    "ADR-0024"
+  ],
+  "permitted_paths": [
+    ".gitattributes",
+    ".github/workflows/documentation-contracts.yml",
+    "README.md",
+    "CONTRIBUTING.md",
+    "docs/",
+    "schemas/",
+    "scripts/"
+  ],
+  "prohibited_actions": [
+    "Edit src/ or add production behavior",
+    "Add pyproject.toml, uv.lock, runtime dependencies, or package code",
+    "Use public network or credentials in required checks",
+    "Commit, push, merge, rebase, reset, clean, or alter Git remotes, configuration, or hooks",
+    "Change accepted ADR semantics or expand Slice scope without a Contract Change Request"
+  ],
+  "implications": {
+    "data": [
+      "None: no runtime or Project data is created"
+    ],
+    "migration": [
+      "None: the repository has no runtime state"
+    ],
+    "compatibility": [
+      "Validation scripts and workflow must behave consistently on supported Windows and Linux runners"
+    ],
+    "security": [
+      "Checks are read-only, offline, bounded, and treat repository text as untrusted data"
+    ],
+    "documentation": [
+      "README, documentation map, policy links, Schema bootstrap note, and readiness audit remain synchronized"
+    ]
+  },
+  "acceptance_criteria": [
+    {
+      "criterion_id": "AC-01",
+      "trace_ids": [
+        "BOOT-01"
+      ],
+      "observable_result": "A clean clone exposes all required root entry points and every indexed local documentation link resolves.",
+      "verification_command_ids": [
+        "docs-check"
+      ]
+    },
+    {
+      "criterion_id": "AC-02",
+      "trace_ids": [
+        "BOOT-02",
+        "XCON-01"
+      ],
+      "observable_result": "All bootstrap Schemas parse, pass Draft 2020-12 validation, have unique $id values, and resolve every $ref and fragment through a standards-compliant registry.",
+      "verification_command_ids": [
+        "contracts-check"
+      ]
+    },
+    {
+      "criterion_id": "AC-03",
+      "trace_ids": [
+        "BOOT-02"
+      ],
+      "observable_result": "A deliberately broken fixture is rejected with a stable nonzero exit and actionable bounded output.",
+      "verification_command_ids": [
+        "contracts-negative"
+      ]
+    },
+    {
+      "criterion_id": "AC-04",
+      "trace_ids": [
+        "BOOT-03",
+        "XPLAT-01"
+      ],
+      "observable_result": "The same offline check commands are configured for required Windows and Linux GitHub Actions jobs.",
+      "verification_command_ids": [
+        "workflow-check"
+      ]
+    },
+    {
+      "criterion_id": "AC-05",
+      "trace_ids": [
+        "XSEC-01"
+      ],
+      "observable_result": "Validation reads repository data only, performs no network access, executes no repository-provided shell string, and emits no secret or Project content.",
+      "verification_command_ids": [
+        "scope-check"
+      ]
+    },
+    {
+      "criterion_id": "AC-06",
+      "trace_ids": [
+        "BOOT-01"
+      ],
+      "observable_result": "The Candidate changes no runtime or application path and contains no production behavior.",
+      "verification_command_ids": [
+        "scope-check"
+      ]
+    }
+  ],
+  "required_tests": [
+    "Positive documentation and Schema baseline fixture",
+    "Broken JSON syntax fixture",
+    "Invalid JSON Schema fixture",
+    "Unresolvable $ref fixture",
+    "Broken local Markdown link fixture",
+    "UTF-8 replacement-character fixture",
+    "Proposed ADR status fixture"
+  ],
+  "demonstration": "From fresh Windows and Linux clones of the exact Candidate, run the documented offline commands successfully, then substitute the deliberately broken fixture and show deterministic rejection without modifying repository state.",
+  "verification_commands": [
+    {
+      "command_id": "docs-check",
+      "argv": [
+        "python",
+        "scripts/check_documentation.py"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 30000
+    },
+    {
+      "command_id": "contracts-check",
+      "argv": [
+        "python",
+        "scripts/check_schemas.py"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 30000
+    },
+    {
+      "command_id": "contracts-negative",
+      "argv": [
+        "python",
+        "scripts/check_schemas.py",
+        "--self-test-negative"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 30000
+    },
+    {
+      "command_id": "workflow-check",
+      "argv": [
+        "python",
+        "scripts/check_documentation.py",
+        "--check-workflow"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 30000
+    },
+    {
+      "command_id": "scope-check",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "9a73b39f2eb1653e7345b27a39760cb55ef95af4..HEAD"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 30000
+    }
+  ],
+  "required_evidence": [
+    "Exact Base and Candidate SHAs",
+    "Changed-path manifest",
+    "Bounded command output and exit codes",
+    "Windows and Linux CI results",
+    "Positive and negative fixture results",
+    "Residual risks and bootstrap limitations"
+  ],
+  "risks": [
+    {
+      "risk_id": "R-01",
+      "description": "Cross-platform path or line-ending behavior causes the same baseline to validate differently.",
+      "impact": "HIGH",
+      "mitigation": "Use pathlib and JSON Schema registry semantics, enforce repository line endings, and run identical commands on Windows and Linux.",
+      "trigger": "A required job disagrees with another platform for the same Git tree."
+    },
+    {
+      "risk_id": "R-02",
+      "description": "The Slice expands into the Python package or Pydantic toolchain before its owning Slice.",
+      "impact": "MEDIUM",
+      "mitigation": "Enforce path scope and stop on any required dependency or runtime code.",
+      "trigger": "Acceptance appears to require pyproject.toml, uv.lock, package code, or a new dependency family."
+    }
+  ],
+  "retry_budget": 2,
+  "stop_conditions": [
+    "Validation requires a new dependency family or public network access",
+    "Implementation requires runtime code or paths outside the permitted set",
+    "Accepted ADR semantics or observable Slice results must change",
+    "The Base SHA or approved Phase Plan changes",
+    "Required Windows and Linux behavior cannot be made equivalent"
+  ],
+  "content_hash": "sha256:d6ba1de4d311bea862816aee4774bad481dca8f56ede3fb7c81134705e7fcf93"
+}

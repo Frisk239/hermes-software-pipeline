@@ -43,6 +43,14 @@ This document prevents Roadmap capabilities, Phase outcomes, Slice acceptance cr
 | `EC-00-11` idempotent non-production lifecycle CLI | `slice-00-05` | `slice-00-07` |
 | `EC-00-12` complete Phase Closeout and Phase 1 prerequisites | `slice-00-07` | every accepted Slice Closeout |
 
+## Repository bootstrap requirements
+
+| ID | Requirement | Owning Slice |
+| --- | --- | --- |
+| `BOOT-01` | A clean clone exposes product status, trust limits, governance, contribution, security, support, domain language, normative documentation, and Roadmap entry points without ambiguity. | `slice-00-01` |
+| `BOOT-02` | Offline checks validate governed text and bootstrap Schema integrity and deterministically reject representative broken fixtures. | `slice-00-01` |
+| `BOOT-03` | Required documentation and bootstrap-contract checks execute identically in Windows and Linux CI. | `slice-00-01` |
+
 ## Slice traceability rules
 
 Every Slice Contract must:

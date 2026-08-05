@@ -1,11 +1,16 @@
 # Phase 00 — Engineering Foundation and Technology Lock
 
-Phase ID: `phase-00`  
-Status: `DRAFT`  
-Owner: Repository Governance Owner `Frisk239`  
-Document revision: `1`  
-Base SHA: pending initial documentation baseline commit  
-Human approval: pending machine-valid projection after Base SHA exists
+Phase ID: `phase-00`
+
+Status: `APPROVED`
+
+Owner: Repository Governance Owner `Frisk239`
+
+Document revision: `1`
+
+Base SHA: `9a73b39f2eb1653e7345b27a39760cb55ef95af4`
+
+Human approval: approved by Repository Governance Owner; attestation `engapr_phase-00_20260805_01`
 
 ## Outcome
 
