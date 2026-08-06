@@ -1,7 +1,7 @@
 {
   "schema_id": "https://schemas.hermes-pipeline.dev/engineering/context-manifest/v1",
   "schema_version": 1,
-  "manifest_id": "ctx_slice-00-03_executor_r5",
+  "manifest_id": "ctx_slice-00-03_executor_r6",
   "role": "EXECUTOR",
   "slice_id": "slice-00-03",
   "base_sha": "f36ba6a2930267e2d90682ff61930c82fd1237bb",
@@ -64,12 +64,12 @@
     },
     {
       "path": "docs/roadmap/phase-00-foundation/slices/00-03-contract-toolchain/SLICE.md",
-      "digest": "sha256:83ea603b3cce3d096cd58bdb920769b89324f359fe05b38e660bd52c55863649",
+      "digest": "sha256:2bc7277788074bdf196bf6a2fa844c3710eaa23a11110012b17a6f08066440b8",
       "purpose": "READY human-readable Slice contract (planning artifact of the docs/slice-00-03-planning change)"
     },
     {
       "path": "docs/roadmap/phase-00-foundation/slices/00-03-contract-toolchain/slice-contract.json",
-      "digest": "sha256:76d204290971d30d09df0b3b7f230853f7ea2ee365a0575bc7e4c10d0a623616",
+      "digest": "sha256:ecd968bdcfc344230d50e18e88ba389d624eb1781a8f4ae7aa79302f4478a83f",
       "purpose": "READY machine-valid Slice contract (planning artifact of the docs/slice-00-03-planning change)"
     },
     {
@@ -176,7 +176,7 @@
     },
     {
       "name": "contract_revision",
-      "value": 6,
+      "value": 7,
       "source": "slice-contract.json"
     },
     {
@@ -186,13 +186,13 @@
     },
     {
       "name": "contract_hash",
-      "value": "sha256:90401ee5ab09bb3a892c8658893e6b3419e21a4e0e92e33e10863de966c62447",
+      "value": "sha256:2f8b961a3d04fbbacee686de1911dc2730b9abe1832ce961c70816983f9abcf1",
       "source": "slice-contract.json canonical content hash"
     },
     {
-      "name": "revision_6_semantic_parity",
-      "value": "No Schema/model divergence allowlist: preserve Draft 2020-12 integer semantics for finite integral JSON numbers such as 3.0, register the deterministic RFC 3339 checker on FORMAT_CHECKER, and use a snapshot-only 14-Schema baseline registry. A mismatch remaining after those rules requires a CCR.",
-      "source": "revision 6 review correction"
+      "name": "revision_7_local_format_checker",
+      "value": "No Schema/model divergence allowlist: preserve Draft 2020-12 integer semantics for finite integral JSON numbers such as 3.0, construct the deterministic RFC 3339 checker locally for each Schema validator from the shared is_rfc3339_datetime rule, never mutate Draft202012Validator.FORMAT_CHECKER, prove that invariant in a fresh subprocess, and use a snapshot-only 14-Schema baseline registry. A mismatch remaining after those rules requires a CCR.",
+      "source": "Human approval 2026-08-06; revision 7 planning correction"
     },
     {
       "name": "digest_binding_policy",
@@ -321,7 +321,7 @@
     },
     {
       "name": "previous_review_findings",
-      "value": "Round 1: manifest not bound to Base; dependency family required ADR-0026; lazy-dispatch boundary undefined; README family not in permitted paths; workflow-policy conflict; no baseline payload fixtures and missing model round-trip; OpenAPI and registry paths and component-key rules unlocked; definitions is a $defs library. Round 2: ADR-0026 not yet committed; manifest Base-source labeling inaccurate; CONTRIBUTING.md and schemas/README.md authority missing; compatibility-targets acceptance missing; /v1 equivalence needs baseline pre-validation; content_hash recomputation scope conflicted with prohibited records; OpenAPI component keys and registry structure need fixed machine-verifiable rules; 14 Pydantic models wording. Round 3: stale predecessor worktree prerequisite; branch name presented as evidence; strict model parity, immutable f36 snapshots, full OpenAPI embedding, exact offline drift-check, and Closeout ownership needed. Current rework: Fact.value must preserve integral 3.0 parity; all failure reporting must remain bounded and safe with unreadable corpus fixtures; diagnostic line breaks must be escaped; the snapshot digest manifest must lock its exact base and 14 paths; registry and migration target versions must reject booleans and non-integers",
+      "value": "Round 1: manifest not bound to Base; dependency family required ADR-0026; lazy-dispatch boundary undefined; README family not in permitted paths; workflow-policy conflict; no baseline payload fixtures and missing model round-trip; OpenAPI and registry paths and component-key rules unlocked; definitions is a $defs library. Round 2: ADR-0026 not yet committed; manifest Base-source labeling inaccurate; CONTRIBUTING.md and schemas/README.md authority missing; compatibility-targets acceptance missing; /v1 equivalence needs baseline pre-validation; content_hash recomputation scope conflicted with prohibited records; OpenAPI component keys and registry structure need fixed machine-verifiable rules; 14 Pydantic models wording. Round 3: stale predecessor worktree prerequisite; branch name presented as evidence; strict model parity, immutable f36 snapshots, full OpenAPI embedding, exact offline drift-check, and Closeout ownership needed. Current rework: Fact.value must preserve integral 3.0 parity; all failure reporting must remain bounded and safe with unreadable corpus fixtures; diagnostic line breaks must be escaped; the snapshot digest manifest must lock its exact base and 14 paths; registry and migration target versions must reject booleans and non-integers. Revision 7: replace the approved-but-unsafe process-global FORMAT_CHECKER mutation with a local checker per Schema validator; a fresh-subprocess default-checker non-mutation regression is required.",
       "source": "Review attempts 1 and 2 (REWORK)"
     },
     {
@@ -330,5 +330,5 @@
       "source": "AGENTS.md and phase-and-slice-operating-model.md"
     }
   ],
-  "content_hash": "sha256:5ec32f0d093bf72505868707e6352033cf7811384d9457f50bd245579675a8ce"
+  "content_hash": "sha256:7ac19750e43acf408ca4d0deac489b0a9951077f1803bc7cbaf58a2274ef1ab4"
 }

@@ -1,7 +1,7 @@
 {
   "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
   "schema_version": 1,
-  "document_revision": 6,
+  "document_revision": 7,
   "slice_id": "slice-00-03",
   "phase_id": "phase-00",
   "status": "READY",
@@ -14,6 +14,7 @@
   "must_scope": [
     "Add pydantic>=2,<3, jsonschema>=4,<5, and rfc8785==0.1.4 to the existing dev dependency group only and freeze the full resolution in uv.lock; [project].dependencies stays empty; the dependency-family decision is bound by ADR-0026 accepted in this planning change",
     "Author all 14 bootstrap contracts as versioned Pydantic v2 authoring types under src/hermes_pipeline/contracts/: 13 root contracts plus the common/definitions $defs type library; every model config sets extra=\"forbid\" explicitly and preserves the f36 Draft 2020-12 pass/reject boundary: no string, boolean, or incompatible-primitive coercion, but integer fields accept finite integral JSON numeric values such as 3.0 whenever the Schema accepts them",
+    "Construct a fresh local jsonschema.FormatChecker for every Schema validator, register the shared is_rfc3339_datetime rule on that instance, and pass it explicitly to Draft202012Validator; never mutate Draft202012Validator.FORMAT_CHECKER, and add a fresh-subprocess regression proving contracts imports leave its default keys and handler identities unchanged",
     "Deterministically generate and commit, from that single authoring source, the 14 JSON Schema Draft 2020-12 documents under schemas/, the OpenAPI document at contracts/openapi.json, and the compatibility registry at contracts/compatibility-registry.json; generation is pure, order-stable, LF/UTF-8, and contains no timestamp, path, or environment input",
     "Perform a one-time reviewed representation-only migration: every generated Schema keeps its exact $id and Draft 2020-12 declaration, the 14-Schema identity lock is unchanged, and no existing JSON document schema_id is edited",
     "Prove /v1 semantic equivalence against an immutable, committed snapshot of the exact f36ba6a Schemas: tests/fixtures/contracts/ contains the snapshots and raw-digest manifest as historical evidence, not a second authoring source; the baseline validator builds its complete $ref registry only from the 14 raw-digested snapshots; every baseline corpus entry is first validated by that precise baseline Schema, then by the strict Pydantic model and generated Schema, and all pass/reject results must agree; digest labels alone are not evidence",
@@ -50,7 +51,7 @@
     "OpenAPI component values: every fixed component fully embeds the corresponding generated Schema including its exact $id; external references or placeholder objects are rejected and canonical component content equals the matching generated Schema",
     "Compatibility registry structure: a JSON object mapping each registry $id to {current_version: integer >= 1, supported_versions: non-empty strictly increasing integer array with current_version as its maximum}; the key set must equal the 14-Schema $id set exactly",
     "Contract-toolchain packages (pydantic, jsonschema, rfc8785) importable only from uv development and CI commands; the Hermes plugin entry, --version, and the normal runtime path never import them; contracts reports a bounded, sanitized error when development dependencies are absent",
-    "Validation parity: register a deterministic RFC 3339 date-time checker on Draft202012Validator.FORMAT_CHECKER using the same shared rule as the authoring type, because the frozen jsonschema installation omits the optional checker; do not add a dependency family or accept a Schema/model divergence"
+    "Validation parity: construct a fresh local jsonschema.FormatChecker for every Schema validator and register the deterministic RFC 3339 date-time checker on that instance using the same shared rule as the authoring type; never mutate Draft202012Validator.FORMAT_CHECKER, prove non-mutation in a fresh subprocess, do not add a dependency family, and do not accept a Schema/model divergence"
   ],
   "binding_adrs": [
     "ADR-0018",
@@ -127,7 +128,7 @@
     {
       "criterion_id": "AC-03",
       "trace_ids": ["EC-00-03", "BOOT-02"],
-    "observable_result": "Every generated Schema passes Draft202012Validator.check_schema meta-validation, $ref closure resolution across the registry, and instance validation with Draft202012Validator.FORMAT_CHECKER enabled; the frozen environment registers the deterministic RFC 3339 date-time checker, so a format-violating instance is rejected by both Schema validation and the authoring model.",
+    "observable_result": "Every generated Schema passes Draft202012Validator.check_schema meta-validation, $ref closure resolution across the registry, and instance validation with a fresh local jsonschema.FormatChecker carrying the shared deterministic RFC 3339 date-time rule; the default Draft202012Validator.FORMAT_CHECKER is never mutated. A format-violating instance is rejected by both Schema validation and the authoring model, and a fresh subprocess proves that contracts imports leave the default checker keys and handler identities unchanged.",
       "verification_command_ids": ["contracts-check"]
     },
     {
@@ -183,7 +184,8 @@
     "Pydantic authoring-type generation is deterministic and produces the committed canonical projection without f36 layout reconstruction or byte-equality assertions; f36 snapshots remain immutable semantic evidence",
     "Registry identity lock unchanged: 14 $ids with exact matching to committed files",
     "Draft 2020-12 meta-validation of every generated Schema and negative meta-fixture",
-    "Instance validation of corpora with Draft202012Validator.FORMAT_CHECKER enabled, including a malformed RFC 3339 date-time rejected by both Schema validation and the authoring model",
+    "Instance validation of corpora with a fresh local jsonschema.FormatChecker carrying the shared RFC 3339 rule, including a malformed RFC 3339 date-time rejected by both Schema validation and the authoring model",
+    "Fresh-subprocess regression: importing hermes_pipeline.contracts modules leaves Draft202012Validator.FORMAT_CHECKER default keys and handler identities unchanged, while the local checker agrees with is_rfc3339_datetime",
     "$ref closure resolution across the registry and OpenAPI components mapping",
     "Immutable f36 Schema snapshots and raw-digest manifest are committed under tests/fixtures/contracts; a snapshot-only registry with the exact 14 paths and digests is used, with no runtime Git lookup or current-generated-Schema reference",
     "Baseline corpus pre-validation: every entry validated by the f36 snapshot, Pydantic model, and generated Schema with the expected result recorded and all results agreeing",
@@ -235,7 +237,7 @@
     "Bounded output, exit code, start time, and duration for every local command",
     "Windows and Linux CI run and job URLs bound to the Candidate",
     "contracts drift-check output on both platforms proving byte-identical generation, including the exact offline workflow command",
-    "Draft 2020-12 meta-validation, FORMAT_CHECKER instance validation, and $ref closure results",
+    "Draft 2020-12 meta-validation, local FormatChecker instance validation, $ref closure, and fresh-subprocess default-checker non-mutation results",
     "Baseline snapshot and raw-digest manifest, plus per-entry baseline Schema, strict model, and generated Schema validation results and their agreement, plus round-trip results for positives",
     "Per-root-contract corpus inventory with pass and reject results and the canary scan",
     "Per-$defs fragment test results for common/definitions",
@@ -251,7 +253,7 @@
       "risk_id": "R-01",
       "description": "Pydantic generation or validation can silently change a bootstrap constraint or diverge from Draft 2020-12 numeric and format semantics, breaking agreement with the immutable f36 Schema snapshots.",
       "impact": "HIGH",
-      "mitigation": "Commit raw-digested f36 Schema snapshots, build their registry independently, register the deterministic date-time checker, cover integral numeric and format boundaries, and require agreement among the baseline Schema, Pydantic model, and generated Schema as a regression gate.",
+      "mitigation": "Commit raw-digested f36 Schema snapshots, build their registry independently, construct the deterministic date-time checker locally per Schema validator without mutating the jsonschema default checker, cover integral numeric and format boundaries, and require agreement among the baseline Schema, Pydantic model, and generated Schema as a regression gate.",
       "trigger": "A baseline entry result differs among the f36 Schema snapshot, strict model, and generated Schema."
     },
     {
@@ -295,6 +297,7 @@
     "A dependency family beyond ADR-0026, FastAPI, or any service framework is required",
     "Runtime dependencies must change or contract-toolchain packages must be imported before the contracts subcommand is parsed",
     "A baseline entry result still differs among the immutable f36 Schema snapshot, Pydantic model, and generated Schema after applying the required date-time checker and Draft 2020-12 integral-number semantics; the replacement stops and a Contract Change Request is submitted without silently changing semantics, accepting a divergence allowlist, or jumping to /v2",
+    "A contracts import mutates Draft202012Validator.FORMAT_CHECKER, or a local RFC 3339 checker cannot agree with the shared authoring rule without changing dependencies or semantics",
     "Any $id changes, a Schema is added or removed, or the identity lock must be altered",
     "Generation output differs between Windows and Linux or from the committed files",
     "A golden vector fails or a second canonicalization implementation is required",
@@ -305,5 +308,5 @@
     "Implementation requires paths outside permitted_paths or changes check_schemas.py, check_repository_artifacts.py, documentation-contracts.yml, .gitattributes, accepted ADRs, or planning, review, evidence, and closeout records",
     "The Base SHA changes or required Windows and Linux behavior cannot be equivalent"
   ],
-  "content_hash": "sha256:90401ee5ab09bb3a892c8658893e6b3419e21a4e0e92e33e10863de966c62447"
+  "content_hash": "sha256:2f8b961a3d04fbbacee686de1911dc2730b9abe1832ce961c70816983f9abcf1"
 }
