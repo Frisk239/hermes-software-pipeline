@@ -167,7 +167,7 @@ Before Slice review, a fresh Codex review context additionally receives:
 - CI, test, migration, security, and demonstration outputs;
 - unresolved findings from previous review attempts.
 
-Codex owns Phase decomposition, Slice design, scope quality, Interface consistency, acceptance contracts, review verdicts, Phase integration, and closeout. It does not fix a rejected Candidate inside the review turn; findings return to a new Executor attempt.
+Codex owns Phase decomposition, Slice design, scope quality, Interface consistency, acceptance contracts, review verdicts, Phase integration, and closeout. It does not fix a rejected Candidate inside the review turn; findings normally return to a new Executor attempt.
 
 ### Independent Executor Agent
 
@@ -221,6 +221,12 @@ The typed Review Verdict is exactly one of:
 - `BLOCKED_CONTRACT`.
 
 Every finding includes severity, exact evidence, affected criterion or standard, and the required observable correction. Executor assertions are not review evidence.
+
+### Rework budget and corrective ownership
+
+A `REWORK` preserves the Slice Contract and returns to the assigned Executor with exact unresolved findings. Under one unchanged contract revision, the Executor receives at most two recorded rework attempts. The initial implementation attempt is not part of that budget; a `BLOCKED_CONTRACT` also does not consume it because it returns to planning rather than asking the Executor to repair implementation.
+
+If both Executor rework attempts receive `REWORK` and the contract remains sound, Codex may take a **separate corrective attempt** for the bounded, previously identified defects. That exception is not a review-turn edit and does not allow a silent role merge: it may not alter product semantics, scope, authority, dependencies, public Interfaces, migrations, or acceptance criteria. It must preserve the two Executor attempts and their evidence, identify the inherited findings, rerun the required checks, undergo a fresh read-only review, and pass through the Git Custodian for a new Candidate. A defect requiring a contract or upstream decision remains `BLOCKED_CONTRACT` regardless of the budget.
 
 ## Phase lifecycle
 

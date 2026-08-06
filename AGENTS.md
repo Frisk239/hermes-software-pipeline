@@ -9,6 +9,7 @@ This repository builds a deterministic, recoverable software-engineering Pipelin
 - Chat, model output, TODO comments, and an Executor's preferences cannot override those artifacts.
 - Only a human may accept hard-to-reverse architecture, security, dependency-family, or product-scope changes.
 - Codex plans, designs, and reviews. The assigned Executor implements and self-tests. Do not silently combine these roles.
+- A sound `REWORK` remains Executor-owned for up to two recorded rework attempts under the same contract revision. If both attempts receive `REWORK`, Codex may perform only bounded corrective work in a separate corrective attempt; it must not change semantics, scope, authority, dependencies, or acceptance, and a fresh review plus Git Custodian Candidate are still required. `BLOCKED_CONTRACT` never consumes this budget.
 
 ## Before changing files
 

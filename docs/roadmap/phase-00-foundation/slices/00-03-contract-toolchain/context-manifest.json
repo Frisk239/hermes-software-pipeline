@@ -1,0 +1,334 @@
+{
+  "schema_id": "https://schemas.hermes-pipeline.dev/engineering/context-manifest/v1",
+  "schema_version": 1,
+  "manifest_id": "ctx_slice-00-03_executor_r6",
+  "role": "EXECUTOR",
+  "slice_id": "slice-00-03",
+  "base_sha": "f36ba6a2930267e2d90682ff61930c82fd1237bb",
+  "assembled_at": "2026-08-06T00:00:00.000Z",
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "digest": "sha256:3908e4507cfbaf1a0d6dd80565ad56832272730c58d4e895f0be53e6e444bde1",
+      "purpose": "Repository constitution and rework-ownership policy (planning artifact of the docs/slice-00-03-planning change)"
+    },
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:97960150474d5b0c2b459770f48299f4d897bb30b91f9de5f13d73d027d915b4",
+      "purpose": "Canonical product and domain vocabulary (Base blob f36ba6a)"
+    },
+    {
+      "path": "docs/agents/roles/executor.md",
+      "digest": "sha256:46925379abdc01916be1faa690b0641737ef9cbe695d3930441f0f23a417ee17",
+      "purpose": "Binding Executor role contract (Base blob f36ba6a)"
+    },
+    {
+      "path": "docs/roadmap/TRACEABILITY.md",
+      "digest": "sha256:cc858ef5387503b2154d59c0dc5ad7aeb934fb69e073d07ab53cf828271f1182",
+      "purpose": "Phase requirement and verification traceability (Base blob f36ba6a)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/PHASE.md",
+      "digest": "sha256:5acb46cdc68794bf69e5c708fb9813048f3d19170a7502f4f82a0f77de7d8f0d",
+      "purpose": "Approved Phase 00 outcome, invariants, and exits (Base blob f36ba6a)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/phase-plan.json",
+      "digest": "sha256:34035ae526cb363e8b8a009fbea7a0246dd87c33337f1086cf079cfa2d5aea3f",
+      "purpose": "Approved Phase 00 machine plan (Base blob f36ba6a)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/README.md",
+      "digest": "sha256:dcddbf695d57805be942eb3b4b1b84d6c61ff992a4f4e23c4a7df08e8779c520",
+      "purpose": "Slice map and next-Slice pointer (planning artifact of the docs/slice-00-03-planning change)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-01-repository-baseline/CLOSEOUT.md",
+      "digest": "sha256:9d365267fa747208bfef1d9c71b372045eec931fda67a222ac72c15bcb61b72d",
+      "purpose": "Accepted predecessor capability, evidence, and debt (Base blob f36ba6a)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-02-python-quality-skeleton/CLOSEOUT.md",
+      "digest": "sha256:b09431e39f7c8d17f834af8cf21a9830cad45e4e9ae86547578b8f002e8877ca",
+      "purpose": "Accepted Slice 00-02 closeout and 00-03 handover (planning artifact of the docs/slice-00-03-planning change)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-02-python-quality-skeleton/SLICE.md",
+      "digest": "sha256:f7e2d7c1922eab9786fe0e5c0e3e97a4b7101032d50a6e68863e4a84e90efadb",
+      "purpose": "Predecessor Slice contract and residual debt (Base blob f36ba6a)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-02-python-quality-skeleton/slice-contract.json",
+      "digest": "sha256:c7b6f024fd5124b20861b90d8be916be790324edf466bd3ebd74ef85622d0866",
+      "purpose": "Predecessor machine contract (Base blob f36ba6a)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-03-contract-toolchain/SLICE.md",
+      "digest": "sha256:2bc7277788074bdf196bf6a2fa844c3710eaa23a11110012b17a6f08066440b8",
+      "purpose": "READY human-readable Slice contract (planning artifact of the docs/slice-00-03-planning change)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-03-contract-toolchain/slice-contract.json",
+      "digest": "sha256:ecd968bdcfc344230d50e18e88ba389d624eb1781a8f4ae7aa79302f4478a83f",
+      "purpose": "READY machine-valid Slice contract (planning artifact of the docs/slice-00-03-planning change)"
+    },
+    {
+      "path": "docs/adr/0026-contract-toolchain-development-dependencies.md",
+      "digest": "sha256:b779787e17a7f4090ce15dbab5530980732bd30eaa19c94ccebfb511335ca3de",
+      "purpose": "Accepted development-only contract-toolchain dependency decision (planning artifact of the docs/slice-00-03-planning change)"
+    },
+    {
+      "path": "docs/development/phase-and-slice-operating-model.md",
+      "digest": "sha256:5bbfee9a5cde6f31acf74a9f39a05869b10de1b3f17abfc51332ca1146702218",
+      "purpose": "Slice lifecycle, worktree, evidence, review, and rework-ownership rules (planning artifact of the docs/slice-00-03-planning change)"
+    },
+    {
+      "path": "docs/development/coding-and-test-standard.md",
+      "digest": "sha256:b4d689f55b2d20c9fcbc9ba25578fb61471d970b49a5a91ddf50d6bab907b83a",
+      "purpose": "Python coding and deterministic test standard (Base blob f36ba6a)"
+    },
+    {
+      "path": "docs/development/ci-and-testing.md",
+      "digest": "sha256:8953023372b964f8edecb5a68158677c3c9712d0d239219261c65782093496bf",
+      "purpose": "CI, branch, dependency, and release-gate rules (Base blob f36ba6a)"
+    },
+    {
+      "path": "docs/development/compatibility-targets.md",
+      "digest": "sha256:636e7db15b285a871dbbad4fe26a5a10aea73bbc4bca5b6178267146f081176f",
+      "purpose": "Python, uv, and tool targets (Base blob f36ba6a; extended by this Slice)"
+    },
+    {
+      "path": "docs/architecture/system-and-module-design.md",
+      "digest": "sha256:adabdcdf7b7673106510a45f867ab58fea48d3ebfc6114e74be95bead8fc986c",
+      "purpose": "Module boundaries including the contracts Module (Base blob f36ba6a)"
+    },
+    {
+      "path": "docs/architecture/data-and-api-contracts.md",
+      "digest": "sha256:bda7ff9a2fdac790a6744d5304df16ea62ebb1fc0d5f71c50724bd63682033b8",
+      "purpose": "Schema compatibility, canonicalization, and hashing rules (Base blob f36ba6a)"
+    },
+    {
+      "path": "docs/adr/0018-separate-planning-and-integration-baselines.md",
+      "digest": "sha256:ea6ba4c1ae3233a02e8929241eff282f88dc83f51984cc60629d460b9e5453e0",
+      "purpose": "Planning and integration baseline separation (Base blob f36ba6a)"
+    },
+    {
+      "path": "docs/adr/0020-use-python-312-and-uv-for-managed-runtime.md",
+      "digest": "sha256:02c3403aeaed29563f0f3f3a25bf8e4a872b204cf88b5e5199b32daf00f9ba3e",
+      "purpose": "Binding Python and uv environment decision (Base blob f36ba6a)"
+    },
+    {
+      "path": "docs/adr/0024-use-pydantic-models-and-json-schema-contracts.md",
+      "digest": "sha256:7e0c6c5b33113d11fe22d647d96d6eea7de9a683979c85b96dbe975e9cd073aa",
+      "purpose": "Pydantic sole-authoring-source decision (Base blob f36ba6a)"
+    },
+    {
+      "path": "schemas/README.md",
+      "digest": "sha256:e9ea4cf9e5477254e31315ca9ceffcd71339c565e2dec611c8de6e7afba70bdb",
+      "purpose": "Bootstrap Schema status and 00-03 adoption mandate (Base blob f36ba6a; updated by this Slice)"
+    },
+    {
+      "path": "schemas/common/definitions.schema.json",
+      "digest": "sha256:84acc4306cec634b6a47307922575bb8611ce2e67e3ca69ac2968a52106ee4d8",
+      "purpose": "Shared $defs type library to re-author with per-$defs fragment tests (Base blob f36ba6a)"
+    },
+    {
+      "path": "scripts/check_schemas.py",
+      "digest": "sha256:dc213d0f303946f3593dfe66adb39cdb726b02ff354afe1fffec4c7b9c1c93a7",
+      "purpose": "Immutable bootstrap Schema gate kept unchanged (Base blob f36ba6a)"
+    },
+    {
+      "path": "scripts/check_repository_artifacts.py",
+      "digest": "sha256:b4d7cc301ff2aa0cf113c5ff650849b30f0f754ae8dee9d08aa4116db129ca96",
+      "purpose": "Final cache and bytecode artifact audit (Base blob f36ba6a)"
+    },
+    {
+      "path": ".github/workflows/python-quality.yml",
+      "digest": "sha256:4528ccfc0c910a93ba0604fde92630d37586b2ed2e5615f9d442cf0a990cd90f",
+      "purpose": "Canonical quality workflow extended by this Slice (Base blob f36ba6a)"
+    },
+    {
+      "path": "pyproject.toml",
+      "digest": "sha256:364992d1f3ea1cb757fce0d497501978f592558f6388fa803a4829aca0d6d2ab",
+      "purpose": "Dependency groups and tool configuration to extend (Base blob f36ba6a)"
+    }
+  ],
+  "facts": [
+    {
+      "name": "assigned_worktree",
+      "value": "C:/Users/a2691/AppData/Local/hermes/managed-worktrees/hermes-software-pipeline/slice-00-03",
+      "source": "slice-contract.json (DRAFT; confirmed by Git Custodian at dispatch)"
+    },
+    {
+      "name": "repository_read_scope",
+      "value": "all tracked files",
+      "source": "AGENTS.md and Executor role contract"
+    },
+    {
+      "name": "manifest_semantics",
+      "value": "governing context, not a read allowlist",
+      "source": "phase-and-slice-operating-model.md"
+    },
+    {
+      "name": "manifest_file_count",
+      "value": 29,
+      "source": "this manifest files array"
+    },
+    {
+      "name": "contract_revision",
+      "value": 7,
+      "source": "slice-contract.json"
+    },
+    {
+      "name": "contract_status",
+      "value": "READY",
+      "source": "slice-contract.json; human approval required before READY"
+    },
+    {
+      "name": "contract_hash",
+      "value": "sha256:2f8b961a3d04fbbacee686de1911dc2730b9abe1832ce961c70816983f9abcf1",
+      "source": "slice-contract.json canonical content hash"
+    },
+    {
+      "name": "revision_7_local_format_checker",
+      "value": "No Schema/model divergence allowlist: preserve Draft 2020-12 integer semantics for finite integral JSON numbers such as 3.0, construct the deterministic RFC 3339 checker locally for each Schema validator from the shared is_rfc3339_datetime rule, never mutate Draft202012Validator.FORMAT_CHECKER, prove that invariant in a fresh subprocess, and use a snapshot-only 14-Schema baseline registry. A mismatch remaining after those rules requires a CCR.",
+      "source": "Human approval 2026-08-06; revision 7 planning correction"
+    },
+    {
+      "name": "digest_binding_policy",
+      "value": "every file purpose marks its digest source: Base blob f36ba6a for pre-existing files, or planning artifact for files introduced or edited by the docs/slice-00-03-planning change; planning-artifact digests bind the planning PR submission state, which is the authoritative planning context",
+      "source": "reviewer finding P1; per-entry purpose labels"
+    },
+    {
+      "name": "planning_artifact_paths",
+      "value": "AGENTS.md, docs/development/phase-and-slice-operating-model.md, docs/roadmap/phase-00-foundation/slices/README.md, docs/roadmap/phase-00-foundation/slices/00-02-python-quality-skeleton/CLOSEOUT.md, docs/roadmap/phase-00-foundation/slices/00-03-contract-toolchain/SLICE.md, docs/roadmap/phase-00-foundation/slices/00-03-contract-toolchain/slice-contract.json, docs/roadmap/phase-00-foundation/slices/00-03-contract-toolchain/context-manifest.json, docs/adr/0026-contract-toolchain-development-dependencies.md",
+      "source": "this manifest"
+    },
+    {
+      "name": "planning_context",
+      "value": "planning branch docs/slice-00-03-planning is routing metadata only; content is bound by the per-file planning-artifact digests and this manifest hash, while the Git Custodian records the exact planning Candidate SHA, pull request, and merge commit in the publication/dispatch evidence",
+      "source": "phase-and-slice-operating-model.md and reviewer finding P1"
+    },
+    {
+      "name": "predecessor_integrated_sha",
+      "value": "f36ba6a2930267e2d90682ff61930c82fd1237bb",
+      "source": "Slice 00-02 Closeout and PR #4"
+    },
+    {
+      "name": "managed_python",
+      "value": ">=3.12,<3.13",
+      "source": "ADR-0020 and compatibility-targets.md"
+    },
+    {
+      "name": "uv_version",
+      "value": "0.12.1",
+      "source": "compatibility-targets.md"
+    },
+    {
+      "name": "branch_flow",
+      "value": "feature pull request to main; signed tag publishes release",
+      "source": "ci-and-testing.md"
+    },
+    {
+      "name": "runtime_dependencies",
+      "value": "[]",
+      "source": "pyproject.toml and ci-and-testing.md runtime-dependency rule"
+    },
+    {
+      "name": "dependency_family_decision",
+      "value": "pydantic>=2,<3, jsonschema>=4,<5, rfc8785==0.1.4 in the dev group only; bound by ADR-0026 committed as accepted in this planning change",
+      "source": "Human acceptance 2026-08-06 and ADR-0026"
+    },
+    {
+      "name": "jcs_implementation",
+      "value": "rfc8785==0.1.4 is the single JCS implementation; no sort_keys approximation",
+      "source": "Human planning decision 2026-08-06"
+    },
+    {
+      "name": "schema_identity_decision",
+      "value": "one-time representation-only /v1 migration; $ids, schema_id references, and the identity lock unchanged; /v2 only for proven semantic incompatibility",
+      "source": "Human planning decision 2026-08-06"
+    },
+    {
+      "name": "baseline_equivalence_decision",
+      "value": "immutable f36 Schema snapshots with raw digests are committed under tests/fixtures/contracts; every baseline corpus entry is validated by the snapshot, strict Pydantic model, and generated Schema; three-way agreement is the gate and digest labels alone are not evidence",
+      "source": "Reviewer direction (REWORK round 2)"
+    },
+    {
+      "name": "openapi_decision",
+      "value": "fixed 3.1.0, jsonSchemaDialect Draft 2020-12, explicit empty paths, fixed 14 PascalCase component keys enumerated in AC-07, full embedded canonical equality with generated Schemas, no external refs, servers, or security placeholders; committed at contracts/openapi.json",
+      "source": "Human planning decision 2026-08-06 and reviewer direction"
+    },
+    {
+      "name": "compatibility_registry_decision",
+      "value": "contracts/compatibility-registry.json maps each of the 14 $ids to {current_version >= 1, supported_versions non-empty strictly increasing with current_version as maximum}; key set equals the $id set exactly",
+      "source": "Reviewer direction"
+    },
+    {
+      "name": "fixture_structure_decision",
+      "value": "13 instantiable root contracts get instance corpora (minimal, maximal, invalid, legacy, canary); common/definitions gets per-$defs fragment tests, not instance corpora",
+      "source": "Reviewer direction"
+    },
+    {
+      "name": "content_hash_scope_decision",
+      "value": "content_hash recomputation limited to 00-03 generated artifacts and permitted_paths files; historical planning, review, evidence, and closeout records keep recorded hashes unless a Contract Change Request approves otherwise",
+      "source": "Reviewer direction"
+    },
+    {
+      "name": "lazy_dispatch_decision",
+      "value": "contracts check keeps its name; toolchain is lazy-imported only after the contracts subcommand is parsed; Hermes plugin, --version, and normal runtime path stay pure standard library; bounded error without development dependencies",
+      "source": "Reviewer direction"
+    },
+    {
+      "name": "workflow_inventory_decision",
+      "value": "python-quality.yml extension includes the exact offline contracts drift-check command and is paired with updating the frozen command inventory in scripts/check_documentation.py and its workflow fixtures; documentation-contracts.yml and check_schemas.py unchanged",
+      "source": "Reviewer direction"
+    },
+    {
+      "name": "documentation_authority",
+      "value": "README.md, docs/README.md, schemas/README.md, CONTRIBUTING.md, and compatibility-targets.md are in permitted_paths and must stay accurate for the upgraded contracts check semantics; the 00-03 Closeout is prepared by the post-acceptance planning/closeout owner, not edited by the Executor",
+      "source": "Reviewer direction"
+    },
+    {
+      "name": "diff_check_command",
+      "value": "git diff --check is tracked as command_id diff-check; staged-tree allowlist is validated by the Git Custodian",
+      "source": "Reviewer direction"
+    },
+    {
+      "name": "bootstrap_gate",
+      "value": "scripts/check_schemas.py remains the untouched dependency-free gate; consistency test aligns it with the full validator",
+      "source": "slice-contract.json"
+    },
+    {
+      "name": "network_after_install_allowed",
+      "value": false,
+      "source": "slice-contract.json"
+    },
+    {
+      "name": "credentials_allowed",
+      "value": false,
+      "source": "slice-contract.json"
+    },
+    {
+      "name": "executor_git_mutation_allowed",
+      "value": false,
+      "source": "slice-contract.json"
+    },
+    {
+      "name": "executor_adr_edit_allowed",
+      "value": false,
+      "source": "reviewer finding P1; the Executor must not modify ADR-0026 or any ADR"
+    },
+    {
+      "name": "previous_review_findings",
+      "value": "Round 1: manifest not bound to Base; dependency family required ADR-0026; lazy-dispatch boundary undefined; README family not in permitted paths; workflow-policy conflict; no baseline payload fixtures and missing model round-trip; OpenAPI and registry paths and component-key rules unlocked; definitions is a $defs library. Round 2: ADR-0026 not yet committed; manifest Base-source labeling inaccurate; CONTRIBUTING.md and schemas/README.md authority missing; compatibility-targets acceptance missing; /v1 equivalence needs baseline pre-validation; content_hash recomputation scope conflicted with prohibited records; OpenAPI component keys and registry structure need fixed machine-verifiable rules; 14 Pydantic models wording. Round 3: stale predecessor worktree prerequisite; branch name presented as evidence; strict model parity, immutable f36 snapshots, full OpenAPI embedding, exact offline drift-check, and Closeout ownership needed. Current rework: Fact.value must preserve integral 3.0 parity; all failure reporting must remain bounded and safe with unreadable corpus fixtures; diagnostic line breaks must be escaped; the snapshot digest manifest must lock its exact base and 14 paths; registry and migration target versions must reject booleans and non-integers. Revision 7: replace the approved-but-unsafe process-global FORMAT_CHECKER mutation with a local checker per Schema validator; a fresh-subprocess default-checker non-mutation regression is required.",
+      "source": "Review attempts 1 and 2 (REWORK)"
+    },
+    {
+      "name": "executor_rework_budget",
+      "value": "Under one unchanged Slice Contract revision, the assigned Executor receives at most two recorded REWORK attempts. BLOCKED_CONTRACT is excluded. After both attempts still receive REWORK, Codex may run only a separate bounded corrective attempt, followed by fresh review and Git Custodian Candidate creation.",
+      "source": "AGENTS.md and phase-and-slice-operating-model.md"
+    }
+  ],
+  "content_hash": "sha256:7ac19750e43acf408ca4d0deac489b0a9951077f1803bc7cbaf58a2274ef1ab4"
+}
