@@ -1,0 +1,483 @@
+{
+  "schema_id": "https://schemas.hermes-pipeline.dev/engineering/review-verdict/v1",
+  "entries": [
+    {
+      "name": "minimal",
+      "category": "minimal",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/review-verdict/v1",
+        "schema_version": 1,
+        "verdict_id": "review_00_03_1",
+        "slice_id": "slice-00-03",
+        "contract_revision": 5,
+        "review_attempt": 1,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "context_manifest_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "evidence_bundle_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "verdict": "REWORK",
+        "axes": {
+          "spec": "PASS",
+          "standards": "FAIL",
+          "evidence": "PASS",
+          "scope_safety": "PASS"
+        },
+        "findings": [
+          {
+            "finding_id": "F-01",
+            "severity": "MAJOR",
+            "axis": "STANDARDS",
+            "evidence": "corpus gap",
+            "requirement_ref": "AC-05",
+            "required_correction": "add round-trip fixtures"
+          }
+        ],
+        "reviewed_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:40e11acfd63f52d6425e3a465e7a1b1ef56e10bdfda936d45374b95b5370893a"
+      }
+    },
+    {
+      "name": "maximal",
+      "category": "maximal",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/review-verdict/v1",
+        "schema_version": 1,
+        "verdict_id": "review_00_03_1",
+        "slice_id": "slice-00-03",
+        "contract_revision": 5,
+        "review_attempt": 2,
+        "base_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "candidate_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "context_manifest_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "evidence_bundle_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "verdict": "PASS",
+        "axes": {
+          "spec": "PASS",
+          "standards": "PASS",
+          "evidence": "PASS",
+          "scope_safety": "PASS"
+        },
+        "findings": [],
+        "reviewed_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:29c0784e3c1665364fe4a803dedbc82376b5aa183a9b9725d183635f008dc10f"
+      }
+    },
+    {
+      "name": "integral-number-3.0",
+      "category": "integral",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/review-verdict/v1",
+        "schema_version": 1,
+        "verdict_id": "review_00_03_1",
+        "slice_id": "slice-00-03",
+        "contract_revision": 3.0,
+        "review_attempt": 1,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "context_manifest_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "evidence_bundle_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "verdict": "REWORK",
+        "axes": {
+          "spec": "PASS",
+          "standards": "FAIL",
+          "evidence": "PASS",
+          "scope_safety": "PASS"
+        },
+        "findings": [
+          {
+            "finding_id": "F-01",
+            "severity": "MAJOR",
+            "axis": "STANDARDS",
+            "evidence": "corpus gap",
+            "requirement_ref": "AC-05",
+            "required_correction": "add round-trip fixtures"
+          }
+        ],
+        "reviewed_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:5397b00f152b06c4fcbd3acdb082a71498f4d37794162f214fabf4e851cf7909"
+      }
+    },
+    {
+      "name": "invalid-finding-id",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/review-verdict/v1",
+        "schema_version": 1,
+        "verdict_id": "review_00_03_1",
+        "slice_id": "slice-00-03",
+        "contract_revision": 5,
+        "review_attempt": 1,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "context_manifest_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "evidence_bundle_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "verdict": "REWORK",
+        "axes": {
+          "spec": "PASS",
+          "standards": "FAIL",
+          "evidence": "PASS",
+          "scope_safety": "PASS"
+        },
+        "findings": [
+          {
+            "finding_id": "F1",
+            "severity": "MAJOR",
+            "axis": "STANDARDS",
+            "evidence": "e",
+            "requirement_ref": "AC-05",
+            "required_correction": "c"
+          }
+        ],
+        "reviewed_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:712ed55f0d0b9736005ee1e1ac84833a452f713b89e7700c3b94ed42de69457f"
+      }
+    },
+    {
+      "name": "invalid-integral-3.5",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/review-verdict/v1",
+        "schema_version": 1,
+        "verdict_id": "review_00_03_1",
+        "slice_id": "slice-00-03",
+        "contract_revision": 3.5,
+        "review_attempt": 1,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "context_manifest_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "evidence_bundle_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "verdict": "REWORK",
+        "axes": {
+          "spec": "PASS",
+          "standards": "FAIL",
+          "evidence": "PASS",
+          "scope_safety": "PASS"
+        },
+        "findings": [
+          {
+            "finding_id": "F-01",
+            "severity": "MAJOR",
+            "axis": "STANDARDS",
+            "evidence": "corpus gap",
+            "requirement_ref": "AC-05",
+            "required_correction": "add round-trip fixtures"
+          }
+        ],
+        "reviewed_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:b363f3572d33f0ad65ca2aed32943f4ef44e91528e40a6f334e65bf267bc440d"
+      }
+    },
+    {
+      "name": "invalid-integral-boolean",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/review-verdict/v1",
+        "schema_version": 1,
+        "verdict_id": "review_00_03_1",
+        "slice_id": "slice-00-03",
+        "contract_revision": true,
+        "review_attempt": 1,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "context_manifest_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "evidence_bundle_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "verdict": "REWORK",
+        "axes": {
+          "spec": "PASS",
+          "standards": "FAIL",
+          "evidence": "PASS",
+          "scope_safety": "PASS"
+        },
+        "findings": [
+          {
+            "finding_id": "F-01",
+            "severity": "MAJOR",
+            "axis": "STANDARDS",
+            "evidence": "corpus gap",
+            "requirement_ref": "AC-05",
+            "required_correction": "add round-trip fixtures"
+          }
+        ],
+        "reviewed_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:ec2219dd9b24bf2ef1f5d0db1d471722e954381918bef1df963641141117385e"
+      }
+    },
+    {
+      "name": "invalid-integral-string",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/review-verdict/v1",
+        "schema_version": 1,
+        "verdict_id": "review_00_03_1",
+        "slice_id": "slice-00-03",
+        "contract_revision": "3",
+        "review_attempt": 1,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "context_manifest_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "evidence_bundle_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "verdict": "REWORK",
+        "axes": {
+          "spec": "PASS",
+          "standards": "FAIL",
+          "evidence": "PASS",
+          "scope_safety": "PASS"
+        },
+        "findings": [
+          {
+            "finding_id": "F-01",
+            "severity": "MAJOR",
+            "axis": "STANDARDS",
+            "evidence": "corpus gap",
+            "requirement_ref": "AC-05",
+            "required_correction": "add round-trip fixtures"
+          }
+        ],
+        "reviewed_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:779976d36f252832eabb1b1923eb75ba4e400350ba86dc1a9037b3dd7dc734de"
+      }
+    },
+    {
+      "name": "invalid-pass-with-findings",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/review-verdict/v1",
+        "schema_version": 1,
+        "verdict_id": "review_00_03_1",
+        "slice_id": "slice-00-03",
+        "contract_revision": 5,
+        "review_attempt": 1,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "context_manifest_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "evidence_bundle_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "verdict": "PASS",
+        "axes": {
+          "spec": "PASS",
+          "standards": "PASS",
+          "evidence": "PASS",
+          "scope_safety": "PASS"
+        },
+        "findings": [
+          {
+            "finding_id": "F-01",
+            "severity": "MAJOR",
+            "axis": "STANDARDS",
+            "evidence": "corpus gap",
+            "requirement_ref": "AC-05",
+            "required_correction": "add round-trip fixtures"
+          }
+        ],
+        "reviewed_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:931ad2213180984781d88ea6bd9965d61e206b582c72f18edb2a355236375608"
+      }
+    },
+    {
+      "name": "invalid-rework-without-findings",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/review-verdict/v1",
+        "schema_version": 1,
+        "verdict_id": "review_00_03_1",
+        "slice_id": "slice-00-03",
+        "contract_revision": 5,
+        "review_attempt": 1,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "context_manifest_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "evidence_bundle_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "verdict": "REWORK",
+        "axes": {
+          "spec": "PASS",
+          "standards": "FAIL",
+          "evidence": "PASS",
+          "scope_safety": "PASS"
+        },
+        "findings": [],
+        "reviewed_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:0b6900a16f6bac8b99f3e9d9b866e2b328b7e0e3ebc1ef34eb345c05ace66267"
+      }
+    },
+    {
+      "name": "invalid-unknown-field",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/review-verdict/v1",
+        "schema_version": 1,
+        "verdict_id": "review_00_03_1",
+        "slice_id": "slice-00-03",
+        "contract_revision": 5,
+        "review_attempt": 1,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "context_manifest_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "evidence_bundle_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "verdict": "REWORK",
+        "axes": {
+          "spec": "PASS",
+          "standards": "FAIL",
+          "evidence": "PASS",
+          "scope_safety": "PASS"
+        },
+        "findings": [
+          {
+            "finding_id": "F-01",
+            "severity": "MAJOR",
+            "axis": "STANDARDS",
+            "evidence": "corpus gap",
+            "requirement_ref": "AC-05",
+            "required_correction": "add round-trip fixtures"
+          }
+        ],
+        "reviewed_at": "2026-08-06T00:00:00.000Z",
+        "approve": true,
+        "content_hash": "sha256:1c3234268d5a7693b344e731ee53d0fa7ca8bc2b2604f8a10bc275f076fe2446"
+      }
+    },
+    {
+      "name": "invalid-verdict",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/review-verdict/v1",
+        "schema_version": 1,
+        "verdict_id": "review_00_03_1",
+        "slice_id": "slice-00-03",
+        "contract_revision": 5,
+        "review_attempt": 1,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "context_manifest_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "evidence_bundle_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "verdict": "APPROVE",
+        "axes": {
+          "spec": "PASS",
+          "standards": "FAIL",
+          "evidence": "PASS",
+          "scope_safety": "PASS"
+        },
+        "findings": [
+          {
+            "finding_id": "F-01",
+            "severity": "MAJOR",
+            "axis": "STANDARDS",
+            "evidence": "corpus gap",
+            "requirement_ref": "AC-05",
+            "required_correction": "add round-trip fixtures"
+          }
+        ],
+        "reviewed_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:8f01aa5692306176f99cb6212f1b167c74cb753740942b59c5ce8acfb983c931"
+      }
+    },
+    {
+      "name": "legacy",
+      "category": "legacy",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/review-verdict/v1",
+        "schema_version": 1,
+        "verdict_id": "review_00_02_3",
+        "slice_id": "slice-00-02",
+        "contract_revision": 4,
+        "review_attempt": 1,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "context_manifest_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "evidence_bundle_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "verdict": "REWORK",
+        "axes": {
+          "spec": "PASS",
+          "standards": "FAIL",
+          "evidence": "PASS",
+          "scope_safety": "PASS"
+        },
+        "findings": [
+          {
+            "finding_id": "F-01",
+            "severity": "MAJOR",
+            "axis": "STANDARDS",
+            "evidence": "corpus gap",
+            "requirement_ref": "AC-05",
+            "required_correction": "add round-trip fixtures"
+          }
+        ],
+        "reviewed_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:c421735e07d4acaf8e551e70f26688a1b6cd8e45c8ec914ce8cd9c04d5dbd13e"
+      }
+    },
+    {
+      "name": "legacy-invalid",
+      "category": "legacy",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/review-verdict/v1",
+        "schema_version": 1,
+        "verdict_id": "review_00_03_1",
+        "slice_id": "slice-00-03",
+        "contract_revision": 5,
+        "review_attempt": 1,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "context_manifest_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "evidence_bundle_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "verdict": "BLOCKED_CONTRACT",
+        "axes": {
+          "spec": "PASS",
+          "standards": "FAIL",
+          "evidence": "PASS",
+          "scope_safety": "PASS"
+        },
+        "findings": [],
+        "reviewed_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:143034dc1e9c6891c67b86697fde0ed1085249f378dd8290d7cabb1aec272434"
+      }
+    },
+    {
+      "name": "canary",
+      "category": "canary",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/review-verdict/v1",
+        "schema_version": 1,
+        "verdict_id": "review_00_03_1",
+        "slice_id": "slice-00-03",
+        "contract_revision": 5,
+        "review_attempt": 1,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "context_manifest_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "evidence_bundle_hash": "canary_review-verdict_7f3e9a2c4b1d",
+        "verdict": "REWORK",
+        "axes": {
+          "spec": "PASS",
+          "standards": "FAIL",
+          "evidence": "PASS",
+          "scope_safety": "PASS"
+        },
+        "findings": [
+          {
+            "finding_id": "F-01",
+            "severity": "MAJOR",
+            "axis": "STANDARDS",
+            "evidence": "corpus gap",
+            "requirement_ref": "AC-05",
+            "required_correction": "add round-trip fixtures"
+          }
+        ],
+        "reviewed_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:555fef4b6811aa863bb96d58a19c692098f205fe7f5e0796d7b9e8920481fa3f"
+      }
+    }
+  ]
+}

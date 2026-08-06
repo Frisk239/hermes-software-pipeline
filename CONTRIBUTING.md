@@ -27,7 +27,7 @@ Open a discussion before preparing changes that alter product scope, architectur
 
 ## Development commands
 
-The canonical command set is established by Phase 00 (slice-00-02):
+The canonical command set is established by Phase 00 (slice-00-02/00-03):
 
 ```text
 uv sync --frozen --all-groups
@@ -36,10 +36,11 @@ uv run ruff check .
 uv run pyright
 uv run pytest
 uv run python -m hermes_pipeline.cli contracts check
+uv run python -m hermes_pipeline.cli contracts drift-check
 uv run python -m hermes_pipeline.cli architecture check
 ```
 
-The managed runtime is Python `>=3.12,<3.13` under `uv 0.12.1`; the full development-tool resolution is frozen in `uv.lock`, and the same checks run offline after installation (`uv run --offline ...` and `uv sync --frozen --all-groups --offline`). `contracts check` delegates in-process to the bootstrap Schema checker; `architecture check` runs the standard-library AST import-boundary checker. Their default repository targets intentionally require a Hermes Pipeline source checkout; a standalone installed console supports `--version`, while `architecture check --root <path>` remains explicit-path capable. Set `PYTHONDONTWRITEBYTECODE=1` for a final local artifact audit; CI already supplies it to every job process. CI runs these checks on Windows and Linux via `.github/workflows/python-quality.yml`.
+The managed runtime is Python `>=3.12,<3.13` under `uv 0.12.1`; the full development-tool resolution is frozen in `uv.lock`, and the same checks run offline after installation (`uv run --offline ...` and `uv sync --frozen --all-groups --offline`). `contracts check` is the full read-only validator (identity lock, Draft 2020-12 meta-validation, `$ref` closure, FORMAT_CHECKER instance validation, the f36 baseline corpus three-way gate, OpenAPI/registry checks, canonical hashes, canary scan); `contracts drift-check` byte-compares regenerated projections against the committed files; `contracts generate` is the only command that writes the generated artifacts, and the toolchain is lazy-imported only after the `contracts` subcommand is parsed. `scripts/check_schemas.py` remains the untouched dependency-free bootstrap gate, and a consistency test keeps both validators aligned. `architecture check` runs the standard-library AST import-boundary checker. Their default repository targets intentionally require a Hermes Pipeline source checkout; a standalone installed console supports `--version`, while `architecture check --root <path>` remains explicit-path capable. Set `PYTHONDONTWRITEBYTECODE=1` for a final local artifact audit; CI already supplies it to every job process. CI runs these checks on Windows and Linux via `.github/workflows/python-quality.yml`.
 
 The slice-00-01 bootstrap checks are dependency-free and offline:
 

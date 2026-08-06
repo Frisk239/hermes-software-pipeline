@@ -6,9 +6,7 @@ commands and malformed arguments must fail without touching any state.
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
-from types import ModuleType
 
 import pytest
 
@@ -43,6 +41,37 @@ def test_contracts_requires_check_subcommand(
     assert main(["contracts", "wat"]) == 2
 
 
+def test_contracts_subcommands_reject_extra_arguments(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    assert main(["contracts", "check", "--bogus"]) == 2
+    assert main(["contracts", "generate", "extra"]) == 2
+    assert main(["contracts", "drift-check", "extra"]) == 2
+
+
+def test_contracts_check_runs_the_full_validator(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    assert main(["contracts", "check"]) == 0
+    assert "contracts check: OK" in capsys.readouterr().out
+
+
+def test_contracts_drift_check_runs_read_only(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    assert main(["contracts", "drift-check"]) == 0
+    assert "contracts drift-check: OK" in capsys.readouterr().out
+
+
+def test_contracts_commands_require_a_source_checkout(
+    capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr("hermes_pipeline.contracts.toolchain._repo_root", lambda: None)
+    assert main(["contracts", "check"]) == 1
+    assert "requires a Hermes Pipeline source checkout" in capsys.readouterr().err
+
+
 def test_architecture_requires_check_subcommand(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
@@ -55,39 +84,6 @@ def test_architecture_check_rejects_unknown_flags(
     assert main(["architecture", "check", "--bogus"]) == 2
     assert main(["architecture", "check", "--root"]) == 2
     assert main(["architecture", "check", "--root", "a", "b"]) == 2
-
-
-def test_contracts_check_delegates_to_bootstrap_checker(
-    capsys: pytest.CaptureFixture[str],
-) -> None:
-    assert main(["contracts", "check"]) == 0
-    assert "check_schemas: OK" in capsys.readouterr().out
-
-
-def test_contracts_check_requires_a_source_checkout(
-    capsys: pytest.CaptureFixture[str],
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.setattr("hermes_pipeline.cli._contracts.repo_root", lambda: None)
-    assert main(["contracts", "check"]) == 1
-    assert "requires a Hermes Pipeline source checkout" in capsys.readouterr().err
-
-
-def test_contracts_check_restores_script_import_state(
-    capsys: pytest.CaptureFixture[str],
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    original_path = list(sys.path)
-    schemas_before = ModuleType("check_schemas_before")
-    common_before = ModuleType("_check_common_before")
-    monkeypatch.setitem(sys.modules, "check_schemas", schemas_before)
-    monkeypatch.setitem(sys.modules, "_check_common", common_before)
-
-    assert main(["contracts", "check"]) == 0
-    assert "check_schemas: OK" in capsys.readouterr().out
-    assert sys.path == original_path
-    assert sys.modules["check_schemas"] is schemas_before
-    assert sys.modules["_check_common"] is common_before
 
 
 def test_architecture_check_accepts_current_skeleton(

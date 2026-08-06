@@ -41,6 +41,8 @@ jobs:
         run: uv run --offline pytest
       - name: Contract check
         run: uv run --offline python -m hermes_pipeline.cli contracts check
+      - name: Contract drift check
+        run: uv run --offline python -m hermes_pipeline.cli contracts drift-check
       - name: Architecture check
         run: uv run --offline python -m hermes_pipeline.cli architecture check
       - name: Documentation checks

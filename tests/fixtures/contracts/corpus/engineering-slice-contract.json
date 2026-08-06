@@ -1,0 +1,1550 @@
+{
+  "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
+  "entries": [
+    {
+      "name": "minimal",
+      "category": "minimal",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
+        "schema_version": 1,
+        "document_revision": 5,
+        "slice_id": "slice-00-03",
+        "phase_id": "phase-00",
+        "status": "READY",
+        "predecessors": [
+          "slice-00-02"
+        ],
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assigned_worktree": "C:/worktrees/slice-00-03",
+        "operator_path": "run the canonical checks offline",
+        "must_scope": [
+          "pydantic authoring types"
+        ],
+        "out_of_scope": [
+          "controller behavior"
+        ],
+        "interfaces": [
+          "contracts generate"
+        ],
+        "binding_adrs": [
+          "ADR-0018",
+          "ADR-0020",
+          "ADR-0024",
+          "ADR-0026"
+        ],
+        "permitted_paths": [
+          "pyproject.toml",
+          "src/hermes_pipeline/contracts/"
+        ],
+        "prohibited_actions": [
+          "modify accepted ADRs"
+        ],
+        "implications": {
+          "data": [
+            "no runtime data"
+          ],
+          "migration": [
+            "representation-only"
+          ],
+          "compatibility": [
+            "v1 preserved"
+          ],
+          "security": [
+            "lazy dispatch"
+          ],
+          "documentation": [
+            "README updated"
+          ]
+        },
+        "acceptance_criteria": [
+          {
+            "criterion_id": "AC-01",
+            "trace_ids": [
+              "EC-00-03"
+            ],
+            "observable_result": "14 schemas generated",
+            "verification_command_ids": [
+              "contracts-check",
+              "contracts-drift"
+            ]
+          }
+        ],
+        "required_tests": [
+          "three-way corpus gate"
+        ],
+        "demonstration": "byte-identical generation on both OS",
+        "verification_commands": [
+          {
+            "command_id": "contracts-check",
+            "argv": [
+              "uv",
+              "run",
+              "python",
+              "-m",
+              "hermes_pipeline.cli",
+              "contracts",
+              "check"
+            ],
+            "working_directory": ".",
+            "timeout_ms": 120000
+          }
+        ],
+        "required_evidence": [
+          "command outputs"
+        ],
+        "risks": [
+          {
+            "risk_id": "R-01",
+            "description": "baseline disagreement",
+            "impact": "HIGH",
+            "mitigation": "three-way corpus gate",
+            "trigger": "entry differs"
+          }
+        ],
+        "retry_budget": 3,
+        "stop_conditions": [
+          "identity change"
+        ],
+        "content_hash": "sha256:d9a76db51915ec95464baa617ed30f18d450c5805c0a6e8cda0703196ac6acef"
+      }
+    },
+    {
+      "name": "maximal",
+      "category": "maximal",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
+        "schema_version": 1,
+        "document_revision": 6,
+        "slice_id": "slice-00-03",
+        "phase_id": "phase-00",
+        "status": "ACCEPTED",
+        "predecessors": [
+          "slice-00-01",
+          "slice-00-02"
+        ],
+        "base_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "assigned_worktree": "C:/worktrees/slice-00-03",
+        "operator_path": "run the canonical checks offline",
+        "must_scope": [
+          "pydantic authoring types",
+          "OpenAPI generation"
+        ],
+        "out_of_scope": [
+          "controller behavior",
+          "persistence"
+        ],
+        "interfaces": [
+          "contracts generate",
+          "contracts drift-check"
+        ],
+        "binding_adrs": [
+          "ADR-0018",
+          "ADR-0020",
+          "ADR-0024",
+          "ADR-0026"
+        ],
+        "permitted_paths": [
+          "pyproject.toml",
+          "schemas/",
+          "tests/"
+        ],
+        "prohibited_actions": [
+          "modify accepted ADRs",
+          "hand-edit generated files"
+        ],
+        "implications": {
+          "data": [
+            "no runtime data"
+          ],
+          "migration": [
+            "representation-only"
+          ],
+          "compatibility": [
+            "v1 preserved"
+          ],
+          "security": [
+            "lazy dispatch"
+          ],
+          "documentation": [
+            "README updated"
+          ]
+        },
+        "acceptance_criteria": [
+          {
+            "criterion_id": "AC-01",
+            "trace_ids": [
+              "EC-00-03",
+              "XCON-01"
+            ],
+            "observable_result": "14 schemas generated",
+            "verification_command_ids": [
+              "contracts-check",
+              "contracts-drift"
+            ]
+          },
+          {
+            "criterion_id": "AC-07",
+            "trace_ids": [
+              "EC-00-03"
+            ],
+            "observable_result": "OpenAPI fixed shape",
+            "verification_command_ids": [
+              "contracts-check"
+            ]
+          }
+        ],
+        "required_tests": [
+          "three-way corpus gate",
+          "golden vectors"
+        ],
+        "demonstration": "byte-identical generation on both OS",
+        "verification_commands": [
+          {
+            "command_id": "contracts-check",
+            "argv": [
+              "uv",
+              "run",
+              "python",
+              "-m",
+              "hermes_pipeline.cli",
+              "contracts",
+              "check"
+            ],
+            "working_directory": ".",
+            "timeout_ms": 120000
+          },
+          {
+            "command_id": "contracts-drift",
+            "argv": [
+              "uv",
+              "run",
+              "python",
+              "-m",
+              "hermes_pipeline.cli",
+              "contracts",
+              "drift-check"
+            ],
+            "working_directory": ".",
+            "timeout_ms": 120000
+          }
+        ],
+        "required_evidence": [
+          "command outputs",
+          "CI urls"
+        ],
+        "risks": [
+          {
+            "risk_id": "R-01",
+            "description": "baseline disagreement",
+            "impact": "HIGH",
+            "mitigation": "three-way corpus gate",
+            "trigger": "entry differs"
+          },
+          {
+            "risk_id": "R-02",
+            "description": "JCS divergence",
+            "impact": "HIGH",
+            "mitigation": "golden vectors",
+            "trigger": "vector fails"
+          }
+        ],
+        "retry_budget": 3,
+        "stop_conditions": [
+          "identity change",
+          "dependency family"
+        ],
+        "content_hash": "sha256:4e573740eeef05cb0d97990bab2ee61ae1ca6010c0baaff0f7dde7782e8f50fe"
+      }
+    },
+    {
+      "name": "integral-number-3.0",
+      "category": "integral",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
+        "schema_version": 1,
+        "document_revision": 3.0,
+        "slice_id": "slice-00-03",
+        "phase_id": "phase-00",
+        "status": "READY",
+        "predecessors": [
+          "slice-00-02"
+        ],
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assigned_worktree": "C:/worktrees/slice-00-03",
+        "operator_path": "run the canonical checks offline",
+        "must_scope": [
+          "pydantic authoring types"
+        ],
+        "out_of_scope": [
+          "controller behavior"
+        ],
+        "interfaces": [
+          "contracts generate"
+        ],
+        "binding_adrs": [
+          "ADR-0018",
+          "ADR-0020",
+          "ADR-0024",
+          "ADR-0026"
+        ],
+        "permitted_paths": [
+          "pyproject.toml",
+          "src/hermes_pipeline/contracts/"
+        ],
+        "prohibited_actions": [
+          "modify accepted ADRs"
+        ],
+        "implications": {
+          "data": [
+            "no runtime data"
+          ],
+          "migration": [
+            "representation-only"
+          ],
+          "compatibility": [
+            "v1 preserved"
+          ],
+          "security": [
+            "lazy dispatch"
+          ],
+          "documentation": [
+            "README updated"
+          ]
+        },
+        "acceptance_criteria": [
+          {
+            "criterion_id": "AC-01",
+            "trace_ids": [
+              "EC-00-03"
+            ],
+            "observable_result": "14 schemas generated",
+            "verification_command_ids": [
+              "contracts-check",
+              "contracts-drift"
+            ]
+          }
+        ],
+        "required_tests": [
+          "three-way corpus gate"
+        ],
+        "demonstration": "byte-identical generation on both OS",
+        "verification_commands": [
+          {
+            "command_id": "contracts-check",
+            "argv": [
+              "uv",
+              "run",
+              "python",
+              "-m",
+              "hermes_pipeline.cli",
+              "contracts",
+              "check"
+            ],
+            "working_directory": ".",
+            "timeout_ms": 120000
+          }
+        ],
+        "required_evidence": [
+          "command outputs"
+        ],
+        "risks": [
+          {
+            "risk_id": "R-01",
+            "description": "baseline disagreement",
+            "impact": "HIGH",
+            "mitigation": "three-way corpus gate",
+            "trigger": "entry differs"
+          }
+        ],
+        "retry_budget": 3,
+        "stop_conditions": [
+          "identity change"
+        ],
+        "content_hash": "sha256:2748d608b248dac7d66dd57ddae0d82f867f1d58ea7c7580e6d81c8f2b8049c7"
+      }
+    },
+    {
+      "name": "invalid-adr",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
+        "schema_version": 1,
+        "document_revision": 5,
+        "slice_id": "slice-00-03",
+        "phase_id": "phase-00",
+        "status": "READY",
+        "predecessors": [
+          "slice-00-02"
+        ],
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assigned_worktree": "C:/worktrees/slice-00-03",
+        "operator_path": "run the canonical checks offline",
+        "must_scope": [
+          "pydantic authoring types"
+        ],
+        "out_of_scope": [
+          "controller behavior"
+        ],
+        "interfaces": [
+          "contracts generate"
+        ],
+        "binding_adrs": [
+          "ADR-26"
+        ],
+        "permitted_paths": [
+          "pyproject.toml",
+          "src/hermes_pipeline/contracts/"
+        ],
+        "prohibited_actions": [
+          "modify accepted ADRs"
+        ],
+        "implications": {
+          "data": [
+            "no runtime data"
+          ],
+          "migration": [
+            "representation-only"
+          ],
+          "compatibility": [
+            "v1 preserved"
+          ],
+          "security": [
+            "lazy dispatch"
+          ],
+          "documentation": [
+            "README updated"
+          ]
+        },
+        "acceptance_criteria": [
+          {
+            "criterion_id": "AC-01",
+            "trace_ids": [
+              "EC-00-03"
+            ],
+            "observable_result": "14 schemas generated",
+            "verification_command_ids": [
+              "contracts-check",
+              "contracts-drift"
+            ]
+          }
+        ],
+        "required_tests": [
+          "three-way corpus gate"
+        ],
+        "demonstration": "byte-identical generation on both OS",
+        "verification_commands": [
+          {
+            "command_id": "contracts-check",
+            "argv": [
+              "uv",
+              "run",
+              "python",
+              "-m",
+              "hermes_pipeline.cli",
+              "contracts",
+              "check"
+            ],
+            "working_directory": ".",
+            "timeout_ms": 120000
+          }
+        ],
+        "required_evidence": [
+          "command outputs"
+        ],
+        "risks": [
+          {
+            "risk_id": "R-01",
+            "description": "baseline disagreement",
+            "impact": "HIGH",
+            "mitigation": "three-way corpus gate",
+            "trigger": "entry differs"
+          }
+        ],
+        "retry_budget": 3,
+        "stop_conditions": [
+          "identity change"
+        ],
+        "content_hash": "sha256:d8cbdf980fb710c4c8b983230266b68648498b85da9e03ca13bc83752e684d4a"
+      }
+    },
+    {
+      "name": "invalid-integral-3.5",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
+        "schema_version": 1,
+        "document_revision": 3.5,
+        "slice_id": "slice-00-03",
+        "phase_id": "phase-00",
+        "status": "READY",
+        "predecessors": [
+          "slice-00-02"
+        ],
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assigned_worktree": "C:/worktrees/slice-00-03",
+        "operator_path": "run the canonical checks offline",
+        "must_scope": [
+          "pydantic authoring types"
+        ],
+        "out_of_scope": [
+          "controller behavior"
+        ],
+        "interfaces": [
+          "contracts generate"
+        ],
+        "binding_adrs": [
+          "ADR-0018",
+          "ADR-0020",
+          "ADR-0024",
+          "ADR-0026"
+        ],
+        "permitted_paths": [
+          "pyproject.toml",
+          "src/hermes_pipeline/contracts/"
+        ],
+        "prohibited_actions": [
+          "modify accepted ADRs"
+        ],
+        "implications": {
+          "data": [
+            "no runtime data"
+          ],
+          "migration": [
+            "representation-only"
+          ],
+          "compatibility": [
+            "v1 preserved"
+          ],
+          "security": [
+            "lazy dispatch"
+          ],
+          "documentation": [
+            "README updated"
+          ]
+        },
+        "acceptance_criteria": [
+          {
+            "criterion_id": "AC-01",
+            "trace_ids": [
+              "EC-00-03"
+            ],
+            "observable_result": "14 schemas generated",
+            "verification_command_ids": [
+              "contracts-check",
+              "contracts-drift"
+            ]
+          }
+        ],
+        "required_tests": [
+          "three-way corpus gate"
+        ],
+        "demonstration": "byte-identical generation on both OS",
+        "verification_commands": [
+          {
+            "command_id": "contracts-check",
+            "argv": [
+              "uv",
+              "run",
+              "python",
+              "-m",
+              "hermes_pipeline.cli",
+              "contracts",
+              "check"
+            ],
+            "working_directory": ".",
+            "timeout_ms": 120000
+          }
+        ],
+        "required_evidence": [
+          "command outputs"
+        ],
+        "risks": [
+          {
+            "risk_id": "R-01",
+            "description": "baseline disagreement",
+            "impact": "HIGH",
+            "mitigation": "three-way corpus gate",
+            "trigger": "entry differs"
+          }
+        ],
+        "retry_budget": 3,
+        "stop_conditions": [
+          "identity change"
+        ],
+        "content_hash": "sha256:bb298ac12126bc798a443f0ba9fa644effc4963468f96a5e58e919ff273d79b7"
+      }
+    },
+    {
+      "name": "invalid-integral-boolean",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
+        "schema_version": 1,
+        "document_revision": true,
+        "slice_id": "slice-00-03",
+        "phase_id": "phase-00",
+        "status": "READY",
+        "predecessors": [
+          "slice-00-02"
+        ],
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assigned_worktree": "C:/worktrees/slice-00-03",
+        "operator_path": "run the canonical checks offline",
+        "must_scope": [
+          "pydantic authoring types"
+        ],
+        "out_of_scope": [
+          "controller behavior"
+        ],
+        "interfaces": [
+          "contracts generate"
+        ],
+        "binding_adrs": [
+          "ADR-0018",
+          "ADR-0020",
+          "ADR-0024",
+          "ADR-0026"
+        ],
+        "permitted_paths": [
+          "pyproject.toml",
+          "src/hermes_pipeline/contracts/"
+        ],
+        "prohibited_actions": [
+          "modify accepted ADRs"
+        ],
+        "implications": {
+          "data": [
+            "no runtime data"
+          ],
+          "migration": [
+            "representation-only"
+          ],
+          "compatibility": [
+            "v1 preserved"
+          ],
+          "security": [
+            "lazy dispatch"
+          ],
+          "documentation": [
+            "README updated"
+          ]
+        },
+        "acceptance_criteria": [
+          {
+            "criterion_id": "AC-01",
+            "trace_ids": [
+              "EC-00-03"
+            ],
+            "observable_result": "14 schemas generated",
+            "verification_command_ids": [
+              "contracts-check",
+              "contracts-drift"
+            ]
+          }
+        ],
+        "required_tests": [
+          "three-way corpus gate"
+        ],
+        "demonstration": "byte-identical generation on both OS",
+        "verification_commands": [
+          {
+            "command_id": "contracts-check",
+            "argv": [
+              "uv",
+              "run",
+              "python",
+              "-m",
+              "hermes_pipeline.cli",
+              "contracts",
+              "check"
+            ],
+            "working_directory": ".",
+            "timeout_ms": 120000
+          }
+        ],
+        "required_evidence": [
+          "command outputs"
+        ],
+        "risks": [
+          {
+            "risk_id": "R-01",
+            "description": "baseline disagreement",
+            "impact": "HIGH",
+            "mitigation": "three-way corpus gate",
+            "trigger": "entry differs"
+          }
+        ],
+        "retry_budget": 3,
+        "stop_conditions": [
+          "identity change"
+        ],
+        "content_hash": "sha256:8351b094cb969dbbfd65b63992e25a88f77cb80f5ee02433b5a991a710247d38"
+      }
+    },
+    {
+      "name": "invalid-integral-string",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
+        "schema_version": 1,
+        "document_revision": "3",
+        "slice_id": "slice-00-03",
+        "phase_id": "phase-00",
+        "status": "READY",
+        "predecessors": [
+          "slice-00-02"
+        ],
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assigned_worktree": "C:/worktrees/slice-00-03",
+        "operator_path": "run the canonical checks offline",
+        "must_scope": [
+          "pydantic authoring types"
+        ],
+        "out_of_scope": [
+          "controller behavior"
+        ],
+        "interfaces": [
+          "contracts generate"
+        ],
+        "binding_adrs": [
+          "ADR-0018",
+          "ADR-0020",
+          "ADR-0024",
+          "ADR-0026"
+        ],
+        "permitted_paths": [
+          "pyproject.toml",
+          "src/hermes_pipeline/contracts/"
+        ],
+        "prohibited_actions": [
+          "modify accepted ADRs"
+        ],
+        "implications": {
+          "data": [
+            "no runtime data"
+          ],
+          "migration": [
+            "representation-only"
+          ],
+          "compatibility": [
+            "v1 preserved"
+          ],
+          "security": [
+            "lazy dispatch"
+          ],
+          "documentation": [
+            "README updated"
+          ]
+        },
+        "acceptance_criteria": [
+          {
+            "criterion_id": "AC-01",
+            "trace_ids": [
+              "EC-00-03"
+            ],
+            "observable_result": "14 schemas generated",
+            "verification_command_ids": [
+              "contracts-check",
+              "contracts-drift"
+            ]
+          }
+        ],
+        "required_tests": [
+          "three-way corpus gate"
+        ],
+        "demonstration": "byte-identical generation on both OS",
+        "verification_commands": [
+          {
+            "command_id": "contracts-check",
+            "argv": [
+              "uv",
+              "run",
+              "python",
+              "-m",
+              "hermes_pipeline.cli",
+              "contracts",
+              "check"
+            ],
+            "working_directory": ".",
+            "timeout_ms": 120000
+          }
+        ],
+        "required_evidence": [
+          "command outputs"
+        ],
+        "risks": [
+          {
+            "risk_id": "R-01",
+            "description": "baseline disagreement",
+            "impact": "HIGH",
+            "mitigation": "three-way corpus gate",
+            "trigger": "entry differs"
+          }
+        ],
+        "retry_budget": 3,
+        "stop_conditions": [
+          "identity change"
+        ],
+        "content_hash": "sha256:dfc51522e1d8c158385feb99551124d564d6cf35f6a3ffa95809e5c9ddbe6aaa"
+      }
+    },
+    {
+      "name": "invalid-retry",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
+        "schema_version": 1,
+        "document_revision": 5,
+        "slice_id": "slice-00-03",
+        "phase_id": "phase-00",
+        "status": "READY",
+        "predecessors": [
+          "slice-00-02"
+        ],
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assigned_worktree": "C:/worktrees/slice-00-03",
+        "operator_path": "run the canonical checks offline",
+        "must_scope": [
+          "pydantic authoring types"
+        ],
+        "out_of_scope": [
+          "controller behavior"
+        ],
+        "interfaces": [
+          "contracts generate"
+        ],
+        "binding_adrs": [
+          "ADR-0018",
+          "ADR-0020",
+          "ADR-0024",
+          "ADR-0026"
+        ],
+        "permitted_paths": [
+          "pyproject.toml",
+          "src/hermes_pipeline/contracts/"
+        ],
+        "prohibited_actions": [
+          "modify accepted ADRs"
+        ],
+        "implications": {
+          "data": [
+            "no runtime data"
+          ],
+          "migration": [
+            "representation-only"
+          ],
+          "compatibility": [
+            "v1 preserved"
+          ],
+          "security": [
+            "lazy dispatch"
+          ],
+          "documentation": [
+            "README updated"
+          ]
+        },
+        "acceptance_criteria": [
+          {
+            "criterion_id": "AC-01",
+            "trace_ids": [
+              "EC-00-03"
+            ],
+            "observable_result": "14 schemas generated",
+            "verification_command_ids": [
+              "contracts-check",
+              "contracts-drift"
+            ]
+          }
+        ],
+        "required_tests": [
+          "three-way corpus gate"
+        ],
+        "demonstration": "byte-identical generation on both OS",
+        "verification_commands": [
+          {
+            "command_id": "contracts-check",
+            "argv": [
+              "uv",
+              "run",
+              "python",
+              "-m",
+              "hermes_pipeline.cli",
+              "contracts",
+              "check"
+            ],
+            "working_directory": ".",
+            "timeout_ms": 120000
+          }
+        ],
+        "required_evidence": [
+          "command outputs"
+        ],
+        "risks": [
+          {
+            "risk_id": "R-01",
+            "description": "baseline disagreement",
+            "impact": "HIGH",
+            "mitigation": "three-way corpus gate",
+            "trigger": "entry differs"
+          }
+        ],
+        "retry_budget": 11,
+        "stop_conditions": [
+          "identity change"
+        ],
+        "content_hash": "sha256:27ef66355fc20f74b9664d96807b1eb5eab3ef71e64edacfe9a1458116d06bfb"
+      }
+    },
+    {
+      "name": "invalid-status",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
+        "schema_version": 1,
+        "document_revision": 5,
+        "slice_id": "slice-00-03",
+        "phase_id": "phase-00",
+        "status": "PAUSED",
+        "predecessors": [
+          "slice-00-02"
+        ],
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assigned_worktree": "C:/worktrees/slice-00-03",
+        "operator_path": "run the canonical checks offline",
+        "must_scope": [
+          "pydantic authoring types"
+        ],
+        "out_of_scope": [
+          "controller behavior"
+        ],
+        "interfaces": [
+          "contracts generate"
+        ],
+        "binding_adrs": [
+          "ADR-0018",
+          "ADR-0020",
+          "ADR-0024",
+          "ADR-0026"
+        ],
+        "permitted_paths": [
+          "pyproject.toml",
+          "src/hermes_pipeline/contracts/"
+        ],
+        "prohibited_actions": [
+          "modify accepted ADRs"
+        ],
+        "implications": {
+          "data": [
+            "no runtime data"
+          ],
+          "migration": [
+            "representation-only"
+          ],
+          "compatibility": [
+            "v1 preserved"
+          ],
+          "security": [
+            "lazy dispatch"
+          ],
+          "documentation": [
+            "README updated"
+          ]
+        },
+        "acceptance_criteria": [
+          {
+            "criterion_id": "AC-01",
+            "trace_ids": [
+              "EC-00-03"
+            ],
+            "observable_result": "14 schemas generated",
+            "verification_command_ids": [
+              "contracts-check",
+              "contracts-drift"
+            ]
+          }
+        ],
+        "required_tests": [
+          "three-way corpus gate"
+        ],
+        "demonstration": "byte-identical generation on both OS",
+        "verification_commands": [
+          {
+            "command_id": "contracts-check",
+            "argv": [
+              "uv",
+              "run",
+              "python",
+              "-m",
+              "hermes_pipeline.cli",
+              "contracts",
+              "check"
+            ],
+            "working_directory": ".",
+            "timeout_ms": 120000
+          }
+        ],
+        "required_evidence": [
+          "command outputs"
+        ],
+        "risks": [
+          {
+            "risk_id": "R-01",
+            "description": "baseline disagreement",
+            "impact": "HIGH",
+            "mitigation": "three-way corpus gate",
+            "trigger": "entry differs"
+          }
+        ],
+        "retry_budget": 3,
+        "stop_conditions": [
+          "identity change"
+        ],
+        "content_hash": "sha256:7e7157dc69b41e0481721bbf4acae6b62e486beda0c3de136e892ba120f7b485"
+      }
+    },
+    {
+      "name": "invalid-timeout",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
+        "schema_version": 1,
+        "document_revision": 5,
+        "slice_id": "slice-00-03",
+        "phase_id": "phase-00",
+        "status": "READY",
+        "predecessors": [
+          "slice-00-02"
+        ],
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assigned_worktree": "C:/worktrees/slice-00-03",
+        "operator_path": "run the canonical checks offline",
+        "must_scope": [
+          "pydantic authoring types"
+        ],
+        "out_of_scope": [
+          "controller behavior"
+        ],
+        "interfaces": [
+          "contracts generate"
+        ],
+        "binding_adrs": [
+          "ADR-0018",
+          "ADR-0020",
+          "ADR-0024",
+          "ADR-0026"
+        ],
+        "permitted_paths": [
+          "pyproject.toml",
+          "src/hermes_pipeline/contracts/"
+        ],
+        "prohibited_actions": [
+          "modify accepted ADRs"
+        ],
+        "implications": {
+          "data": [
+            "no runtime data"
+          ],
+          "migration": [
+            "representation-only"
+          ],
+          "compatibility": [
+            "v1 preserved"
+          ],
+          "security": [
+            "lazy dispatch"
+          ],
+          "documentation": [
+            "README updated"
+          ]
+        },
+        "acceptance_criteria": [
+          {
+            "criterion_id": "AC-01",
+            "trace_ids": [
+              "EC-00-03"
+            ],
+            "observable_result": "14 schemas generated",
+            "verification_command_ids": [
+              "contracts-check",
+              "contracts-drift"
+            ]
+          }
+        ],
+        "required_tests": [
+          "three-way corpus gate"
+        ],
+        "demonstration": "byte-identical generation on both OS",
+        "verification_commands": [
+          {
+            "command_id": "contracts-check",
+            "argv": [
+              "uv",
+              "run",
+              "pytest"
+            ],
+            "working_directory": ".",
+            "timeout_ms": 500
+          }
+        ],
+        "required_evidence": [
+          "command outputs"
+        ],
+        "risks": [
+          {
+            "risk_id": "R-01",
+            "description": "baseline disagreement",
+            "impact": "HIGH",
+            "mitigation": "three-way corpus gate",
+            "trigger": "entry differs"
+          }
+        ],
+        "retry_budget": 3,
+        "stop_conditions": [
+          "identity change"
+        ],
+        "content_hash": "sha256:ad1a8fc3295d4d0222856681e186ca6185cd40eb93bbcb0706898b925d992e9d"
+      }
+    },
+    {
+      "name": "invalid-unknown-field",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
+        "schema_version": 1,
+        "document_revision": 5,
+        "slice_id": "slice-00-03",
+        "phase_id": "phase-00",
+        "status": "READY",
+        "predecessors": [
+          "slice-00-02"
+        ],
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assigned_worktree": "C:/worktrees/slice-00-03",
+        "operator_path": "run the canonical checks offline",
+        "must_scope": [
+          "pydantic authoring types"
+        ],
+        "out_of_scope": [
+          "controller behavior"
+        ],
+        "interfaces": [
+          "contracts generate"
+        ],
+        "binding_adrs": [
+          "ADR-0018",
+          "ADR-0020",
+          "ADR-0024",
+          "ADR-0026"
+        ],
+        "permitted_paths": [
+          "pyproject.toml",
+          "src/hermes_pipeline/contracts/"
+        ],
+        "prohibited_actions": [
+          "modify accepted ADRs"
+        ],
+        "implications": {
+          "data": [
+            "no runtime data"
+          ],
+          "migration": [
+            "representation-only"
+          ],
+          "compatibility": [
+            "v1 preserved"
+          ],
+          "security": [
+            "lazy dispatch"
+          ],
+          "documentation": [
+            "README updated"
+          ]
+        },
+        "acceptance_criteria": [
+          {
+            "criterion_id": "AC-01",
+            "trace_ids": [
+              "EC-00-03"
+            ],
+            "observable_result": "14 schemas generated",
+            "verification_command_ids": [
+              "contracts-check",
+              "contracts-drift"
+            ]
+          }
+        ],
+        "required_tests": [
+          "three-way corpus gate"
+        ],
+        "demonstration": "byte-identical generation on both OS",
+        "verification_commands": [
+          {
+            "command_id": "contracts-check",
+            "argv": [
+              "uv",
+              "run",
+              "python",
+              "-m",
+              "hermes_pipeline.cli",
+              "contracts",
+              "check"
+            ],
+            "working_directory": ".",
+            "timeout_ms": 120000
+          }
+        ],
+        "required_evidence": [
+          "command outputs"
+        ],
+        "risks": [
+          {
+            "risk_id": "R-01",
+            "description": "baseline disagreement",
+            "impact": "HIGH",
+            "mitigation": "three-way corpus gate",
+            "trigger": "entry differs"
+          }
+        ],
+        "retry_budget": 3,
+        "stop_conditions": [
+          "identity change"
+        ],
+        "owner": "x",
+        "content_hash": "sha256:228a6f1212298da1c58172bac2b6a270b1bd88330ad5329b24da12e4f144a07a"
+      }
+    },
+    {
+      "name": "legacy",
+      "category": "legacy",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
+        "schema_version": 1,
+        "document_revision": 4,
+        "slice_id": "slice-00-02",
+        "phase_id": "phase-00",
+        "status": "ACCEPTED",
+        "predecessors": [
+          "slice-00-01"
+        ],
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assigned_worktree": "C:/worktrees/slice-00-03",
+        "operator_path": "run the canonical checks offline",
+        "must_scope": [
+          "pydantic authoring types"
+        ],
+        "out_of_scope": [
+          "controller behavior"
+        ],
+        "interfaces": [
+          "contracts generate"
+        ],
+        "binding_adrs": [
+          "ADR-0018",
+          "ADR-0020",
+          "ADR-0024",
+          "ADR-0026"
+        ],
+        "permitted_paths": [
+          "pyproject.toml",
+          "src/hermes_pipeline/contracts/"
+        ],
+        "prohibited_actions": [
+          "modify accepted ADRs"
+        ],
+        "implications": {
+          "data": [
+            "no runtime data"
+          ],
+          "migration": [
+            "representation-only"
+          ],
+          "compatibility": [
+            "v1 preserved"
+          ],
+          "security": [
+            "lazy dispatch"
+          ],
+          "documentation": [
+            "README updated"
+          ]
+        },
+        "acceptance_criteria": [
+          {
+            "criterion_id": "AC-01",
+            "trace_ids": [
+              "EC-00-03"
+            ],
+            "observable_result": "14 schemas generated",
+            "verification_command_ids": [
+              "contracts-check",
+              "contracts-drift"
+            ]
+          }
+        ],
+        "required_tests": [
+          "bootstrap gate"
+        ],
+        "demonstration": "byte-identical generation on both OS",
+        "verification_commands": [
+          {
+            "command_id": "contracts-check",
+            "argv": [
+              "uv",
+              "run",
+              "python",
+              "-m",
+              "hermes_pipeline.cli",
+              "contracts",
+              "check"
+            ],
+            "working_directory": ".",
+            "timeout_ms": 120000
+          }
+        ],
+        "required_evidence": [
+          "command outputs"
+        ],
+        "risks": [
+          {
+            "risk_id": "R-01",
+            "description": "baseline disagreement",
+            "impact": "HIGH",
+            "mitigation": "three-way corpus gate",
+            "trigger": "entry differs"
+          }
+        ],
+        "retry_budget": 3,
+        "stop_conditions": [
+          "identity change"
+        ],
+        "content_hash": "sha256:e7c9ecbe86b22e6ea8bf7e125ef7bc2be98a71955f6c206ad4511d9868768573"
+      }
+    },
+    {
+      "name": "legacy-invalid",
+      "category": "legacy",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
+        "schema_version": 1,
+        "document_revision": 4,
+        "slice_id": "slice-00-02",
+        "phase_id": "phase-00",
+        "status": "ACCEPTED",
+        "predecessors": [
+          "slice-00-01"
+        ],
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assigned_worktree": "C:/worktrees/slice-00-03",
+        "operator_path": "run the canonical checks offline",
+        "must_scope": [
+          "pydantic authoring types"
+        ],
+        "out_of_scope": [
+          "controller behavior"
+        ],
+        "interfaces": [
+          "contracts generate"
+        ],
+        "binding_adrs": [
+          "ADR-0018",
+          "ADR-0020",
+          "ADR-0024",
+          "ADR-0026"
+        ],
+        "permitted_paths": [
+          "pyproject.toml",
+          "src/hermes_pipeline/contracts/"
+        ],
+        "prohibited_actions": [
+          "modify accepted ADRs"
+        ],
+        "implications": {
+          "data": [
+            "no runtime data"
+          ],
+          "migration": [
+            "representation-only"
+          ],
+          "compatibility": [
+            "v1 preserved"
+          ],
+          "security": [
+            "lazy dispatch"
+          ],
+          "documentation": [
+            "README updated"
+          ]
+        },
+        "acceptance_criteria": [
+          {
+            "criterion_id": "AC-01",
+            "trace_ids": [
+              "EC-00-03"
+            ],
+            "observable_result": "14 schemas generated",
+            "verification_command_ids": [
+              "contracts-check",
+              "contracts-drift"
+            ]
+          }
+        ],
+        "required_tests": [],
+        "demonstration": "byte-identical generation on both OS",
+        "verification_commands": [
+          {
+            "command_id": "contracts-check",
+            "argv": [
+              "uv",
+              "run",
+              "python",
+              "-m",
+              "hermes_pipeline.cli",
+              "contracts",
+              "check"
+            ],
+            "working_directory": ".",
+            "timeout_ms": 120000
+          }
+        ],
+        "required_evidence": [
+          "command outputs"
+        ],
+        "risks": [
+          {
+            "risk_id": "R-01",
+            "description": "baseline disagreement",
+            "impact": "HIGH",
+            "mitigation": "three-way corpus gate",
+            "trigger": "entry differs"
+          }
+        ],
+        "retry_budget": 3,
+        "stop_conditions": [
+          "identity change"
+        ],
+        "content_hash": "sha256:1d6afd0f256882b8341df167e0151fb89c25e61100032ec503774dfa8c29813c"
+      }
+    },
+    {
+      "name": "canary",
+      "category": "canary",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
+        "schema_version": 1,
+        "document_revision": 5,
+        "slice_id": "slice-00-03",
+        "phase_id": "phase-00",
+        "status": "READY",
+        "predecessors": [
+          "slice-00-02"
+        ],
+        "base_sha": "canary_slice-contract_7f3e9a2c4b1d",
+        "assigned_worktree": "C:/worktrees/slice-00-03",
+        "operator_path": "canary_slice-contract_7f3e9a2c4b1d",
+        "must_scope": [
+          "pydantic authoring types"
+        ],
+        "out_of_scope": [
+          "controller behavior"
+        ],
+        "interfaces": [
+          "contracts generate"
+        ],
+        "binding_adrs": [
+          "ADR-0018",
+          "ADR-0020",
+          "ADR-0024",
+          "ADR-0026"
+        ],
+        "permitted_paths": [
+          "pyproject.toml",
+          "src/hermes_pipeline/contracts/"
+        ],
+        "prohibited_actions": [
+          "modify accepted ADRs"
+        ],
+        "implications": {
+          "data": [
+            "no runtime data"
+          ],
+          "migration": [
+            "representation-only"
+          ],
+          "compatibility": [
+            "v1 preserved"
+          ],
+          "security": [
+            "lazy dispatch"
+          ],
+          "documentation": [
+            "README updated"
+          ]
+        },
+        "acceptance_criteria": [
+          {
+            "criterion_id": "AC-01",
+            "trace_ids": [
+              "EC-00-03"
+            ],
+            "observable_result": "14 schemas generated",
+            "verification_command_ids": [
+              "contracts-check",
+              "contracts-drift"
+            ]
+          }
+        ],
+        "required_tests": [
+          "three-way corpus gate"
+        ],
+        "demonstration": "byte-identical generation on both OS",
+        "verification_commands": [
+          {
+            "command_id": "contracts-check",
+            "argv": [
+              "uv",
+              "run",
+              "python",
+              "-m",
+              "hermes_pipeline.cli",
+              "contracts",
+              "check"
+            ],
+            "working_directory": ".",
+            "timeout_ms": 120000
+          }
+        ],
+        "required_evidence": [
+          "command outputs"
+        ],
+        "risks": [
+          {
+            "risk_id": "R-01",
+            "description": "baseline disagreement",
+            "impact": "HIGH",
+            "mitigation": "three-way corpus gate",
+            "trigger": "entry differs"
+          }
+        ],
+        "retry_budget": 3,
+        "stop_conditions": [
+          "identity change"
+        ],
+        "content_hash": "sha256:c31d573525a34217a4c45357d29a288cf919d1eb0ac562e20431638f7af262b5"
+      }
+    }
+  ]
+}

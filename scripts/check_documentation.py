@@ -134,6 +134,7 @@ REQUIRED_QUALITY_WORKFLOW_COMMANDS = (
     "uv run --offline pyright",
     "uv run --offline pytest",
     "uv run --offline python -m hermes_pipeline.cli contracts check",
+    "uv run --offline python -m hermes_pipeline.cli contracts drift-check",
     "uv run --offline python -m hermes_pipeline.cli architecture check",
     "uv run --offline python scripts/check_documentation.py",
     "uv run --offline python scripts/check_documentation.py --self-test-negative",

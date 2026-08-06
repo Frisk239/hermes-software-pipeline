@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.hermes-pipeline.dev/runtime/pipeline-event/v1",
+  "title": "Pipeline Event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_id", "schema_version", "event_id", "workspace_id", "project_id", "pipeline_id", "pipeline_revision", "event_type", "event_schema_version", "actor_id", "authorization_decision_id", "command_id", "correlation_id", "payload", "occurred_at", "recorded_at", "previous_event_hash", "event_hash"],
+  "properties": {
+    "schema_id": {"const": "https://schemas.hermes-pipeline.dev/runtime/pipeline-event/v1"},
+    "schema_version": {"const": 1},
+    "event_id": {"type": "string", "pattern": "^evt_[A-Za-z0-9_-]+$"},
+    "workspace_id": {"type": "string"},
+    "project_id": {"type": "string"},
+    "pipeline_id": {"type": "string"},
+    "pipeline_revision": {"type": "integer", "minimum": 1},
+    "event_type": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]+$"},
+    "event_schema_version": {"type": "integer", "minimum": 1},
+    "actor_id": {"type": "string"},
+    "authorization_decision_id": {"type": "string"},
+    "command_id": {"type": "string"},
+    "correlation_id": {"type": "string"},
+    "causation_id": {"type": "string"},
+    "payload": {"type": "object"},
+    "occurred_at": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/utcTimestamp"},
+    "recorded_at": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/utcTimestamp"},
+    "previous_event_hash": {"anyOf": [{"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"}, {"type": "null"}]},
+    "event_hash": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"}
+  }
+}

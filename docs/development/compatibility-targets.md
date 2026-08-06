@@ -45,6 +45,28 @@ when slice-00-02 froze the lock on 2026-08-05:
 | Hypothesis | `6.165.1` | Deterministic property smoke tests (`derandomize`). |
 | `hermes-pipeline` distribution | `0.1.0` | Package metadata is the sole version source. |
 
+## Slice-00-03 dev-only contract toolchain
+
+ADR-0026 approves a development/CI-only dependency family for the contract
+toolchain; `[project].dependencies` stays empty. The resolution is frozen in
+`uv.lock`; versions observed when slice-00-03 froze the lock on 2026-08-06:
+
+| Component | Frozen version | Role |
+| --- | --- | --- |
+| Pydantic | `2.13.4` | Sole authoring source for the 14 committed Schemas (ADR-0024); strict models with `extra="forbid"`. |
+| jsonschema | `4.26.0` | Draft 2020-12 meta-validation, `$ref` closure, and corpus instance validation; the frozen installation lacks the optional RFC 3339 checker, so the toolchain registers its deterministic shared-rule `date-time` checker on the FORMAT_CHECKER (revision 6). |
+| rfc8785 | `0.1.4` | Single RFC 8785 (JCS) implementation for canonical JSON and `content_hash`; committed golden vectors lock its output. |
+
+The toolchain is lazy-imported only after the `contracts` subcommand is
+parsed; the Hermes plugin entry, `--version`, and the normal runtime path
+stay pure standard library (AC-10). Generation output is byte-identical on
+Windows and Linux (LF, UTF-8, no timestamps or paths); the read-only
+`contracts drift-check` gate runs offline in CI on both operating systems.
+Compatibility evidence: the f36 Schema snapshots under
+`tests/fixtures/contracts/` with their raw-digest manifest, the 170-entry
+three-way corpus gate (including the revision-6 finite-integral-number and
+RFC 3339 parity cases), and the RFC 8785 golden vectors.
+
 ## Compatibility policy
 
 - Exact dependency versions and hashes belong in `uv.lock`; this document records tested product/tool ranges.

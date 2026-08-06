@@ -1,0 +1,383 @@
+{
+  "schema_id": "https://schemas.hermes-pipeline.dev/runtime/controller-command/v1",
+  "entries": [
+    {
+      "name": "minimal",
+      "category": "minimal",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/controller-command/v1",
+        "schema_version": 1,
+        "command_id": "cmd_00_03_1",
+        "idempotency_key": "idem-0000-0000-0000-0001",
+        "workspace_id": "ws_001",
+        "project_id": "prj_001",
+        "pipeline_id": "pl_001",
+        "expected_revision": 0,
+        "actor": {
+          "principal_id": "lei",
+          "provider": "CLI",
+          "provider_actor_id": "lei"
+        },
+        "ingress": "CLI",
+        "command_type": "START_PIPELINE",
+        "payload": {
+          "stage": "prd"
+        },
+        "correlation_id": "corr_1",
+        "submitted_at": "2026-08-06T00:00:00.000Z"
+      }
+    },
+    {
+      "name": "maximal",
+      "category": "maximal",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/controller-command/v1",
+        "schema_version": 1,
+        "command_id": "cmd_00_03_2",
+        "idempotency_key": "idem-0000-0000-0000-0002",
+        "workspace_id": "ws_001",
+        "project_id": "prj_001",
+        "pipeline_id": "pl_001",
+        "expected_revision": 2,
+        "actor": {
+          "principal_id": "feishu-bot",
+          "provider": "FEISHU",
+          "provider_actor_id": "bot-1"
+        },
+        "ingress": "HERMES_FEISHU",
+        "command_type": "CANCEL_PIPELINE",
+        "payload": {
+          "reason": "user requested"
+        },
+        "correlation_id": "corr_2",
+        "submitted_at": "2026-08-06T09:30:00+08:00",
+        "causation_id": "cmd_00_03_1"
+      }
+    },
+    {
+      "name": "integral-number-3.0",
+      "category": "integral",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/controller-command/v1",
+        "schema_version": 1,
+        "command_id": "cmd_00_03_1",
+        "idempotency_key": "idem-0000-0000-0000-0001",
+        "workspace_id": "ws_001",
+        "project_id": "prj_001",
+        "pipeline_id": "pl_001",
+        "expected_revision": 3.0,
+        "actor": {
+          "principal_id": "lei",
+          "provider": "CLI",
+          "provider_actor_id": "lei"
+        },
+        "ingress": "CLI",
+        "command_type": "START_PIPELINE",
+        "payload": {
+          "stage": "prd"
+        },
+        "correlation_id": "corr_1",
+        "submitted_at": "2026-08-06T00:00:00.000Z"
+      }
+    },
+    {
+      "name": "invalid-actor",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/controller-command/v1",
+        "schema_version": 1,
+        "command_id": "cmd_00_03_1",
+        "idempotency_key": "idem-0000-0000-0000-0001",
+        "workspace_id": "ws_001",
+        "project_id": "prj_001",
+        "pipeline_id": "pl_001",
+        "expected_revision": 0,
+        "actor": {
+          "principal_id": "x",
+          "provider": "WEB",
+          "provider_actor_id": "x"
+        },
+        "ingress": "CLI",
+        "command_type": "START_PIPELINE",
+        "payload": {
+          "stage": "prd"
+        },
+        "correlation_id": "corr_1",
+        "submitted_at": "2026-08-06T00:00:00.000Z"
+      }
+    },
+    {
+      "name": "invalid-id",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/controller-command/v1",
+        "schema_version": 1,
+        "command_id": "cmd-1",
+        "idempotency_key": "idem-0000-0000-0000-0001",
+        "workspace_id": "ws_001",
+        "project_id": "prj_001",
+        "pipeline_id": "pl_001",
+        "expected_revision": 0,
+        "actor": {
+          "principal_id": "lei",
+          "provider": "CLI",
+          "provider_actor_id": "lei"
+        },
+        "ingress": "CLI",
+        "command_type": "START_PIPELINE",
+        "payload": {
+          "stage": "prd"
+        },
+        "correlation_id": "corr_1",
+        "submitted_at": "2026-08-06T00:00:00.000Z"
+      }
+    },
+    {
+      "name": "invalid-integral-3.5",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/controller-command/v1",
+        "schema_version": 1,
+        "command_id": "cmd_00_03_1",
+        "idempotency_key": "idem-0000-0000-0000-0001",
+        "workspace_id": "ws_001",
+        "project_id": "prj_001",
+        "pipeline_id": "pl_001",
+        "expected_revision": 3.5,
+        "actor": {
+          "principal_id": "lei",
+          "provider": "CLI",
+          "provider_actor_id": "lei"
+        },
+        "ingress": "CLI",
+        "command_type": "START_PIPELINE",
+        "payload": {
+          "stage": "prd"
+        },
+        "correlation_id": "corr_1",
+        "submitted_at": "2026-08-06T00:00:00.000Z"
+      }
+    },
+    {
+      "name": "invalid-integral-boolean",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/controller-command/v1",
+        "schema_version": 1,
+        "command_id": "cmd_00_03_1",
+        "idempotency_key": "idem-0000-0000-0000-0001",
+        "workspace_id": "ws_001",
+        "project_id": "prj_001",
+        "pipeline_id": "pl_001",
+        "expected_revision": true,
+        "actor": {
+          "principal_id": "lei",
+          "provider": "CLI",
+          "provider_actor_id": "lei"
+        },
+        "ingress": "CLI",
+        "command_type": "START_PIPELINE",
+        "payload": {
+          "stage": "prd"
+        },
+        "correlation_id": "corr_1",
+        "submitted_at": "2026-08-06T00:00:00.000Z"
+      }
+    },
+    {
+      "name": "invalid-integral-string",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/controller-command/v1",
+        "schema_version": 1,
+        "command_id": "cmd_00_03_1",
+        "idempotency_key": "idem-0000-0000-0000-0001",
+        "workspace_id": "ws_001",
+        "project_id": "prj_001",
+        "pipeline_id": "pl_001",
+        "expected_revision": "3",
+        "actor": {
+          "principal_id": "lei",
+          "provider": "CLI",
+          "provider_actor_id": "lei"
+        },
+        "ingress": "CLI",
+        "command_type": "START_PIPELINE",
+        "payload": {
+          "stage": "prd"
+        },
+        "correlation_id": "corr_1",
+        "submitted_at": "2026-08-06T00:00:00.000Z"
+      }
+    },
+    {
+      "name": "invalid-payload-type",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/controller-command/v1",
+        "schema_version": 1,
+        "command_id": "cmd_00_03_1",
+        "idempotency_key": "idem-0000-0000-0000-0001",
+        "workspace_id": "ws_001",
+        "project_id": "prj_001",
+        "pipeline_id": "pl_001",
+        "expected_revision": 0,
+        "actor": {
+          "principal_id": "lei",
+          "provider": "CLI",
+          "provider_actor_id": "lei"
+        },
+        "ingress": "CLI",
+        "command_type": "START_PIPELINE",
+        "payload": "START",
+        "correlation_id": "corr_1",
+        "submitted_at": "2026-08-06T00:00:00.000Z"
+      }
+    },
+    {
+      "name": "invalid-type",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/controller-command/v1",
+        "schema_version": 1,
+        "command_id": "cmd_00_03_1",
+        "idempotency_key": "idem-0000-0000-0000-0001",
+        "workspace_id": "ws_001",
+        "project_id": "prj_001",
+        "pipeline_id": "pl_001",
+        "expected_revision": 0,
+        "actor": {
+          "principal_id": "lei",
+          "provider": "CLI",
+          "provider_actor_id": "lei"
+        },
+        "ingress": "CLI",
+        "command_type": "start_pipeline",
+        "payload": {
+          "stage": "prd"
+        },
+        "correlation_id": "corr_1",
+        "submitted_at": "2026-08-06T00:00:00.000Z"
+      }
+    },
+    {
+      "name": "invalid-unknown-field",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/controller-command/v1",
+        "schema_version": 1,
+        "command_id": "cmd_00_03_1",
+        "idempotency_key": "idem-0000-0000-0000-0001",
+        "workspace_id": "ws_001",
+        "project_id": "prj_001",
+        "pipeline_id": "pl_001",
+        "expected_revision": 0,
+        "actor": {
+          "principal_id": "lei",
+          "provider": "CLI",
+          "provider_actor_id": "lei"
+        },
+        "ingress": "CLI",
+        "command_type": "START_PIPELINE",
+        "payload": {
+          "stage": "prd"
+        },
+        "correlation_id": "corr_1",
+        "submitted_at": "2026-08-06T00:00:00.000Z",
+        "actor_email": "x@y.z"
+      }
+    },
+    {
+      "name": "legacy",
+      "category": "legacy",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/controller-command/v1",
+        "schema_version": 1,
+        "command_id": "cmd_00_02_1",
+        "idempotency_key": "idem-0000-0000-0000-0099",
+        "workspace_id": "ws_001",
+        "project_id": "prj_001",
+        "pipeline_id": "pl_001",
+        "expected_revision": 0,
+        "actor": {
+          "principal_id": "lei",
+          "provider": "CLI",
+          "provider_actor_id": "lei"
+        },
+        "ingress": "CLI",
+        "command_type": "START_PIPELINE",
+        "payload": {
+          "stage": "prd"
+        },
+        "correlation_id": "corr_1",
+        "submitted_at": "2026-08-05T00:00:00Z"
+      }
+    },
+    {
+      "name": "legacy-invalid",
+      "category": "legacy",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/controller-command/v1",
+        "schema_version": 1,
+        "command_id": "cmd_00_03_1",
+        "idempotency_key": "short",
+        "workspace_id": "ws_001",
+        "project_id": "prj_001",
+        "pipeline_id": "pl_001",
+        "expected_revision": 0,
+        "actor": {
+          "principal_id": "lei",
+          "provider": "CLI",
+          "provider_actor_id": "lei"
+        },
+        "ingress": "CLI",
+        "command_type": "START_PIPELINE",
+        "payload": {
+          "stage": "prd"
+        },
+        "correlation_id": "corr_1",
+        "submitted_at": "2026-08-06T00:00:00.000Z"
+      }
+    },
+    {
+      "name": "canary",
+      "category": "canary",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/controller-command/v1",
+        "schema_version": 1,
+        "command_id": "canary_controller-command_7f3e9a2c4b1d",
+        "idempotency_key": "idem-0000-0000-0000-0001",
+        "workspace_id": "ws_001",
+        "project_id": "prj_001",
+        "pipeline_id": "pl_001",
+        "expected_revision": 0,
+        "actor": {
+          "principal_id": "lei",
+          "provider": "CLI",
+          "provider_actor_id": "lei"
+        },
+        "ingress": "CLI",
+        "command_type": "START_PIPELINE",
+        "payload": {
+          "token": "canary_controller-command_7f3e9a2c4b1d"
+        },
+        "correlation_id": "corr_1",
+        "submitted_at": "2026-08-06T00:00:00.000Z"
+      }
+    }
+  ]
+}

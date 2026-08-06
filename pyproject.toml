@@ -27,6 +27,10 @@ dev = [
     "hypothesis~=6.130",
     "ruff~=0.12",
     "pyright[nodejs]~=1.1.400",
+    # Slice 00-03 contract toolchain (ADR-0026): development/CI only.
+    "pydantic>=2,<3",
+    "jsonschema>=4,<5",
+    "rfc8785==0.1.4",
 ]
 
 [tool.ruff]

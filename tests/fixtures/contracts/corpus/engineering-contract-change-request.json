@@ -1,0 +1,259 @@
+{
+  "schema_id": "https://schemas.hermes-pipeline.dev/engineering/contract-change-request/v1",
+  "entries": [
+    {
+      "name": "minimal",
+      "category": "minimal",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/contract-change-request/v1",
+        "schema_version": 1,
+        "request_id": "ccr_00_03_scope",
+        "slice_id": "slice-00-03",
+        "contract_revision": 5,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "stop_condition": "baseline disagreement",
+        "evidence": [
+          "corpus entry closeout canary"
+        ],
+        "requested_decision": "clarify corpus expectations",
+        "scope_impact": "CLARIFICATION",
+        "submitted_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:591345c27bf3f041a95428cda61b16a12de3896392d78a4abecebe81d9e99176"
+      }
+    },
+    {
+      "name": "maximal",
+      "category": "maximal",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/contract-change-request/v1",
+        "schema_version": 1,
+        "request_id": "ccr_00_03_interface",
+        "slice_id": "slice-00-03",
+        "contract_revision": 5,
+        "base_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "stop_condition": "runtime dependency required",
+        "evidence": [
+          "ADR draft",
+          "review finding R-06"
+        ],
+        "requested_decision": "approve a runtime isolation ADR",
+        "scope_impact": "INTERFACE_CHANGE",
+        "submitted_at": "2026-08-06T09:30:00+08:00",
+        "content_hash": "sha256:c16f3a7f811c12a4542b00e9faf5a86219bec9ece392425a7786fc4d77be153e"
+      }
+    },
+    {
+      "name": "integral-number-3.0",
+      "category": "integral",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/contract-change-request/v1",
+        "schema_version": 1,
+        "request_id": "ccr_00_03_scope",
+        "slice_id": "slice-00-03",
+        "contract_revision": 3.0,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "stop_condition": "baseline disagreement",
+        "evidence": [
+          "corpus entry closeout canary"
+        ],
+        "requested_decision": "clarify corpus expectations",
+        "scope_impact": "CLARIFICATION",
+        "submitted_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:866b8668602e74e5c10752bcf053ca7fbcbad4dc7eec0c4732af017c6d3d5a82"
+      }
+    },
+    {
+      "name": "invalid-impact",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/contract-change-request/v1",
+        "schema_version": 1,
+        "request_id": "ccr_00_03_scope",
+        "slice_id": "slice-00-03",
+        "contract_revision": 5,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "stop_condition": "x",
+        "evidence": [
+          "e"
+        ],
+        "requested_decision": "d",
+        "scope_impact": "MINOR",
+        "submitted_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:b3bd85e36254ec9807c01ad195c19e4f034b05f43201b04110f8e0e7b156214f"
+      }
+    },
+    {
+      "name": "invalid-integral-3.5",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/contract-change-request/v1",
+        "schema_version": 1,
+        "request_id": "ccr_00_03_scope",
+        "slice_id": "slice-00-03",
+        "contract_revision": 3.5,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "stop_condition": "baseline disagreement",
+        "evidence": [
+          "corpus entry closeout canary"
+        ],
+        "requested_decision": "clarify corpus expectations",
+        "scope_impact": "CLARIFICATION",
+        "submitted_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:ac7b9cb84e8c8592ea3bd52283c08b796881a3ada3129ad1d9ef6d4af66b883b"
+      }
+    },
+    {
+      "name": "invalid-integral-boolean",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/contract-change-request/v1",
+        "schema_version": 1,
+        "request_id": "ccr_00_03_scope",
+        "slice_id": "slice-00-03",
+        "contract_revision": true,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "stop_condition": "baseline disagreement",
+        "evidence": [
+          "corpus entry closeout canary"
+        ],
+        "requested_decision": "clarify corpus expectations",
+        "scope_impact": "CLARIFICATION",
+        "submitted_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:e0ec56bd863c9c6c674ed82c9945e31ef60cb6c4a7ae677aae6fa2c77506a67e"
+      }
+    },
+    {
+      "name": "invalid-integral-string",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/contract-change-request/v1",
+        "schema_version": 1,
+        "request_id": "ccr_00_03_scope",
+        "slice_id": "slice-00-03",
+        "contract_revision": "3",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "stop_condition": "baseline disagreement",
+        "evidence": [
+          "corpus entry closeout canary"
+        ],
+        "requested_decision": "clarify corpus expectations",
+        "scope_impact": "CLARIFICATION",
+        "submitted_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:514cdfa2ac732beaa0872761c82fce935814b9ccac7b91ec20b23fc4424567b3"
+      }
+    },
+    {
+      "name": "invalid-revision-string",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/contract-change-request/v1",
+        "schema_version": 1,
+        "request_id": "ccr_00_03_scope",
+        "slice_id": "slice-00-03",
+        "contract_revision": "5",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "stop_condition": "x",
+        "evidence": [
+          "e"
+        ],
+        "requested_decision": "d",
+        "scope_impact": "CLARIFICATION",
+        "submitted_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:d08f283d291739623cbdb04b3062fdcd29baebbfa9d8121b0185840754d37406"
+      }
+    },
+    {
+      "name": "invalid-unknown-field",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/contract-change-request/v1",
+        "schema_version": 1,
+        "request_id": "ccr_00_03_scope",
+        "slice_id": "slice-00-03",
+        "contract_revision": 5,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "stop_condition": "x",
+        "evidence": [
+          "e"
+        ],
+        "requested_decision": "d",
+        "scope_impact": "CLARIFICATION",
+        "submitted_at": "2026-08-06T00:00:00.000Z",
+        "requested_by": "nobody",
+        "content_hash": "sha256:4010ea2f917382bbea7c07b33a5d84bc7556856857df49cd3c577c1e8ba38a69"
+      }
+    },
+    {
+      "name": "legacy",
+      "category": "legacy",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/contract-change-request/v1",
+        "schema_version": 1,
+        "request_id": "ccr_00_02_deps",
+        "slice_id": "slice-00-02",
+        "contract_revision": 4,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "stop_condition": "dependency family needed",
+        "evidence": [
+          "ADR-0026 draft"
+        ],
+        "requested_decision": "approve dev-only toolchain",
+        "scope_impact": "ADR_CHANGE",
+        "submitted_at": "2026-08-04T00:00:00Z",
+        "content_hash": "sha256:b7d0cdf4219f9fee638a54e691a9ab17698125fbc69890dbc60d7f488e03ee1a"
+      }
+    },
+    {
+      "name": "legacy-invalid",
+      "category": "legacy",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/contract-change-request/v1",
+        "schema_version": 1,
+        "request_id": "ccr_00_02_deps",
+        "slice_id": "slice-00-02",
+        "contract_revision": 4,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "stop_condition": "",
+        "evidence": [
+          "ADR-0026 draft"
+        ],
+        "requested_decision": "approve dev-only toolchain",
+        "scope_impact": "ADR_CHANGE",
+        "submitted_at": "2026-08-04T00:00:00Z",
+        "content_hash": "sha256:05884d36744b0827a73230a82885f4c0ba9d7338c4fa90d2bfc2d3fe3a96a9fc"
+      }
+    },
+    {
+      "name": "canary",
+      "category": "canary",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/contract-change-request/v1",
+        "schema_version": 1,
+        "request_id": "canary_contract-change-request_7f3e9a2c4b1d",
+        "slice_id": "slice-00-03",
+        "contract_revision": 5,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "stop_condition": "x",
+        "evidence": [
+          "canary_contract-change-request_7f3e9a2c4b1d"
+        ],
+        "requested_decision": "d",
+        "scope_impact": "CLARIFICATION",
+        "submitted_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:0bc6261d12da4f27772c1fa61b4ebe04c51f77556c400e6f18333505f29f043a"
+      }
+    }
+  ]
+}

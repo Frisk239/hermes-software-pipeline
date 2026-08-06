@@ -1,22 +1,73 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schemas.hermes-pipeline.dev/engineering/contract-change-request/v1",
-  "title": "Engineering Contract Change Request",
-  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
-  "required": ["schema_id", "schema_version", "request_id", "slice_id", "contract_revision", "base_sha", "stop_condition", "evidence", "requested_decision", "scope_impact", "submitted_at", "content_hash"],
   "properties": {
-    "schema_id": {"const": "https://schemas.hermes-pipeline.dev/engineering/contract-change-request/v1"},
-    "schema_version": {"const": 1},
-    "request_id": {"type": "string", "pattern": "^ccr_[A-Za-z0-9_-]+$"},
-    "slice_id": {"type": "string"},
-    "contract_revision": {"type": "integer", "minimum": 1},
-    "base_sha": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/gitSha"},
-    "stop_condition": {"type": "string", "minLength": 1},
-    "evidence": {"type": "array", "minItems": 1, "items": {"type": "string"}},
-    "requested_decision": {"type": "string", "minLength": 1},
-    "scope_impact": {"enum": ["CLARIFICATION", "SCOPE_CHANGE", "INTERFACE_CHANGE", "ADR_CHANGE", "UNKNOWN"]},
-    "submitted_at": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/utcTimestamp"},
-    "content_hash": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"}
-  }
+    "base_sha": {
+      "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/gitSha"
+    },
+    "content_hash": {
+      "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"
+    },
+    "contract_revision": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "evidence": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "request_id": {
+      "pattern": "^ccr_[A-Za-z0-9_-]+$",
+      "type": "string"
+    },
+    "requested_decision": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "schema_id": {
+      "const": "https://schemas.hermes-pipeline.dev/engineering/contract-change-request/v1"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "scope_impact": {
+      "enum": [
+        "CLARIFICATION",
+        "SCOPE_CHANGE",
+        "INTERFACE_CHANGE",
+        "ADR_CHANGE",
+        "UNKNOWN"
+      ]
+    },
+    "slice_id": {
+      "type": "string"
+    },
+    "stop_condition": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "submitted_at": {
+      "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/utcTimestamp"
+    }
+  },
+  "required": [
+    "schema_id",
+    "schema_version",
+    "request_id",
+    "slice_id",
+    "contract_revision",
+    "base_sha",
+    "stop_condition",
+    "evidence",
+    "requested_decision",
+    "scope_impact",
+    "submitted_at",
+    "content_hash"
+  ],
+  "title": "Engineering Contract Change Request",
+  "type": "object"
 }

@@ -1,0 +1,20 @@
+{
+  "kind": "f36-schema-snapshot-raw-digests",
+  "base_sha": "f36ba6a2930267e2d90682ff61930c82fd1237bb",
+  "digests": {
+    "snapshots/common/definitions.schema.json": "sha256:84acc4306cec634b6a47307922575bb8611ce2e67e3ca69ac2968a52106ee4d8",
+    "snapshots/engineering/closeout.schema.json": "sha256:b31cf8116856ed88f8a96445a296d4fac55f3bb50952a7dacc6c3143d8e7ecdc",
+    "snapshots/engineering/context-manifest.schema.json": "sha256:6e3c354e6d5f7a1167d3c7e09d66f3369bb3fff80f7b6e1c35a852518e71a732",
+    "snapshots/engineering/contract-change-request.schema.json": "sha256:dbcdd2b86ae2adda8ed7827c69dd54c49c5e04e15f19c5b36594b4b98599d6d8",
+    "snapshots/engineering/execution-report.schema.json": "sha256:e0733dec906737170bffba0d82a2ca1e3c5ce4d09c5e4b88f9a659bb56c46ebf",
+    "snapshots/engineering/phase-plan.schema.json": "sha256:e07e294028d8999f578d132f81202539afb915877c3aa76871cd1f339723335a",
+    "snapshots/engineering/review-verdict.schema.json": "sha256:6f567d3aad4a0ebfa3b50d7a48a8ce9406fdf23b9359d43b85302491eec715cb",
+    "snapshots/engineering/slice-contract.schema.json": "sha256:068e2ce358ecbb8330751e0ca4264d0e122021ad0843908902b6c6c24dc2aedd",
+    "snapshots/runtime/artifact-manifest.schema.json": "sha256:ddeb7604008ed2ca4e44bcccd10ec48a0746b11aaaa7f7b9aff695dc8489e324",
+    "snapshots/runtime/capability-profile.schema.json": "sha256:b74e0a03c1e1b2fdbd535519ccd6e67d1380ce24cdee28b07d8b16d2cd37c87e",
+    "snapshots/runtime/command-receipt.schema.json": "sha256:30436c75e30d6a59755aa0c6dd9b22fe3d488f0e84a8c39393bcbc189a85c7f3",
+    "snapshots/runtime/controller-command.schema.json": "sha256:aa32ab179a8459d0904bd885c26bba47cb9d85605ea31b29b7a53b2010ce7974",
+    "snapshots/runtime/evidence-bundle.schema.json": "sha256:eb228acfc532f2ceaec965b330384b025f7807a3408dbf779130f8ba928694f5",
+    "snapshots/runtime/pipeline-event.schema.json": "sha256:057201d2d4831532f61bf6e1d97c82ae2fb5bad0722a342bf743c71759051453"
+  }
+}

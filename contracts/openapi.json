@@ -1,0 +1,2034 @@
+{
+  "components": {
+    "schemas": {
+      "CommonDefinitionsV1": {
+        "$defs": {
+          "artifactReference": {
+            "additionalProperties": false,
+            "properties": {
+              "artifact_id": {
+                "pattern": "^art_[A-Za-z0-9_-]+$",
+                "type": "string"
+              },
+              "manifest_digest": {
+                "$ref": "#/$defs/sha256"
+              },
+              "role": {
+                "maxLength": 128,
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "artifact_id",
+              "manifest_digest",
+              "role"
+            ],
+            "type": "object"
+          },
+          "engineeringRisk": {
+            "additionalProperties": false,
+            "properties": {
+              "description": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "impact": {
+                "enum": [
+                  "LOW",
+                  "MEDIUM",
+                  "HIGH",
+                  "CRITICAL"
+                ]
+              },
+              "mitigation": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "risk_id": {
+                "pattern": "^R-[0-9]{2,}$",
+                "type": "string"
+              },
+              "trigger": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "risk_id",
+              "description",
+              "impact",
+              "mitigation",
+              "trigger"
+            ],
+            "type": "object"
+          },
+          "fileReference": {
+            "additionalProperties": false,
+            "properties": {
+              "digest": {
+                "$ref": "#/$defs/sha256"
+              },
+              "path": {
+                "$ref": "#/$defs/relativePath"
+              },
+              "purpose": {
+                "maxLength": 256,
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "digest",
+              "purpose"
+            ],
+            "type": "object"
+          },
+          "gitSha": {
+            "pattern": "^[0-9a-f]{40}([0-9a-f]{24})?$",
+            "type": "string"
+          },
+          "identity": {
+            "maxLength": 128,
+            "minLength": 4,
+            "pattern": "^[a-z][a-z0-9_-]*_[A-Za-z0-9_-]+$",
+            "type": "string"
+          },
+          "relativePath": {
+            "maxLength": 512,
+            "minLength": 1,
+            "pattern": "^(?!/)(?![A-Za-z]:)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\).+$",
+            "type": "string"
+          },
+          "schemaIdentity": {
+            "additionalProperties": false,
+            "properties": {
+              "schema_id": {
+                "format": "uri",
+                "type": "string"
+              },
+              "schema_version": {
+                "minimum": 1,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "schema_id",
+              "schema_version"
+            ],
+            "type": "object"
+          },
+          "sha256": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "utcTimestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "$id": "https://schemas.hermes-pipeline.dev/common/definitions/v1",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "Hermes Pipeline Common Definitions"
+      },
+      "EngineeringCloseoutV1": {
+        "$id": "https://schemas.hermes-pipeline.dev/engineering/closeout/v1",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "accepted_sha": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/gitSha"
+          },
+          "base_sha": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/gitSha"
+          },
+          "closed_at": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/utcTimestamp"
+          },
+          "closeout_id": {
+            "pattern": "^close_[A-Za-z0-9_-]+$",
+            "type": "string"
+          },
+          "content_hash": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"
+          },
+          "delivered": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/artifactReference"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "next_prerequisites": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "residual_debt": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "schema_id": {
+            "const": "https://schemas.hermes-pipeline.dev/engineering/closeout/v1"
+          },
+          "schema_version": {
+            "const": 1
+          },
+          "scope_id": {
+            "type": "string"
+          },
+          "scope_kind": {
+            "enum": [
+              "SLICE",
+              "PHASE"
+            ]
+          }
+        },
+        "required": [
+          "schema_id",
+          "schema_version",
+          "closeout_id",
+          "scope_kind",
+          "scope_id",
+          "base_sha",
+          "accepted_sha",
+          "delivered",
+          "evidence",
+          "residual_debt",
+          "next_prerequisites",
+          "closed_at",
+          "content_hash"
+        ],
+        "title": "Engineering Closeout",
+        "type": "object"
+      },
+      "EngineeringContextManifestV1": {
+        "$id": "https://schemas.hermes-pipeline.dev/engineering/context-manifest/v1",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "assembled_at": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/utcTimestamp"
+          },
+          "base_sha": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/gitSha"
+          },
+          "content_hash": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"
+          },
+          "facts": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "source": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": [
+                    "string",
+                    "integer",
+                    "boolean"
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "value",
+                "source"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "files": {
+            "items": {
+              "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/fileReference"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "manifest_id": {
+            "pattern": "^ctx_[A-Za-z0-9_-]+$",
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "PLANNER",
+              "EXECUTOR",
+              "REVIEWER"
+            ]
+          },
+          "schema_id": {
+            "const": "https://schemas.hermes-pipeline.dev/engineering/context-manifest/v1"
+          },
+          "schema_version": {
+            "const": 1
+          },
+          "slice_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "schema_id",
+          "schema_version",
+          "manifest_id",
+          "role",
+          "slice_id",
+          "base_sha",
+          "assembled_at",
+          "files",
+          "facts",
+          "content_hash"
+        ],
+        "title": "Engineering Context Manifest",
+        "type": "object"
+      },
+      "EngineeringContractChangeRequestV1": {
+        "$id": "https://schemas.hermes-pipeline.dev/engineering/contract-change-request/v1",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "base_sha": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/gitSha"
+          },
+          "content_hash": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"
+          },
+          "contract_revision": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "evidence": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "request_id": {
+            "pattern": "^ccr_[A-Za-z0-9_-]+$",
+            "type": "string"
+          },
+          "requested_decision": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "schema_id": {
+            "const": "https://schemas.hermes-pipeline.dev/engineering/contract-change-request/v1"
+          },
+          "schema_version": {
+            "const": 1
+          },
+          "scope_impact": {
+            "enum": [
+              "CLARIFICATION",
+              "SCOPE_CHANGE",
+              "INTERFACE_CHANGE",
+              "ADR_CHANGE",
+              "UNKNOWN"
+            ]
+          },
+          "slice_id": {
+            "type": "string"
+          },
+          "stop_condition": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "submitted_at": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/utcTimestamp"
+          }
+        },
+        "required": [
+          "schema_id",
+          "schema_version",
+          "request_id",
+          "slice_id",
+          "contract_revision",
+          "base_sha",
+          "stop_condition",
+          "evidence",
+          "requested_decision",
+          "scope_impact",
+          "submitted_at",
+          "content_hash"
+        ],
+        "title": "Engineering Contract Change Request",
+        "type": "object"
+      },
+      "EngineeringExecutionReportV1": {
+        "$id": "https://schemas.hermes-pipeline.dev/engineering/execution-report/v1",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "artifact_refs": {
+            "items": {
+              "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/artifactReference"
+            },
+            "type": "array"
+          },
+          "attempt": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "base_sha": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/gitSha"
+          },
+          "candidate_sha": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/gitSha"
+          },
+          "changed_paths": {
+            "items": {
+              "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/relativePath"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "command_results": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "command_id": {
+                  "type": "string"
+                },
+                "duration_ms": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "exit_code": {
+                  "type": "integer"
+                },
+                "output_artifact": {
+                  "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/artifactReference"
+                },
+                "started_at": {
+                  "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/utcTimestamp"
+                }
+              },
+              "required": [
+                "command_id",
+                "exit_code",
+                "started_at",
+                "duration_ms",
+                "output_artifact"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "content_hash": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"
+          },
+          "context_manifest_hash": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"
+          },
+          "contract_revision": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "report_id": {
+            "pattern": "^exec_[A-Za-z0-9_-]+$",
+            "type": "string"
+          },
+          "risks": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "schema_id": {
+            "const": "https://schemas.hermes-pipeline.dev/engineering/execution-report/v1"
+          },
+          "schema_version": {
+            "const": 1
+          },
+          "self_assessment": {
+            "enum": [
+              "READY_FOR_REVIEW",
+              "BLOCKED"
+            ]
+          },
+          "slice_id": {
+            "type": "string"
+          },
+          "submitted_at": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/utcTimestamp"
+          }
+        },
+        "required": [
+          "schema_id",
+          "schema_version",
+          "report_id",
+          "slice_id",
+          "contract_revision",
+          "attempt",
+          "base_sha",
+          "candidate_sha",
+          "context_manifest_hash",
+          "changed_paths",
+          "command_results",
+          "artifact_refs",
+          "self_assessment",
+          "submitted_at",
+          "content_hash"
+        ],
+        "title": "Engineering Execution Report",
+        "type": "object"
+      },
+      "EngineeringPhasePlanV1": {
+        "$id": "https://schemas.hermes-pipeline.dev/engineering/phase-plan/v1",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "enum": [
+                    "APPROVED",
+                    "EXECUTING",
+                    "REVIEWING",
+                    "COMPLETE"
+                  ]
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "human_approval": {
+                  "properties": {
+                    "required": {
+                      "const": true
+                    },
+                    "status": {
+                      "const": "APPROVED"
+                    }
+                  },
+                  "required": [
+                    "attestation_id"
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "properties": {
+          "acceptance_dimensions": {
+            "additionalProperties": false,
+            "properties": {
+              "demonstration": {
+                "items": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              "documentation": {
+                "items": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              "migration": {
+                "items": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              "security": {
+                "items": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              "testing": {
+                "items": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "minItems": 1,
+                "type": "array"
+              }
+            },
+            "required": [
+              "testing",
+              "migration",
+              "security",
+              "documentation",
+              "demonstration"
+            ],
+            "type": "object"
+          },
+          "accepted_adrs": {
+            "items": {
+              "pattern": "^ADR-[0-9]{4}$",
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "base_sha": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/gitSha"
+          },
+          "content_hash": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"
+          },
+          "document_revision": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "exclusions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "exit_criteria": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "criterion_id": {
+                  "pattern": "^EC-[0-9]{2,}-[0-9]{2,}$",
+                  "type": "string"
+                },
+                "observable_result": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "owner_slice_ids": {
+                  "items": {
+                    "pattern": "^slice-[0-9]{2,}-[0-9]{2,}$",
+                    "type": "string"
+                  },
+                  "minItems": 1,
+                  "type": "array",
+                  "uniqueItems": true
+                }
+              },
+              "required": [
+                "criterion_id",
+                "observable_result",
+                "owner_slice_ids"
+              ],
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "human_approval": {
+            "additionalProperties": false,
+            "properties": {
+              "attestation_id": {
+                "type": "string"
+              },
+              "required": {
+                "type": "boolean"
+              },
+              "status": {
+                "enum": [
+                  "NOT_REQUIRED",
+                  "PENDING",
+                  "APPROVED",
+                  "REJECTED"
+                ]
+              }
+            },
+            "required": [
+              "required",
+              "status"
+            ],
+            "type": "object"
+          },
+          "invariants": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "module_boundaries": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "outcome": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "owner": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "phase_gate": {
+            "additionalProperties": false,
+            "properties": {
+              "allowed_verdicts": {
+                "const": [
+                  "PASS",
+                  "REWORK",
+                  "BLOCKED_CONTRACT"
+                ]
+              },
+              "required_evidence": {
+                "items": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "minItems": 1,
+                "type": "array",
+                "uniqueItems": true
+              },
+              "reviewer_role": {
+                "const": "CODEX_PLANNER_DESIGNER_REVIEWER"
+              }
+            },
+            "required": [
+              "reviewer_role",
+              "required_evidence",
+              "allowed_verdicts"
+            ],
+            "type": "object"
+          },
+          "phase_id": {
+            "pattern": "^phase-[0-9]{2,}$",
+            "type": "string"
+          },
+          "prerequisites": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "risks": {
+            "items": {
+              "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/engineeringRisk"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "schema_id": {
+            "const": "https://schemas.hermes-pipeline.dev/engineering/phase-plan/v1"
+          },
+          "schema_version": {
+            "const": 1
+          },
+          "slices": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "demonstration": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "depends_on": {
+                  "items": {
+                    "pattern": "^slice-[0-9]{2,}-[0-9]{2,}$",
+                    "type": "string"
+                  },
+                  "type": "array",
+                  "uniqueItems": true
+                },
+                "owns_exit_criteria": {
+                  "items": {
+                    "pattern": "^EC-[0-9]{2,}-[0-9]{2,}$",
+                    "type": "string"
+                  },
+                  "type": "array",
+                  "uniqueItems": true
+                },
+                "slice_id": {
+                  "pattern": "^slice-[0-9]{2,}-[0-9]{2,}$",
+                  "type": "string"
+                },
+                "title": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "slice_id",
+                "title",
+                "depends_on",
+                "owns_exit_criteria",
+                "demonstration"
+              ],
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "DRAFT",
+              "APPROVED",
+              "EXECUTING",
+              "REVIEWING",
+              "COMPLETE",
+              "BLOCKED"
+            ]
+          },
+          "stop_conditions": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "title": {
+            "maxLength": 160,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "schema_id",
+          "schema_version",
+          "document_revision",
+          "phase_id",
+          "title",
+          "status",
+          "owner",
+          "base_sha",
+          "outcome",
+          "prerequisites",
+          "accepted_adrs",
+          "module_boundaries",
+          "slices",
+          "invariants",
+          "acceptance_dimensions",
+          "exit_criteria",
+          "exclusions",
+          "risks",
+          "stop_conditions",
+          "phase_gate",
+          "human_approval",
+          "content_hash"
+        ],
+        "title": "Engineering Phase Plan",
+        "type": "object"
+      },
+      "EngineeringReviewVerdictV1": {
+        "$id": "https://schemas.hermes-pipeline.dev/engineering/review-verdict/v1",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "verdict": {
+                  "const": "PASS"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "axes": {
+                  "properties": {
+                    "evidence": {
+                      "const": "PASS"
+                    },
+                    "scope_safety": {
+                      "const": "PASS"
+                    },
+                    "spec": {
+                      "const": "PASS"
+                    },
+                    "standards": {
+                      "const": "PASS"
+                    }
+                  }
+                },
+                "findings": {
+                  "maxItems": 0
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "verdict": {
+                  "enum": [
+                    "REWORK",
+                    "BLOCKED_CONTRACT"
+                  ]
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "findings": {
+                  "minItems": 1
+                }
+              }
+            }
+          }
+        ],
+        "properties": {
+          "axes": {
+            "additionalProperties": false,
+            "properties": {
+              "evidence": {
+                "enum": [
+                  "PASS",
+                  "FAIL",
+                  "BLOCKED"
+                ]
+              },
+              "scope_safety": {
+                "enum": [
+                  "PASS",
+                  "FAIL",
+                  "BLOCKED"
+                ]
+              },
+              "spec": {
+                "enum": [
+                  "PASS",
+                  "FAIL",
+                  "BLOCKED"
+                ]
+              },
+              "standards": {
+                "enum": [
+                  "PASS",
+                  "FAIL",
+                  "BLOCKED"
+                ]
+              }
+            },
+            "required": [
+              "spec",
+              "standards",
+              "evidence",
+              "scope_safety"
+            ],
+            "type": "object"
+          },
+          "base_sha": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/gitSha"
+          },
+          "candidate_sha": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/gitSha"
+          },
+          "content_hash": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"
+          },
+          "context_manifest_hash": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"
+          },
+          "contract_revision": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "evidence_bundle_hash": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"
+          },
+          "findings": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "axis": {
+                  "enum": [
+                    "SPEC",
+                    "STANDARDS",
+                    "EVIDENCE",
+                    "SCOPE_SAFETY"
+                  ]
+                },
+                "evidence": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "finding_id": {
+                  "pattern": "^F-[0-9]{2,}$",
+                  "type": "string"
+                },
+                "required_correction": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "requirement_ref": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "severity": {
+                  "enum": [
+                    "BLOCKER",
+                    "MAJOR",
+                    "MINOR"
+                  ]
+                }
+              },
+              "required": [
+                "finding_id",
+                "severity",
+                "axis",
+                "evidence",
+                "requirement_ref",
+                "required_correction"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "review_attempt": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "reviewed_at": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/utcTimestamp"
+          },
+          "schema_id": {
+            "const": "https://schemas.hermes-pipeline.dev/engineering/review-verdict/v1"
+          },
+          "schema_version": {
+            "const": 1
+          },
+          "slice_id": {
+            "type": "string"
+          },
+          "verdict": {
+            "enum": [
+              "PASS",
+              "REWORK",
+              "BLOCKED_CONTRACT"
+            ]
+          },
+          "verdict_id": {
+            "pattern": "^review_[A-Za-z0-9_-]+$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schema_id",
+          "schema_version",
+          "verdict_id",
+          "slice_id",
+          "contract_revision",
+          "review_attempt",
+          "base_sha",
+          "candidate_sha",
+          "context_manifest_hash",
+          "evidence_bundle_hash",
+          "verdict",
+          "axes",
+          "findings",
+          "reviewed_at",
+          "content_hash"
+        ],
+        "title": "Engineering Review Verdict",
+        "type": "object"
+      },
+      "EngineeringSliceContractV1": {
+        "$id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "acceptance_criteria": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "criterion_id": {
+                  "pattern": "^AC-[0-9]{2,}$",
+                  "type": "string"
+                },
+                "observable_result": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "trace_ids": {
+                  "items": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "minItems": 1,
+                  "type": "array",
+                  "uniqueItems": true
+                },
+                "verification_command_ids": {
+                  "items": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "minItems": 1,
+                  "type": "array",
+                  "uniqueItems": true
+                }
+              },
+              "required": [
+                "criterion_id",
+                "trace_ids",
+                "observable_result",
+                "verification_command_ids"
+              ],
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "assigned_worktree": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "base_sha": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/gitSha"
+          },
+          "binding_adrs": {
+            "items": {
+              "pattern": "^ADR-[0-9]{4}$",
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "content_hash": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"
+          },
+          "demonstration": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "document_revision": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "implications": {
+            "additionalProperties": false,
+            "properties": {
+              "compatibility": {
+                "items": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "data": {
+                "items": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "documentation": {
+                "items": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "migration": {
+                "items": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "security": {
+                "items": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "data",
+              "migration",
+              "compatibility",
+              "security",
+              "documentation"
+            ],
+            "type": "object"
+          },
+          "interfaces": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "must_scope": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "operator_path": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "out_of_scope": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "permitted_paths": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "phase_id": {
+            "pattern": "^phase-[0-9]{2,}$",
+            "type": "string"
+          },
+          "predecessors": {
+            "items": {
+              "pattern": "^slice-[0-9]{2,}-[0-9]{2,}$",
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "prohibited_actions": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "required_evidence": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "required_tests": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "retry_budget": {
+            "maximum": 10,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "risks": {
+            "items": {
+              "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/engineeringRisk"
+            },
+            "type": "array"
+          },
+          "schema_id": {
+            "const": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1"
+          },
+          "schema_version": {
+            "const": 1
+          },
+          "slice_id": {
+            "pattern": "^slice-[0-9]{2,}-[0-9]{2,}$",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "DRAFT",
+              "READY",
+              "EXECUTING",
+              "SUBMITTED",
+              "ACCEPTED",
+              "REWORK",
+              "BLOCKED"
+            ]
+          },
+          "stop_conditions": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "verification_commands": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "argv": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "minItems": 1,
+                  "type": "array"
+                },
+                "command_id": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "timeout_ms": {
+                  "maximum": 3600000,
+                  "minimum": 1000,
+                  "type": "integer"
+                },
+                "working_directory": {
+                  "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/relativePath"
+                }
+              },
+              "required": [
+                "command_id",
+                "argv",
+                "working_directory",
+                "timeout_ms"
+              ],
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "schema_id",
+          "schema_version",
+          "document_revision",
+          "slice_id",
+          "phase_id",
+          "status",
+          "predecessors",
+          "base_sha",
+          "assigned_worktree",
+          "operator_path",
+          "must_scope",
+          "out_of_scope",
+          "interfaces",
+          "binding_adrs",
+          "permitted_paths",
+          "prohibited_actions",
+          "implications",
+          "acceptance_criteria",
+          "required_tests",
+          "demonstration",
+          "verification_commands",
+          "required_evidence",
+          "risks",
+          "retry_budget",
+          "stop_conditions",
+          "content_hash"
+        ],
+        "title": "Engineering Slice Contract",
+        "type": "object"
+      },
+      "RuntimeArtifactManifestV1": {
+        "$id": "https://schemas.hermes-pipeline.dev/runtime/artifact-manifest/v1",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "artifact_id": {
+            "pattern": "^art_[A-Za-z0-9_-]+$",
+            "type": "string"
+          },
+          "byte_size": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "content_digest": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"
+          },
+          "created_at": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/utcTimestamp"
+          },
+          "document_schema_id": {
+            "format": "uri",
+            "type": "string"
+          },
+          "document_schema_version": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "logical_role": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "manifest_digest": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"
+          },
+          "media_type": {
+            "minLength": 3,
+            "type": "string"
+          },
+          "producer": {
+            "additionalProperties": false,
+            "properties": {
+              "execution_run_id": {
+                "pattern": "^run_[A-Za-z0-9_-]+$",
+                "type": "string"
+              },
+              "lease_generation": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "stage_attempt_id": {
+                "pattern": "^att_[A-Za-z0-9_-]+$",
+                "type": "string"
+              }
+            },
+            "required": [
+              "stage_attempt_id",
+              "execution_run_id",
+              "lease_generation"
+            ],
+            "type": "object"
+          },
+          "provenance": {
+            "additionalProperties": false,
+            "properties": {
+              "capability_profile_hash": {
+                "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"
+              },
+              "model": {
+                "type": "string"
+              },
+              "runtime_version": {
+                "type": "string"
+              },
+              "tool": {
+                "type": "string"
+              },
+              "tool_version": {
+                "type": "string"
+              },
+              "workflow_version": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "workflow_version",
+              "runtime_version",
+              "capability_profile_hash"
+            ],
+            "type": "object"
+          },
+          "retention_class": {
+            "enum": [
+              "EPHEMERAL",
+              "PIPELINE",
+              "AUDIT",
+              "LEGAL_HOLD"
+            ]
+          },
+          "schema_id": {
+            "const": "https://schemas.hermes-pipeline.dev/runtime/artifact-manifest/v1"
+          },
+          "schema_version": {
+            "const": 1
+          },
+          "sensitivity": {
+            "enum": [
+              "PUBLIC",
+              "PROJECT",
+              "RESTRICTED",
+              "SECRET_DERIVED"
+            ]
+          },
+          "source_identity": {
+            "additionalProperties": false,
+            "properties": {
+              "candidate_sha": {
+                "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/gitSha"
+              },
+              "integration_base_sha": {
+                "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/gitSha"
+              },
+              "integration_candidate_sha": {
+                "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/gitSha"
+              },
+              "planning_base_sha": {
+                "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/gitSha"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "schema_id",
+          "schema_version",
+          "artifact_id",
+          "logical_role",
+          "media_type",
+          "byte_size",
+          "content_digest",
+          "producer",
+          "source_identity",
+          "provenance",
+          "sensitivity",
+          "retention_class",
+          "created_at",
+          "manifest_digest"
+        ],
+        "title": "Artifact Manifest",
+        "type": "object"
+      },
+      "RuntimeCapabilityProfileV1": {
+        "$id": "https://schemas.hermes-pipeline.dev/runtime/capability-profile/v1",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "browser": {
+            "enum": [
+              "NONE",
+              "CHROME_DEVTOOLS_MCP"
+            ]
+          },
+          "content_hash": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"
+          },
+          "executables": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "filesystem": {
+            "additionalProperties": false,
+            "properties": {
+              "read_roots": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "write_roots": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "read_roots",
+              "write_roots"
+            ],
+            "type": "object"
+          },
+          "network": {
+            "additionalProperties": false,
+            "properties": {
+              "allow": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "mode": {
+                "enum": [
+                  "DENY_ALL",
+                  "ALLOW_LIST"
+                ]
+              }
+            },
+            "required": [
+              "mode",
+              "allow"
+            ],
+            "type": "object"
+          },
+          "profile_id": {
+            "pattern": "^cap_[A-Za-z0-9_-]+$",
+            "type": "string"
+          },
+          "profile_revision": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "resources": {
+            "additionalProperties": false,
+            "properties": {
+              "output_bytes": {
+                "minimum": 1024,
+                "type": "integer"
+              },
+              "processes": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "wall_time_ms": {
+                "minimum": 1000,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "wall_time_ms",
+              "output_bytes",
+              "processes"
+            ],
+            "type": "object"
+          },
+          "schema_id": {
+            "const": "https://schemas.hermes-pipeline.dev/runtime/capability-profile/v1"
+          },
+          "schema_version": {
+            "const": 1
+          },
+          "secrets": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "side_effects": {
+            "items": {
+              "enum": [
+                "NONE",
+                "LOCAL_BUILD",
+                "LOCAL_TEST",
+                "BROWSER_TEST"
+              ]
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "stage_type": {
+            "enum": [
+              "PRD",
+              "ARCHITECTURE",
+              "DEVELOPMENT",
+              "E2E",
+              "ACCEPTANCE"
+            ]
+          }
+        },
+        "required": [
+          "schema_id",
+          "schema_version",
+          "profile_id",
+          "profile_revision",
+          "stage_type",
+          "filesystem",
+          "executables",
+          "network",
+          "secrets",
+          "browser",
+          "resources",
+          "side_effects",
+          "content_hash"
+        ],
+        "title": "Stage Capability Profile",
+        "type": "object"
+      },
+      "RuntimeCommandReceiptV1": {
+        "$id": "https://schemas.hermes-pipeline.dev/runtime/command-receipt/v1",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "command_id": {
+            "type": "string"
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "error": {
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "enum": [
+                  "VALIDATION_ERROR",
+                  "AUTHENTICATION_FAILED",
+                  "AUTHORIZATION_DENIED",
+                  "NOT_FOUND",
+                  "CONFLICT",
+                  "POLICY_REJECTED",
+                  "LEASE_STALE",
+                  "DEPENDENCY_UNAVAILABLE",
+                  "RATE_LIMITED",
+                  "INTERNAL_ERROR"
+                ]
+              },
+              "field_violations": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "message": {
+                "type": "string"
+              },
+              "retryable": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "code",
+              "message",
+              "retryable"
+            ],
+            "type": "object"
+          },
+          "event_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "observed_revision": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "pipeline_id": {
+            "type": "string"
+          },
+          "recorded_at": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/utcTimestamp"
+          },
+          "schema_id": {
+            "const": "https://schemas.hermes-pipeline.dev/runtime/command-receipt/v1"
+          },
+          "schema_version": {
+            "const": 1
+          },
+          "status": {
+            "enum": [
+              "ACCEPTED",
+              "REJECTED",
+              "CONFLICT",
+              "DEDUPLICATED"
+            ]
+          }
+        },
+        "required": [
+          "schema_id",
+          "schema_version",
+          "command_id",
+          "status",
+          "pipeline_id",
+          "observed_revision",
+          "recorded_at",
+          "correlation_id"
+        ],
+        "title": "Command Receipt",
+        "type": "object"
+      },
+      "RuntimeControllerCommandV1": {
+        "$id": "https://schemas.hermes-pipeline.dev/runtime/controller-command/v1",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "actor": {
+            "additionalProperties": false,
+            "properties": {
+              "principal_id": {
+                "type": "string"
+              },
+              "provider": {
+                "enum": [
+                  "CLI",
+                  "FEISHU",
+                  "SYSTEM",
+                  "GITHUB"
+                ]
+              },
+              "provider_actor_id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "principal_id",
+              "provider",
+              "provider_actor_id"
+            ],
+            "type": "object"
+          },
+          "causation_id": {
+            "type": "string"
+          },
+          "command_id": {
+            "pattern": "^cmd_[A-Za-z0-9_-]+$",
+            "type": "string"
+          },
+          "command_type": {
+            "pattern": "^[A-Z][A-Z0-9_]+$",
+            "type": "string"
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "expected_revision": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "idempotency_key": {
+            "maxLength": 160,
+            "minLength": 16,
+            "type": "string"
+          },
+          "ingress": {
+            "enum": [
+              "CLI",
+              "HERMES_FEISHU",
+              "SYSTEM_RECONCILER",
+              "GITHUB_RECONCILER"
+            ]
+          },
+          "payload": {
+            "type": "object"
+          },
+          "pipeline_id": {
+            "pattern": "^pl_[A-Za-z0-9_-]+$",
+            "type": "string"
+          },
+          "project_id": {
+            "pattern": "^prj_[A-Za-z0-9_-]+$",
+            "type": "string"
+          },
+          "schema_id": {
+            "const": "https://schemas.hermes-pipeline.dev/runtime/controller-command/v1"
+          },
+          "schema_version": {
+            "const": 1
+          },
+          "submitted_at": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/utcTimestamp"
+          },
+          "workspace_id": {
+            "pattern": "^ws_[A-Za-z0-9_-]+$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schema_id",
+          "schema_version",
+          "command_id",
+          "idempotency_key",
+          "workspace_id",
+          "project_id",
+          "pipeline_id",
+          "expected_revision",
+          "actor",
+          "ingress",
+          "command_type",
+          "payload",
+          "correlation_id",
+          "submitted_at"
+        ],
+        "title": "Controller Command",
+        "type": "object"
+      },
+      "RuntimeEvidenceBundleV1": {
+        "$id": "https://schemas.hermes-pipeline.dev/runtime/evidence-bundle/v1",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "artifacts": {
+            "items": {
+              "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/artifactReference"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "bundle_digest": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"
+          },
+          "bundle_id": {
+            "pattern": "^evb_[A-Za-z0-9_-]+$",
+            "type": "string"
+          },
+          "contract_revision": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "created_at": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/utcTimestamp"
+          },
+          "execution_run_id": {
+            "pattern": "^run_[A-Za-z0-9_-]+$",
+            "type": "string"
+          },
+          "lease_generation": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "pipeline_id": {
+            "pattern": "^pl_[A-Za-z0-9_-]+$",
+            "type": "string"
+          },
+          "schema_id": {
+            "const": "https://schemas.hermes-pipeline.dev/runtime/evidence-bundle/v1"
+          },
+          "schema_version": {
+            "const": 1
+          },
+          "source_identity": {
+            "additionalProperties": false,
+            "minProperties": 1,
+            "properties": {
+              "candidate_sha": {
+                "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/gitSha"
+              },
+              "integration_candidate_sha": {
+                "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/gitSha"
+              },
+              "planning_base_sha": {
+                "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/gitSha"
+              }
+            },
+            "type": "object"
+          },
+          "stage_attempt_id": {
+            "pattern": "^att_[A-Za-z0-9_-]+$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schema_id",
+          "schema_version",
+          "bundle_id",
+          "pipeline_id",
+          "stage_attempt_id",
+          "execution_run_id",
+          "lease_generation",
+          "source_identity",
+          "contract_revision",
+          "artifacts",
+          "created_at",
+          "bundle_digest"
+        ],
+        "title": "Evidence Bundle",
+        "type": "object"
+      },
+      "RuntimePipelineEventV1": {
+        "$id": "https://schemas.hermes-pipeline.dev/runtime/pipeline-event/v1",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "actor_id": {
+            "type": "string"
+          },
+          "authorization_decision_id": {
+            "type": "string"
+          },
+          "causation_id": {
+            "type": "string"
+          },
+          "command_id": {
+            "type": "string"
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "event_hash": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"
+          },
+          "event_id": {
+            "pattern": "^evt_[A-Za-z0-9_-]+$",
+            "type": "string"
+          },
+          "event_schema_version": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "event_type": {
+            "pattern": "^[A-Z][A-Z0-9_]+$",
+            "type": "string"
+          },
+          "occurred_at": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/utcTimestamp"
+          },
+          "payload": {
+            "type": "object"
+          },
+          "pipeline_id": {
+            "type": "string"
+          },
+          "pipeline_revision": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "previous_event_hash": {
+            "anyOf": [
+              {
+                "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "project_id": {
+            "type": "string"
+          },
+          "recorded_at": {
+            "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/utcTimestamp"
+          },
+          "schema_id": {
+            "const": "https://schemas.hermes-pipeline.dev/runtime/pipeline-event/v1"
+          },
+          "schema_version": {
+            "const": 1
+          },
+          "workspace_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "schema_id",
+          "schema_version",
+          "event_id",
+          "workspace_id",
+          "project_id",
+          "pipeline_id",
+          "pipeline_revision",
+          "event_type",
+          "event_schema_version",
+          "actor_id",
+          "authorization_decision_id",
+          "command_id",
+          "correlation_id",
+          "payload",
+          "occurred_at",
+          "recorded_at",
+          "previous_event_hash",
+          "event_hash"
+        ],
+        "title": "Pipeline Event",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "Hermes Pipeline Contract Catalog",
+    "version": "0.1.0"
+  },
+  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
+  "openapi": "3.1.0",
+  "paths": {}
+}

@@ -1,0 +1,426 @@
+{
+  "schema_id": "https://schemas.hermes-pipeline.dev/engineering/context-manifest/v1",
+  "entries": [
+    {
+      "name": "minimal",
+      "category": "minimal",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/context-manifest/v1",
+        "schema_version": 1,
+        "manifest_id": "ctx_slice_00_03_executor",
+        "role": "EXECUTOR",
+        "slice_id": "slice-00-03",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assembled_at": "2026-08-06T00:00:00.000Z",
+        "files": [
+          {
+            "path": "docs/guide.md",
+            "digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "purpose": "governing"
+          }
+        ],
+        "facts": [
+          {
+            "name": "assigned_worktree",
+            "value": "slice-00-03",
+            "source": "slice-contract.json"
+          }
+        ],
+        "content_hash": "sha256:74f7c9ec982584cc451efd90c3bebe494a771689de15998912803710d73af01c"
+      }
+    },
+    {
+      "name": "maximal",
+      "category": "maximal",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/context-manifest/v1",
+        "schema_version": 1,
+        "manifest_id": "ctx_phase_00_planner",
+        "role": "PLANNER",
+        "slice_id": "slice-00-03",
+        "base_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "assembled_at": "2026-08-06T09:30:00+08:00",
+        "files": [
+          {
+            "path": "docs/guide.md",
+            "digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "purpose": "governing"
+          },
+          {
+            "path": "docs/README.md",
+            "digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "purpose": "index"
+          }
+        ],
+        "facts": [
+          {
+            "name": "retry_budget",
+            "value": 3.0,
+            "source": "slice-contract.json"
+          },
+          {
+            "name": "offline_allowed",
+            "value": true,
+            "source": "dispatch"
+          },
+          {
+            "name": "assigned_worktree",
+            "value": "slice-00-03",
+            "source": "slice-contract.json"
+          }
+        ],
+        "content_hash": "sha256:5528648f035e77190d5fa134514a9dfa01d818934ad26db4976335a172739be7"
+      }
+    },
+    {
+      "name": "integral-boolean-value",
+      "category": "integral",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/context-manifest/v1",
+        "schema_version": 1,
+        "manifest_id": "ctx_slice_00_03_executor",
+        "role": "EXECUTOR",
+        "slice_id": "slice-00-03",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assembled_at": "2026-08-06T00:00:00.000Z",
+        "files": [
+          {
+            "path": "docs/guide.md",
+            "digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "purpose": "governing"
+          }
+        ],
+        "facts": [
+          {
+            "name": "assigned_worktree",
+            "value": true,
+            "source": "slice-contract.json"
+          }
+        ],
+        "content_hash": "sha256:ff6b3bd4ffbb37c6269f5baecdf4e1c4801f1f3771032058e1f0f176a43389de"
+      }
+    },
+    {
+      "name": "integral-number-3.0",
+      "category": "integral",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/context-manifest/v1",
+        "schema_version": 1,
+        "manifest_id": "ctx_slice_00_03_executor",
+        "role": "EXECUTOR",
+        "slice_id": "slice-00-03",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assembled_at": "2026-08-06T00:00:00.000Z",
+        "files": [
+          {
+            "path": "docs/guide.md",
+            "digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "purpose": "governing"
+          }
+        ],
+        "facts": [
+          {
+            "name": "assigned_worktree",
+            "value": 3.0,
+            "source": "slice-contract.json"
+          }
+        ],
+        "content_hash": "sha256:e916619b544ef8ea7b315919057e311559ff82b4b3cc0cf721a8af7607254516"
+      }
+    },
+    {
+      "name": "integral-string-value",
+      "category": "integral",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/context-manifest/v1",
+        "schema_version": 1,
+        "manifest_id": "ctx_slice_00_03_executor",
+        "role": "EXECUTOR",
+        "slice_id": "slice-00-03",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assembled_at": "2026-08-06T00:00:00.000Z",
+        "files": [
+          {
+            "path": "docs/guide.md",
+            "digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "purpose": "governing"
+          }
+        ],
+        "facts": [
+          {
+            "name": "assigned_worktree",
+            "value": "3",
+            "source": "slice-contract.json"
+          }
+        ],
+        "content_hash": "sha256:b85cf874cd0ffa42e8286b5f1f8d3afc7dd2d5a2fa94818585b867d526b8e8be"
+      }
+    },
+    {
+      "name": "invalid-bad-timestamp",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/context-manifest/v1",
+        "schema_version": 1,
+        "manifest_id": "manifest_1",
+        "role": "EXECUTOR",
+        "slice_id": "slice-00-03",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assembled_at": "2026-08-06T00:00:00",
+        "files": [
+          {
+            "path": "docs/guide.md",
+            "digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "purpose": "governing"
+          }
+        ],
+        "facts": [
+          {
+            "name": "assigned_worktree",
+            "value": "slice-00-03",
+            "source": "slice-contract.json"
+          }
+        ],
+        "content_hash": "sha256:750b0acc317ad8aa0d174473e85c47d5b55b5bc6b48034c2dc279332c1f357e6"
+      }
+    },
+    {
+      "name": "invalid-digest",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/context-manifest/v1",
+        "schema_version": 1,
+        "manifest_id": "ctx_slice_00_03_executor",
+        "role": "EXECUTOR",
+        "slice_id": "slice-00-03",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assembled_at": "2026-08-06T00:00:00.000Z",
+        "files": [
+          {
+            "path": "docs/guide.md",
+            "digest": "md5:dddddddddddddddddddddddddddddddd",
+            "purpose": "governing"
+          }
+        ],
+        "facts": [
+          {
+            "name": "assigned_worktree",
+            "value": "slice-00-03",
+            "source": "slice-contract.json"
+          }
+        ],
+        "content_hash": "sha256:9f6825c746ab497e1a7d0f8f016a5f3da85009dbe66f927b7854748b0dc39b22"
+      }
+    },
+    {
+      "name": "invalid-integral-3.5",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/context-manifest/v1",
+        "schema_version": 1,
+        "manifest_id": "ctx_slice_00_03_executor",
+        "role": "EXECUTOR",
+        "slice_id": "slice-00-03",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assembled_at": "2026-08-06T00:00:00.000Z",
+        "files": [
+          {
+            "path": "docs/guide.md",
+            "digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "purpose": "governing"
+          }
+        ],
+        "facts": [
+          {
+            "name": "assigned_worktree",
+            "value": 3.5,
+            "source": "slice-contract.json"
+          }
+        ],
+        "content_hash": "sha256:e27bde3d8bf5b0a955283bcaac1aaf8588b28d7f00fcc9086e420c984e0e6c62"
+      }
+    },
+    {
+      "name": "invalid-relative-path",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/context-manifest/v1",
+        "schema_version": 1,
+        "manifest_id": "ctx_slice_00_03_executor",
+        "role": "EXECUTOR",
+        "slice_id": "slice-00-03",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assembled_at": "2026-08-06T00:00:00.000Z",
+        "files": [
+          {
+            "path": "../escape.md",
+            "digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "purpose": "governing"
+          }
+        ],
+        "facts": [
+          {
+            "name": "assigned_worktree",
+            "value": "slice-00-03",
+            "source": "slice-contract.json"
+          }
+        ],
+        "content_hash": "sha256:b5585707e3fe1cdfa1c5ffaf92c8dd97126c7fcd73b2dee076775a400d1b8a32"
+      }
+    },
+    {
+      "name": "invalid-role",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/context-manifest/v1",
+        "schema_version": 1,
+        "manifest_id": "ctx_slice_00_03_executor",
+        "role": "AUDITOR",
+        "slice_id": "slice-00-03",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assembled_at": "2026-08-06T00:00:00.000Z",
+        "files": [
+          {
+            "path": "docs/guide.md",
+            "digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "purpose": "governing"
+          }
+        ],
+        "facts": [
+          {
+            "name": "assigned_worktree",
+            "value": "slice-00-03",
+            "source": "slice-contract.json"
+          }
+        ],
+        "content_hash": "sha256:d8a08af4a482b2698de716e543764f59defe123c7a205a5e61af7c5107b997e9"
+      }
+    },
+    {
+      "name": "invalid-unknown-field",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/context-manifest/v1",
+        "schema_version": 1,
+        "manifest_id": "ctx_slice_00_03_executor",
+        "role": "EXECUTOR",
+        "slice_id": "slice-00-03",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assembled_at": "2026-08-06T00:00:00.000Z",
+        "files": [
+          {
+            "path": "docs/guide.md",
+            "digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "purpose": "governing"
+          }
+        ],
+        "facts": [
+          {
+            "name": "assigned_worktree",
+            "value": "slice-00-03",
+            "source": "slice-contract.json"
+          }
+        ],
+        "extra": [],
+        "content_hash": "sha256:4fe1200d72343967878f5636efdb2db6d4c705fcca0d7e613c6886f6e49e7b10"
+      }
+    },
+    {
+      "name": "legacy",
+      "category": "legacy",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/context-manifest/v1",
+        "schema_version": 1,
+        "manifest_id": "ctx_slice_00_02_executor",
+        "role": "REVIEWER",
+        "slice_id": "slice-00-02",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assembled_at": "2026-08-05T00:00:00Z",
+        "files": [
+          {
+            "path": "AGENTS.md",
+            "digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "purpose": "constitution"
+          }
+        ],
+        "facts": [
+          {
+            "name": "attempt",
+            "value": 1,
+            "source": "dispatch"
+          }
+        ],
+        "content_hash": "sha256:68e8aa5b2b49565247420d3b99068bdecd1d1ff31acc563fbf9ea47b7b75c52b"
+      }
+    },
+    {
+      "name": "legacy-invalid",
+      "category": "legacy",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/context-manifest/v1",
+        "schema_version": 1,
+        "manifest_id": "ctx_slice_00_02_executor",
+        "role": "REVIEWER",
+        "slice_id": "slice-00-02",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assembled_at": "2026-08-05",
+        "files": [
+          {
+            "path": "/abs/escape.md",
+            "digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "purpose": "constitution"
+          }
+        ],
+        "facts": [
+          {
+            "name": "attempt",
+            "value": 1,
+            "source": "dispatch"
+          }
+        ],
+        "content_hash": "sha256:d2a0748b7756d74671606462fba4382793aabc5c146ca4ab57904cf9ec87a696"
+      }
+    },
+    {
+      "name": "canary",
+      "category": "canary",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/context-manifest/v1",
+        "schema_version": 1,
+        "manifest_id": "ctx_slice_00_03_executor",
+        "role": "EXECUTOR",
+        "slice_id": "slice-00-03",
+        "base_sha": "canary_context-manifest_7f3e9a2c4b1d",
+        "files": [
+          {
+            "path": "docs/guide.md",
+            "digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "purpose": "governing"
+          }
+        ],
+        "facts": [
+          {
+            "name": "assigned_worktree",
+            "value": "slice-00-03",
+            "source": "slice-contract.json"
+          }
+        ],
+        "content_hash": "sha256:d0aaa5734ff52472a887892d91cc892796d60a55512965ac30985611ee3c36b3"
+      }
+    }
+  ]
+}

@@ -1,0 +1,136 @@
+{
+  "kind": "rfc8785-golden-vectors",
+  "implementation": "rfc8785==0.1.4",
+  "vectors": [
+    {
+      "name": "rfc8785-spec-object-order",
+      "input": {
+        "b": 2,
+        "a": 1,
+        "c": true
+      },
+      "canonical": "{\"a\":1,\"b\":2,\"c\":true}",
+      "sha256": "sha256:b1bc62390ee3afb6f2b11d4088f018acd2ba100d3996bdd7490085df2269f55f"
+    },
+    {
+      "name": "rfc8785-spec-nested",
+      "input": {
+        "c": {
+          "d": 4,
+          "b": 3
+        },
+        "a": [
+          1,
+          "two",
+          false,
+          null
+        ]
+      },
+      "canonical": "{\"a\":[1,\"two\",false,null],\"c\":{\"b\":3,\"d\":4}}",
+      "sha256": "sha256:8b04e325d0508c4fe68fd8f8ad88d14169c5563d9508519dd891d4eecfa55cf3"
+    },
+    {
+      "name": "number-integer",
+      "input": {
+        "n": 42
+      },
+      "canonical": "{\"n\":42}",
+      "sha256": "sha256:4e0730f238f81de137ff27d89ec3bcc3ebadf95107661387df82043c4ec25475"
+    },
+    {
+      "name": "number-large-exponent",
+      "input": {
+        "n": 1e+21
+      },
+      "canonical": "{\"n\":1e+21}",
+      "sha256": "sha256:f1ee2b60ee95a3170fdc07a577e5f3514ced26867443d69da265acadead81007"
+    },
+    {
+      "name": "number-fraction",
+      "input": {
+        "n": 1.5
+      },
+      "canonical": "{\"n\":1.5}",
+      "sha256": "sha256:cb14d55cfe562fd6592d919f5dfacfa8708687b746a1d110c6dd5529c410e772"
+    },
+    {
+      "name": "number-float-equality",
+      "input": {
+        "a": 1.0,
+        "b": 1,
+        "c": 1.0
+      },
+      "canonical": "{\"a\":1,\"b\":1,\"c\":1}",
+      "sha256": "sha256:0756c7fe6f47340c71bbc8c149787fe93eb27223bb0ee1f209e0a340cd498f3b"
+    },
+    {
+      "name": "utf16-code-unit-ordering",
+      "input": {
+        "\ud801\udc00": 1,
+        "z": 2
+      },
+      "canonical": "{\"z\":2,\"\ud801\udc00\":1}",
+      "sha256": "sha256:35f67256f6e15d3a62448f98543729ca7f6ba75dae9a9f2af9b62e849c891be6"
+    },
+    {
+      "name": "utf16-code-unit-ordering-two",
+      "input": {
+        "\u03b1": 1,
+        "z": 2
+      },
+      "canonical": "{\"z\":2,\"\u03b1\":1}",
+      "sha256": "sha256:df2ef6162997cfee76c8d1cda81d88bfb9e0827d719d1a1d656ca8867de33fc6"
+    },
+    {
+      "name": "control-characters",
+      "input": {
+        "a": "\u0000\u0001\u0007"
+      },
+      "canonical": "{\"a\":\"\\u0000\\u0001\\u0007\"}",
+      "sha256": "sha256:407b5088d80c89b3a9a9847d93681e5bd749dd7ae326c32089b6b40bf480393b"
+    },
+    {
+      "name": "unicode-preserved",
+      "input": {
+        "a": "\u00e9"
+      },
+      "canonical": "{\"a\":\"\u00e9\"}",
+      "sha256": "sha256:b3a092a6af48807fa9482b2ee140105575daa26d5b24b3c0e60a7e2dee6683b1"
+    },
+    {
+      "name": "empty-object-and-array",
+      "input": {
+        "a": {},
+        "b": []
+      },
+      "canonical": "{\"a\":{},\"b\":[]}",
+      "sha256": "sha256:aeeba1e56a144077f89e26c930dad7cf933e9383cfb8e33ddff618233b29be76"
+    }
+  ],
+  "rejections": [
+    {
+      "name": "nan",
+      "input": {
+        "a": NaN
+      }
+    },
+    {
+      "name": "infinity",
+      "input": {
+        "a": Infinity
+      }
+    },
+    {
+      "name": "negative-infinity",
+      "input": {
+        "a": -Infinity
+      }
+    },
+    {
+      "name": "lone-surrogate",
+      "input": {
+        "a": "\ud800"
+      }
+    }
+  ]
+}
