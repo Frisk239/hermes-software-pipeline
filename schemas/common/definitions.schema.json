@@ -1,109 +1,131 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schemas.hermes-pipeline.dev/common/definitions/v1",
-  "title": "Hermes Pipeline Common Definitions",
   "$defs": {
-    "utcTimestamp": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "gitSha": {
-      "type": "string",
-      "pattern": "^[0-9a-f]{40}([0-9a-f]{24})?$"
-    },
-    "sha256": {
-      "type": "string",
-      "pattern": "^sha256:[0-9a-f]{64}$"
-    },
-    "relativePath": {
-      "type": "string",
-      "minLength": 1,
-      "maxLength": 512,
-      "pattern": "^(?!/)(?![A-Za-z]:)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\).+$"
-    },
-    "identity": {
-      "type": "string",
-      "minLength": 4,
-      "maxLength": 128,
-      "pattern": "^[a-z][a-z0-9_-]*_[A-Za-z0-9_-]+$"
-    },
-    "schemaIdentity": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["schema_id", "schema_version"],
-      "properties": {
-        "schema_id": {
-          "type": "string",
-          "format": "uri"
-        },
-        "schema_version": {
-          "type": "integer",
-          "minimum": 1
-        }
-      }
-    },
-    "fileReference": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["path", "digest", "purpose"],
-      "properties": {
-        "path": {
-          "$ref": "#/$defs/relativePath"
-        },
-        "digest": {
-          "$ref": "#/$defs/sha256"
-        },
-        "purpose": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 256
-        }
-      }
-    },
     "artifactReference": {
-      "type": "object",
       "additionalProperties": false,
-      "required": ["artifact_id", "manifest_digest", "role"],
       "properties": {
         "artifact_id": {
-          "type": "string",
-          "pattern": "^art_[A-Za-z0-9_-]+$"
+          "pattern": "^art_[A-Za-z0-9_-]+$",
+          "type": "string"
         },
         "manifest_digest": {
           "$ref": "#/$defs/sha256"
         },
         "role": {
-          "type": "string",
+          "maxLength": 128,
           "minLength": 1,
-          "maxLength": 128
+          "type": "string"
         }
-      }
+      },
+      "required": [
+        "artifact_id",
+        "manifest_digest",
+        "role"
+      ],
+      "type": "object"
     },
     "engineeringRisk": {
-      "type": "object",
       "additionalProperties": false,
-      "required": ["risk_id", "description", "impact", "mitigation", "trigger"],
       "properties": {
-        "risk_id": {
-          "type": "string",
-          "pattern": "^R-[0-9]{2,}$"
-        },
         "description": {
-          "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "type": "string"
         },
         "impact": {
-          "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
+          "enum": [
+            "LOW",
+            "MEDIUM",
+            "HIGH",
+            "CRITICAL"
+          ]
         },
         "mitigation": {
-          "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "type": "string"
+        },
+        "risk_id": {
+          "pattern": "^R-[0-9]{2,}$",
+          "type": "string"
         },
         "trigger": {
-          "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "type": "string"
         }
-      }
+      },
+      "required": [
+        "risk_id",
+        "description",
+        "impact",
+        "mitigation",
+        "trigger"
+      ],
+      "type": "object"
+    },
+    "fileReference": {
+      "additionalProperties": false,
+      "properties": {
+        "digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "path": {
+          "$ref": "#/$defs/relativePath"
+        },
+        "purpose": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "digest",
+        "purpose"
+      ],
+      "type": "object"
+    },
+    "gitSha": {
+      "pattern": "^[0-9a-f]{40}([0-9a-f]{24})?$",
+      "type": "string"
+    },
+    "identity": {
+      "maxLength": 128,
+      "minLength": 4,
+      "pattern": "^[a-z][a-z0-9_-]*_[A-Za-z0-9_-]+$",
+      "type": "string"
+    },
+    "relativePath": {
+      "maxLength": 512,
+      "minLength": 1,
+      "pattern": "^(?!/)(?![A-Za-z]:)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\).+$",
+      "type": "string"
+    },
+    "schemaIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_id": {
+          "format": "uri",
+          "type": "string"
+        },
+        "schema_version": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "schema_id",
+        "schema_version"
+      ],
+      "type": "object"
+    },
+    "sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "utcTimestamp": {
+      "format": "date-time",
+      "type": "string"
     }
-  }
+  },
+  "$id": "https://schemas.hermes-pipeline.dev/common/definitions/v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Hermes Pipeline Common Definitions"
 }

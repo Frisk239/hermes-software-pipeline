@@ -1,102 +1,349 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schemas.hermes-pipeline.dev/engineering/phase-plan/v1",
-  "title": "Engineering Phase Plan",
-  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
-  "required": ["schema_id", "schema_version", "document_revision", "phase_id", "title", "status", "owner", "base_sha", "outcome", "prerequisites", "accepted_adrs", "module_boundaries", "slices", "invariants", "acceptance_dimensions", "exit_criteria", "exclusions", "risks", "stop_conditions", "phase_gate", "human_approval", "content_hash"],
-  "properties": {
-    "schema_id": {"const": "https://schemas.hermes-pipeline.dev/engineering/phase-plan/v1"},
-    "schema_version": {"const": 1},
-    "document_revision": {"type": "integer", "minimum": 1},
-    "phase_id": {"type": "string", "pattern": "^phase-[0-9]{2,}$"},
-    "title": {"type": "string", "minLength": 1, "maxLength": 160},
-    "status": {"enum": ["DRAFT", "APPROVED", "EXECUTING", "REVIEWING", "COMPLETE", "BLOCKED"]},
-    "owner": {"type": "string", "minLength": 1, "maxLength": 128},
-    "base_sha": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/gitSha"},
-    "outcome": {"type": "string", "minLength": 1},
-    "prerequisites": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
-    "accepted_adrs": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^ADR-[0-9]{4}$"}},
-    "module_boundaries": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
-    "slices": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["slice_id", "title", "depends_on", "owns_exit_criteria", "demonstration"],
-        "properties": {
-          "slice_id": {"type": "string", "pattern": "^slice-[0-9]{2,}-[0-9]{2,}$"},
-          "title": {"type": "string", "minLength": 1},
-          "depends_on": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^slice-[0-9]{2,}-[0-9]{2,}$"}},
-          "owns_exit_criteria": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^EC-[0-9]{2,}-[0-9]{2,}$"}},
-          "demonstration": {"type": "string", "minLength": 1}
-        }
-      }
-    },
-    "invariants": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
-    "acceptance_dimensions": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["testing", "migration", "security", "documentation", "demonstration"],
-      "properties": {
-        "testing": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
-        "migration": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
-        "security": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
-        "documentation": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
-        "demonstration": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
-      }
-    },
-    "exit_criteria": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["criterion_id", "observable_result", "owner_slice_ids"],
-        "properties": {
-          "criterion_id": {"type": "string", "pattern": "^EC-[0-9]{2,}-[0-9]{2,}$"},
-          "observable_result": {"type": "string", "minLength": 1},
-          "owner_slice_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "pattern": "^slice-[0-9]{2,}-[0-9]{2,}$"}}
-        }
-      }
-    },
-    "exclusions": {"type": "array", "items": {"type": "string"}},
-    "risks": {"type": "array", "minItems": 1, "items": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/engineeringRisk"}},
-    "stop_conditions": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
-    "phase_gate": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["reviewer_role", "required_evidence", "allowed_verdicts"],
-      "properties": {
-        "reviewer_role": {"const": "CODEX_PLANNER_DESIGNER_REVIEWER"},
-        "required_evidence": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
-        "allowed_verdicts": {"const": ["PASS", "REWORK", "BLOCKED_CONTRACT"]}
-      }
-    },
-    "human_approval": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["required", "status"],
-      "properties": {
-        "required": {"type": "boolean"},
-        "status": {"enum": ["NOT_REQUIRED", "PENDING", "APPROVED", "REJECTED"]},
-        "attestation_id": {"type": "string"}
-      }
-    },
-    "content_hash": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"}
-  },
   "allOf": [
     {
-      "if": {"properties": {"status": {"enum": ["APPROVED", "EXECUTING", "REVIEWING", "COMPLETE"]}}},
+      "if": {
+        "properties": {
+          "status": {
+            "enum": [
+              "APPROVED",
+              "EXECUTING",
+              "REVIEWING",
+              "COMPLETE"
+            ]
+          }
+        }
+      },
       "then": {
         "properties": {
           "human_approval": {
-            "required": ["attestation_id"],
-            "properties": {"required": {"const": true}, "status": {"const": "APPROVED"}}
+            "properties": {
+              "required": {
+                "const": true
+              },
+              "status": {
+                "const": "APPROVED"
+              }
+            },
+            "required": [
+              "attestation_id"
+            ]
           }
         }
       }
     }
-  ]
+  ],
+  "properties": {
+    "acceptance_dimensions": {
+      "additionalProperties": false,
+      "properties": {
+        "demonstration": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "documentation": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "migration": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "security": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "testing": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "testing",
+        "migration",
+        "security",
+        "documentation",
+        "demonstration"
+      ],
+      "type": "object"
+    },
+    "accepted_adrs": {
+      "items": {
+        "pattern": "^ADR-[0-9]{4}$",
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "base_sha": {
+      "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/gitSha"
+    },
+    "content_hash": {
+      "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"
+    },
+    "document_revision": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "exclusions": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "exit_criteria": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "criterion_id": {
+            "pattern": "^EC-[0-9]{2,}-[0-9]{2,}$",
+            "type": "string"
+          },
+          "observable_result": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "owner_slice_ids": {
+            "items": {
+              "pattern": "^slice-[0-9]{2,}-[0-9]{2,}$",
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "criterion_id",
+          "observable_result",
+          "owner_slice_ids"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "human_approval": {
+      "additionalProperties": false,
+      "properties": {
+        "attestation_id": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "status": {
+          "enum": [
+            "NOT_REQUIRED",
+            "PENDING",
+            "APPROVED",
+            "REJECTED"
+          ]
+        }
+      },
+      "required": [
+        "required",
+        "status"
+      ],
+      "type": "object"
+    },
+    "invariants": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "module_boundaries": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "outcome": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "owner": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+    },
+    "phase_gate": {
+      "additionalProperties": false,
+      "properties": {
+        "allowed_verdicts": {
+          "const": [
+            "PASS",
+            "REWORK",
+            "BLOCKED_CONTRACT"
+          ]
+        },
+        "required_evidence": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "reviewer_role": {
+          "const": "CODEX_PLANNER_DESIGNER_REVIEWER"
+        }
+      },
+      "required": [
+        "reviewer_role",
+        "required_evidence",
+        "allowed_verdicts"
+      ],
+      "type": "object"
+    },
+    "phase_id": {
+      "pattern": "^phase-[0-9]{2,}$",
+      "type": "string"
+    },
+    "prerequisites": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "risks": {
+      "items": {
+        "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/engineeringRisk"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "schema_id": {
+      "const": "https://schemas.hermes-pipeline.dev/engineering/phase-plan/v1"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "slices": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "demonstration": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "depends_on": {
+            "items": {
+              "pattern": "^slice-[0-9]{2,}-[0-9]{2,}$",
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "owns_exit_criteria": {
+            "items": {
+              "pattern": "^EC-[0-9]{2,}-[0-9]{2,}$",
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "slice_id": {
+            "pattern": "^slice-[0-9]{2,}-[0-9]{2,}$",
+            "type": "string"
+          },
+          "title": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "slice_id",
+          "title",
+          "depends_on",
+          "owns_exit_criteria",
+          "demonstration"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "status": {
+      "enum": [
+        "DRAFT",
+        "APPROVED",
+        "EXECUTING",
+        "REVIEWING",
+        "COMPLETE",
+        "BLOCKED"
+      ]
+    },
+    "stop_conditions": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "title": {
+      "maxLength": 160,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_id",
+    "schema_version",
+    "document_revision",
+    "phase_id",
+    "title",
+    "status",
+    "owner",
+    "base_sha",
+    "outcome",
+    "prerequisites",
+    "accepted_adrs",
+    "module_boundaries",
+    "slices",
+    "invariants",
+    "acceptance_dimensions",
+    "exit_criteria",
+    "exclusions",
+    "risks",
+    "stop_conditions",
+    "phase_gate",
+    "human_approval",
+    "content_hash"
+  ],
+  "title": "Engineering Phase Plan",
+  "type": "object"
 }

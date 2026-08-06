@@ -1,0 +1,385 @@
+{
+  "schema_id": "https://schemas.hermes-pipeline.dev/runtime/pipeline-event/v1",
+  "entries": [
+    {
+      "name": "minimal",
+      "category": "minimal",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/pipeline-event/v1",
+        "schema_version": 1,
+        "event_id": "evt_00_03_1",
+        "workspace_id": "ws_001",
+        "project_id": "prj_001",
+        "pipeline_id": "pl_001",
+        "pipeline_revision": 1,
+        "event_type": "PIPELINE_STARTED",
+        "event_schema_version": 1,
+        "actor_id": "lei",
+        "authorization_decision_id": "adz_1",
+        "command_id": "cmd_00_03_1",
+        "correlation_id": "corr_1",
+        "payload": {
+          "stage": "prd"
+        },
+        "occurred_at": "2026-08-06T00:00:00.000Z",
+        "recorded_at": "2026-08-06T00:00:00.000Z",
+        "previous_event_hash": null,
+        "event_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      }
+    },
+    {
+      "name": "maximal",
+      "category": "maximal",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/pipeline-event/v1",
+        "schema_version": 1,
+        "event_id": "evt_00_03_2",
+        "workspace_id": "ws_001",
+        "project_id": "prj_001",
+        "pipeline_id": "pl_001",
+        "pipeline_revision": 2,
+        "event_type": "PIPELINE_FINISHED",
+        "event_schema_version": 1,
+        "actor_id": "feishu-bot",
+        "authorization_decision_id": "adz_2",
+        "command_id": "cmd_00_03_2",
+        "correlation_id": "corr_2",
+        "payload": {
+          "result": "ok"
+        },
+        "occurred_at": "2026-08-06T09:30:00+08:00",
+        "recorded_at": "2026-08-06T09:30:00+08:00",
+        "previous_event_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "event_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "causation_id": "cmd_00_03_1"
+      }
+    },
+    {
+      "name": "integral-number-3.0",
+      "category": "integral",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/pipeline-event/v1",
+        "schema_version": 1,
+        "event_id": "evt_00_03_1",
+        "workspace_id": "ws_001",
+        "project_id": "prj_001",
+        "pipeline_id": "pl_001",
+        "pipeline_revision": 3.0,
+        "event_type": "PIPELINE_STARTED",
+        "event_schema_version": 1,
+        "actor_id": "lei",
+        "authorization_decision_id": "adz_1",
+        "command_id": "cmd_00_03_1",
+        "correlation_id": "corr_1",
+        "payload": {
+          "stage": "prd"
+        },
+        "occurred_at": "2026-08-06T00:00:00.000Z",
+        "recorded_at": "2026-08-06T00:00:00.000Z",
+        "previous_event_hash": null,
+        "event_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      }
+    },
+    {
+      "name": "invalid-event-id",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/pipeline-event/v1",
+        "schema_version": 1,
+        "event_id": "event_1",
+        "workspace_id": "ws_001",
+        "project_id": "prj_001",
+        "pipeline_id": "pl_001",
+        "pipeline_revision": 1,
+        "event_type": "PIPELINE_STARTED",
+        "event_schema_version": 1,
+        "actor_id": "lei",
+        "authorization_decision_id": "adz_1",
+        "command_id": "cmd_00_03_1",
+        "correlation_id": "corr_1",
+        "payload": {
+          "stage": "prd"
+        },
+        "occurred_at": "2026-08-06T00:00:00.000Z",
+        "recorded_at": "2026-08-06T00:00:00.000Z",
+        "previous_event_hash": null,
+        "event_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      }
+    },
+    {
+      "name": "invalid-event-type",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/pipeline-event/v1",
+        "schema_version": 1,
+        "event_id": "evt_00_03_1",
+        "workspace_id": "ws_001",
+        "project_id": "prj_001",
+        "pipeline_id": "pl_001",
+        "pipeline_revision": 1,
+        "event_type": "pipeline_started",
+        "event_schema_version": 1,
+        "actor_id": "lei",
+        "authorization_decision_id": "adz_1",
+        "command_id": "cmd_00_03_1",
+        "correlation_id": "corr_1",
+        "payload": {
+          "stage": "prd"
+        },
+        "occurred_at": "2026-08-06T00:00:00.000Z",
+        "recorded_at": "2026-08-06T00:00:00.000Z",
+        "previous_event_hash": null,
+        "event_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      }
+    },
+    {
+      "name": "invalid-integral-3.5",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/pipeline-event/v1",
+        "schema_version": 1,
+        "event_id": "evt_00_03_1",
+        "workspace_id": "ws_001",
+        "project_id": "prj_001",
+        "pipeline_id": "pl_001",
+        "pipeline_revision": 3.5,
+        "event_type": "PIPELINE_STARTED",
+        "event_schema_version": 1,
+        "actor_id": "lei",
+        "authorization_decision_id": "adz_1",
+        "command_id": "cmd_00_03_1",
+        "correlation_id": "corr_1",
+        "payload": {
+          "stage": "prd"
+        },
+        "occurred_at": "2026-08-06T00:00:00.000Z",
+        "recorded_at": "2026-08-06T00:00:00.000Z",
+        "previous_event_hash": null,
+        "event_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      }
+    },
+    {
+      "name": "invalid-integral-boolean",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/pipeline-event/v1",
+        "schema_version": 1,
+        "event_id": "evt_00_03_1",
+        "workspace_id": "ws_001",
+        "project_id": "prj_001",
+        "pipeline_id": "pl_001",
+        "pipeline_revision": true,
+        "event_type": "PIPELINE_STARTED",
+        "event_schema_version": 1,
+        "actor_id": "lei",
+        "authorization_decision_id": "adz_1",
+        "command_id": "cmd_00_03_1",
+        "correlation_id": "corr_1",
+        "payload": {
+          "stage": "prd"
+        },
+        "occurred_at": "2026-08-06T00:00:00.000Z",
+        "recorded_at": "2026-08-06T00:00:00.000Z",
+        "previous_event_hash": null,
+        "event_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      }
+    },
+    {
+      "name": "invalid-integral-string",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/pipeline-event/v1",
+        "schema_version": 1,
+        "event_id": "evt_00_03_1",
+        "workspace_id": "ws_001",
+        "project_id": "prj_001",
+        "pipeline_id": "pl_001",
+        "pipeline_revision": "3",
+        "event_type": "PIPELINE_STARTED",
+        "event_schema_version": 1,
+        "actor_id": "lei",
+        "authorization_decision_id": "adz_1",
+        "command_id": "cmd_00_03_1",
+        "correlation_id": "corr_1",
+        "payload": {
+          "stage": "prd"
+        },
+        "occurred_at": "2026-08-06T00:00:00.000Z",
+        "recorded_at": "2026-08-06T00:00:00.000Z",
+        "previous_event_hash": null,
+        "event_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      }
+    },
+    {
+      "name": "invalid-previous-hash",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/pipeline-event/v1",
+        "schema_version": 1,
+        "event_id": "evt_00_03_1",
+        "workspace_id": "ws_001",
+        "project_id": "prj_001",
+        "pipeline_id": "pl_001",
+        "pipeline_revision": 1,
+        "event_type": "PIPELINE_STARTED",
+        "event_schema_version": 1,
+        "actor_id": "lei",
+        "authorization_decision_id": "adz_1",
+        "command_id": "cmd_00_03_1",
+        "correlation_id": "corr_1",
+        "payload": {
+          "stage": "prd"
+        },
+        "occurred_at": "2026-08-06T00:00:00.000Z",
+        "recorded_at": "2026-08-06T00:00:00.000Z",
+        "previous_event_hash": "sha256:abc",
+        "event_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      }
+    },
+    {
+      "name": "invalid-revision",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/pipeline-event/v1",
+        "schema_version": 1,
+        "event_id": "evt_00_03_1",
+        "workspace_id": "ws_001",
+        "project_id": "prj_001",
+        "pipeline_id": "pl_001",
+        "pipeline_revision": 0,
+        "event_type": "PIPELINE_STARTED",
+        "event_schema_version": 1,
+        "actor_id": "lei",
+        "authorization_decision_id": "adz_1",
+        "command_id": "cmd_00_03_1",
+        "correlation_id": "corr_1",
+        "payload": {
+          "stage": "prd"
+        },
+        "occurred_at": "2026-08-06T00:00:00.000Z",
+        "recorded_at": "2026-08-06T00:00:00.000Z",
+        "previous_event_hash": null,
+        "event_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      }
+    },
+    {
+      "name": "invalid-unknown-field",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/pipeline-event/v1",
+        "schema_version": 1,
+        "event_id": "evt_00_03_1",
+        "workspace_id": "ws_001",
+        "project_id": "prj_001",
+        "pipeline_id": "pl_001",
+        "pipeline_revision": 1,
+        "event_type": "PIPELINE_STARTED",
+        "event_schema_version": 1,
+        "actor_id": "lei",
+        "authorization_decision_id": "adz_1",
+        "command_id": "cmd_00_03_1",
+        "correlation_id": "corr_1",
+        "payload": {
+          "stage": "prd"
+        },
+        "occurred_at": "2026-08-06T00:00:00.000Z",
+        "recorded_at": "2026-08-06T00:00:00.000Z",
+        "previous_event_hash": null,
+        "event_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "sequence": 1
+      }
+    },
+    {
+      "name": "legacy",
+      "category": "legacy",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/pipeline-event/v1",
+        "schema_version": 1,
+        "event_id": "evt_00_02_1",
+        "workspace_id": "ws_001",
+        "project_id": "prj_001",
+        "pipeline_id": "pl_002",
+        "pipeline_revision": 1,
+        "event_type": "PIPELINE_STARTED",
+        "event_schema_version": 1,
+        "actor_id": "codex",
+        "authorization_decision_id": "adz_0",
+        "command_id": "cmd_00_02_1",
+        "correlation_id": "corr_0",
+        "payload": {
+          "stage": "prd"
+        },
+        "occurred_at": "2026-08-05T00:00:00Z",
+        "recorded_at": "2026-08-05T00:00:00Z",
+        "previous_event_hash": null,
+        "event_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      }
+    },
+    {
+      "name": "legacy-invalid",
+      "category": "legacy",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/pipeline-event/v1",
+        "schema_version": 1,
+        "event_id": "evt_00_03_1",
+        "workspace_id": "ws_001",
+        "project_id": "prj_001",
+        "pipeline_id": "pl_001",
+        "pipeline_revision": 1,
+        "event_type": "PIPELINE_STARTED",
+        "event_schema_version": 1,
+        "actor_id": "lei",
+        "authorization_decision_id": "adz_1",
+        "command_id": "cmd_00_03_1",
+        "correlation_id": "corr_1",
+        "payload": {
+          "stage": "prd"
+        },
+        "occurred_at": "2026-08-06T00:00:00.000Z",
+        "recorded_at": "2026-08-06T00:00:00.000Z",
+        "previous_event_hash": null,
+        "event_hash": "sha256:fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      }
+    },
+    {
+      "name": "canary",
+      "category": "canary",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/pipeline-event/v1",
+        "schema_version": 1,
+        "event_id": "evt_00_03_1",
+        "workspace_id": "ws_001",
+        "project_id": "prj_001",
+        "pipeline_id": "pl_001",
+        "pipeline_revision": 1,
+        "event_type": "PIPELINE_STARTED",
+        "event_schema_version": 1,
+        "actor_id": "canary_pipeline-event_7f3e9a2c4b1d",
+        "authorization_decision_id": "adz_1",
+        "command_id": "cmd_00_03_1",
+        "correlation_id": "corr_1",
+        "payload": {
+          "stage": "prd"
+        },
+        "occurred_at": "2026-08-06T00:00:00.000Z",
+        "recorded_at": "2026-08-06T00:00:00.000Z",
+        "previous_event_hash": null,
+        "event_hash": "canary_pipeline-event_7f3e9a2c4b1d"
+      }
+    }
+  ]
+}

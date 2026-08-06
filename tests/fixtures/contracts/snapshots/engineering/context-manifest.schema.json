@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.hermes-pipeline.dev/engineering/context-manifest/v1",
+  "title": "Engineering Context Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_id", "schema_version", "manifest_id", "role", "slice_id", "base_sha", "assembled_at", "files", "facts", "content_hash"],
+  "properties": {
+    "schema_id": {"const": "https://schemas.hermes-pipeline.dev/engineering/context-manifest/v1"},
+    "schema_version": {"const": 1},
+    "manifest_id": {"type": "string", "pattern": "^ctx_[A-Za-z0-9_-]+$"},
+    "role": {"enum": ["PLANNER", "EXECUTOR", "REVIEWER"]},
+    "slice_id": {"type": "string"},
+    "base_sha": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/gitSha"},
+    "assembled_at": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/utcTimestamp"},
+    "files": {"type": "array", "minItems": 1, "items": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/fileReference"}},
+    "facts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "value", "source"],
+        "properties": {
+          "name": {"type": "string"},
+          "value": {"type": ["string", "integer", "boolean"]},
+          "source": {"type": "string"}
+        }
+      }
+    },
+    "content_hash": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"}
+  }
+}

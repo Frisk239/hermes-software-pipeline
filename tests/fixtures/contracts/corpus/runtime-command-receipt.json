@@ -1,0 +1,222 @@
+{
+  "schema_id": "https://schemas.hermes-pipeline.dev/runtime/command-receipt/v1",
+  "entries": [
+    {
+      "name": "minimal",
+      "category": "minimal",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/command-receipt/v1",
+        "schema_version": 1,
+        "command_id": "cmd_00_03_1",
+        "status": "ACCEPTED",
+        "pipeline_id": "pl_00_03",
+        "observed_revision": 0,
+        "recorded_at": "2026-08-06T00:00:00.000Z",
+        "correlation_id": "corr_1"
+      }
+    },
+    {
+      "name": "maximal",
+      "category": "maximal",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/command-receipt/v1",
+        "schema_version": 1,
+        "command_id": "cmd_00_03_2",
+        "status": "REJECTED",
+        "pipeline_id": "pl_00_03",
+        "observed_revision": 3,
+        "event_ids": [
+          "evt_1",
+          "evt_2"
+        ],
+        "error": {
+          "code": "VALIDATION_ERROR",
+          "message": "bad payload",
+          "retryable": false,
+          "field_violations": [
+            "payload.stage"
+          ]
+        },
+        "recorded_at": "2026-08-06T09:30:00+08:00",
+        "correlation_id": "corr_2"
+      }
+    },
+    {
+      "name": "integral-number-3.0",
+      "category": "integral",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/command-receipt/v1",
+        "schema_version": 1,
+        "command_id": "cmd_00_03_1",
+        "status": "ACCEPTED",
+        "pipeline_id": "pl_00_03",
+        "observed_revision": 3.0,
+        "recorded_at": "2026-08-06T00:00:00.000Z",
+        "correlation_id": "corr_1"
+      }
+    },
+    {
+      "name": "invalid-error-code",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/command-receipt/v1",
+        "schema_version": 1,
+        "command_id": "cmd_00_03_1",
+        "status": "REJECTED",
+        "pipeline_id": "pl_00_03",
+        "observed_revision": 0,
+        "error": {
+          "code": "PANIC",
+          "message": "m",
+          "retryable": true
+        },
+        "recorded_at": "2026-08-06T00:00:00.000Z",
+        "correlation_id": "corr_1"
+      }
+    },
+    {
+      "name": "invalid-integral-3.5",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/command-receipt/v1",
+        "schema_version": 1,
+        "command_id": "cmd_00_03_1",
+        "status": "ACCEPTED",
+        "pipeline_id": "pl_00_03",
+        "observed_revision": 3.5,
+        "recorded_at": "2026-08-06T00:00:00.000Z",
+        "correlation_id": "corr_1"
+      }
+    },
+    {
+      "name": "invalid-integral-boolean",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/command-receipt/v1",
+        "schema_version": 1,
+        "command_id": "cmd_00_03_1",
+        "status": "ACCEPTED",
+        "pipeline_id": "pl_00_03",
+        "observed_revision": true,
+        "recorded_at": "2026-08-06T00:00:00.000Z",
+        "correlation_id": "corr_1"
+      }
+    },
+    {
+      "name": "invalid-integral-string",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/command-receipt/v1",
+        "schema_version": 1,
+        "command_id": "cmd_00_03_1",
+        "status": "ACCEPTED",
+        "pipeline_id": "pl_00_03",
+        "observed_revision": "3",
+        "recorded_at": "2026-08-06T00:00:00.000Z",
+        "correlation_id": "corr_1"
+      }
+    },
+    {
+      "name": "invalid-null-error",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/command-receipt/v1",
+        "schema_version": 1,
+        "command_id": "cmd_00_03_1",
+        "status": "REJECTED",
+        "pipeline_id": "pl_00_03",
+        "observed_revision": 0,
+        "error": null,
+        "recorded_at": "2026-08-06T00:00:00.000Z",
+        "correlation_id": "corr_1"
+      }
+    },
+    {
+      "name": "invalid-status",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/command-receipt/v1",
+        "schema_version": 1,
+        "command_id": "cmd_00_03_1",
+        "status": "QUEUED",
+        "pipeline_id": "pl_00_03",
+        "observed_revision": 0,
+        "recorded_at": "2026-08-06T00:00:00.000Z",
+        "correlation_id": "corr_1"
+      }
+    },
+    {
+      "name": "invalid-unknown-field",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/command-receipt/v1",
+        "schema_version": 1,
+        "command_id": "cmd_00_03_1",
+        "status": "ACCEPTED",
+        "pipeline_id": "pl_00_03",
+        "observed_revision": 0,
+        "recorded_at": "2026-08-06T00:00:00.000Z",
+        "correlation_id": "corr_1",
+        "receipt_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      }
+    },
+    {
+      "name": "legacy",
+      "category": "legacy",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/command-receipt/v1",
+        "schema_version": 1,
+        "command_id": "cmd_00_02_1",
+        "status": "DEDUPLICATED",
+        "pipeline_id": "pl_00_02",
+        "observed_revision": 1,
+        "event_ids": [
+          "evt_9"
+        ],
+        "recorded_at": "2026-08-05T00:00:00Z",
+        "correlation_id": "corr_9"
+      }
+    },
+    {
+      "name": "legacy-invalid",
+      "category": "legacy",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/command-receipt/v1",
+        "schema_version": 1,
+        "command_id": "cmd_00_02_1",
+        "status": "DEDUPLICATED",
+        "pipeline_id": "pl_00_02",
+        "observed_revision": -1,
+        "recorded_at": "2026-08-05T00:00:00Z",
+        "correlation_id": "corr_9"
+      }
+    },
+    {
+      "name": "canary",
+      "category": "canary",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/command-receipt/v1",
+        "schema_version": 1,
+        "command_id": "canary_command-receipt_7f3e9a2c4b1d",
+        "status": "ACCEPTED",
+        "pipeline_id": "pl_00_03",
+        "observed_revision": "canary_command-receipt_7f3e9a2c4b1d",
+        "recorded_at": "2026-08-06T00:00:00.000Z",
+        "correlation_id": "corr_1"
+      }
+    }
+  ]
+}

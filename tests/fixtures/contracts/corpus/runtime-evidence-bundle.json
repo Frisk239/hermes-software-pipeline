@@ -1,0 +1,357 @@
+{
+  "schema_id": "https://schemas.hermes-pipeline.dev/runtime/evidence-bundle/v1",
+  "entries": [
+    {
+      "name": "minimal",
+      "category": "minimal",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/evidence-bundle/v1",
+        "schema_version": 1,
+        "bundle_id": "evb_00_03_1",
+        "pipeline_id": "pl_00_03",
+        "stage_attempt_id": "att_00_03_1",
+        "execution_run_id": "run_00_03_1",
+        "lease_generation": 1,
+        "source_identity": {
+          "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "contract_revision": 5,
+        "artifacts": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "evidence"
+          }
+        ],
+        "created_at": "2026-08-06T00:00:00.000Z",
+        "bundle_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      }
+    },
+    {
+      "name": "maximal",
+      "category": "maximal",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/evidence-bundle/v1",
+        "schema_version": 1,
+        "bundle_id": "evb_00_03_2",
+        "pipeline_id": "pl_00_03",
+        "stage_attempt_id": "att_00_03_1",
+        "execution_run_id": "run_00_03_1",
+        "lease_generation": 3,
+        "source_identity": {
+          "planning_base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "integration_candidate_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        },
+        "contract_revision": 5,
+        "artifacts": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "evidence"
+          },
+          {
+            "artifact_id": "art_report_002",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "log"
+          }
+        ],
+        "created_at": "2026-08-06T09:30:00+08:00",
+        "bundle_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      }
+    },
+    {
+      "name": "integral-number-3.0",
+      "category": "integral",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/evidence-bundle/v1",
+        "schema_version": 1,
+        "bundle_id": "evb_00_03_1",
+        "pipeline_id": "pl_00_03",
+        "stage_attempt_id": "att_00_03_1",
+        "execution_run_id": "run_00_03_1",
+        "lease_generation": 3.0,
+        "source_identity": {
+          "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "contract_revision": 5,
+        "artifacts": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "evidence"
+          }
+        ],
+        "created_at": "2026-08-06T00:00:00.000Z",
+        "bundle_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      }
+    },
+    {
+      "name": "invalid-artifact",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/evidence-bundle/v1",
+        "schema_version": 1,
+        "bundle_id": "evb_00_03_1",
+        "pipeline_id": "pl_00_03",
+        "stage_attempt_id": "att_00_03_1",
+        "execution_run_id": "run_00_03_1",
+        "lease_generation": 1,
+        "source_identity": {
+          "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "contract_revision": 5,
+        "artifacts": [
+          {
+            "artifact_id": "artifact_1",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "evidence"
+          }
+        ],
+        "created_at": "2026-08-06T00:00:00.000Z",
+        "bundle_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "content_hash": "sha256:23ba12cbb062f9aa283a70469848a0e0b072caa35f2257a618f12d90dce4c184"
+      }
+    },
+    {
+      "name": "invalid-bundle-id",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/evidence-bundle/v1",
+        "schema_version": 1,
+        "bundle_id": "bundle_1",
+        "pipeline_id": "pl_00_03",
+        "stage_attempt_id": "att_00_03_1",
+        "execution_run_id": "run_00_03_1",
+        "lease_generation": 1,
+        "source_identity": {
+          "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "contract_revision": 5,
+        "artifacts": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "evidence"
+          }
+        ],
+        "created_at": "2026-08-06T00:00:00.000Z",
+        "bundle_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      }
+    },
+    {
+      "name": "invalid-empty-source-identity",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/evidence-bundle/v1",
+        "schema_version": 1,
+        "bundle_id": "evb_00_03_1",
+        "pipeline_id": "pl_00_03",
+        "stage_attempt_id": "att_00_03_1",
+        "execution_run_id": "run_00_03_1",
+        "lease_generation": 1,
+        "source_identity": {},
+        "contract_revision": 5,
+        "artifacts": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "evidence"
+          }
+        ],
+        "created_at": "2026-08-06T00:00:00.000Z",
+        "bundle_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      }
+    },
+    {
+      "name": "invalid-integral-3.5",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/evidence-bundle/v1",
+        "schema_version": 1,
+        "bundle_id": "evb_00_03_1",
+        "pipeline_id": "pl_00_03",
+        "stage_attempt_id": "att_00_03_1",
+        "execution_run_id": "run_00_03_1",
+        "lease_generation": 3.5,
+        "source_identity": {
+          "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "contract_revision": 5,
+        "artifacts": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "evidence"
+          }
+        ],
+        "created_at": "2026-08-06T00:00:00.000Z",
+        "bundle_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      }
+    },
+    {
+      "name": "invalid-integral-boolean",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/evidence-bundle/v1",
+        "schema_version": 1,
+        "bundle_id": "evb_00_03_1",
+        "pipeline_id": "pl_00_03",
+        "stage_attempt_id": "att_00_03_1",
+        "execution_run_id": "run_00_03_1",
+        "lease_generation": true,
+        "source_identity": {
+          "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "contract_revision": 5,
+        "artifacts": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "evidence"
+          }
+        ],
+        "created_at": "2026-08-06T00:00:00.000Z",
+        "bundle_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      }
+    },
+    {
+      "name": "invalid-integral-string",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/evidence-bundle/v1",
+        "schema_version": 1,
+        "bundle_id": "evb_00_03_1",
+        "pipeline_id": "pl_00_03",
+        "stage_attempt_id": "att_00_03_1",
+        "execution_run_id": "run_00_03_1",
+        "lease_generation": "3",
+        "source_identity": {
+          "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "contract_revision": 5,
+        "artifacts": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "evidence"
+          }
+        ],
+        "created_at": "2026-08-06T00:00:00.000Z",
+        "bundle_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      }
+    },
+    {
+      "name": "invalid-unknown-field",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/evidence-bundle/v1",
+        "schema_version": 1,
+        "bundle_id": "evb_00_03_1",
+        "pipeline_id": "pl_00_03",
+        "stage_attempt_id": "att_00_03_1",
+        "execution_run_id": "run_00_03_1",
+        "lease_generation": 1,
+        "source_identity": {
+          "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "contract_revision": 5,
+        "artifacts": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "evidence"
+          }
+        ],
+        "created_at": "2026-08-06T00:00:00.000Z",
+        "bundle_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "sha": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      }
+    },
+    {
+      "name": "legacy",
+      "category": "legacy",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/evidence-bundle/v1",
+        "schema_version": 1,
+        "bundle_id": "evb_00_02_1",
+        "pipeline_id": "pl_00_02",
+        "stage_attempt_id": "att_00_02_1",
+        "execution_run_id": "run_00_02_1",
+        "lease_generation": 1,
+        "source_identity": {
+          "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "contract_revision": 4,
+        "artifacts": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "evidence"
+          }
+        ],
+        "created_at": "2026-08-05T00:00:00Z",
+        "bundle_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      }
+    },
+    {
+      "name": "legacy-invalid",
+      "category": "legacy",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/evidence-bundle/v1",
+        "schema_version": 1,
+        "bundle_id": "evb_00_03_1",
+        "pipeline_id": "pl_00_03",
+        "stage_attempt_id": "att_00_03_1",
+        "execution_run_id": "run_00_03_1",
+        "lease_generation": 1,
+        "source_identity": {
+          "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "contract_revision": 5,
+        "artifacts": [],
+        "created_at": "2026-08-06T00:00:00.000Z",
+        "bundle_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      }
+    },
+    {
+      "name": "canary",
+      "category": "canary",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/evidence-bundle/v1",
+        "schema_version": 1,
+        "bundle_id": "evb_00_03_1",
+        "pipeline_id": "pl_00_03",
+        "stage_attempt_id": "att_00_03_1",
+        "execution_run_id": "run_00_03_1",
+        "lease_generation": 1,
+        "source_identity": {
+          "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "contract_revision": 5,
+        "artifacts": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "evidence"
+          }
+        ],
+        "created_at": "2026-08-06T00:00:00.000Z",
+        "bundle_digest": "canary_evidence-bundle_7f3e9a2c4b1d"
+      }
+    }
+  ]
+}

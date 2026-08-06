@@ -1,48 +1,149 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schemas.hermes-pipeline.dev/runtime/capability-profile/v1",
-  "title": "Stage Capability Profile",
-  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
-  "required": ["schema_id", "schema_version", "profile_id", "profile_revision", "stage_type", "filesystem", "executables", "network", "secrets", "browser", "resources", "side_effects", "content_hash"],
   "properties": {
-    "schema_id": {"const": "https://schemas.hermes-pipeline.dev/runtime/capability-profile/v1"},
-    "schema_version": {"const": 1},
-    "profile_id": {"type": "string", "pattern": "^cap_[A-Za-z0-9_-]+$"},
-    "profile_revision": {"type": "integer", "minimum": 1},
-    "stage_type": {"enum": ["PRD", "ARCHITECTURE", "DEVELOPMENT", "E2E", "ACCEPTANCE"]},
+    "browser": {
+      "enum": [
+        "NONE",
+        "CHROME_DEVTOOLS_MCP"
+      ]
+    },
+    "content_hash": {
+      "$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"
+    },
+    "executables": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
     "filesystem": {
-      "type": "object",
       "additionalProperties": false,
-      "required": ["read_roots", "write_roots"],
       "properties": {
-        "read_roots": {"type": "array", "items": {"type": "string"}},
-        "write_roots": {"type": "array", "items": {"type": "string"}}
-      }
+        "read_roots": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "write_roots": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "read_roots",
+        "write_roots"
+      ],
+      "type": "object"
     },
-    "executables": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
     "network": {
-      "type": "object",
       "additionalProperties": false,
-      "required": ["mode", "allow"],
       "properties": {
-        "mode": {"enum": ["DENY_ALL", "ALLOW_LIST"]},
-        "allow": {"type": "array", "items": {"type": "string"}}
-      }
+        "allow": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "mode": {
+          "enum": [
+            "DENY_ALL",
+            "ALLOW_LIST"
+          ]
+        }
+      },
+      "required": [
+        "mode",
+        "allow"
+      ],
+      "type": "object"
     },
-    "secrets": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
-    "browser": {"enum": ["NONE", "CHROME_DEVTOOLS_MCP"]},
+    "profile_id": {
+      "pattern": "^cap_[A-Za-z0-9_-]+$",
+      "type": "string"
+    },
+    "profile_revision": {
+      "minimum": 1,
+      "type": "integer"
+    },
     "resources": {
-      "type": "object",
       "additionalProperties": false,
-      "required": ["wall_time_ms", "output_bytes", "processes"],
       "properties": {
-        "wall_time_ms": {"type": "integer", "minimum": 1000},
-        "output_bytes": {"type": "integer", "minimum": 1024},
-        "processes": {"type": "integer", "minimum": 1}
-      }
+        "output_bytes": {
+          "minimum": 1024,
+          "type": "integer"
+        },
+        "processes": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "wall_time_ms": {
+          "minimum": 1000,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "wall_time_ms",
+        "output_bytes",
+        "processes"
+      ],
+      "type": "object"
     },
-    "side_effects": {"type": "array", "uniqueItems": true, "items": {"enum": ["NONE", "LOCAL_BUILD", "LOCAL_TEST", "BROWSER_TEST"]}},
-    "content_hash": {"$ref": "https://schemas.hermes-pipeline.dev/common/definitions/v1#/$defs/sha256"}
-  }
+    "schema_id": {
+      "const": "https://schemas.hermes-pipeline.dev/runtime/capability-profile/v1"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "secrets": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "side_effects": {
+      "items": {
+        "enum": [
+          "NONE",
+          "LOCAL_BUILD",
+          "LOCAL_TEST",
+          "BROWSER_TEST"
+        ]
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "stage_type": {
+      "enum": [
+        "PRD",
+        "ARCHITECTURE",
+        "DEVELOPMENT",
+        "E2E",
+        "ACCEPTANCE"
+      ]
+    }
+  },
+  "required": [
+    "schema_id",
+    "schema_version",
+    "profile_id",
+    "profile_revision",
+    "stage_type",
+    "filesystem",
+    "executables",
+    "network",
+    "secrets",
+    "browser",
+    "resources",
+    "side_effects",
+    "content_hash"
+  ],
+  "title": "Stage Capability Profile",
+  "type": "object"
 }

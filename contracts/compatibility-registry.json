@@ -1,0 +1,86 @@
+{
+  "https://schemas.hermes-pipeline.dev/common/definitions/v1": {
+    "current_version": 1,
+    "supported_versions": [
+      1
+    ]
+  },
+  "https://schemas.hermes-pipeline.dev/engineering/closeout/v1": {
+    "current_version": 1,
+    "supported_versions": [
+      1
+    ]
+  },
+  "https://schemas.hermes-pipeline.dev/engineering/context-manifest/v1": {
+    "current_version": 1,
+    "supported_versions": [
+      1
+    ]
+  },
+  "https://schemas.hermes-pipeline.dev/engineering/contract-change-request/v1": {
+    "current_version": 1,
+    "supported_versions": [
+      1
+    ]
+  },
+  "https://schemas.hermes-pipeline.dev/engineering/execution-report/v1": {
+    "current_version": 1,
+    "supported_versions": [
+      1
+    ]
+  },
+  "https://schemas.hermes-pipeline.dev/engineering/phase-plan/v1": {
+    "current_version": 1,
+    "supported_versions": [
+      1
+    ]
+  },
+  "https://schemas.hermes-pipeline.dev/engineering/review-verdict/v1": {
+    "current_version": 1,
+    "supported_versions": [
+      1
+    ]
+  },
+  "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1": {
+    "current_version": 1,
+    "supported_versions": [
+      1
+    ]
+  },
+  "https://schemas.hermes-pipeline.dev/runtime/artifact-manifest/v1": {
+    "current_version": 1,
+    "supported_versions": [
+      1
+    ]
+  },
+  "https://schemas.hermes-pipeline.dev/runtime/capability-profile/v1": {
+    "current_version": 1,
+    "supported_versions": [
+      1
+    ]
+  },
+  "https://schemas.hermes-pipeline.dev/runtime/command-receipt/v1": {
+    "current_version": 1,
+    "supported_versions": [
+      1
+    ]
+  },
+  "https://schemas.hermes-pipeline.dev/runtime/controller-command/v1": {
+    "current_version": 1,
+    "supported_versions": [
+      1
+    ]
+  },
+  "https://schemas.hermes-pipeline.dev/runtime/evidence-bundle/v1": {
+    "current_version": 1,
+    "supported_versions": [
+      1
+    ]
+  },
+  "https://schemas.hermes-pipeline.dev/runtime/pipeline-event/v1": {
+    "current_version": 1,
+    "supported_versions": [
+      1
+    ]
+  }
+}

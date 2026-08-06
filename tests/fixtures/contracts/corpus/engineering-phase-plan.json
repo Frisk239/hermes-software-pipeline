@@ -1,0 +1,1422 @@
+{
+  "schema_id": "https://schemas.hermes-pipeline.dev/engineering/phase-plan/v1",
+  "entries": [
+    {
+      "name": "minimal",
+      "category": "minimal",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/phase-plan/v1",
+        "schema_version": 1,
+        "document_revision": 1,
+        "phase_id": "phase-00",
+        "title": "Foundation",
+        "status": "DRAFT",
+        "owner": "Codex",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "outcome": "deterministic pipeline foundation",
+        "prerequisites": [
+          "repository baseline"
+        ],
+        "accepted_adrs": [
+          "ADR-0018",
+          "ADR-0020"
+        ],
+        "module_boundaries": [
+          "domain",
+          "contracts",
+          "controller"
+        ],
+        "slices": [
+          {
+            "slice_id": "slice-00-03",
+            "title": "Contract toolchain",
+            "depends_on": [
+              "slice-00-02"
+            ],
+            "owns_exit_criteria": [
+              "EC-00-03"
+            ],
+            "demonstration": "byte-identical generation"
+          }
+        ],
+        "invariants": [
+          "identity lock unchanged"
+        ],
+        "acceptance_dimensions": {
+          "testing": [
+            "unit"
+          ],
+          "migration": [
+            "none"
+          ],
+          "security": [
+            "lazy dispatch"
+          ],
+          "documentation": [
+            "README"
+          ],
+          "demonstration": [
+            "drift check"
+          ]
+        },
+        "exit_criteria": [
+          {
+            "criterion_id": "EC-00-03",
+            "observable_result": "contract toolchain adopted",
+            "owner_slice_ids": [
+              "slice-00-03"
+            ]
+          }
+        ],
+        "exclusions": [
+          "business behavior"
+        ],
+        "risks": [
+          {
+            "risk_id": "R-01",
+            "description": "baseline disagreement",
+            "impact": "HIGH",
+            "mitigation": "three-way corpus gate",
+            "trigger": "entry differs"
+          }
+        ],
+        "stop_conditions": [
+          "identity change"
+        ],
+        "phase_gate": {
+          "reviewer_role": "CODEX_PLANNER_DESIGNER_REVIEWER",
+          "required_evidence": [
+            "closeout evidence bundle"
+          ],
+          "allowed_verdicts": [
+            "PASS",
+            "REWORK",
+            "BLOCKED_CONTRACT"
+          ]
+        },
+        "human_approval": {
+          "required": false,
+          "status": "NOT_REQUIRED"
+        },
+        "content_hash": "sha256:9aae34911461ca7ef9d8187a8221a7a98e423e9b4c980ec701f2e64e34ad86a0"
+      }
+    },
+    {
+      "name": "maximal",
+      "category": "maximal",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/phase-plan/v1",
+        "schema_version": 1,
+        "document_revision": 3,
+        "phase_id": "phase-00",
+        "title": "Foundation",
+        "status": "APPROVED",
+        "owner": "Frisk239",
+        "base_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "outcome": "deterministic pipeline foundation",
+        "prerequisites": [
+          "repository baseline",
+          "quality skeleton"
+        ],
+        "accepted_adrs": [
+          "ADR-0018",
+          "ADR-0020",
+          "ADR-0024",
+          "ADR-0026"
+        ],
+        "module_boundaries": [
+          "domain",
+          "contracts",
+          "controller",
+          "delivery"
+        ],
+        "slices": [
+          {
+            "slice_id": "slice-00-03",
+            "title": "Contract toolchain",
+            "depends_on": [
+              "slice-00-02"
+            ],
+            "owns_exit_criteria": [
+              "EC-00-03"
+            ],
+            "demonstration": "byte-identical generation"
+          }
+        ],
+        "invariants": [
+          "identity lock unchanged",
+          "runtime dependencies empty"
+        ],
+        "acceptance_dimensions": {
+          "testing": [
+            "unit"
+          ],
+          "migration": [
+            "none"
+          ],
+          "security": [
+            "lazy dispatch"
+          ],
+          "documentation": [
+            "README"
+          ],
+          "demonstration": [
+            "drift check"
+          ]
+        },
+        "exit_criteria": [
+          {
+            "criterion_id": "EC-00-03",
+            "observable_result": "contract toolchain adopted",
+            "owner_slice_ids": [
+              "slice-00-03"
+            ]
+          }
+        ],
+        "exclusions": [
+          "business behavior"
+        ],
+        "risks": [
+          {
+            "risk_id": "R-01",
+            "description": "baseline disagreement",
+            "impact": "HIGH",
+            "mitigation": "three-way corpus gate",
+            "trigger": "entry differs"
+          }
+        ],
+        "stop_conditions": [
+          "identity change",
+          "dependency family"
+        ],
+        "phase_gate": {
+          "reviewer_role": "CODEX_PLANNER_DESIGNER_REVIEWER",
+          "required_evidence": [
+            "closeout evidence bundle"
+          ],
+          "allowed_verdicts": [
+            "PASS",
+            "REWORK",
+            "BLOCKED_CONTRACT"
+          ]
+        },
+        "human_approval": {
+          "required": true,
+          "status": "APPROVED",
+          "attestation_id": "att_human_2026_08_06"
+        },
+        "content_hash": "sha256:37f66613c3a07cbfda109438cd871db1e4c8cd3adbe845b95e03a3477cd57b1a"
+      }
+    },
+    {
+      "name": "integral-number-3.0",
+      "category": "integral",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/phase-plan/v1",
+        "schema_version": 1,
+        "document_revision": 3.0,
+        "phase_id": "phase-00",
+        "title": "Foundation",
+        "status": "DRAFT",
+        "owner": "Codex",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "outcome": "deterministic pipeline foundation",
+        "prerequisites": [
+          "repository baseline"
+        ],
+        "accepted_adrs": [
+          "ADR-0018",
+          "ADR-0020"
+        ],
+        "module_boundaries": [
+          "domain",
+          "contracts",
+          "controller"
+        ],
+        "slices": [
+          {
+            "slice_id": "slice-00-03",
+            "title": "Contract toolchain",
+            "depends_on": [
+              "slice-00-02"
+            ],
+            "owns_exit_criteria": [
+              "EC-00-03"
+            ],
+            "demonstration": "byte-identical generation"
+          }
+        ],
+        "invariants": [
+          "identity lock unchanged"
+        ],
+        "acceptance_dimensions": {
+          "testing": [
+            "unit"
+          ],
+          "migration": [
+            "none"
+          ],
+          "security": [
+            "lazy dispatch"
+          ],
+          "documentation": [
+            "README"
+          ],
+          "demonstration": [
+            "drift check"
+          ]
+        },
+        "exit_criteria": [
+          {
+            "criterion_id": "EC-00-03",
+            "observable_result": "contract toolchain adopted",
+            "owner_slice_ids": [
+              "slice-00-03"
+            ]
+          }
+        ],
+        "exclusions": [
+          "business behavior"
+        ],
+        "risks": [
+          {
+            "risk_id": "R-01",
+            "description": "baseline disagreement",
+            "impact": "HIGH",
+            "mitigation": "three-way corpus gate",
+            "trigger": "entry differs"
+          }
+        ],
+        "stop_conditions": [
+          "identity change"
+        ],
+        "phase_gate": {
+          "reviewer_role": "CODEX_PLANNER_DESIGNER_REVIEWER",
+          "required_evidence": [
+            "closeout evidence bundle"
+          ],
+          "allowed_verdicts": [
+            "PASS",
+            "REWORK",
+            "BLOCKED_CONTRACT"
+          ]
+        },
+        "human_approval": {
+          "required": false,
+          "status": "NOT_REQUIRED"
+        },
+        "content_hash": "sha256:8a8b9ded50b79a892fba3a471a2fbb40e10215b7ea932c1f5b04aa34841bec29"
+      }
+    },
+    {
+      "name": "invalid-approval-conditional",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/phase-plan/v1",
+        "schema_version": 1,
+        "document_revision": 1,
+        "phase_id": "phase-00",
+        "title": "Foundation",
+        "status": "APPROVED",
+        "owner": "Codex",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "outcome": "deterministic pipeline foundation",
+        "prerequisites": [
+          "repository baseline"
+        ],
+        "accepted_adrs": [
+          "ADR-0018",
+          "ADR-0020"
+        ],
+        "module_boundaries": [
+          "domain",
+          "contracts",
+          "controller"
+        ],
+        "slices": [
+          {
+            "slice_id": "slice-00-03",
+            "title": "Contract toolchain",
+            "depends_on": [
+              "slice-00-02"
+            ],
+            "owns_exit_criteria": [
+              "EC-00-03"
+            ],
+            "demonstration": "byte-identical generation"
+          }
+        ],
+        "invariants": [
+          "identity lock unchanged"
+        ],
+        "acceptance_dimensions": {
+          "testing": [
+            "unit"
+          ],
+          "migration": [
+            "none"
+          ],
+          "security": [
+            "lazy dispatch"
+          ],
+          "documentation": [
+            "README"
+          ],
+          "demonstration": [
+            "drift check"
+          ]
+        },
+        "exit_criteria": [
+          {
+            "criterion_id": "EC-00-03",
+            "observable_result": "contract toolchain adopted",
+            "owner_slice_ids": [
+              "slice-00-03"
+            ]
+          }
+        ],
+        "exclusions": [
+          "business behavior"
+        ],
+        "risks": [
+          {
+            "risk_id": "R-01",
+            "description": "baseline disagreement",
+            "impact": "HIGH",
+            "mitigation": "three-way corpus gate",
+            "trigger": "entry differs"
+          }
+        ],
+        "stop_conditions": [
+          "identity change"
+        ],
+        "phase_gate": {
+          "reviewer_role": "CODEX_PLANNER_DESIGNER_REVIEWER",
+          "required_evidence": [
+            "closeout evidence bundle"
+          ],
+          "allowed_verdicts": [
+            "PASS",
+            "REWORK",
+            "BLOCKED_CONTRACT"
+          ]
+        },
+        "human_approval": {
+          "required": false,
+          "status": "NOT_REQUIRED"
+        },
+        "content_hash": "sha256:f287f08df55a280cfef090dc9f8426e2f168ec2faaa9eb4eb73fb159911314d4"
+      }
+    },
+    {
+      "name": "invalid-integral-3.5",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/phase-plan/v1",
+        "schema_version": 1,
+        "document_revision": 3.5,
+        "phase_id": "phase-00",
+        "title": "Foundation",
+        "status": "DRAFT",
+        "owner": "Codex",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "outcome": "deterministic pipeline foundation",
+        "prerequisites": [
+          "repository baseline"
+        ],
+        "accepted_adrs": [
+          "ADR-0018",
+          "ADR-0020"
+        ],
+        "module_boundaries": [
+          "domain",
+          "contracts",
+          "controller"
+        ],
+        "slices": [
+          {
+            "slice_id": "slice-00-03",
+            "title": "Contract toolchain",
+            "depends_on": [
+              "slice-00-02"
+            ],
+            "owns_exit_criteria": [
+              "EC-00-03"
+            ],
+            "demonstration": "byte-identical generation"
+          }
+        ],
+        "invariants": [
+          "identity lock unchanged"
+        ],
+        "acceptance_dimensions": {
+          "testing": [
+            "unit"
+          ],
+          "migration": [
+            "none"
+          ],
+          "security": [
+            "lazy dispatch"
+          ],
+          "documentation": [
+            "README"
+          ],
+          "demonstration": [
+            "drift check"
+          ]
+        },
+        "exit_criteria": [
+          {
+            "criterion_id": "EC-00-03",
+            "observable_result": "contract toolchain adopted",
+            "owner_slice_ids": [
+              "slice-00-03"
+            ]
+          }
+        ],
+        "exclusions": [
+          "business behavior"
+        ],
+        "risks": [
+          {
+            "risk_id": "R-01",
+            "description": "baseline disagreement",
+            "impact": "HIGH",
+            "mitigation": "three-way corpus gate",
+            "trigger": "entry differs"
+          }
+        ],
+        "stop_conditions": [
+          "identity change"
+        ],
+        "phase_gate": {
+          "reviewer_role": "CODEX_PLANNER_DESIGNER_REVIEWER",
+          "required_evidence": [
+            "closeout evidence bundle"
+          ],
+          "allowed_verdicts": [
+            "PASS",
+            "REWORK",
+            "BLOCKED_CONTRACT"
+          ]
+        },
+        "human_approval": {
+          "required": false,
+          "status": "NOT_REQUIRED"
+        },
+        "content_hash": "sha256:f115d74057bd10b3c50e99a59faef571902af223d9f3cc63a2674c4a83430fee"
+      }
+    },
+    {
+      "name": "invalid-integral-boolean",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/phase-plan/v1",
+        "schema_version": 1,
+        "document_revision": true,
+        "phase_id": "phase-00",
+        "title": "Foundation",
+        "status": "DRAFT",
+        "owner": "Codex",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "outcome": "deterministic pipeline foundation",
+        "prerequisites": [
+          "repository baseline"
+        ],
+        "accepted_adrs": [
+          "ADR-0018",
+          "ADR-0020"
+        ],
+        "module_boundaries": [
+          "domain",
+          "contracts",
+          "controller"
+        ],
+        "slices": [
+          {
+            "slice_id": "slice-00-03",
+            "title": "Contract toolchain",
+            "depends_on": [
+              "slice-00-02"
+            ],
+            "owns_exit_criteria": [
+              "EC-00-03"
+            ],
+            "demonstration": "byte-identical generation"
+          }
+        ],
+        "invariants": [
+          "identity lock unchanged"
+        ],
+        "acceptance_dimensions": {
+          "testing": [
+            "unit"
+          ],
+          "migration": [
+            "none"
+          ],
+          "security": [
+            "lazy dispatch"
+          ],
+          "documentation": [
+            "README"
+          ],
+          "demonstration": [
+            "drift check"
+          ]
+        },
+        "exit_criteria": [
+          {
+            "criterion_id": "EC-00-03",
+            "observable_result": "contract toolchain adopted",
+            "owner_slice_ids": [
+              "slice-00-03"
+            ]
+          }
+        ],
+        "exclusions": [
+          "business behavior"
+        ],
+        "risks": [
+          {
+            "risk_id": "R-01",
+            "description": "baseline disagreement",
+            "impact": "HIGH",
+            "mitigation": "three-way corpus gate",
+            "trigger": "entry differs"
+          }
+        ],
+        "stop_conditions": [
+          "identity change"
+        ],
+        "phase_gate": {
+          "reviewer_role": "CODEX_PLANNER_DESIGNER_REVIEWER",
+          "required_evidence": [
+            "closeout evidence bundle"
+          ],
+          "allowed_verdicts": [
+            "PASS",
+            "REWORK",
+            "BLOCKED_CONTRACT"
+          ]
+        },
+        "human_approval": {
+          "required": false,
+          "status": "NOT_REQUIRED"
+        },
+        "content_hash": "sha256:0dda8bcb698817a778cb408cfa3207baa26a2d21d7959a02b336c19bb7f6a565"
+      }
+    },
+    {
+      "name": "invalid-integral-string",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/phase-plan/v1",
+        "schema_version": 1,
+        "document_revision": "3",
+        "phase_id": "phase-00",
+        "title": "Foundation",
+        "status": "DRAFT",
+        "owner": "Codex",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "outcome": "deterministic pipeline foundation",
+        "prerequisites": [
+          "repository baseline"
+        ],
+        "accepted_adrs": [
+          "ADR-0018",
+          "ADR-0020"
+        ],
+        "module_boundaries": [
+          "domain",
+          "contracts",
+          "controller"
+        ],
+        "slices": [
+          {
+            "slice_id": "slice-00-03",
+            "title": "Contract toolchain",
+            "depends_on": [
+              "slice-00-02"
+            ],
+            "owns_exit_criteria": [
+              "EC-00-03"
+            ],
+            "demonstration": "byte-identical generation"
+          }
+        ],
+        "invariants": [
+          "identity lock unchanged"
+        ],
+        "acceptance_dimensions": {
+          "testing": [
+            "unit"
+          ],
+          "migration": [
+            "none"
+          ],
+          "security": [
+            "lazy dispatch"
+          ],
+          "documentation": [
+            "README"
+          ],
+          "demonstration": [
+            "drift check"
+          ]
+        },
+        "exit_criteria": [
+          {
+            "criterion_id": "EC-00-03",
+            "observable_result": "contract toolchain adopted",
+            "owner_slice_ids": [
+              "slice-00-03"
+            ]
+          }
+        ],
+        "exclusions": [
+          "business behavior"
+        ],
+        "risks": [
+          {
+            "risk_id": "R-01",
+            "description": "baseline disagreement",
+            "impact": "HIGH",
+            "mitigation": "three-way corpus gate",
+            "trigger": "entry differs"
+          }
+        ],
+        "stop_conditions": [
+          "identity change"
+        ],
+        "phase_gate": {
+          "reviewer_role": "CODEX_PLANNER_DESIGNER_REVIEWER",
+          "required_evidence": [
+            "closeout evidence bundle"
+          ],
+          "allowed_verdicts": [
+            "PASS",
+            "REWORK",
+            "BLOCKED_CONTRACT"
+          ]
+        },
+        "human_approval": {
+          "required": false,
+          "status": "NOT_REQUIRED"
+        },
+        "content_hash": "sha256:d1e8a30916bf23ea8f1e9d8cc1fbff54ba5e99271e39a5b6423a265758256f6e"
+      }
+    },
+    {
+      "name": "invalid-slice-id",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/phase-plan/v1",
+        "schema_version": 1,
+        "document_revision": 1,
+        "phase_id": "phase-00",
+        "title": "Foundation",
+        "status": "DRAFT",
+        "owner": "Codex",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "outcome": "deterministic pipeline foundation",
+        "prerequisites": [
+          "repository baseline"
+        ],
+        "accepted_adrs": [
+          "ADR-0018",
+          "ADR-0020"
+        ],
+        "module_boundaries": [
+          "domain",
+          "contracts",
+          "controller"
+        ],
+        "slices": [
+          {
+            "slice_id": "slice-3",
+            "title": "Contract toolchain",
+            "depends_on": [],
+            "owns_exit_criteria": [],
+            "demonstration": "d"
+          }
+        ],
+        "invariants": [
+          "identity lock unchanged"
+        ],
+        "acceptance_dimensions": {
+          "testing": [
+            "unit"
+          ],
+          "migration": [
+            "none"
+          ],
+          "security": [
+            "lazy dispatch"
+          ],
+          "documentation": [
+            "README"
+          ],
+          "demonstration": [
+            "drift check"
+          ]
+        },
+        "exit_criteria": [
+          {
+            "criterion_id": "EC-00-03",
+            "observable_result": "contract toolchain adopted",
+            "owner_slice_ids": [
+              "slice-00-03"
+            ]
+          }
+        ],
+        "exclusions": [
+          "business behavior"
+        ],
+        "risks": [
+          {
+            "risk_id": "R-01",
+            "description": "baseline disagreement",
+            "impact": "HIGH",
+            "mitigation": "three-way corpus gate",
+            "trigger": "entry differs"
+          }
+        ],
+        "stop_conditions": [
+          "identity change"
+        ],
+        "phase_gate": {
+          "reviewer_role": "CODEX_PLANNER_DESIGNER_REVIEWER",
+          "required_evidence": [
+            "closeout evidence bundle"
+          ],
+          "allowed_verdicts": [
+            "PASS",
+            "REWORK",
+            "BLOCKED_CONTRACT"
+          ]
+        },
+        "human_approval": {
+          "required": false,
+          "status": "NOT_REQUIRED"
+        },
+        "content_hash": "sha256:896ae26d64da89c08441c5dbb581e5914c71f60bf7c42868124c521932ebe6d8"
+      }
+    },
+    {
+      "name": "invalid-status",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/phase-plan/v1",
+        "schema_version": 1,
+        "document_revision": 1,
+        "phase_id": "phase-00",
+        "title": "Foundation",
+        "status": "PAUSED",
+        "owner": "Codex",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "outcome": "deterministic pipeline foundation",
+        "prerequisites": [
+          "repository baseline"
+        ],
+        "accepted_adrs": [
+          "ADR-0018",
+          "ADR-0020"
+        ],
+        "module_boundaries": [
+          "domain",
+          "contracts",
+          "controller"
+        ],
+        "slices": [
+          {
+            "slice_id": "slice-00-03",
+            "title": "Contract toolchain",
+            "depends_on": [
+              "slice-00-02"
+            ],
+            "owns_exit_criteria": [
+              "EC-00-03"
+            ],
+            "demonstration": "byte-identical generation"
+          }
+        ],
+        "invariants": [
+          "identity lock unchanged"
+        ],
+        "acceptance_dimensions": {
+          "testing": [
+            "unit"
+          ],
+          "migration": [
+            "none"
+          ],
+          "security": [
+            "lazy dispatch"
+          ],
+          "documentation": [
+            "README"
+          ],
+          "demonstration": [
+            "drift check"
+          ]
+        },
+        "exit_criteria": [
+          {
+            "criterion_id": "EC-00-03",
+            "observable_result": "contract toolchain adopted",
+            "owner_slice_ids": [
+              "slice-00-03"
+            ]
+          }
+        ],
+        "exclusions": [
+          "business behavior"
+        ],
+        "risks": [
+          {
+            "risk_id": "R-01",
+            "description": "baseline disagreement",
+            "impact": "HIGH",
+            "mitigation": "three-way corpus gate",
+            "trigger": "entry differs"
+          }
+        ],
+        "stop_conditions": [
+          "identity change"
+        ],
+        "phase_gate": {
+          "reviewer_role": "CODEX_PLANNER_DESIGNER_REVIEWER",
+          "required_evidence": [
+            "closeout evidence bundle"
+          ],
+          "allowed_verdicts": [
+            "PASS",
+            "REWORK",
+            "BLOCKED_CONTRACT"
+          ]
+        },
+        "human_approval": {
+          "required": false,
+          "status": "NOT_REQUIRED"
+        },
+        "content_hash": "sha256:31883ad3a8dd319cc2f90950b244348b3ae7858d10e283246aa6e1b087755fc6"
+      }
+    },
+    {
+      "name": "invalid-unknown-field",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/phase-plan/v1",
+        "schema_version": 1,
+        "document_revision": 1,
+        "phase_id": "phase-00",
+        "title": "Foundation",
+        "status": "DRAFT",
+        "owner": "Codex",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "outcome": "deterministic pipeline foundation",
+        "prerequisites": [
+          "repository baseline"
+        ],
+        "accepted_adrs": [
+          "ADR-0018",
+          "ADR-0020"
+        ],
+        "module_boundaries": [
+          "domain",
+          "contracts",
+          "controller"
+        ],
+        "slices": [
+          {
+            "slice_id": "slice-00-03",
+            "title": "Contract toolchain",
+            "depends_on": [
+              "slice-00-02"
+            ],
+            "owns_exit_criteria": [
+              "EC-00-03"
+            ],
+            "demonstration": "byte-identical generation"
+          }
+        ],
+        "invariants": [
+          "identity lock unchanged"
+        ],
+        "acceptance_dimensions": {
+          "testing": [
+            "unit"
+          ],
+          "migration": [
+            "none"
+          ],
+          "security": [
+            "lazy dispatch"
+          ],
+          "documentation": [
+            "README"
+          ],
+          "demonstration": [
+            "drift check"
+          ]
+        },
+        "exit_criteria": [
+          {
+            "criterion_id": "EC-00-03",
+            "observable_result": "contract toolchain adopted",
+            "owner_slice_ids": [
+              "slice-00-03"
+            ]
+          }
+        ],
+        "exclusions": [
+          "business behavior"
+        ],
+        "risks": [
+          {
+            "risk_id": "R-01",
+            "description": "baseline disagreement",
+            "impact": "HIGH",
+            "mitigation": "three-way corpus gate",
+            "trigger": "entry differs"
+          }
+        ],
+        "stop_conditions": [
+          "identity change"
+        ],
+        "phase_gate": {
+          "reviewer_role": "CODEX_PLANNER_DESIGNER_REVIEWER",
+          "required_evidence": [
+            "closeout evidence bundle"
+          ],
+          "allowed_verdicts": [
+            "PASS",
+            "REWORK",
+            "BLOCKED_CONTRACT"
+          ]
+        },
+        "human_approval": {
+          "required": false,
+          "status": "NOT_REQUIRED"
+        },
+        "extra_key": true,
+        "content_hash": "sha256:38d1aaafc3d0160d93153e840611c46096ac6d8702a47679e7d5158e4562aea7"
+      }
+    },
+    {
+      "name": "invalid-verdicts",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/phase-plan/v1",
+        "schema_version": 1,
+        "document_revision": 1,
+        "phase_id": "phase-00",
+        "title": "Foundation",
+        "status": "DRAFT",
+        "owner": "Codex",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "outcome": "deterministic pipeline foundation",
+        "prerequisites": [
+          "repository baseline"
+        ],
+        "accepted_adrs": [
+          "ADR-0018",
+          "ADR-0020"
+        ],
+        "module_boundaries": [
+          "domain",
+          "contracts",
+          "controller"
+        ],
+        "slices": [
+          {
+            "slice_id": "slice-00-03",
+            "title": "Contract toolchain",
+            "depends_on": [
+              "slice-00-02"
+            ],
+            "owns_exit_criteria": [
+              "EC-00-03"
+            ],
+            "demonstration": "byte-identical generation"
+          }
+        ],
+        "invariants": [
+          "identity lock unchanged"
+        ],
+        "acceptance_dimensions": {
+          "testing": [
+            "unit"
+          ],
+          "migration": [
+            "none"
+          ],
+          "security": [
+            "lazy dispatch"
+          ],
+          "documentation": [
+            "README"
+          ],
+          "demonstration": [
+            "drift check"
+          ]
+        },
+        "exit_criteria": [
+          {
+            "criterion_id": "EC-00-03",
+            "observable_result": "contract toolchain adopted",
+            "owner_slice_ids": [
+              "slice-00-03"
+            ]
+          }
+        ],
+        "exclusions": [
+          "business behavior"
+        ],
+        "risks": [
+          {
+            "risk_id": "R-01",
+            "description": "baseline disagreement",
+            "impact": "HIGH",
+            "mitigation": "three-way corpus gate",
+            "trigger": "entry differs"
+          }
+        ],
+        "stop_conditions": [
+          "identity change"
+        ],
+        "phase_gate": {
+          "reviewer_role": "CODEX_PLANNER_DESIGNER_REVIEWER",
+          "required_evidence": [
+            "closeout evidence bundle"
+          ],
+          "allowed_verdicts": [
+            "PASS",
+            "REWORK"
+          ]
+        },
+        "human_approval": {
+          "required": false,
+          "status": "NOT_REQUIRED"
+        },
+        "content_hash": "sha256:ef8a1fa8348312d4fd85e4cdc9fb9150e893c0504f1034dfd45175d4e4aaf2f0"
+      }
+    },
+    {
+      "name": "legacy",
+      "category": "legacy",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/phase-plan/v1",
+        "schema_version": 1,
+        "document_revision": 1,
+        "phase_id": "phase-00",
+        "title": "Foundation",
+        "status": "DRAFT",
+        "owner": "Codex",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "outcome": "deterministic pipeline foundation",
+        "prerequisites": [
+          "repository baseline"
+        ],
+        "accepted_adrs": [
+          "ADR-0018",
+          "ADR-0020"
+        ],
+        "module_boundaries": [
+          "domain",
+          "contracts",
+          "controller"
+        ],
+        "slices": [
+          {
+            "slice_id": "slice-00-03",
+            "title": "Contract toolchain",
+            "depends_on": [
+              "slice-00-02"
+            ],
+            "owns_exit_criteria": [
+              "EC-00-03"
+            ],
+            "demonstration": "byte-identical generation"
+          }
+        ],
+        "invariants": [
+          "identity lock unchanged"
+        ],
+        "acceptance_dimensions": {
+          "testing": [
+            "unit"
+          ],
+          "migration": [
+            "none"
+          ],
+          "security": [
+            "lazy dispatch"
+          ],
+          "documentation": [
+            "README"
+          ],
+          "demonstration": [
+            "drift check"
+          ]
+        },
+        "exit_criteria": [
+          {
+            "criterion_id": "EC-00-03",
+            "observable_result": "contract toolchain adopted",
+            "owner_slice_ids": [
+              "slice-00-03"
+            ]
+          }
+        ],
+        "exclusions": [
+          "business behavior"
+        ],
+        "risks": [
+          {
+            "risk_id": "R-01",
+            "description": "baseline disagreement",
+            "impact": "HIGH",
+            "mitigation": "three-way corpus gate",
+            "trigger": "entry differs"
+          }
+        ],
+        "stop_conditions": [
+          "identity change"
+        ],
+        "phase_gate": {
+          "reviewer_role": "CODEX_PLANNER_DESIGNER_REVIEWER",
+          "required_evidence": [
+            "closeout evidence bundle"
+          ],
+          "allowed_verdicts": [
+            "PASS",
+            "REWORK",
+            "BLOCKED_CONTRACT"
+          ]
+        },
+        "human_approval": {
+          "required": false,
+          "status": "NOT_REQUIRED"
+        },
+        "content_hash": "sha256:9aae34911461ca7ef9d8187a8221a7a98e423e9b4c980ec701f2e64e34ad86a0"
+      }
+    },
+    {
+      "name": "legacy-invalid",
+      "category": "legacy",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/phase-plan/v1",
+        "schema_version": 1,
+        "document_revision": 1,
+        "phase_id": "phase-00",
+        "title": "Foundation",
+        "status": "DRAFT",
+        "owner": "Codex",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "outcome": "deterministic pipeline foundation",
+        "prerequisites": [
+          "repository baseline"
+        ],
+        "accepted_adrs": [
+          "ADR-0018",
+          "ADR-0020"
+        ],
+        "module_boundaries": [
+          "domain",
+          "contracts",
+          "controller"
+        ],
+        "slices": [
+          {
+            "slice_id": "slice-00-03",
+            "title": "Contract toolchain",
+            "depends_on": [
+              "slice-00-02"
+            ],
+            "owns_exit_criteria": [
+              "EC-00-03"
+            ],
+            "demonstration": "byte-identical generation"
+          }
+        ],
+        "invariants": [
+          "identity lock unchanged"
+        ],
+        "acceptance_dimensions": {
+          "testing": [
+            "unit"
+          ],
+          "migration": [
+            "none"
+          ],
+          "security": [
+            "lazy dispatch"
+          ],
+          "documentation": [
+            "README"
+          ],
+          "demonstration": [
+            "drift check"
+          ]
+        },
+        "exit_criteria": [
+          {
+            "criterion_id": "EC-00-03",
+            "observable_result": "contract toolchain adopted",
+            "owner_slice_ids": [
+              "slice-00-03"
+            ]
+          }
+        ],
+        "exclusions": [
+          "business behavior"
+        ],
+        "risks": [
+          {
+            "risk_id": "R-01",
+            "description": "baseline disagreement",
+            "impact": "HIGH",
+            "mitigation": "three-way corpus gate",
+            "trigger": "entry differs"
+          }
+        ],
+        "stop_conditions": [
+          "identity change"
+        ],
+        "phase_gate": {
+          "reviewer_role": "HUMAN",
+          "required_evidence": [
+            "closeout evidence bundle"
+          ],
+          "allowed_verdicts": [
+            "PASS",
+            "REWORK",
+            "BLOCKED_CONTRACT"
+          ]
+        },
+        "human_approval": {
+          "required": false,
+          "status": "NOT_REQUIRED"
+        },
+        "content_hash": "sha256:bae10b44e3a9329af46edbfe788d66cf67fc9d066a0989fbd47cdf6f6096af20"
+      }
+    },
+    {
+      "name": "canary",
+      "category": "canary",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/phase-plan/v1",
+        "schema_version": 1,
+        "document_revision": 1,
+        "phase_id": "phase-00",
+        "title": "canary_phase-plan_7f3e9a2c4b1d",
+        "status": "DRAFT",
+        "owner": "Codex",
+        "base_sha": "canary_phase-plan_7f3e9a2c4b1d",
+        "outcome": "deterministic pipeline foundation",
+        "prerequisites": [
+          "repository baseline"
+        ],
+        "accepted_adrs": [
+          "ADR-0018",
+          "ADR-0020"
+        ],
+        "module_boundaries": [
+          "domain",
+          "contracts",
+          "controller"
+        ],
+        "slices": [
+          {
+            "slice_id": "slice-00-03",
+            "title": "Contract toolchain",
+            "depends_on": [
+              "slice-00-02"
+            ],
+            "owns_exit_criteria": [
+              "EC-00-03"
+            ],
+            "demonstration": "byte-identical generation"
+          }
+        ],
+        "invariants": [
+          "identity lock unchanged"
+        ],
+        "acceptance_dimensions": {
+          "testing": [
+            "unit"
+          ],
+          "migration": [
+            "none"
+          ],
+          "security": [
+            "lazy dispatch"
+          ],
+          "documentation": [
+            "README"
+          ],
+          "demonstration": [
+            "drift check"
+          ]
+        },
+        "exit_criteria": [
+          {
+            "criterion_id": "EC-00-03",
+            "observable_result": "contract toolchain adopted",
+            "owner_slice_ids": [
+              "slice-00-03"
+            ]
+          }
+        ],
+        "exclusions": [
+          "business behavior"
+        ],
+        "risks": [
+          {
+            "risk_id": "R-01",
+            "description": "baseline disagreement",
+            "impact": "HIGH",
+            "mitigation": "three-way corpus gate",
+            "trigger": "entry differs"
+          }
+        ],
+        "stop_conditions": [
+          "identity change"
+        ],
+        "phase_gate": {
+          "reviewer_role": "CODEX_PLANNER_DESIGNER_REVIEWER",
+          "required_evidence": [
+            "closeout evidence bundle"
+          ],
+          "allowed_verdicts": [
+            "PASS",
+            "REWORK",
+            "BLOCKED_CONTRACT"
+          ]
+        },
+        "human_approval": {
+          "required": false,
+          "status": "NOT_REQUIRED"
+        },
+        "content_hash": "sha256:a3a43c3bcb3675834d1ca4286841333c780cef98d15846c0a87b982f5ca6e07b"
+      }
+    }
+  ]
+}

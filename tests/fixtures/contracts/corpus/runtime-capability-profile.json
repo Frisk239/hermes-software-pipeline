@@ -1,0 +1,549 @@
+{
+  "schema_id": "https://schemas.hermes-pipeline.dev/runtime/capability-profile/v1",
+  "entries": [
+    {
+      "name": "minimal",
+      "category": "minimal",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/capability-profile/v1",
+        "schema_version": 1,
+        "profile_id": "cap_dev_001",
+        "profile_revision": 1,
+        "stage_type": "DEVELOPMENT",
+        "filesystem": {
+          "read_roots": [
+            "/repo"
+          ],
+          "write_roots": [
+            "/tmp"
+          ]
+        },
+        "executables": [
+          "uv"
+        ],
+        "network": {
+          "mode": "DENY_ALL",
+          "allow": []
+        },
+        "secrets": [],
+        "browser": "NONE",
+        "resources": {
+          "wall_time_ms": 600000,
+          "output_bytes": 1048576,
+          "processes": 4
+        },
+        "side_effects": [
+          "LOCAL_TEST"
+        ],
+        "content_hash": "sha256:6554581bd512b2ec847036145a8903c68b4e309ade4851618788ab43f72cdacb"
+      }
+    },
+    {
+      "name": "maximal",
+      "category": "maximal",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/capability-profile/v1",
+        "schema_version": 1,
+        "profile_id": "cap_e2e_002",
+        "profile_revision": 2,
+        "stage_type": "E2E",
+        "filesystem": {
+          "read_roots": [
+            "/repo",
+            "/opt"
+          ],
+          "write_roots": [
+            "/tmp",
+            "/var/tmp"
+          ]
+        },
+        "executables": [
+          "uv",
+          "python"
+        ],
+        "network": {
+          "mode": "ALLOW_LIST",
+          "allow": [
+            "pypi.org"
+          ]
+        },
+        "secrets": [
+          "API_TOKEN"
+        ],
+        "browser": "CHROME_DEVTOOLS_MCP",
+        "resources": {
+          "wall_time_ms": 3600000,
+          "output_bytes": 10485760,
+          "processes": 8
+        },
+        "side_effects": [
+          "LOCAL_BUILD",
+          "BROWSER_TEST"
+        ],
+        "content_hash": "sha256:c9e1a30fa25fc76737b16ff0b76b46e9427f90f9e8b7000d7b9cd5e4faa8a3ab"
+      }
+    },
+    {
+      "name": "integral-number-3.0",
+      "category": "integral",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/capability-profile/v1",
+        "schema_version": 1,
+        "profile_id": "cap_dev_001",
+        "profile_revision": 3.0,
+        "stage_type": "DEVELOPMENT",
+        "filesystem": {
+          "read_roots": [
+            "/repo"
+          ],
+          "write_roots": [
+            "/tmp"
+          ]
+        },
+        "executables": [
+          "uv"
+        ],
+        "network": {
+          "mode": "DENY_ALL",
+          "allow": []
+        },
+        "secrets": [],
+        "browser": "NONE",
+        "resources": {
+          "wall_time_ms": 600000,
+          "output_bytes": 1048576,
+          "processes": 4
+        },
+        "side_effects": [
+          "LOCAL_TEST"
+        ],
+        "content_hash": "sha256:2180c5d80fb0b0e348aa3055ff7639ef13acfaab41526c265abf5b434623f98f"
+      }
+    },
+    {
+      "name": "invalid-duplicate-executable",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/capability-profile/v1",
+        "schema_version": 1,
+        "profile_id": "cap_dev_001",
+        "profile_revision": 1,
+        "stage_type": "DEVELOPMENT",
+        "filesystem": {
+          "read_roots": [
+            "/repo"
+          ],
+          "write_roots": [
+            "/tmp"
+          ]
+        },
+        "executables": [
+          "uv",
+          "uv"
+        ],
+        "network": {
+          "mode": "DENY_ALL",
+          "allow": []
+        },
+        "secrets": [],
+        "browser": "NONE",
+        "resources": {
+          "wall_time_ms": 600000,
+          "output_bytes": 1048576,
+          "processes": 4
+        },
+        "side_effects": [
+          "LOCAL_TEST"
+        ],
+        "content_hash": "sha256:2727609b176bdd085d6729d1e7b5aed871b8baddfd4d7d76aa393f94063f92ee"
+      }
+    },
+    {
+      "name": "invalid-integral-3.5",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/capability-profile/v1",
+        "schema_version": 1,
+        "profile_id": "cap_dev_001",
+        "profile_revision": 3.5,
+        "stage_type": "DEVELOPMENT",
+        "filesystem": {
+          "read_roots": [
+            "/repo"
+          ],
+          "write_roots": [
+            "/tmp"
+          ]
+        },
+        "executables": [
+          "uv"
+        ],
+        "network": {
+          "mode": "DENY_ALL",
+          "allow": []
+        },
+        "secrets": [],
+        "browser": "NONE",
+        "resources": {
+          "wall_time_ms": 600000,
+          "output_bytes": 1048576,
+          "processes": 4
+        },
+        "side_effects": [
+          "LOCAL_TEST"
+        ],
+        "content_hash": "sha256:e13e2ee7c9ad772259ac48845af53ffe6446478a586138f7f3ce7d5fe6e68b31"
+      }
+    },
+    {
+      "name": "invalid-integral-boolean",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/capability-profile/v1",
+        "schema_version": 1,
+        "profile_id": "cap_dev_001",
+        "profile_revision": true,
+        "stage_type": "DEVELOPMENT",
+        "filesystem": {
+          "read_roots": [
+            "/repo"
+          ],
+          "write_roots": [
+            "/tmp"
+          ]
+        },
+        "executables": [
+          "uv"
+        ],
+        "network": {
+          "mode": "DENY_ALL",
+          "allow": []
+        },
+        "secrets": [],
+        "browser": "NONE",
+        "resources": {
+          "wall_time_ms": 600000,
+          "output_bytes": 1048576,
+          "processes": 4
+        },
+        "side_effects": [
+          "LOCAL_TEST"
+        ],
+        "content_hash": "sha256:869c48909d96b5fe7e86af9829c206c97ab02d9b45c46c355ce5dd09acc53a64"
+      }
+    },
+    {
+      "name": "invalid-integral-string",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/capability-profile/v1",
+        "schema_version": 1,
+        "profile_id": "cap_dev_001",
+        "profile_revision": "3",
+        "stage_type": "DEVELOPMENT",
+        "filesystem": {
+          "read_roots": [
+            "/repo"
+          ],
+          "write_roots": [
+            "/tmp"
+          ]
+        },
+        "executables": [
+          "uv"
+        ],
+        "network": {
+          "mode": "DENY_ALL",
+          "allow": []
+        },
+        "secrets": [],
+        "browser": "NONE",
+        "resources": {
+          "wall_time_ms": 600000,
+          "output_bytes": 1048576,
+          "processes": 4
+        },
+        "side_effects": [
+          "LOCAL_TEST"
+        ],
+        "content_hash": "sha256:883956a0c3575eda9770a2b7b88eee098a8c1eef101e1eb141869c70ee9d9c87"
+      }
+    },
+    {
+      "name": "invalid-resources",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/capability-profile/v1",
+        "schema_version": 1,
+        "profile_id": "cap_dev_001",
+        "profile_revision": 1,
+        "stage_type": "DEVELOPMENT",
+        "filesystem": {
+          "read_roots": [
+            "/repo"
+          ],
+          "write_roots": [
+            "/tmp"
+          ]
+        },
+        "executables": [
+          "uv"
+        ],
+        "network": {
+          "mode": "DENY_ALL",
+          "allow": []
+        },
+        "secrets": [],
+        "browser": "NONE",
+        "resources": {
+          "wall_time_ms": 500,
+          "output_bytes": 1048576,
+          "processes": 4
+        },
+        "side_effects": [
+          "LOCAL_TEST"
+        ],
+        "content_hash": "sha256:0504d042d0ccef0f168bb8dc211f9061c0840da56477390dd034d9242c6663d0"
+      }
+    },
+    {
+      "name": "invalid-side-effects",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/capability-profile/v1",
+        "schema_version": 1,
+        "profile_id": "cap_dev_001",
+        "profile_revision": 1,
+        "stage_type": "DEVELOPMENT",
+        "filesystem": {
+          "read_roots": [
+            "/repo"
+          ],
+          "write_roots": [
+            "/tmp"
+          ]
+        },
+        "executables": [
+          "uv"
+        ],
+        "network": {
+          "mode": "DENY_ALL",
+          "allow": []
+        },
+        "secrets": [],
+        "browser": "NONE",
+        "resources": {
+          "wall_time_ms": 600000,
+          "output_bytes": 1048576,
+          "processes": 4
+        },
+        "side_effects": [
+          "DEPLOY"
+        ],
+        "content_hash": "sha256:d9bb5d99fc47aa201de30b73e725388260e1ef04867425e4cf87db5b4e13f378"
+      }
+    },
+    {
+      "name": "invalid-stage",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/capability-profile/v1",
+        "schema_version": 1,
+        "profile_id": "cap_dev_001",
+        "profile_revision": 1,
+        "stage_type": "QA",
+        "filesystem": {
+          "read_roots": [
+            "/repo"
+          ],
+          "write_roots": [
+            "/tmp"
+          ]
+        },
+        "executables": [
+          "uv"
+        ],
+        "network": {
+          "mode": "DENY_ALL",
+          "allow": []
+        },
+        "secrets": [],
+        "browser": "NONE",
+        "resources": {
+          "wall_time_ms": 600000,
+          "output_bytes": 1048576,
+          "processes": 4
+        },
+        "side_effects": [
+          "LOCAL_TEST"
+        ],
+        "content_hash": "sha256:41915d4e762fd2bb13ada9aafe883ea1574a155f32a5d3c4aaa5f498dc157a69"
+      }
+    },
+    {
+      "name": "invalid-unknown-field",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/capability-profile/v1",
+        "schema_version": 1,
+        "profile_id": "cap_dev_001",
+        "profile_revision": 1,
+        "stage_type": "DEVELOPMENT",
+        "filesystem": {
+          "read_roots": [
+            "/repo"
+          ],
+          "write_roots": [
+            "/tmp"
+          ]
+        },
+        "executables": [
+          "uv"
+        ],
+        "network": {
+          "mode": "DENY_ALL",
+          "allow": []
+        },
+        "secrets": [],
+        "browser": "NONE",
+        "resources": {
+          "wall_time_ms": 600000,
+          "output_bytes": 1048576,
+          "processes": 4
+        },
+        "side_effects": [
+          "LOCAL_TEST"
+        ],
+        "net": true,
+        "content_hash": "sha256:f5b20c1a827cadc45e7167e18aff21c6f6952fd8677298390f2eaf9c0c142a1e"
+      }
+    },
+    {
+      "name": "legacy",
+      "category": "legacy",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/capability-profile/v1",
+        "schema_version": 1,
+        "profile_id": "cap_arch_001",
+        "profile_revision": 1,
+        "stage_type": "ARCHITECTURE",
+        "filesystem": {
+          "read_roots": [
+            "/repo"
+          ],
+          "write_roots": [
+            "/tmp"
+          ]
+        },
+        "executables": [
+          "uv"
+        ],
+        "network": {
+          "mode": "DENY_ALL",
+          "allow": []
+        },
+        "secrets": [],
+        "browser": "NONE",
+        "resources": {
+          "wall_time_ms": 600000,
+          "output_bytes": 1048576,
+          "processes": 4
+        },
+        "side_effects": [
+          "LOCAL_TEST"
+        ],
+        "content_hash": "sha256:001d22423c50a77e789690d42b1839ce7d2e516179068cc18d7800e05f722531"
+      }
+    },
+    {
+      "name": "legacy-invalid",
+      "category": "legacy",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/capability-profile/v1",
+        "schema_version": 1,
+        "profile_id": "cap_dev_001",
+        "profile_revision": 0,
+        "stage_type": "DEVELOPMENT",
+        "filesystem": {
+          "read_roots": [
+            "/repo"
+          ],
+          "write_roots": [
+            "/tmp"
+          ]
+        },
+        "executables": [
+          "uv"
+        ],
+        "network": {
+          "mode": "DENY_ALL",
+          "allow": []
+        },
+        "secrets": [],
+        "browser": "NONE",
+        "resources": {
+          "wall_time_ms": 600000,
+          "output_bytes": 1048576,
+          "processes": 4
+        },
+        "side_effects": [
+          "LOCAL_TEST"
+        ],
+        "content_hash": "sha256:6bb34551c9a95428007cec87a8ed7dda7ff30e68c9e5af0a0ec7dfd1431c9fe8"
+      }
+    },
+    {
+      "name": "canary",
+      "category": "canary",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/runtime/capability-profile/v1",
+        "schema_version": 1,
+        "profile_id": "canary_capability-profile_7f3e9a2c4b1d",
+        "profile_revision": 1,
+        "stage_type": "DEVELOPMENT",
+        "filesystem": {
+          "read_roots": [
+            "/repo"
+          ],
+          "write_roots": [
+            "/tmp"
+          ]
+        },
+        "executables": [
+          "uv"
+        ],
+        "network": {
+          "mode": "DENY_ALL",
+          "allow": []
+        },
+        "secrets": [
+          "canary_capability-profile_7f3e9a2c4b1d"
+        ],
+        "browser": "NONE",
+        "resources": {
+          "wall_time_ms": 600000,
+          "output_bytes": 1048576,
+          "processes": 4
+        },
+        "side_effects": [
+          "LOCAL_TEST"
+        ],
+        "content_hash": "sha256:e6ee34898fa2d73962038c769d7b562a9bf42dfd38feca5d4909c922d4054a26"
+      }
+    }
+  ]
+}

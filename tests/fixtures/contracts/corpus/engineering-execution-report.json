@@ -1,0 +1,574 @@
+{
+  "schema_id": "https://schemas.hermes-pipeline.dev/engineering/execution-report/v1",
+  "entries": [
+    {
+      "name": "minimal",
+      "category": "minimal",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/execution-report/v1",
+        "schema_version": 1,
+        "report_id": "exec_00_03_attempt_1",
+        "slice_id": "slice-00-03",
+        "contract_revision": 5,
+        "attempt": 1,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "context_manifest_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "changed_paths": [
+          "pyproject.toml"
+        ],
+        "command_results": [
+          {
+            "command_id": "frozen-sync",
+            "exit_code": 0,
+            "started_at": "2026-08-06T00:00:00.000Z",
+            "duration_ms": 120,
+            "output_artifact": {
+              "artifact_id": "art_evidence_001",
+              "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "role": "output"
+            }
+          }
+        ],
+        "artifact_refs": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "evidence"
+          }
+        ],
+        "self_assessment": "READY_FOR_REVIEW",
+        "submitted_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:652ef7598d14cfaf121157724e49f3946a8e4748e9e79974469f1e03f8416f8b"
+      }
+    },
+    {
+      "name": "maximal",
+      "category": "maximal",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/execution-report/v1",
+        "schema_version": 1,
+        "report_id": "exec_00_03_attempt_2",
+        "slice_id": "slice-00-03",
+        "contract_revision": 5,
+        "attempt": 2,
+        "base_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "candidate_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "context_manifest_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "changed_paths": [
+          "pyproject.toml",
+          "src/hermes_pipeline/contracts/",
+          "tests/"
+        ],
+        "command_results": [
+          {
+            "command_id": "frozen-sync",
+            "exit_code": 0,
+            "started_at": "2026-08-06T00:00:00.000Z",
+            "duration_ms": 120,
+            "output_artifact": {
+              "artifact_id": "art_evidence_001",
+              "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "role": "output"
+            }
+          },
+          {
+            "command_id": "unit-check",
+            "exit_code": 1,
+            "started_at": "2026-08-06T00:00:00.000Z",
+            "duration_ms": 120,
+            "output_artifact": {
+              "artifact_id": "art_evidence_001",
+              "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "role": "output"
+            }
+          }
+        ],
+        "artifact_refs": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "evidence"
+          },
+          {
+            "artifact_id": "art_report_002",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "log"
+          }
+        ],
+        "self_assessment": "BLOCKED",
+        "risks": [
+          "corpus disagreement"
+        ],
+        "submitted_at": "2026-08-06T09:30:00+08:00",
+        "content_hash": "sha256:7e03585ef83a6ad1a0dde02a044cc108d90a7fcee86669a4140b734ca505ec36"
+      }
+    },
+    {
+      "name": "integral-number-3.0",
+      "category": "integral",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/execution-report/v1",
+        "schema_version": 1,
+        "report_id": "exec_00_03_attempt_1",
+        "slice_id": "slice-00-03",
+        "contract_revision": 3.0,
+        "attempt": 1,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "context_manifest_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "changed_paths": [
+          "pyproject.toml"
+        ],
+        "command_results": [
+          {
+            "command_id": "frozen-sync",
+            "exit_code": 0,
+            "started_at": "2026-08-06T00:00:00.000Z",
+            "duration_ms": 120,
+            "output_artifact": {
+              "artifact_id": "art_evidence_001",
+              "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "role": "output"
+            }
+          }
+        ],
+        "artifact_refs": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "evidence"
+          }
+        ],
+        "self_assessment": "READY_FOR_REVIEW",
+        "submitted_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:13433cbcf1501be99e8456ea33d0cf94b76b9a69a345ced9e74c0ae4cf0131f3"
+      }
+    },
+    {
+      "name": "invalid-attempt-zero",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/execution-report/v1",
+        "schema_version": 1,
+        "report_id": "exec_00_03_attempt_1",
+        "slice_id": "slice-00-03",
+        "contract_revision": 5,
+        "attempt": 0,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "context_manifest_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "changed_paths": [
+          "pyproject.toml"
+        ],
+        "command_results": [
+          {
+            "command_id": "frozen-sync",
+            "exit_code": 0,
+            "started_at": "2026-08-06T00:00:00.000Z",
+            "duration_ms": 120,
+            "output_artifact": {
+              "artifact_id": "art_evidence_001",
+              "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "role": "output"
+            }
+          }
+        ],
+        "artifact_refs": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "evidence"
+          }
+        ],
+        "self_assessment": "READY_FOR_REVIEW",
+        "submitted_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:d5800aa4d9722c84647faf97851f06bca10cd3a21c2482820409845b878f24cc"
+      }
+    },
+    {
+      "name": "invalid-duplicate-path",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/execution-report/v1",
+        "schema_version": 1,
+        "report_id": "exec_00_03_attempt_1",
+        "slice_id": "slice-00-03",
+        "contract_revision": 5,
+        "attempt": 1,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "context_manifest_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "changed_paths": [
+          "pyproject.toml",
+          "pyproject.toml"
+        ],
+        "command_results": [
+          {
+            "command_id": "frozen-sync",
+            "exit_code": 0,
+            "started_at": "2026-08-06T00:00:00.000Z",
+            "duration_ms": 120,
+            "output_artifact": {
+              "artifact_id": "art_evidence_001",
+              "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "role": "output"
+            }
+          }
+        ],
+        "artifact_refs": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "evidence"
+          }
+        ],
+        "self_assessment": "READY_FOR_REVIEW",
+        "submitted_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:8159d97a8ec4b263285558ac2866ca1babe9072dd3de1d9142f777b072f8d966"
+      }
+    },
+    {
+      "name": "invalid-duration",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/execution-report/v1",
+        "schema_version": 1,
+        "report_id": "exec_00_03_attempt_1",
+        "slice_id": "slice-00-03",
+        "contract_revision": 5,
+        "attempt": 1,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "context_manifest_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "changed_paths": [
+          "pyproject.toml"
+        ],
+        "command_results": [
+          {
+            "command_id": "frozen-sync",
+            "exit_code": 0,
+            "started_at": "2026-08-06T00:00:00.000Z",
+            "duration_ms": -5,
+            "output_artifact": {
+              "artifact_id": "art_evidence_001",
+              "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "role": "output"
+            }
+          }
+        ],
+        "artifact_refs": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "evidence"
+          }
+        ],
+        "self_assessment": "READY_FOR_REVIEW",
+        "submitted_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:a1cbed318e204ac5bed85fc595a33baeb1a9452ada52aa525918b2264dcdc697"
+      }
+    },
+    {
+      "name": "invalid-integral-3.5",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/execution-report/v1",
+        "schema_version": 1,
+        "report_id": "exec_00_03_attempt_1",
+        "slice_id": "slice-00-03",
+        "contract_revision": 3.5,
+        "attempt": 1,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "context_manifest_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "changed_paths": [
+          "pyproject.toml"
+        ],
+        "command_results": [
+          {
+            "command_id": "frozen-sync",
+            "exit_code": 0,
+            "started_at": "2026-08-06T00:00:00.000Z",
+            "duration_ms": 120,
+            "output_artifact": {
+              "artifact_id": "art_evidence_001",
+              "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "role": "output"
+            }
+          }
+        ],
+        "artifact_refs": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "evidence"
+          }
+        ],
+        "self_assessment": "READY_FOR_REVIEW",
+        "submitted_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:7f2990d67a1ba0a041cec2a17063838f0259093af6b016b9d95b0700fa9a4242"
+      }
+    },
+    {
+      "name": "invalid-integral-boolean",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/execution-report/v1",
+        "schema_version": 1,
+        "report_id": "exec_00_03_attempt_1",
+        "slice_id": "slice-00-03",
+        "contract_revision": true,
+        "attempt": 1,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "context_manifest_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "changed_paths": [
+          "pyproject.toml"
+        ],
+        "command_results": [
+          {
+            "command_id": "frozen-sync",
+            "exit_code": 0,
+            "started_at": "2026-08-06T00:00:00.000Z",
+            "duration_ms": 120,
+            "output_artifact": {
+              "artifact_id": "art_evidence_001",
+              "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "role": "output"
+            }
+          }
+        ],
+        "artifact_refs": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "evidence"
+          }
+        ],
+        "self_assessment": "READY_FOR_REVIEW",
+        "submitted_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:d80d9400568a592c3eed2d88b1519337b8b6bd52aa54c239f10e43b023723b26"
+      }
+    },
+    {
+      "name": "invalid-integral-string",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/execution-report/v1",
+        "schema_version": 1,
+        "report_id": "exec_00_03_attempt_1",
+        "slice_id": "slice-00-03",
+        "contract_revision": "3",
+        "attempt": 1,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "context_manifest_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "changed_paths": [
+          "pyproject.toml"
+        ],
+        "command_results": [
+          {
+            "command_id": "frozen-sync",
+            "exit_code": 0,
+            "started_at": "2026-08-06T00:00:00.000Z",
+            "duration_ms": 120,
+            "output_artifact": {
+              "artifact_id": "art_evidence_001",
+              "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "role": "output"
+            }
+          }
+        ],
+        "artifact_refs": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "evidence"
+          }
+        ],
+        "self_assessment": "READY_FOR_REVIEW",
+        "submitted_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:56c0c5edc969f8ce8ee78942ade3d7edeb10d28af71aab067c38df4edcb739ba"
+      }
+    },
+    {
+      "name": "invalid-unknown-field",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/execution-report/v1",
+        "schema_version": 1,
+        "report_id": "exec_00_03_attempt_1",
+        "slice_id": "slice-00-03",
+        "contract_revision": 5,
+        "attempt": 1,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "context_manifest_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "changed_paths": [
+          "pyproject.toml"
+        ],
+        "command_results": [
+          {
+            "command_id": "frozen-sync",
+            "exit_code": 0,
+            "started_at": "2026-08-06T00:00:00.000Z",
+            "duration_ms": 120,
+            "output_artifact": {
+              "artifact_id": "art_evidence_001",
+              "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "role": "output"
+            }
+          }
+        ],
+        "artifact_refs": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "evidence"
+          }
+        ],
+        "self_assessment": "READY_FOR_REVIEW",
+        "submitted_at": "2026-08-06T00:00:00.000Z",
+        "verdict": "PASS",
+        "content_hash": "sha256:6d728fed831c228341b23023c9f07ed5ad1331d66d7cb7b141b7bc0845a271a0"
+      }
+    },
+    {
+      "name": "legacy",
+      "category": "legacy",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/execution-report/v1",
+        "schema_version": 1,
+        "report_id": "exec_00_02_attempt_1",
+        "slice_id": "slice-00-02",
+        "contract_revision": 4,
+        "attempt": 1,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "context_manifest_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "changed_paths": [
+          "pyproject.toml"
+        ],
+        "command_results": [
+          {
+            "command_id": "lint-check",
+            "exit_code": 0,
+            "started_at": "2026-08-06T00:00:00.000Z",
+            "duration_ms": 120,
+            "output_artifact": {
+              "artifact_id": "art_evidence_001",
+              "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "role": "output"
+            }
+          }
+        ],
+        "artifact_refs": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "evidence"
+          }
+        ],
+        "self_assessment": "READY_FOR_REVIEW",
+        "submitted_at": "2026-08-05T00:00:00Z",
+        "content_hash": "sha256:d27664f73c5bf263b04d5d23b58ba84cbadce95a3ba9adab533286eb4315909c"
+      }
+    },
+    {
+      "name": "legacy-invalid",
+      "category": "legacy",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/execution-report/v1",
+        "schema_version": 1,
+        "report_id": "exec_00_02_attempt_1",
+        "slice_id": "slice-00-02",
+        "contract_revision": 4,
+        "attempt": 1,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "context_manifest_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "changed_paths": [
+          "pyproject.toml"
+        ],
+        "command_results": [
+          {
+            "command_id": "lint-check",
+            "exit_code": 0,
+            "started_at": "2026-08-06T00:00:00.000Z",
+            "duration_ms": 120,
+            "output_artifact": {
+              "artifact_id": "art_evidence_001",
+              "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "role": "output"
+            }
+          }
+        ],
+        "artifact_refs": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "evidence"
+          }
+        ],
+        "self_assessment": "HONEST",
+        "submitted_at": "2026-08-05T00:00:00Z",
+        "content_hash": "sha256:fc5ee3501f4713254fd8e26b116790d4f8087953ebc8ef14d1d045e682f6b4a1"
+      }
+    },
+    {
+      "name": "canary",
+      "category": "canary",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/execution-report/v1",
+        "schema_version": 1,
+        "report_id": "exec_00_03_attempt_1",
+        "slice_id": "slice-00-03",
+        "contract_revision": 5,
+        "attempt": 1,
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "candidate_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "context_manifest_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "changed_paths": [
+          "pyproject.toml"
+        ],
+        "command_results": [
+          {
+            "command_id": "canary_execution-report_7f3e9a2c4b1d",
+            "exit_code": "canary_execution-report_7f3e9a2c4b1d",
+            "started_at": "2026-08-06T00:00:00.000Z",
+            "duration_ms": 120,
+            "output_artifact": {
+              "artifact_id": "art_evidence_001",
+              "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "role": "output"
+            }
+          }
+        ],
+        "artifact_refs": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "evidence"
+          }
+        ],
+        "self_assessment": "READY_FOR_REVIEW",
+        "submitted_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:80bfe665505be642a0006713b2e552ff4322ae68e081304373863f0f623c46bd"
+      }
+    }
+  ]
+}

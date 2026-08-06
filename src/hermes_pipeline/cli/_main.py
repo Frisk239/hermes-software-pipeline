@@ -1,12 +1,13 @@
-"""Bootstrap CLI for the hermes-pipeline runtime (slice-00-02).
+"""Bootstrap CLI for the hermes-pipeline runtime (slice-00-02/00-03).
 
 Supported surface, deliberately small:
 
 - ``--version`` prints the installed distribution version (sole version
   source: package metadata) and exits 0;
-- ``contracts check`` delegates in-process to the existing bootstrap Schema
-  checker ``scripts/check_schemas.py`` from a source checkout (no second
-  validation logic, no shell string);
+- ``contracts check|generate|drift-check`` runs the lazily-imported contract
+  toolchain (Pydantic authoring source, jsonschema validation, RFC 8785
+  hashing) after the subcommand is parsed; without development dependencies
+  it returns a bounded error;
 - ``architecture check`` runs the standard-library AST import-boundary
   checker against ``src/hermes_pipeline`` in a source checkout, or against
   an explicit ``--root`` path.
@@ -23,14 +24,15 @@ from hermes_pipeline import __version__
 
 from ._architecture_check import check_package_tree, render_diagnostics
 from ._bootstrap import EXIT_CHECK_FAIL, EXIT_OK, EXIT_USAGE, repo_root
-from ._contracts import run_contracts_check
+from ._contracts import run_contracts
 
 DEFAULT_PACKAGE_ROOT = "src/hermes_pipeline"
 
 USAGE = (
     "usage: hermes-pipeline-runtime [--version] <command> [args]\n"
     "commands:\n"
-    "  contracts check     validate the committed Schema registry\n"
+    "  contracts check|generate|drift-check\n"
+    "                           validate or regenerate the contract registry\n"
     "  architecture check  validate package import boundaries\n"
 )
 
@@ -75,9 +77,7 @@ def main(argv: list[str] | None = None) -> int:
         print(__version__)
         return EXIT_OK
     if args[0] == "contracts":
-        if len(args) < 2 or args[1] != "check":
-            return _usage_error("expected 'contracts check'")
-        return run_contracts_check(args[2:])
+        return run_contracts(args[1:])
     if args[0] == "architecture":
         if len(args) < 2 or args[1] != "check":
             return _usage_error("expected 'architecture check'")

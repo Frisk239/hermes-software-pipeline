@@ -1,0 +1,327 @@
+{
+  "schema_id": "https://schemas.hermes-pipeline.dev/engineering/closeout/v1",
+  "entries": [
+    {
+      "name": "minimal",
+      "category": "minimal",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/closeout/v1",
+        "schema_version": 1,
+        "closeout_id": "close_slice_00_02",
+        "scope_kind": "SLICE",
+        "scope_id": "slice-00-02",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "accepted_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "delivered": [
+          "python quality skeleton"
+        ],
+        "evidence": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "ci-run"
+          }
+        ],
+        "residual_debt": [],
+        "next_prerequisites": [],
+        "closed_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:a88e9dfd80edcb73cd7f2ac4f13f4c865c0234a240a1fba790ecf62b806e919a"
+      }
+    },
+    {
+      "name": "maximal",
+      "category": "maximal",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/closeout/v1",
+        "schema_version": 1,
+        "closeout_id": "close_phase_00",
+        "scope_kind": "PHASE",
+        "scope_id": "phase-00",
+        "base_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "accepted_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "delivered": [
+          "contract toolchain",
+          "quality skeleton"
+        ],
+        "evidence": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "evidence"
+          },
+          {
+            "artifact_id": "art_report_002",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "report"
+          }
+        ],
+        "residual_debt": [
+          "bootstrap gate stays dependency-free"
+        ],
+        "next_prerequisites": [
+          "slice-00-04"
+        ],
+        "closed_at": "2026-08-06T09:30:00+08:00",
+        "content_hash": "sha256:40625a5b86dfb0121d382669aab176d752bf9ba2b011061ceb8b5f5094b82e52"
+      }
+    },
+    {
+      "name": "invalid-unknown-field",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/closeout/v1",
+        "schema_version": 1,
+        "closeout_id": "close_slice_00_02",
+        "scope_kind": "SLICE",
+        "scope_id": "slice-00-02",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "accepted_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "delivered": [
+          "x"
+        ],
+        "evidence": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "r"
+          }
+        ],
+        "residual_debt": [],
+        "next_prerequisites": [],
+        "closed_at": "2026-08-06T00:00:00.000Z",
+        "surprise_field": 1,
+        "content_hash": "sha256:1af58bc1a81d7d515d17140648346780f9c1b365b1c733e2dea35bc296a84a60"
+      }
+    },
+    {
+      "name": "invalid-identity",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/closeout/v2",
+        "schema_version": 1,
+        "closeout_id": "close_slice_00_02",
+        "scope_kind": "SLICE",
+        "scope_id": "slice-00-02",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "accepted_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "delivered": [
+          "x"
+        ],
+        "evidence": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "r"
+          }
+        ],
+        "residual_debt": [],
+        "next_prerequisites": [],
+        "closed_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:e841a848b3e70abe29380e60a911094d5272344ffc4379468c43483c7775737a"
+      }
+    },
+    {
+      "name": "invalid-malformed-sha",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/closeout/v1",
+        "schema_version": 1,
+        "closeout_id": "close_slice_00_02",
+        "scope_kind": "SLICE",
+        "scope_id": "slice-00-02",
+        "base_sha": "zzaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "accepted_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "delivered": [
+          "x"
+        ],
+        "evidence": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "r"
+          }
+        ],
+        "residual_debt": [],
+        "next_prerequisites": [],
+        "closed_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:a734f4c61aa53e84384e6a5612a943fa512b7dd07872413ae4863bd9185fc159"
+      }
+    },
+    {
+      "name": "invalid-string-number",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/closeout/v1",
+        "schema_version": "1",
+        "closeout_id": "close_slice_00_02",
+        "scope_kind": "SLICE",
+        "scope_id": "slice-00-02",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "accepted_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "delivered": [
+          "x"
+        ],
+        "evidence": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "r"
+          }
+        ],
+        "residual_debt": [],
+        "next_prerequisites": [],
+        "closed_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:3e61f681a9899a656788ed91f50dda904d9b59f7c701e23879873aa508695ab4"
+      }
+    },
+    {
+      "name": "invalid-enum",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/closeout/v1",
+        "schema_version": 1,
+        "closeout_id": "close_slice_00_02",
+        "scope_kind": "EPIC",
+        "scope_id": "slice-00-02",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "accepted_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "delivered": [
+          "x"
+        ],
+        "evidence": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "r"
+          }
+        ],
+        "residual_debt": [],
+        "next_prerequisites": [],
+        "closed_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:eeb2bbdd8c9e6a475c93405972da6d381c72b30eebfb1cccfc6ca17d6c2b0f19"
+      }
+    },
+    {
+      "name": "invalid-missing-required",
+      "category": "invalid",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/closeout/v1",
+        "schema_version": 1,
+        "closeout_id": "close_slice_00_02",
+        "scope_kind": "SLICE",
+        "scope_id": "slice-00-02",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "accepted_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "delivered": [
+          "x"
+        ],
+        "evidence": [
+          {
+            "artifact_id": "art_evidence_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "r"
+          }
+        ],
+        "residual_debt": [],
+        "next_prerequisites": [],
+        "content_hash": "sha256:707a3eae17ace165e66bb93fe34317e0bd73b9536af442a2dabe3ae9b320dff6"
+      }
+    },
+    {
+      "name": "legacy",
+      "category": "legacy",
+      "expected": "pass",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/closeout/v1",
+        "schema_version": 1,
+        "closeout_id": "close_slice_00_01",
+        "scope_kind": "SLICE",
+        "scope_id": "slice-00-01",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "accepted_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "delivered": [
+          "repository baseline"
+        ],
+        "evidence": [
+          {
+            "artifact_id": "art_baseline_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "ci"
+          }
+        ],
+        "residual_debt": [],
+        "next_prerequisites": [
+          "slice-00-02"
+        ],
+        "closed_at": "2026-08-01T12:00:00Z",
+        "content_hash": "sha256:4582a68d57580ea6ec3321a78f4657930669e96197be6baf557e4fa0a37fc2da"
+      }
+    },
+    {
+      "name": "legacy-invalid",
+      "category": "legacy",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/closeout/v1",
+        "schema_version": 1,
+        "closeout_id": "close_slice_00_01",
+        "scope_kind": "SLICE",
+        "scope_id": "slice-00-01",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "accepted_sha": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "delivered": [
+          "repository baseline"
+        ],
+        "evidence": [
+          {
+            "artifact_id": "art_baseline_001",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "ci"
+          }
+        ],
+        "residual_debt": [],
+        "next_prerequisites": [
+          "slice-00-02"
+        ],
+        "closed_at": "2026-08-01T12:00:00Z",
+        "content_hash": "sha256:ebe9c44ace44ffc02c4fcec99d63ce957c7a30ece9ad05f7be3ce85a6cdd3c55"
+      }
+    },
+    {
+      "name": "canary",
+      "category": "canary",
+      "expected": "reject",
+      "document": {
+        "schema_id": "https://schemas.hermes-pipeline.dev/engineering/closeout/v1",
+        "schema_version": 1,
+        "closeout_id": "close_slice_00_02",
+        "scope_kind": "SLICE",
+        "scope_id": "slice-00-02",
+        "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "accepted_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "delivered": [
+          "x"
+        ],
+        "evidence": [
+          {
+            "artifact_id": "canary_closeout_7f3e9a2c4b1d",
+            "manifest_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "role": "r"
+          }
+        ],
+        "residual_debt": [],
+        "next_prerequisites": [],
+        "closed_at": "2026-08-06T00:00:00.000Z",
+        "content_hash": "sha256:65dbfc399cdb1aaf94b8f6defd04e513602e603428b3f1f8949dbf7dd7b76e51"
+      }
+    }
+  ]
+}
