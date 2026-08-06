@@ -26,6 +26,7 @@ from hermes_pipeline.contracts.corpus import (
     load_corpus,
     validate_entry,
 )
+from hermes_pipeline.contracts.formats import build_format_checker
 from hermes_pipeline.contracts.registry import CONTRACTS, contract_by_id
 from hermes_pipeline.contracts.validate import run_contracts_check
 
@@ -75,7 +76,7 @@ def _validator(
 ) -> Draft202012Validator:
     return Draft202012Validator(
         document,
-        format_checker=Draft202012Validator.FORMAT_CHECKER,
+        format_checker=build_format_checker(),
         registry=_registry() if registry is None else registry,
     )
 

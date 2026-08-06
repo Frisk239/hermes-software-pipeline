@@ -1,11 +1,11 @@
 """Deterministic format rules shared by the authoring types and jsonschema.
 
 The frozen ``jsonschema`` installation lacks its optional RFC 3339 checker
-(``rfc3339_validator`` is not a dependency), so the toolchain registers one
-deterministic checker on ``Draft202012Validator.FORMAT_CHECKER``. The single
-shared rule below is used by the authoring type (``definitions.UtcTimestamp``)
-and by the Schema-side format checker, so both authorities cannot diverge on
-``format: date-time`` instances (AC-03, revision 6).
+(``rfc3339_validator`` is not a dependency), so the toolchain constructs a
+fresh deterministic checker for each Schema validator. The single shared rule
+below is used by the authoring type (``definitions.UtcTimestamp``) and by the
+Schema-side format checker, so both authorities cannot diverge on
+``format: date-time`` instances (AC-03, revision 7).
 
 The rule is pure standard library: no timezone database, no third-party
 library, and no wall-clock input, so the verdict is byte-identical on every
@@ -18,7 +18,7 @@ import re
 from datetime import datetime
 from typing import Any
 
-from jsonschema import Draft202012Validator
+from jsonschema import FormatChecker
 
 # RFC 3339 full-date "T" full-time with a mandatory time offset. Both "T"/"t"
 # and "Z"/"z" are accepted (the ABNF is case-insensitive); the time offset
@@ -63,17 +63,17 @@ def validate_rfc3339_datetime(value: str) -> str:
     return value
 
 
-def register_rfc3339_checker() -> None:
-    """Register the deterministic date-time checker (idempotent, AC-03).
+def build_format_checker() -> FormatChecker:
+    """Build a fresh deterministic date-time checker (AC-03).
 
     The checker and the authoring type share ``is_rfc3339_datetime``, so a
     format-violating instance is rejected by both Schema validation and the
-    Pydantic model.
+    Pydantic model. It is deliberately local to one validator: never mutate
+    jsonschema's process-wide default ``FORMAT_CHECKER``.
     """
-    Draft202012Validator.FORMAT_CHECKER.checkers["date-time"] = (
-        _check_date_time,
-        ValueError,
-    )
+    checker = FormatChecker()
+    checker.checks("date-time", raises=ValueError)(_check_date_time)
+    return checker
 
 
 def _check_date_time(value: Any) -> bool:

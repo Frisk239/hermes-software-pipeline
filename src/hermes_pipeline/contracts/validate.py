@@ -34,15 +34,10 @@ from .corpus import (
     load_corpus,
     validate_entry,
 )
-from .formats import register_rfc3339_checker
+from .formats import build_format_checker
 from .generate import generate_contract_document, load_json_document
 from .jcs import canonical_json, raw_digest
 from .registry import COMPONENT_KEYS, CONTRACTS, DRAFT_2020_12, EXPECTED_SCHEMA_IDS
-
-# The frozen jsonschema lacks its optional RFC 3339 checker; registering the
-# deterministic shared-rule checker is idempotent and required for every
-# instance validation performed by this validator (AC-03, revision 6).
-register_rfc3339_checker()
 
 MAX_ISSUES = 60
 MAX_LINE_BYTES = 240
@@ -331,9 +326,9 @@ def _build_registry(documents: dict[Path, dict[str, Any]]) -> Registry[Any]:
 def _formatted_validator(
     document: dict[str, Any], registry: Registry
 ) -> Draft202012Validator:
-    """Draft 2020-12 validator with the FORMAT_CHECKER enabled (AC-03)."""
+    """Draft 2020-12 validator with a local RFC 3339 checker (AC-03)."""
     return Draft202012Validator(
-        document, format_checker=Draft202012Validator.FORMAT_CHECKER, registry=registry
+        document, format_checker=build_format_checker(), registry=registry
     )
 
 

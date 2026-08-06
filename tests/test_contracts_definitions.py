@@ -5,7 +5,7 @@ payload Schema; each definition gets fragment tests instead of instance
 corpora. Every fragment case is validated by three authorities that must
 agree: the f36 snapshot ``$defs`` entry, the committed generated ``$defs``
 entry, and the corresponding authoring type. The deterministic RFC 3339
-checker is registered on the Draft 2020-12 FORMAT_CHECKER (revision 6), so
+checker is local to each Draft 2020-12 validator (revision 7), so
 ``format: date-time`` violations are rejected by both Schema authorities and
 the authoring type, and integer fragments accept finite integral JSON
 numbers such as ``3.0`` while rejecting strings, booleans, and non-integral
@@ -15,6 +15,9 @@ numbers.
 from __future__ import annotations
 
 import json
+import os
+import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -24,14 +27,10 @@ from pydantic import TypeAdapter, ValidationError
 from referencing import Registry, Resource
 
 from hermes_pipeline.contracts.definitions import DEFINITION_TYPES, DEFINITIONS_ID
-from hermes_pipeline.contracts.formats import register_rfc3339_checker
+from hermes_pipeline.contracts.formats import build_format_checker
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SNAPSHOT_DIR = REPO_ROOT / "tests" / "fixtures" / "contracts" / "snapshots" / "common"
-
-# The deterministic date-time checker is registered before any validator in
-# this module is built (idempotent; revision 6).
-register_rfc3339_checker()
 
 
 def _accepts(validator: Any, value: object) -> bool:
@@ -211,7 +210,7 @@ def _definitions_validator(
     schema = {"$ref": f"{DEFINITIONS_ID}#/$defs/{fragment}"}
     return Draft202012Validator(
         schema,
-        format_checker=Draft202012Validator.FORMAT_CHECKER,
+        format_checker=build_format_checker(),
         registry=registry,
     )
 
@@ -238,13 +237,14 @@ def test_fragment_positive_and_negative_agree_three_way(fragment: str) -> None:
                 adapter.validate_python(value)
 
 
-def test_rfc3339_checker_is_registered_and_shared() -> None:
-    """The deterministic date-time checker is registered on the Draft 2020-12
-    FORMAT_CHECKER and shares the authoring type's rule (revision 6)."""
+def test_rfc3339_checker_is_local_and_shared() -> None:
+    """The local checker shares the authoring type's rule without global state."""
     from hermes_pipeline.contracts.formats import is_rfc3339_datetime
 
-    register_rfc3339_checker()
-    assert "date-time" in Draft202012Validator.FORMAT_CHECKER.checkers
+    default_handlers = dict(Draft202012Validator.FORMAT_CHECKER.checkers)
+    checker = build_format_checker()
+    assert checker is not Draft202012Validator.FORMAT_CHECKER
+    assert Draft202012Validator.FORMAT_CHECKER.checkers == default_handlers
     adapter = TypeAdapter(DEFINITION_TYPES["utcTimestamp"])
     for value in (
         "2026-08-06T00:00:00.000Z",
@@ -258,7 +258,7 @@ def test_rfc3339_checker_is_registered_and_shared() -> None:
     ):
         schema_accepts = True
         try:
-            Draft202012Validator.FORMAT_CHECKER.check(value, "date-time")
+            checker.check(value, "date-time")
         except Exception:
             schema_accepts = False
         model_accepts = True
@@ -272,7 +272,7 @@ def test_rfc3339_checker_is_registered_and_shared() -> None:
 
 def test_utc_timestamp_strict_type_rejects_format_violations() -> None:
     """The strict authoring type enforces the RFC 3339 boundary with the same
-    rule as the registered Schema-side format checker."""
+    rule as the local Schema-side format checker."""
     adapter = TypeAdapter(DEFINITION_TYPES["utcTimestamp"])
     for value in (
         "not-a-date",
@@ -282,3 +282,29 @@ def test_utc_timestamp_strict_type_rejects_format_violations() -> None:
     ):
         with pytest.raises(ValidationError):
             adapter.validate_python(value)
+
+
+def test_contract_imports_do_not_mutate_default_format_checker() -> None:
+    """Import-time behavior is checked in a fresh process (revision 7)."""
+    script = """
+from jsonschema import Draft202012Validator
+
+before = dict(Draft202012Validator.FORMAT_CHECKER.checkers)
+import hermes_pipeline.contracts.formats  # noqa: F401
+import hermes_pipeline.contracts.validate  # noqa: F401
+after = Draft202012Validator.FORMAT_CHECKER.checkers
+
+assert set(before) == set(after)
+assert all(before[name] is after[name] for name in before)
+"""
+    environment = os.environ.copy()
+    environment["PYTHONDONTWRITEBYTECODE"] = "1"
+    result = subprocess.run(
+        [sys.executable, "-c", script],
+        cwd=REPO_ROOT,
+        env=environment,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr

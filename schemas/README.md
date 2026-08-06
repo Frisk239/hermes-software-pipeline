@@ -10,7 +10,7 @@ All schemas use JSON Schema Draft 2020-12, reject unknown top-level fields, and 
 
 ## Authoring and drift
 
-`contracts generate` is the only command that writes the generated projections; the toolchain is lazy-imported only after the `contracts` subcommand is parsed. `contracts drift-check` regenerates every projection into a temporary directory and byte-compares it with the committed files, so a hand edit, a timestamp, or a platform-dependent byte fails CI. `contracts check` runs the full read-only validator: the identity lock, Draft 2020-12 meta-validation, `$ref` closure, FORMAT_CHECKER instance validation, the f36 baseline corpus three-way gate (immutable snapshots under `tests/fixtures/contracts/`, strict models, generated Schemas), OpenAPI and compatibility-registry checks, canonical hashes, and the canary scan.
+`contracts generate` is the only command that writes the generated projections; the toolchain is lazy-imported only after the `contracts` subcommand is parsed. `contracts drift-check` regenerates every projection into a temporary directory and byte-compares it with the committed files, so a hand edit, a timestamp, or a platform-dependent byte fails CI. `contracts check` runs the full read-only validator: the identity lock, Draft 2020-12 meta-validation, `$ref` closure, local RFC 3339 `FormatChecker` instance validation, the f36 baseline corpus three-way gate (immutable snapshots under `tests/fixtures/contracts/`, strict models, generated Schemas), OpenAPI and compatibility-registry checks, canonical hashes, and the canary scan.
 
 ```text
 uv run python -m hermes_pipeline.cli contracts generate
