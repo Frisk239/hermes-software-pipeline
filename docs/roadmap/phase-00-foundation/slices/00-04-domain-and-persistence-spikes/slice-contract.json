@@ -1,0 +1,844 @@
+{
+  "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
+  "schema_version": 1,
+  "document_revision": 6,
+  "slice_id": "slice-00-04",
+  "phase_id": "phase-00",
+  "status": "READY",
+  "predecessors": [
+    "slice-00-03"
+  ],
+  "base_sha": "32b4b7a5406bf4ee58b79e2602f77af78ba3a27f",
+  "assigned_worktree": "C:\\Users\\a2691\\AppData\\Local\\hermes\\managed-worktrees\\hermes-software-pipeline\\slice-00-04",
+  "operator_path": "From a clean Windows or Linux checkout, install the exact frozen Python 3.12 development environment once, then run the deterministic spike tests and the complete canonical check set offline; the spike produces written feasibility evidence for the frozen CounterSpike oracle, one atomic SQLite Controller transaction with typed failure boundaries, a fixed single-writer workload envelope with a redacted runner profile, crash, backup, and restore recovery, Stage lease fencing, an Alembic migration spike, and LangGraph replay that cannot advance business state.",
+  "must_scope": [
+    "Add sqlalchemy>=2,<3, alembic>=1.19,<2, langgraph>=1.2,<2, and langgraph-checkpoint-sqlite>=3.1,<4 to the existing dev dependency group only, freeze the complete transitive resolution including sqlite-vec and its wheel admission evidence in uv.lock, and keep [project].dependencies empty; the dependency-family decision is bound by ADR-0027 accepted in this planning change",
+    "Spike the fixed product-meaning-free CounterSpike oracle under src/hermes_pipeline/domain/ with a frozen semantic: initial state is strictly (value=0, revision=0); from any (value=v, revision=r), accepting Increment(delta=1) transitions the state strictly to (v+1, r+1) and produces the unique domain Event CounterIncremented whose payload exactly contains the new value and the new revision; command identity is carried by the existing Controller envelope; any delta different from 1 returns the typed INVALID_DELTA result, leaves the state completely unchanged, and produces no domain Event; expected-revision conflict handling remains the Controller persistence layer's responsibility, not the domain's; the evaluator has no I/O, clock, identity, randomness, or framework dependency and is a candidate for retention, clearly marked non-public",
+    "Define a typed persistence port private to the Controller: controller depends only on that port and domain values and never imports SQLAlchemy, LangGraph, Alembic, filesystem, or concrete persistence Adapter code, and never executes SQL or filesystem operations itself; the port has a deterministic in-memory test Adapter and one SQLite spike Adapter that may use SQLAlchemy Core",
+    "Retain ControllerCommandPort.submit(command: ControllerCommand) -> CommandReceipt as the accepted external Interface and the only Interface the Stage Executor may call; it uses the existing CommandReceipt status/error model: domain INVALID_DELTA projects to REJECTED/VALIDATION_ERROR with fixed message invalid delta; same-ID/different-payload and expected-revision conflicts project to CONFLICT/CONFLICT with respectively fixed messages command identity conflict and expected revision conflict; persistence failures including SQLITE_FULL project to an in-memory, non-durable REJECTED/INTERNAL_ERROR receipt with fixed message persistence unavailable and retryable=true; no durable receipt record or partial records are written on that path, and raw sqlite3, SQLAlchemy, or driver exceptions never cross the Interface; the Stage Executor and LangGraph spike graph are forbidden to import the private persistence port, any persistence Adapter, SQLAlchemy, or database files, enforced by positive and negative import-boundary tests",
+    "Prove one atomic SQLite Controller transaction writes Inbox, Event, projection, Outbox, and receipt records all-or-none using an explicit SQLite driver transaction mode (for example SQLAlchemy connect_args autocommit=False or an explicit BEGIN event hook); the legacy sqlite3 default transaction control is never relied on and the chosen mode is documented and tested",
+    "Prove duplicate command delivery, same-command-id different-payload conflict, and expected-revision conflict: a repeated identical command returns the original receipt and appends exactly one Event; the private spike must classify the former as COMMAND_ID_CONFLICT, while the Stage-visible receipt is CONFLICT/CONFLICT with fixed message command identity conflict; expected-revision mismatch uses CONFLICT/CONFLICT with fixed message expected revision conflict; neither rejection appends an Event or Outbox row",
+    "Separate transaction-failure and process-crash evidence: AC-03 injects an exception before and after each of the five logical writes inside the transaction and proves the whole transaction rolls back; AC-05 crashes a real subprocess only at the true durable boundaries (pre-commit and post-commit of the five-record transaction) and restarts a fresh process from the same database and WAL; ordinary exception injection is never presented as crash evidence",
+    "Translate every driver failure at the Interface boundary: ControllerCommandPort.submit returns the schema-compatible, non-durable CommandReceipt specified above; backup and migration test-helper Interfaces return bounded non-serialized typed results; no traceback, raw SQL, absolute path, database content, or raw exception text crosses any Interface; output is bounded; the spike does not change committed Schemas or the accepted Controller signature and does not turn spike errors into a product public API",
+    "Prove projection rebuild: a projection rebuilt from the authoritative Event Log with Event hash-chain verification equals the live projection for the same Event set",
+    "Prove online backup and restore through the Python sqlite3.Connection.backup API while a reader or writer is active, then validate the restored copy with PRAGMA integrity_check and PRAGMA foreign_key_check; the backup API and policy reject the raw-copy path before any I/O, and a guard or mock proves the implementation only ever calls sqlite3.Connection.backup(); no test asserts that a raw copy necessarily corrupts the database; the backup helper returns bounded typed results and never exposes raw driver exceptions",
+    "Record sqlite3.sqlite_version on both required platforms and apply the exact SQLite WAL-reset repair-version predicate: at least 3.51.3, or at least 3.50.7 and below 3.51.0, or at least 3.44.6 and below 3.45.0, with committed accept and reject version vectors; a linked library failing the predicate on either platform stops the Slice with a Contract Change Request before any spike persistence conclusion is claimed",
+    "Run the fixed reproducible single-writer workload envelope: 1,000 accepted commands, 4 producers, one writer, queue capacity 32, command and event payloads each no larger than 1 KiB, p95 acknowledged latency no greater than 2 seconds, busy count equal to 0, WAL high-water no greater than 16 MiB, and checkpoint, online backup, and fresh-process recovery each no greater than 5 seconds; the report records a fixed redacted runner profile (OS family, architecture, CI runner label, Python version, and sqlite3.sqlite_version) plus selected PRAGMAs and queue high-water; hostname, username, absolute paths, environment variable values, tokens, raw exception text, and database content are forbidden from test output and the Execution Report, with a verifiable redaction assertion that injects fake sensitive values and proves the reporter does not leak them; a deterministic SQLITE_FULL injection returns the specified non-durable REJECTED/INTERNAL_ERROR receipt, writes no durable receipt record or partial records, is restart-safe, and never exhausts real disk; an exceeded limit or unrecordable evidence triggers the already-planned replacement-ADR path (Phase risk R-03)",
+    "Spike Stage Attempt and Run leases with monotonically increasing fencing generations: a result carrying an expired or superseded generation is rejected, and a generation takeover fences the stale holder; the spike lease is not a production lock",
+    "Spike LangGraph with SqliteSaver only as local feasibility evidence: a separate checkpoint database physically distinct from the Controller database; one graph thread per Execution Run namespace; a deterministic graph node that calls only ControllerCommandPort.submit with a stable command ID; interrupt, resume, and replay resubmit the stable Controller command ID and prove exactly one accepted Event and one stable receipt, including after checkpoint loss using sync durability and with an absent or stale checkpoint; the Stage Executor and graph code never import the private persistence port, a persistence Adapter, SQLAlchemy, or database files; the checkpoint database has no authority to advance Controller state and the tests prove it cannot",
+    "Spike Alembic migration with a dedicated acceptance criterion: upgrade and rollback run on a temporary spike database; the selected transaction semantics are recorded; an injected migration failure recovers through the verified backup and recovery path; the migration helper returns bounded typed results and never exposes raw driver exceptions; the evidence never claims whole-migration rollback atomicity for SQLite DDL, because begin_transaction is a logical migration transaction whose real atomicity depends on dialect, online or offline mode, transactional DDL, and transaction_per_migration",
+    "Mark every spike component with an explicit disposition: only the CounterSpike domain evaluator may be retained as a non-public candidate; persistence, migration, workload, and LangGraph checkpoint spike code and tests are experimental and are deleted or rewritten unless Slice 00-07 explicitly adopts them; unproven spike code cannot silently become production foundation",
+    "Keep the Hermes plugin entry, --version, and the normal runtime path (src/hermes_pipeline/__init__.py, src/hermes_pipeline/cli/__init__.py, src/hermes_pipeline/cli/_main.py, src/hermes_pipeline/cli/__main__.py) free of SQLAlchemy, Alembic, LangGraph, checkpointer, sqlite-vec, and any transitive import, with a regression test; verification leaves no cache or bytecode artifact",
+    "Make the complete offline verification executable by mirroring the exact offline command set of the unchanged .github/workflows/python-quality.yml: offline format, lint, type, pytest, contracts check, contracts drift-check, architecture, documentation positive and negative, schema negative, workflow policy, artifact audit, offline frozen sync, and offline version; every spike test is covered by the offline pytest run, and the non-offline unit-check alone is never the evidence for complete offline verification",
+    "Record the added dev-only spike dependencies, their exact version locks, the SQLite runtime version predicate, and the workload envelope in docs/development/compatibility-targets.md",
+    "Prove platform reproducibility: the complete canonical command set and spike tests run offline on Windows and Linux with LF and UTF-8 output, no timestamps or paths, and PYTHONDONTWRITEBYTECODE=1 for final verification"
+  ],
+  "out_of_scope": [
+    "Any real Pipeline business state machine, Controller production behavior, or Hermes runtime behavior",
+    "Production services, servers, HTTP endpoints, or a Control Interface",
+    "Cross-database transactions of any kind; the Controller database and the checkpoint database never share a transaction",
+    "Making SqliteSaver, SQLAlchemy, Alembic, LangGraph, or any spike dependency a runtime dependency or a business-state authority",
+    "Real migrations of production state, production backup or restore, or any operation on a real Workspace",
+    "Remote operations, provider calls, Git mutation, secrets, or network access after the dependency-install step",
+    "Changes to scripts/, bootstrap workflow files, .github/workflows/, committed Schemas, contracts/, src/hermes_pipeline/contracts/, src/hermes_pipeline/cli/, or any accepted ADR, planning, review, evidence, or closeout record",
+    "Recomputing content_hash in historical planning, review, evidence, or closeout records",
+    "Slice 00-05, 00-06, or 00-07 behavior, including any runtime-dependency or managed-runtime isolation decision; that requires a later ADR and Slice under ADR-0027",
+    "Changing the accepted ControllerCommand -> CommandReceipt signature, turning spike helper failures into a product public API, or changing committed Schemas for them"
+  ],
+  "interfaces": [
+    "src/hermes_pipeline/domain/: the frozen CounterSpike oracle — initial state strictly (value=0, revision=0); from any (value=v, revision=r), accepting Increment(delta=1) transitions strictly to (v+1, r+1) and produces the unique domain Event CounterIncremented whose payload exactly contains the new value and new revision; any delta different from 1 returns typed INVALID_DELTA, leaves state unchanged, and produces no domain Event; standard library and domain value types only; candidate for retention, non-public",
+    "ControllerCommandPort.submit(command: ControllerCommand) -> CommandReceipt: the accepted Controller external Interface and the only Interface the Stage Executor may call; it returns the existing receipt model, including a non-durable REJECTED/INTERNAL_ERROR receipt with fixed message persistence unavailable and retryable=true for SQLITE_FULL or persistence unavailability; no durable receipt record or partial records are written on that failure path, and raw sqlite3, SQLAlchemy, or driver exceptions never cross the Interface; the LangGraph spike graph reaches business state only through it",
+    "Controller private persistence port: private to controller; the spike submit flow evaluates a command against CounterSpike state and commits Inbox, Event, projection, Outbox, and receipt in one SQLite transaction; the port has a deterministic in-memory Adapter and a SQLite spike Adapter; Controller code imports neither SQLAlchemy nor LangGraph nor concrete Adapters nor filesystem code, enforced by import-boundary tests and architecture check",
+    "Stage Executor boundary: the Stage Executor and LangGraph graph code import only domain values and ControllerCommandPort; positive and negative import-boundary tests forbid importing the private persistence port, any persistence Adapter, SQLAlchemy, or database files",
+    "Backup and migration test-helper Interfaces: bounded typed results only; raw driver exceptions, SQL, paths, and database content never reach callers; negative tests prove no traceback, no raw SQL, no absolute path, no database content, and no raw exception text in any output",
+    "Controller database: one SQLite file for the spike Inbox, Event, projection, Outbox, receipt, and lease tables; the checkpoint database is a separate physical SQLite file with no shared transaction",
+    "SqliteSaver: LangGraph checkpoint persistence for the spike graph only; local feasibility evidence; never authoritative for business state",
+    "Dependency surface: SQLAlchemy Core, Alembic, LangGraph, and langgraph-checkpoint-sqlite with the full locked transitive graph including sqlite-vec exist only in the dev group and are importable only from uv development and CI commands; the Hermes plugin entry, --version, and the normal runtime path (src/hermes_pipeline/__init__.py, src/hermes_pipeline/cli/__init__.py, src/hermes_pipeline/cli/_main.py, src/hermes_pipeline/cli/__main__.py) never import them, enforced by a regression test",
+    "Spike evidence artifacts live under tests/; workload, backup, recovery, migration, and replay metrics are captured as bounded test output and recorded in the Execution Report; the workload report contains only the fixed redacted runner profile (OS family, architecture, CI runner label, Python version, and sqlite3.sqlite_version) plus PRAGMAs and queue high-water, never hostname, username, absolute paths, environment values, tokens, raw exceptions, or database content",
+    "The Executor may read every tracked file but may edit only the machine contract's permitted paths in the assigned worktree"
+  ],
+  "binding_adrs": [
+    "ADR-0014",
+    "ADR-0019",
+    "ADR-0020",
+    "ADR-0021",
+    "ADR-0023",
+    "ADR-0026",
+    "ADR-0027"
+  ],
+  "permitted_paths": [
+    "pyproject.toml",
+    "uv.lock",
+    "src/hermes_pipeline/domain/",
+    "src/hermes_pipeline/controller/",
+    "src/hermes_pipeline/persistence/",
+    "src/hermes_pipeline/stage_executor/",
+    "tests/",
+    "docs/development/compatibility-targets.md"
+  ],
+  "prohibited_actions": [
+    "Modify scripts/, .github/workflows/, .gitattributes, schemas/, contracts/, src/hermes_pipeline/contracts/, src/hermes_pipeline/cli/, accepted ADRs, or planning, review, evidence, and closeout records",
+    "Add runtime dependencies or change [project].dependencies; add a dependency family beyond ADR-0027; import SQLAlchemy, Alembic, LangGraph, or checkpointer packages from the Hermes plugin entry, --version, or the normal runtime path",
+    "Let Controller code import SQLAlchemy, LangGraph, Alembic, filesystem, or a concrete persistence Adapter, or execute SQL or filesystem operations itself",
+    "Let the Stage Executor or LangGraph graph code import the private persistence port, a persistence Adapter, SQLAlchemy, or database files, or reach business state except through ControllerCommandPort.submit",
+    "Let raw sqlite3, SQLAlchemy, or driver exceptions, raw SQL, absolute paths, database content, or raw exception text cross ControllerCommandPort.submit or the backup and migration test-helper Interfaces; spike typed failures must carry sensitive-free error codes only",
+    "Share a transaction or a database file between the Controller database and the LangGraph checkpoint database, or make the checkpoint database authoritative for any business state",
+    "Promise rollback-atomic Alembic migration batches or rely on the legacy sqlite3 default transaction control",
+    "Copy live Controller or checkpoint database files directly instead of using the online backup API; perform any file I/O on the raw-copy path before the API or policy rejects it; assert that a raw copy necessarily corrupts the database",
+    "Present AC-03 in-transaction exception injection as process-crash evidence; process-crash evidence uses a real subprocess crash only at the pre-commit and post-commit durable boundaries",
+    "Exhaust real disk with the SQLITE_FULL injection; the injection uses a bounded fixture such as a size-capped or PRAGMA max_page_count limited database and maps to the specified non-durable REJECTED/INTERNAL_ERROR CommandReceipt",
+    "Emit hostname, username, absolute paths, environment variable values, tokens, raw exception text, or database content in any test output or the Execution Report",
+    "Treat any spike component as production foundation without a recorded disposition or explicit Slice 00-07 adoption",
+    "Recompute content_hash in historical planning, review, evidence, or closeout records without a Contract Change Request",
+    "Weaken, skip, delete, or mark existing checks to make the Candidate pass",
+    "Use credentials or public network after the dependency-install step",
+    "Execute repository-provided shell strings or add ambient filesystem, Git, network, secret, or process authority",
+    "Commit, push, merge, rebase, reset, clean, stash, alter remotes, Git configuration, hooks, branches, tags, or the user working copy"
+  ],
+  "implications": {
+    "data": [
+      "The Controller and checkpoint databases are disposable spike fixture databases under tests/; no runtime or real Workspace data is created",
+      "Workload, backup, recovery, migration, and replay metrics are captured as bounded test output and recorded in the Execution Report; the workload report contains only the fixed redacted runner profile and never hostname, username, absolute paths, environment values, tokens, raw exceptions, or database content"
+    ],
+    "migration": [
+      "The Alembic migration spike runs upgrade and rollback on a temporary spike database and records the selected transaction semantics; begin_transaction is a logical migration transaction and whole-migration rollback atomicity is never promised",
+      "An injected migration failure recovers through the verified backup and recovery path; no production-state migration occurs; bootstrap Schema and committed registry files are untouched"
+    ],
+    "compatibility": [
+      "sqlite3.sqlite_version is recorded on Windows and Linux and gated against the exact predicate: at least 3.51.3, or at least 3.50.7 and below 3.51.0, or at least 3.44.6 and below 3.45.0, with committed accept and reject version vectors; a sub-gate library stops the Slice with a Contract Change Request",
+      "The exact dev-only spike dependency locks, including sqlite-vec wheel admission evidence, and the fixed workload envelope are recorded in docs/development/compatibility-targets.md"
+    ],
+    "security": [
+      "SQLAlchemy, Alembic, LangGraph, and langgraph-checkpoint-sqlite with their full transitive graph are development and CI only; the Hermes plugin entry, --version, and the normal runtime path stay pure standard library",
+      "The Controller database and the LangGraph checkpoint database are physically separate; the checkpoint database has no authority to advance Controller state; the Stage Executor reaches business state only through ControllerCommandPort.submit",
+      "Raw driver exceptions, SQL, paths, and database content never cross the spike Interfaces; workload evidence carries only the fixed redacted runner profile; verification leaves no cache or bytecode artifact"
+    ],
+    "documentation": [
+      "docs/development/compatibility-targets.md records the dev-only spike dependency locks, the SQLite version predicate, and the workload envelope; the 00-04 Closeout is prepared by the post-acceptance planning and closeout owner, not edited by the Executor"
+    ]
+  },
+  "acceptance_criteria": [
+    {
+      "criterion_id": "AC-01",
+      "trace_ids": [
+        "EC-00-04",
+        "CAP-02"
+      ],
+      "observable_result": "The frozen CounterSpike oracle holds state (value, revision) starting strictly at (value=0, revision=0); from any (value=v, revision=r), accepting Increment(delta=1) transitions strictly to (v+1, r+1) and produces the unique domain Event CounterIncremented whose payload exactly contains the new value and new revision; any delta different from 1 returns typed INVALID_DELTA, leaves state completely unchanged, and produces no domain Event; expected-revision conflict handling stays in the Controller persistence layer; the evaluator imports no framework, I/O, clock, identity, randomness, or provider package and is deterministic.",
+      "verification_command_ids": [
+        "spike-domain",
+        "unit-check",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-02",
+      "trace_ids": [
+        "EC-00-04"
+      ],
+      "observable_result": "The Controller depends only on its private persistence port and domain values; Controller code imports no SQLAlchemy, LangGraph, Alembic, filesystem, or concrete Adapter code; the port has an in-memory deterministic Adapter and a SQLite spike Adapter; the Stage-facing signature remains ControllerCommandPort.submit(command: ControllerCommand) -> CommandReceipt.",
+      "verification_command_ids": [
+        "architecture-check",
+        "unit-check",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-03",
+      "trace_ids": [
+        "EC-00-04",
+        "XREL-01"
+      ],
+      "observable_result": "One explicit SQLite transaction atomically commits Inbox, Event, projection, Outbox, and receipt records: all five appear together or none do; an exception injected before or after each of the five logical writes rolls the whole transaction back; the chosen driver transaction mode is explicit and tested, never the legacy default; every driver failure is translated at the Interface boundary into the specified safe non-durable CommandReceipt with no traceback, raw SQL, absolute path, database content, or raw exception text reaching callers; injected exceptions are transaction-failure evidence, not process-crash evidence.",
+      "verification_command_ids": [
+        "spike-persistence",
+        "unit-check",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-04",
+      "trace_ids": [
+        "EC-00-04",
+        "CAP-02"
+      ],
+      "observable_result": "Duplicate identical commands return the original receipt and append exactly one Event; the same command ID with a different canonical payload hash records private COMMAND_ID_CONFLICT classification but returns CommandReceipt(status=CONFLICT, error.code=CONFLICT, error.message=command identity conflict); an expected-revision mismatch returns CommandReceipt(status=CONFLICT, error.code=CONFLICT, error.message=expected revision conflict); rejections append no Event or Outbox row and leak no raw exception text.",
+      "verification_command_ids": [
+        "spike-persistence",
+        "unit-check",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-05",
+      "trace_ids": [
+        "EC-00-04",
+        "XREL-01"
+      ],
+      "observable_result": "A real subprocess crash injected only at the durable boundaries (pre-commit and post-commit of the five-record transaction), followed by a fresh-process restart from the same database and WAL, produces no duplicate Event and no lost acknowledged command; recovery reconciles Inbox, Event, projection, Outbox, and receipt; ordinary in-transaction exception injection (AC-03) is never presented as crash evidence.",
+      "verification_command_ids": [
+        "spike-persistence",
+        "unit-check",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-06",
+      "trace_ids": [
+        "EC-00-04"
+      ],
+      "observable_result": "A projection rebuilt from the authoritative Event Log equals the live projection for the same Event set, and the Event hash chain verifies; rebuild is deterministic.",
+      "verification_command_ids": [
+        "spike-persistence",
+        "unit-check",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-07",
+      "trace_ids": [
+        "EC-00-05",
+        "XOPS-01"
+      ],
+      "observable_result": "Online backup via sqlite3.Connection.backup while readers or writers are active, then restore into a fresh database file, validates with PRAGMA integrity_check and PRAGMA foreign_key_check; the backup API and policy reject the raw-copy path before any I/O, and a guard or mock proves the implementation only ever calls sqlite3.Connection.backup(); no assertion that a raw copy necessarily corrupts is permitted; the backup helper returns bounded typed results and never exposes raw driver exceptions.",
+      "verification_command_ids": [
+        "spike-persistence",
+        "unit-check",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-08",
+      "trace_ids": [
+        "EC-00-05",
+        "XPLAT-01"
+      ],
+      "observable_result": "sqlite3.sqlite_version is recorded on both required platforms and satisfies the exact predicate: at least 3.51.3, or at least 3.50.7 and below 3.51.0, or at least 3.44.6 and below 3.45.0, with committed accept and reject version vectors; a linked library failing the predicate on either platform stops the Slice with a Contract Change Request before any spike persistence conclusion is claimed; the driver transaction mode is explicit.",
+      "verification_command_ids": [
+        "spike-persistence",
+        "spike-workload",
+        "unit-check",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-09",
+      "trace_ids": [
+        "EC-00-05",
+        "CAP-02"
+      ],
+      "observable_result": "The single-writer workload spike uses the fixed reproducible envelope: 1,000 accepted commands, 4 producers, one writer, queue capacity 32, command and event payloads each no larger than 1 KiB, p95 acknowledged latency no greater than 2 seconds, busy count equal to 0, WAL high-water no greater than 16 MiB, and checkpoint, online backup, and fresh-process recovery each no greater than 5 seconds; the report records a fixed redacted runner profile (OS family, architecture, CI runner label, Python version, and sqlite3.sqlite_version), selected PRAGMAs, and queue high-water; hostname, username, absolute paths, environment variable values, tokens, raw exception text, and database content are forbidden from test output and the Execution Report, proved by a redaction assertion with injected fake sensitive values; a deterministic SQLITE_FULL injection returns the specified non-durable REJECTED/INTERNAL_ERROR receipt, writes no durable receipt record or partial records, and is restart-safe without exhausting real disk; an exceeded limit or unrecordable evidence triggers the replacement-ADR path (Phase risk R-03).",
+      "verification_command_ids": [
+        "spike-workload",
+        "unit-check",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-10",
+      "trace_ids": [
+        "EC-00-04",
+        "CAP-02"
+      ],
+      "observable_result": "Stage Attempt and Run leases carry monotonically increasing fencing generations; a result with an expired or superseded generation is rejected, and a generation takeover fences the stale holder; the spike lease is not a production lock.",
+      "verification_command_ids": [
+        "spike-persistence",
+        "unit-check",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-11",
+      "trace_ids": [
+        "EC-00-06",
+        "CAP-02"
+      ],
+      "observable_result": "The LangGraph spike with SqliteSaver uses a separate checkpoint database and per-Run thread namespaces; a deterministic node calls only ControllerCommandPort.submit with a stable Controller command ID through interrupt, resume, and replay (including checkpoint loss under sync durability and an absent or stale checkpoint), producing exactly one accepted Event and one stable receipt; the Stage Executor and graph code never import the private persistence port, a persistence Adapter, SQLAlchemy, or database files; the checkpoint database cannot advance Controller state (Phase risk R-04).",
+      "verification_command_ids": [
+        "spike-langgraph",
+        "architecture-check",
+        "unit-check",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-12",
+      "trace_ids": [
+        "EC-00-05",
+        "XOPS-01"
+      ],
+      "observable_result": "The Alembic migration spike runs upgrade and rollback on a temporary spike database and records the selected transaction semantics; an injected migration failure recovers through the verified backup and recovery path; the migration helper returns bounded typed results and never exposes raw driver exceptions; the evidence records that begin_transaction is a logical migration transaction and never claims whole-migration rollback atomicity for SQLite DDL.",
+      "verification_command_ids": [
+        "spike-migration",
+        "unit-check",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-13",
+      "trace_ids": [
+        "XSEC-01",
+        "EC-00-02"
+      ],
+      "observable_result": "SQLAlchemy Core, Alembic, LangGraph, and langgraph-checkpoint-sqlite with the full locked transitive graph including sqlite-vec exist only in the dev group; [project].dependencies stays empty; the Hermes plugin entry, --version, and the normal runtime path never import them; uv.lock is frozen; the complete offline canonical command set passes, covering offline format, lint, type, pytest, contracts check, contracts drift-check, architecture, documentation positive and negative, schema negative, workflow policy, artifact audit, offline frozen sync, and offline version; every spike test is covered by the offline pytest run; docs/development/compatibility-targets.md records the exact locks, the SQLite version predicate, and the workload envelope.",
+      "verification_command_ids": [
+        "frozen-sync",
+        "offline-sync",
+        "offline-version",
+        "offline-format",
+        "offline-lint",
+        "offline-type",
+        "offline-pytest",
+        "offline-contracts-check",
+        "offline-contracts-drift",
+        "offline-architecture",
+        "offline-docs-check",
+        "offline-docs-negative",
+        "offline-schema-negative",
+        "offline-workflow-policy",
+        "offline-artifact",
+        "unit-check",
+        "docs-check",
+        "artifact-check",
+        "contracts-check",
+        "bootstrap-checks"
+      ]
+    },
+    {
+      "criterion_id": "AC-14",
+      "trace_ids": [
+        "XSEC-01",
+        "XOPS-01"
+      ],
+      "observable_result": "Every spike component carries an explicit disposition: only the CounterSpike domain evaluator may be retained as a non-public candidate; persistence, migration, workload, and LangGraph checkpoint spike code and tests are experimental and are deleted or rewritten unless Slice 00-07 explicitly adopts them; unproven spike code cannot silently become production foundation.",
+      "verification_command_ids": [
+        "unit-check",
+        "docs-check"
+      ]
+    }
+  ],
+  "required_tests": [
+    "CounterSpike oracle tests: initial state is exactly (value=0, revision=0); multi-step Increment(delta=1) sequences transition (v, r) to (v+1, r+1) and emit CounterIncremented with payload exactly containing the new value and new revision; Increment(delta=0), Increment(delta=2), and any other delta return typed INVALID_DELTA with state completely unchanged and no domain Event; property tests over generated command sequences keep forbidden states unreachable; an import-boundary test proves no framework, I/O, clock, identity, randomness, or provider import",
+    "Persistence port contract tests against a deterministic in-memory Adapter and the SQLite spike Adapter; the Stage-facing ControllerCommandPort signature remains submit(ControllerCommand) -> CommandReceipt",
+    "Controller import-boundary regression: controller imports no SQLAlchemy, LangGraph, Alembic, filesystem, or concrete Adapter; negative fixtures fail",
+    "Stage Executor import-boundary regression: stage_executor and LangGraph graph code import only domain values and ControllerCommandPort; positive fixtures pass and negative fixtures importing the private persistence port, a persistence Adapter, SQLAlchemy, or database files fail",
+    "Typed failure boundary tests: ControllerCommandPort.submit translates every driver exception into the specified schema-compatible non-durable CommandReceipt; backup and migration test-helper Interfaces return bounded non-serialized typed results; negative fixtures prove no traceback, no raw SQL, no absolute path, no database content, and no raw exception text escapes, and that output is bounded",
+    "Atomic transaction tests: an exception injected before and after each of the five logical writes (Inbox, Event, projection, Outbox, receipt) leaves all five absent; a normal submit leaves all five present; injected failures reach the caller only as the specified non-durable CommandReceipt",
+    "Duplicate command test: an identical replay returns the original receipt with exactly one Event",
+    "Same-command-id different-payload test: private COMMAND_ID_CONFLICT classification and the schema-compatible CONFLICT/CONFLICT CommandReceipt with fixed message command identity conflict, no Event, no Outbox row, and no raw exception text",
+    "Expected-revision conflict test: the schema-compatible CONFLICT/CONFLICT CommandReceipt with fixed message expected revision conflict, no Event, no Outbox row, and no raw exception text",
+    "Real subprocess crash matrix at the durable boundaries (pre-commit and post-commit of the five-record transaction): a fresh process restarts from the same database and WAL with no duplicate Event and no lost acknowledged command; a fixture that labels AC-03 exception injection as a process crash fails",
+    "Projection rebuild test: a rebuilt projection equals the live projection with a verified Event hash chain; a tampered Event breaks the chain and fails rebuild",
+    "Online backup and restore test via sqlite3.Connection.backup with PRAGMA integrity_check and PRAGMA foreign_key_check on the restored copy; the raw-copy path is rejected by the API or policy before any file I/O; a guard or mock proves the implementation only ever calls sqlite3.Connection.backup(); no assertion that a raw copy necessarily corrupts is permitted; a raw driver exception escaping the backup helper fails",
+    "SQLite version gate test: sqlite3.sqlite_version is recorded and compared against the exact predicate (at least 3.51.3, or at least 3.50.7 and below 3.51.0, or at least 3.44.6 and below 3.45.0); committed accept vectors (3.51.3, 3.51.4, 3.50.7, 3.50.8, 3.44.6, 3.44.7) pass and reject vectors (3.51.2, 3.51.0, 3.50.6, 3.44.5, 3.43.0) fail deterministically",
+    "Explicit driver transaction-mode test: the selected mode is exercised and documented; a fixture relying on the legacy sqlite3 default transaction control fails",
+    "Single-writer workload test with the fixed envelope: 1,000 accepted commands, 4 producers, one writer, queue capacity 32, payloads no larger than 1 KiB; p95 acknowledged latency no greater than 2 seconds; busy count 0; WAL high-water no greater than 16 MiB; checkpoint, online backup, and fresh-process recovery each no greater than 5 seconds; selected PRAGMAs and queue high-water recorded; an envelope-exceeding fixture fails the declared acceptance boundary",
+    "Redaction assertion test: the workload reporter is given injected fake sensitive values (hostname, username, absolute path, environment variable value, token) and the test proves none appear in test output or the Execution Report; the runner profile contains only OS family, architecture, CI runner label, Python version, and sqlite3.sqlite_version",
+    "Deterministic SQLITE_FULL injection test: a bounded fixture (for example a size-capped or PRAGMA max_page_count limited database) returns the specified non-durable REJECTED/INTERNAL_ERROR CommandReceipt with fixed message persistence unavailable and retryable=true, writes no durable receipt record or partial records, survives restart, and does not exhaust real disk",
+    "Lease and fencing tests: monotonic generations; stale, expired, and superseded results rejected; takeover fences the stale holder",
+    "LangGraph checkpoint spike tests: separate checkpoint database; per-Run thread namespaces; interrupt, resume, and replay resubmit a stable Controller command ID through ControllerCommandPort.submit with exactly one Event and one stable receipt; sync-durability checkpoint-loss test; absent or stale checkpoint cannot duplicate the command; the checkpoint database cannot write Controller tables or advance state",
+    "Alembic migration spike tests: upgrade and rollback on a temporary spike database; selected transaction semantics recorded; an injected migration failure recovers through the verified backup and recovery path; a raw driver exception escaping the migration helper fails; no whole-migration rollback atomicity promise",
+    "Dependency isolation regression: --version and the normal runtime path import no spike package; frozen and offline sync succeed; no cache or bytecode artifact remains",
+    "Complete offline verification: offline format, lint, type, pytest (covering every spike test), contracts check, contracts drift-check, architecture, documentation positive and negative, schema negative, workflow policy, artifact audit, offline frozen sync, and offline version all pass on both platforms",
+    "Disposition inventory: every spike module and test carries an experimental marker and a retain-or-delete record",
+    "Platform reproducibility: identical results on Windows and Linux with LF and UTF-8 output and no timestamps or paths; final verification inherits PYTHONDONTWRITEBYTECODE=1"
+  ],
+  "demonstration": "On the exact Candidate, Windows and Linux jobs install the frozen environment, run the complete canonical command set offline and every spike test through the offline pytest run, prove the frozen CounterSpike oracle (initial state (0, 0), multi-step (v, r) to (v+1, r+1) with CounterIncremented carrying the exact new value and revision, and rejection invariance), prove the accepted ControllerCommand -> CommandReceipt signature plus schema-compatible safe failure mappings with no traceback, raw SQL, absolute path, database content, or raw exception text across ControllerCommandPort.submit and the backup and migration helpers including the non-durable SQLITE_FULL REJECTED/INTERNAL_ERROR receipt, prove the fault-injection and real-crash scenario that restarts at the durable boundaries without duplicate transition or stale advancement, record sqlite3.sqlite_version per platform against the exact WAL-reset repair-version predicate with accept and reject vectors, capture the workload report (1,000 commands, p95, busy, WAL high-water, checkpoint, backup, recovery) within the fixed envelope with the redacted runner profile and the redaction assertion, prove backup and restore with integrity and foreign-key checks and pre-I/O raw-copy rejection, prove lease fencing, prove the Alembic upgrade and rollback spike, and prove LangGraph interrupt, resume, and replay resubmit a stable Controller command ID through ControllerCommandPort.submit with exactly one Event and one stable receipt.",
+  "verification_commands": [
+    {
+      "command_id": "frozen-sync",
+      "argv": [
+        "uv",
+        "sync",
+        "--frozen",
+        "--all-groups"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 600000
+    },
+    {
+      "command_id": "format-check",
+      "argv": [
+        "uv",
+        "run",
+        "ruff",
+        "format",
+        "--check",
+        "."
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "lint-check",
+      "argv": [
+        "uv",
+        "run",
+        "ruff",
+        "check",
+        "."
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "type-check",
+      "argv": [
+        "uv",
+        "run",
+        "pyright"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 180000
+    },
+    {
+      "command_id": "unit-check",
+      "argv": [
+        "uv",
+        "run",
+        "pytest"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 600000
+    },
+    {
+      "command_id": "spike-domain",
+      "argv": [
+        "uv",
+        "run",
+        "pytest",
+        "tests/spike/domain"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "spike-persistence",
+      "argv": [
+        "uv",
+        "run",
+        "pytest",
+        "tests/spike/persistence"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 300000
+    },
+    {
+      "command_id": "spike-migration",
+      "argv": [
+        "uv",
+        "run",
+        "pytest",
+        "tests/spike/migration"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "spike-workload",
+      "argv": [
+        "uv",
+        "run",
+        "pytest",
+        "tests/spike/workload"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 600000
+    },
+    {
+      "command_id": "spike-langgraph",
+      "argv": [
+        "uv",
+        "run",
+        "pytest",
+        "tests/spike/langgraph"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 300000
+    },
+    {
+      "command_id": "contracts-check",
+      "argv": [
+        "uv",
+        "run",
+        "python",
+        "-m",
+        "hermes_pipeline.cli",
+        "contracts",
+        "check"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "architecture-check",
+      "argv": [
+        "uv",
+        "run",
+        "python",
+        "-m",
+        "hermes_pipeline.cli",
+        "architecture",
+        "check"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "bootstrap-checks",
+      "argv": [
+        "python",
+        "scripts/check_schemas.py",
+        "--self-test-negative"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "docs-check",
+      "argv": [
+        "python",
+        "scripts/check_documentation.py"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "docs-negative",
+      "argv": [
+        "python",
+        "scripts/check_documentation.py",
+        "--self-test-negative"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "workflow-policy",
+      "argv": [
+        "python",
+        "scripts/check_documentation.py",
+        "--check-workflows"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-sync",
+      "argv": [
+        "uv",
+        "sync",
+        "--frozen",
+        "--all-groups",
+        "--offline"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 300000
+    },
+    {
+      "command_id": "offline-version",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "-m",
+        "hermes_pipeline.cli",
+        "--version"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-contracts-check",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "-m",
+        "hermes_pipeline.cli",
+        "contracts",
+        "check"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-contracts-drift",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "-m",
+        "hermes_pipeline.cli",
+        "contracts",
+        "drift-check"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-architecture",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "-m",
+        "hermes_pipeline.cli",
+        "architecture",
+        "check"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-format",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "ruff",
+        "format",
+        "--check",
+        "."
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-lint",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "ruff",
+        "check",
+        "."
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-type",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pyright"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 180000
+    },
+    {
+      "command_id": "offline-pytest",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pytest"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 600000
+    },
+    {
+      "command_id": "offline-docs-check",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "scripts/check_documentation.py"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-docs-negative",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "scripts/check_documentation.py",
+        "--self-test-negative"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-schema-negative",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "scripts/check_schemas.py",
+        "--self-test-negative"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-workflow-policy",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "scripts/check_documentation.py",
+        "--check-workflows"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-artifact",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "scripts/check_repository_artifacts.py"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 30000
+    },
+    {
+      "command_id": "diff-check",
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 30000
+    },
+    {
+      "command_id": "changed-paths",
+      "argv": [
+        "git",
+        "status",
+        "--short"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 30000
+    },
+    {
+      "command_id": "artifact-check",
+      "argv": [
+        "python",
+        "scripts/check_repository_artifacts.py"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 30000
+    }
+  ],
+  "required_evidence": [
+    "Exact Base and Candidate SHAs, Slice Contract revision, and content hash",
+    "Changed-path manifest and staged-tree allowlist comparison performed by the Git Custodian",
+    "Exact uv, Python, SQLAlchemy, Alembic, LangGraph, langgraph-checkpoint-sqlite, and sqlite-vec versions and the committed uv.lock digest",
+    "Bounded output, exit code, start time, and duration for every local command",
+    "Windows and Linux CI run and job URLs bound to the Candidate",
+    "Recorded sqlite3.sqlite_version per platform and the accept and reject version-vector results against the exact WAL-reset repair-version predicate",
+    "CounterSpike oracle output: initial-state (0, 0) assertion, multi-step (v, r) to (v+1, r+1) transitions, CounterIncremented payload field assertions, INVALID_DELTA rejection invariance with no domain Event, and the domain import scan",
+    "Accepted ControllerCommand -> CommandReceipt signature and safe failure-mapping evidence: INVALID_DELTA, conflict, and SQLITE_FULL mappings; no traceback, raw SQL, absolute path, database content, or raw exception text across ControllerCommandPort.submit and the backup and migration helpers; bounded output",
+    "In-transaction fault-injection matrix with per-write rollback evidence for all five records",
+    "Real subprocess crash matrix at the pre-commit and post-commit durable boundaries with exact Event counts and receipts after fresh-process restart",
+    "Deduplication, same-command-id conflict, expected-revision conflict, and fencing scenario outputs",
+    "Projection rebuild and Event hash-chain verification output",
+    "Online backup and restore output with PRAGMA integrity_check and PRAGMA foreign_key_check results, the pre-I/O raw-copy rejection evidence, and the guard or mock proof that only sqlite3.Connection.backup is used",
+    "Workload report with the fixed envelope, the redacted runner profile (OS family, architecture, CI runner label, Python version, and sqlite3.sqlite_version), selected PRAGMAs, and queue high-water, plus p95 latency, busy count, WAL high-water mark, checkpoint, backup, and recovery durations",
+    "Redaction assertion evidence: injected fake sensitive values (hostname, username, absolute path, environment variable value, token) do not appear in test output or the Execution Report",
+    "Deterministic SQLITE_FULL evidence: specified non-durable REJECTED/INTERNAL_ERROR CommandReceipt, no durable receipt record, no partial records, restart-safe, no real-disk exhaustion",
+    "LangGraph replay matrix with Event counts, receipts, and checkpoint-loss evidence, plus the Stage Executor import-boundary and checkpoint-authority boundary test outputs",
+    "Alembic migration upgrade and rollback evidence, the transaction-semantics note, the injected-failure recovery evidence, and the typed-result and no-leak evidence",
+    "Complete offline verification outputs for format, lint, type, pytest, contracts check, contracts drift-check, architecture, documentation positive and negative, schema negative, workflow policy, artifact audit, offline frozen sync, and offline version",
+    "Dependency isolation regression output, the frozen lock digest, and the repository artifact scan",
+    "Disposition inventory mapping every spike path to retain-or-delete",
+    "docs/development/compatibility-targets.md entry for the spike dependency locks, SQLite version predicate, and workload envelope",
+    "Residual risks and compatibility limitations"
+  ],
+  "risks": [
+    {
+      "risk_id": "R-01",
+      "description": "The linked SQLite library on a required platform is below the exact WAL-reset repair-version predicate (at least 3.51.3, or at least 3.50.7 and below 3.51.0, or at least 3.44.6 and below 3.45.0), exposing concurrent WAL write or checkpoint corruption.",
+      "impact": "HIGH",
+      "mitigation": "Record sqlite3.sqlite_version on both platforms, gate it against the exact predicate with committed accept and reject version vectors, and stop with a Contract Change Request before claiming any spike persistence conclusion when a platform fails.",
+      "trigger": "Either platform links an SQLite library failing the predicate or a version vector disagrees."
+    },
+    {
+      "risk_id": "R-02",
+      "description": "The fixed single-writer workload envelope (1,000 accepted commands, 4 producers, queue capacity 32, 1 KiB payloads, p95 within 2 seconds, busy 0, WAL high-water within 16 MiB, checkpoint, backup, and recovery within 5 seconds each) is exceeded, or a metric cannot be recorded.",
+      "impact": "HIGH",
+      "mitigation": "Declare the fixed envelope as the acceptance boundary, measure every metric including queue high-water, run the deterministic SQLITE_FULL injection on a bounded fixture mapping to the specified non-durable REJECTED/INTERNAL_ERROR CommandReceipt, and raise the already-planned replacement-ADR decision instead of claiming SQLite scales indefinitely.",
+      "trigger": "A declared envelope limit is exceeded or the evidence cannot be recorded."
+    },
+    {
+      "risk_id": "R-03",
+      "description": "The five-record Controller write is not atomic, an acknowledged command is lost after restart, a replay duplicates an Event, or a driver failure crosses the Interface as a raw exception.",
+      "impact": "CRITICAL",
+      "mitigation": "Inject exceptions before and after every logical write for rollback evidence, translate every driver failure into the specified safe non-durable CommandReceipt or a bounded private helper result, crash a real subprocess only at the pre-commit and post-commit durable boundaries, restart from the same database and WAL in fresh processes, and assert all-or-none commits, exactly one Event per command, and the original receipt on replay.",
+      "trigger": "Any subset of the five records commits alone, an acknowledged command is lost, a replay appends a second Event, or a raw driver exception or sensitive payload crosses the Interface."
+    },
+    {
+      "risk_id": "R-04",
+      "description": "LangGraph replay or checkpoint loss duplicates a Controller transition, the Stage Executor imports a forbidden persistence surface, or the checkpoint database gains authority over Controller state.",
+      "impact": "HIGH",
+      "mitigation": "Route all Stage Executor business effects through ControllerCommandPort.submit with a stable Controller command ID, prove exactly one Event and one stable receipt including under sync-durability checkpoint loss, enforce positive and negative Stage Executor import-boundary tests, and prove the checkpoint database cannot write Controller tables or advance state.",
+      "trigger": "A replay appends a second Event, a receipt is unstable, a Stage Executor import violates the boundary, or the checkpoint database advances Controller state."
+    },
+    {
+      "risk_id": "R-05",
+      "description": "The spike silently relies on the legacy sqlite3 default transaction control, promises rollback-atomic Alembic migration batches, or presents exception injection as process-crash evidence.",
+      "impact": "MEDIUM",
+      "mitigation": "Select and test one explicit SQLite driver transaction mode, record Alembic begin_transaction as a logical transaction with upgrade and rollback evidence plus injected-failure recovery through verified backup, and keep AC-03 exception injection separate from AC-05 real subprocess crashes.",
+      "trigger": "Legacy transaction control is relied on, whole-migration atomicity is promised, or exception injection is presented as crash evidence."
+    },
+    {
+      "risk_id": "R-06",
+      "description": "The transitive dependency graph, including sqlite-vec, does not resolve or execute reproducibly on Windows and Linux, or a spike package leaks into the runtime path.",
+      "impact": "MEDIUM",
+      "mitigation": "Freeze the complete resolution in uv.lock with sqlite-vec wheel admission evidence, run the complete offline canonical command set on both platforms, and enforce an import-boundary regression for the plugin entry, --version, and the normal runtime path.",
+      "trigger": "A platform cannot resolve or execute the frozen graph, an offline canonical command fails, or a spike package is imported from the runtime path."
+    },
+    {
+      "risk_id": "R-07",
+      "description": "Spike code is treated as production foundation without a recorded disposition, silently constraining Slice 00-07 or later design.",
+      "impact": "MEDIUM",
+      "mitigation": "Mark every spike component experimental with an explicit retain-or-delete record; retain only the CounterSpike domain evaluator as a non-public candidate unless Slice 00-07 explicitly adopts the rest.",
+      "trigger": "A spike component is presented as production foundation without a disposition or 00-07 adoption."
+    },
+    {
+      "risk_id": "R-08",
+      "description": "The workload reporter or any Interface leaks hostname, username, absolute paths, environment values, tokens, raw exception text, or database content into test output or the Execution Report.",
+      "impact": "MEDIUM",
+      "mitigation": "Restrict the runner profile to the fixed redacted fields (OS family, architecture, CI runner label, Python version, and sqlite3.sqlite_version), forbid all other fields, and prove with a redaction assertion using injected fake sensitive values that the reporter does not leak; typed failures carry sensitive-free error codes only.",
+      "trigger": "A forbidden field or sensitive value appears in test output or the Execution Report."
+    }
+  ],
+  "retry_budget": 3,
+  "stop_conditions": [
+    "A required platform links an SQLite library failing the exact predicate (at least 3.51.3, or at least 3.50.7 and below 3.51.0, or at least 3.44.6 and below 3.45.0), or a committed version vector disagrees; stop and submit a Contract Change Request before claiming any spike persistence conclusion",
+    "Controller code must import SQLAlchemy, LangGraph, Alembic, filesystem, or a concrete persistence Adapter, must execute SQL or filesystem operations itself, or the Stage-facing ControllerCommandPort signature differs from submit(ControllerCommand) -> CommandReceipt",
+    "The Stage Executor or LangGraph graph code must import the private persistence port, a persistence Adapter, SQLAlchemy, or database files, or must reach business state outside ControllerCommandPort.submit",
+    "Inbox, Event, projection, Outbox, and receipt cannot commit atomically; an acknowledged command is lost; or a replay appends a second Event",
+    "A raw sqlite3, SQLAlchemy, or driver exception, raw SQL, an absolute path, database content, or raw exception text must cross ControllerCommandPort.submit or the backup and migration test-helper Interfaces",
+    "A cross-database transaction between the Controller database and the checkpoint database becomes necessary",
+    "The checkpoint database gains any authority to advance Controller state",
+    "A spike dependency must enter the runtime path, [project].dependencies must change, or the Hermes plugin entry, --version, or the normal runtime path must import a spike package",
+    "A declared workload envelope limit is exceeded or the evidence cannot be recorded; raise the replacement-ADR decision",
+    "The deterministic SQLITE_FULL injection cannot be produced without exhausting real disk, does not map to the specified non-durable REJECTED/INTERNAL_ERROR CommandReceipt, or leaves partial records or a durable receipt record",
+    "Rollback-atomic Alembic migration batches must be promised, the legacy sqlite3 default transaction control must be relied on, or a migration failure cannot be recovered through verified backup and recovery",
+    "Exception injection must be presented as process-crash evidence, or a raw-copy path must perform file I/O before the API or policy rejects it",
+    "The CounterSpike oracle initial state differs from (0, 0), a rejection changes state or emits a domain Event, or CounterIncremented payload omits the exact new value and revision",
+    "A forbidden runner field or any hostname, username, absolute path, environment value, token, raw exception text, or database content appears in test output or the Execution Report",
+    "A spike component is presented as production foundation without a recorded disposition or explicit Slice 00-07 adoption",
+    "Implementation requires paths outside permitted_paths or changes scripts/, workflows, schemas, contracts/, src/hermes_pipeline/contracts/, src/hermes_pipeline/cli/, accepted ADRs, or planning, review, evidence, and closeout records",
+    "Recomputing content_hash in historical planning, review, evidence, or closeout records becomes necessary",
+    "The Base SHA changes or required Windows and Linux behavior cannot be equivalent"
+  ],
+  "content_hash": "sha256:78a2c27311c6c9740d5188d806753bcaddcd1dbaa8743d2194d3a89fded36c3e"
+}
