@@ -1,0 +1,404 @@
+{
+  "schema_id": "https://schemas.hermes-pipeline.dev/engineering/context-manifest/v1",
+  "schema_version": 1,
+  "manifest_id": "ctx_slice-00-04_planner_r6",
+  "role": "PLANNER",
+  "slice_id": "slice-00-04",
+  "base_sha": "32b4b7a5406bf4ee58b79e2602f77af78ba3a27f",
+  "assembled_at": "2026-08-07T00:00:00.000Z",
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "digest": "sha256:3908e4507cfbaf1a0d6dd80565ad56832272730c58d4e895f0be53e6e444bde1",
+      "purpose": "Repository constitution and rework-ownership policy (Base blob 32b4b7a)"
+    },
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:97960150474d5b0c2b459770f48299f4d897bb30b91f9de5f13d73d027d915b4",
+      "purpose": "Canonical product and domain vocabulary (Base blob 32b4b7a)"
+    },
+    {
+      "path": "docs/agents/roles/planner-reviewer.md",
+      "digest": "sha256:34a6ef4243121fa6133c32a55f2e9c2c5c1605153fcf58f7adc69f46c59ba7cb",
+      "purpose": "Binding Codex Planner-Designer-Reviewer role contract (Base blob 32b4b7a)"
+    },
+    {
+      "path": "docs/roadmap/TRACEABILITY.md",
+      "digest": "sha256:cc858ef5387503b2154d59c0dc5ad7aeb934fb69e073d07ab53cf828271f1182",
+      "purpose": "Phase requirement and verification traceability (Base blob 32b4b7a)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/PHASE.md",
+      "digest": "sha256:5acb46cdc68794bf69e5c708fb9813048f3d19170a7502f4f82a0f77de7d8f0d",
+      "purpose": "Approved Phase 00 outcome, invariants, exits, and slice map (Base blob 32b4b7a)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/phase-plan.json",
+      "digest": "sha256:34035ae526cb363e8b8a009fbea7a0246dd87c33337f1086cf079cfa2d5aea3f",
+      "purpose": "Approved Phase 00 machine plan including slice-00-04 ownership of EC-00-04/05/06 (Base blob 32b4b7a)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/README.md",
+      "digest": "sha256:21ee5f7bcd2caf0199f000a8d43f8d7e21a4688673df541955519611ca06e3dc",
+      "purpose": "Slice map and next-Slice pointer (planning artifact of the docs/slice-00-04-planning change)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-01-repository-baseline/CLOSEOUT.md",
+      "digest": "sha256:9d365267fa747208bfef1d9c71b372045eec931fda67a222ac72c15bcb61b72d",
+      "purpose": "Accepted predecessor capability, evidence, and debt (Base blob 32b4b7a)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-02-python-quality-skeleton/CLOSEOUT.md",
+      "digest": "sha256:b09431e39f7c8d17f834af8cf21a9830cad45e4e9ae86547578b8f002e8877ca",
+      "purpose": "Accepted Slice 00-02 closeout (Base blob 32b4b7a)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-03-contract-toolchain/SLICE.md",
+      "digest": "sha256:2bc7277788074bdf196bf6a2fa844c3710eaa23a11110012b17a6f08066440b8",
+      "purpose": "Accepted Slice 00-03 human-readable contract (Base blob 32b4b7a)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-03-contract-toolchain/slice-contract.json",
+      "digest": "sha256:ecd968bdcfc344230d50e18e88ba389d624eb1781a8f4ae7aa79302f4478a83f",
+      "purpose": "Accepted Slice 00-03 machine contract, revision 7 (Base blob 32b4b7a)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-03-contract-toolchain/CLOSEOUT.md",
+      "digest": "sha256:0e24f5bccf258475fb1f587a08249f7568d195f0fe062bd9731d543e5440789b",
+      "purpose": "Accepted Slice 00-03 closeout and 00-04 handover prerequisites (planning artifact of the docs/slice-00-04-planning change)"
+    },
+    {
+      "path": "docs/research/00-04-domain-persistence-spike-dependency-research.md",
+      "digest": "sha256:dfe20ddda4fc54500fc5c489717fbb7beca093ea548e38260cea3ce4212061d8",
+      "purpose": "Slice 00-04 spike dependency research note (planning artifact of the docs/slice-00-04-planning change)"
+    },
+    {
+      "path": "docs/adr/0014-keep-pipeline-authority-outside-stage-workflow-engine.md",
+      "digest": "sha256:124920ba5602762accd9645d216a485562d44eb6f2f88a7601d81d638b6f3b24",
+      "purpose": "Controller authority, transaction, and checkpoint boundary decision (Base blob 32b4b7a)"
+    },
+    {
+      "path": "docs/adr/0019-isolate-runtime-behind-thin-hermes-shim.md",
+      "digest": "sha256:34749f93ff34501ebbbf951a26b540f56e2e6a3181570be556601be4a7e73e46",
+      "purpose": "Thin Shim and runtime isolation decision (Base blob 32b4b7a)"
+    },
+    {
+      "path": "docs/adr/0020-use-python-312-and-uv-for-managed-runtime.md",
+      "digest": "sha256:02c3403aeaed29563f0f3f3a25bf8e4a872b204cf88b5e5199b32daf00f9ba3e",
+      "purpose": "Binding Python and uv environment decision (Base blob 32b4b7a)"
+    },
+    {
+      "path": "docs/adr/0021-use-sqlite-single-writer-for-version-1.md",
+      "digest": "sha256:3ef94448ebc54e60d87da73ebc2895bce15d4857026cfd756e03cc5a32571590",
+      "purpose": "SQLite single-writer and separate checkpoint database decision (Base blob 32b4b7a)"
+    },
+    {
+      "path": "docs/adr/0023-use-langgraph-only-inside-stage-executor.md",
+      "digest": "sha256:a90719bb2b3b87599769e3420b6f93cb733e5d7c1a31836fd5ade5fc7810ce4f",
+      "purpose": "LangGraph confinement to Stage Executor decision (Base blob 32b4b7a)"
+    },
+    {
+      "path": "docs/adr/0024-use-pydantic-models-and-json-schema-contracts.md",
+      "digest": "sha256:7e0c6c5b33113d11fe22d647d96d6eea7de9a683979c85b96dbe975e9cd073aa",
+      "purpose": "Pydantic sole-authoring-source contract decision (Base blob 32b4b7a)"
+    },
+    {
+      "path": "docs/adr/0026-contract-toolchain-development-dependencies.md",
+      "digest": "sha256:b779787e17a7f4090ce15dbab5530980732bd30eaa19c94ccebfb511335ca3de",
+      "purpose": "Dev-only contract-toolchain dependency decision (Base blob 32b4b7a)"
+    },
+    {
+      "path": "docs/adr/0027-domain-and-persistence-spike-dependencies.md",
+      "digest": "sha256:924f9a0f4faf6f77d4264e8713b7c922054f4550659e6ff714934cb271f8a06e",
+      "purpose": "Accepted dev-only domain and persistence spike dependency decision (planning artifact of the docs/slice-00-04-planning change)"
+    },
+    {
+      "path": "docs/architecture/system-and-module-design.md",
+      "digest": "sha256:adabdcdf7b7673106510a45f867ab58fea48d3ebfc6114e74be95bead8fc986c",
+      "purpose": "Module boundaries, persistence ports, and dependency direction (Base blob 32b4b7a)"
+    },
+    {
+      "path": "docs/architecture/data-and-api-contracts.md",
+      "digest": "sha256:bda7ff9a2fdac790a6744d5304df16ea62ebb1fc0d5f71c50724bd63682033b8",
+      "purpose": "Command, Event, receipt, canonicalization, and hashing rules (Base blob 32b4b7a)"
+    },
+    {
+      "path": "docs/development/coding-and-test-standard.md",
+      "digest": "sha256:b4d689f55b2d20c9fcbc9ba25578fb61471d970b49a5a91ddf50d6bab907b83a",
+      "purpose": "Python coding and deterministic test standard; raw exceptions must not cross Interfaces (Base blob 32b4b7a)"
+    },
+    {
+      "path": "docs/development/ci-and-testing.md",
+      "digest": "sha256:8953023372b964f8edecb5a68158677c3c9712d0d239219261c65782093496bf",
+      "purpose": "CI, branch, dependency, and release-gate rules (Base blob 32b4b7a)"
+    },
+    {
+      "path": "docs/development/compatibility-targets.md",
+      "digest": "sha256:fe623f902e42663f2c3cc214bb81773368971726c086b9d3aa91acac3eeacd41",
+      "purpose": "Python, uv, and tool targets (Base blob 32b4b7a; extended by this Slice)"
+    },
+    {
+      "path": "docs/development/phase-and-slice-operating-model.md",
+      "digest": "sha256:5bbfee9a5cde6f31acf74a9f39a05869b10de1b3f17abfc51332ca1146702218",
+      "purpose": "Slice lifecycle, worktree, evidence, review, and rework-ownership rules (Base blob 32b4b7a)"
+    },
+    {
+      "path": "docs/operations/configuration-and-lifecycle.md",
+      "digest": "sha256:61e736f5f5ca05238c64597b5fd213c5e9ebc5335d8a35d883d8311e35f3d109",
+      "purpose": "Data roots, startup, shutdown, and lifecycle command rules (Base blob 32b4b7a)"
+    },
+    {
+      "path": "docs/operations/observability-recovery-and-runbooks.md",
+      "digest": "sha256:ca388d78948625718d5277dabd111a01f7ff4de3b916c6f7eaa16ba74eeeaa82",
+      "purpose": "p95 2-second acknowledged-command target, backup boundary, and recovery rules (Base blob 32b4b7a)"
+    },
+    {
+      "path": "schemas/engineering/slice-contract.schema.json",
+      "digest": "sha256:a1a004e5bb7e5e4c1c10ca9b9ccff2f7a37259f703141ea5ea0da6c3d7680a80",
+      "purpose": "Machine validation schema for the 00-04 Slice Contract (Base blob 32b4b7a)"
+    },
+    {
+      "path": "schemas/engineering/context-manifest.schema.json",
+      "digest": "sha256:bbf4d7f7568f91476404c28ef2554cbb9bbaddb219eeed2b088f62f929991210",
+      "purpose": "Machine validation schema for this Context Manifest (Base blob 32b4b7a)"
+    },
+    {
+      "path": "schemas/common/definitions.schema.json",
+      "digest": "sha256:51eab419183f06688230ee9ec739275642c9a4c3a6dffa26f107356302ff2149",
+      "purpose": "Shared $defs for digest, SHA, path, and timestamp types (Base blob 32b4b7a)"
+    },
+    {
+      "path": "scripts/check_documentation.py",
+      "digest": "sha256:a102a6d09cb233f6e2e8517dea2993806bec4f6a283d226c43db57133c83059e",
+      "purpose": "Dependency-free documentation checker used by this planning self-check (Base blob 32b4b7a)"
+    },
+    {
+      "path": "scripts/check_schemas.py",
+      "digest": "sha256:dc213d0f303946f3593dfe66adb39cdb726b02ff354afe1fffec4c7b9c1c93a7",
+      "purpose": "Immutable bootstrap Schema gate used by this planning self-check (Base blob 32b4b7a)"
+    },
+    {
+      "path": "scripts/check_repository_artifacts.py",
+      "digest": "sha256:b4d7cc301ff2aa0cf113c5ff650849b30f0f754ae8dee9d08aa4116db129ca96",
+      "purpose": "Final cache and bytecode artifact audit (Base blob 32b4b7a)"
+    },
+    {
+      "path": "pyproject.toml",
+      "digest": "sha256:a562dcfdbd8c8f9a02387f52c4b7a03f65c1486283944f432d28ed731a3ed40c",
+      "purpose": "Dependency groups and tool configuration; the dev group is the only permitted declaration surface for the ADR-0027 spike dependencies and [project].dependencies stays empty (Base blob 32b4b7a)"
+    },
+    {
+      "path": "uv.lock",
+      "digest": "sha256:ef6ebd4eeea3f0e8b66e67e4488a7581cf4d569209ff0d839dbe70999cc59221",
+      "purpose": "Frozen complete resolution authority for the dev-only spike dependency family and the canonical offline checks (Base blob 32b4b7a)"
+    },
+    {
+      "path": ".python-version",
+      "digest": "sha256:7b55f8e67b5623c4bef3fa691288da9437d79d3aba156de48d481db32ac7d16d",
+      "purpose": "Managed Python 3.12 selection for the runtime and CI environment (Base blob 32b4b7a)"
+    },
+    {
+      "path": ".github/workflows/python-quality.yml",
+      "digest": "sha256:02025660df8db6095fec15ada2a9d26ccc2a894aeab9355de6899f201bb60839",
+      "purpose": "CI offline canonical command inventory that the contract offline-* verification commands mirror exactly; it must stay unchanged (Base blob 32b4b7a)"
+    },
+    {
+      "path": "src/hermes_pipeline/__init__.py",
+      "digest": "sha256:969eaa51a71dd9d86e19c9fb6d55e126f58bea3a42dea47cc02ec2786f05dc4b",
+      "purpose": "Runtime package entry imported by the lazy-dispatch boundary tests; must stay free of spike dependencies (Base blob 32b4b7a)"
+    },
+    {
+      "path": "src/hermes_pipeline/cli/__init__.py",
+      "digest": "sha256:a8fc54d7473aafb05f42c3e558eb000ce5a4b4f6dda1ee85984e966c2bfc19be",
+      "purpose": "CLI module entry imported by boundary regression tests; stdlib-only (Base blob 32b4b7a)"
+    },
+    {
+      "path": "src/hermes_pipeline/cli/_main.py",
+      "digest": "sha256:7a99e3078c93132b5389e782f2aef0317bfdea25c32c11ed0e8797a02ea0aaf8",
+      "purpose": "Hermes runtime entry implementing --version and command dispatch; must never import spike dependencies (Base blob 32b4b7a)"
+    },
+    {
+      "path": "src/hermes_pipeline/cli/__main__.py",
+      "digest": "sha256:abb81b611ed4cc886034eecd91a644e74650429c426a8910e4a7d315330723dc",
+      "purpose": "python -m hermes_pipeline.cli entry used by the --version boundary tests (Base blob 32b4b7a)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-04-domain-and-persistence-spikes/SLICE.md",
+      "digest": "sha256:27ccfc52e81dfbedfd3be638c6db525ff6ea92cfa86f58c987b44412593f6bbf",
+      "purpose": "READY human-readable Slice contract, revision 6 (planning artifact of the docs/slice-00-04-planning change)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-04-domain-and-persistence-spikes/slice-contract.json",
+      "digest": "sha256:8b50af6fcb778ca08ae13ebfcadf0f2767af9a59c783c55b1d0f29e4ee56e1b9",
+      "purpose": "READY machine-valid Slice contract, revision 6 (planning artifact of the docs/slice-00-04-planning change)"
+    }
+  ],
+  "facts": [
+    {
+      "name": "assigned_worktree",
+      "value": "C:\\Users\\a2691\\AppData\\Local\\hermes\\managed-worktrees\\hermes-software-pipeline\\slice-00-04",
+      "source": "slice-contract.json; Git Custodian WORKTREE_READY report (clean detached worktree at Base SHA 32b4b7a)"
+    },
+    {
+      "name": "repository_read_scope",
+      "value": "all tracked files",
+      "source": "AGENTS.md and Planner role contract"
+    },
+    {
+      "name": "manifest_semantics",
+      "value": "governing context, not a read allowlist",
+      "source": "phase-and-slice-operating-model.md"
+    },
+    {
+      "name": "manifest_file_count",
+      "value": 45,
+      "source": "this manifest files array"
+    },
+    {
+      "name": "contract_revision",
+      "value": 6,
+      "source": "slice-contract.json"
+    },
+    {
+      "name": "contract_status",
+      "value": "READY",
+      "source": "slice-contract.json; Codex fresh Standards and Spec reviews passed and the Git Custodian recorded the exact worktree assignment"
+    },
+    {
+      "name": "contract_hash",
+      "value": "sha256:78a2c27311c6c9740d5188d806753bcaddcd1dbaa8743d2194d3a89fded36c3e",
+      "source": "slice-contract.json canonical content hash"
+    },
+    {
+      "name": "base_sha",
+      "value": "32b4b7a5406bf4ee58b79e2602f77af78ba3a27f",
+      "source": "Slice 00-03 Closeout and integrated main"
+    },
+    {
+      "name": "predecessor_integrated_sha",
+      "value": "32b4b7a5406bf4ee58b79e2602f77af78ba3a27f",
+      "source": "Slice 00-03 Closeout (integrated SHA 32b4b7a) and PR #6"
+    },
+    {
+      "name": "managed_python",
+      "value": ">=3.12,<3.13",
+      "source": "ADR-0020 and compatibility-targets.md"
+    },
+    {
+      "name": "uv_version",
+      "value": "0.12.1",
+      "source": "compatibility-targets.md"
+    },
+    {
+      "name": "runtime_dependencies",
+      "value": "[]",
+      "source": "pyproject.toml and ci-and-testing.md runtime-dependency rule"
+    },
+    {
+      "name": "dependency_family_decision",
+      "value": "SQLAlchemy Core, Alembic, LangGraph, and langgraph-checkpoint-sqlite with the complete transitive shape including sqlite-vec are dev/CI-only feasibility-spike dependencies for Slice 00-04; [project].dependencies stays empty; the Hermes plugin entry, --version, and the normal runtime path never import them; any future entry into an isolated managed runtime requires a later ADR and Slice",
+      "source": "Human acceptance 2026-08-07 and ADR-0027 committed as accepted in this planning change"
+    },
+    {
+      "name": "transaction_authority",
+      "value": "the Controller Event Log remains the sole authoritative business history (ADR-0014); the Controller database and the LangGraph checkpoint database are physically separate files; no cross-database transaction exists; SqliteSaver is local feasibility evidence only and never a business-state authority",
+      "source": "ADR-0014, ADR-0021, ADR-0023, and the research note"
+    },
+    {
+      "name": "counter_spike_oracle",
+      "value": "CounterSpike frozen oracle: initial state strictly (value=0, revision=0); from any (value=v, revision=r), accepting Increment(delta=1) transitions strictly to (v+1, r+1) and produces the unique domain Event CounterIncremented whose payload exactly contains the new value and new revision (command identity carried by the Controller envelope); any delta different from 1 returns typed INVALID_DELTA, leaves state completely unchanged, and produces no domain Event; expected-revision conflict handling is the Controller persistence layer's responsibility",
+      "source": "Reviewer direction (DRAFT review rounds 1 and 2, REWORK)"
+    },
+    {
+      "name": "port_direction",
+      "value": "the persistence port is private to the Controller; the accepted ControllerCommandPort.submit(command: ControllerCommand) -> CommandReceipt signature is the external Interface and the only Interface the Stage Executor may call; the Stage Executor and graph code must not import the private persistence port, persistence Adapters, SQLAlchemy, or database files",
+      "source": "Accepted system-and-module-design.md plus Codex corrective attempt after two Executor reworks"
+    },
+    {
+      "name": "typed_failure_boundary",
+      "value": "the existing CommandReceipt status/error model carries safe translated Controller failures: INVALID_DELTA projects to REJECTED/VALIDATION_ERROR with fixed message invalid delta; conflicts project to CONFLICT/CONFLICT with fixed safe messages; SQLITE_FULL and persistence unavailability project to a non-durable REJECTED/INTERNAL_ERROR receipt with fixed message persistence unavailable and retryable=true; backup and migration helpers return bounded non-serialized typed results; raw sqlite3, SQLAlchemy, or driver exceptions never cross Interfaces; no committed Schema or accepted Interface changes",
+      "source": "coding-and-test-standard.md, command-receipt.schema.json, accepted system-and-module-design.md, and Codex corrective attempt"
+    },
+    {
+      "name": "crash_vs_transaction_evidence",
+      "value": "AC-03 injects exceptions before and after each logical write inside the transaction for rollback evidence; AC-05 crashes a real subprocess only at the pre-commit and post-commit durable boundaries and restarts a fresh process from the same database and WAL; exception injection is never presented as crash evidence",
+      "source": "Reviewer direction (DRAFT review round 1, REWORK)"
+    },
+    {
+      "name": "backup_policy",
+      "value": "the backup API and policy reject the raw-copy path before any I/O; a guard or mock proves the implementation only ever calls sqlite3.Connection.backup(); no assertion that a raw copy necessarily corrupts is permitted; the backup helper returns bounded typed results",
+      "source": "Reviewer direction (DRAFT review round 1, REWORK)"
+    },
+    {
+      "name": "sqlite_version_predicate",
+      "value": "exact predicate: at least 3.51.3, or at least 3.50.7 and below 3.51.0, or at least 3.44.6 and below 3.45.0; committed accept vectors (3.51.3, 3.51.4, 3.50.7, 3.50.8, 3.44.6, 3.44.7) and reject vectors (3.51.2, 3.51.0, 3.50.6, 3.44.5, 3.43.0); a failing linked library on either platform stops the Slice with a Contract Change Request before claiming any spike persistence conclusion",
+      "source": "Research note and reviewer direction (DRAFT review round 1, REWORK)"
+    },
+    {
+      "name": "driver_transaction_mode",
+      "value": "the spike selects and tests one explicit SQLite driver transaction mode (for example SQLAlchemy connect_args autocommit=False or an explicit BEGIN event hook); the legacy sqlite3 default transaction control is never relied on; Alembic begin_transaction is a logical migration transaction and whole-migration rollback atomicity is never promised; an injected migration failure recovers through the verified backup and recovery path",
+      "source": "Research note and slice-contract.json"
+    },
+    {
+      "name": "workload_envelope",
+      "value": "fixed reproducible envelope: 1,000 accepted commands, 4 producers, one writer, queue capacity 32, command and event payloads each no larger than 1 KiB, p95 acknowledged latency no greater than 2 seconds, busy count equal to 0, WAL high-water no greater than 16 MiB, and checkpoint, online backup, and fresh-process recovery each no greater than 5 seconds; the report records a fixed redacted runner profile (OS family, architecture, CI runner label, Python version, and sqlite3.sqlite_version) plus selected PRAGMAs and queue high-water; hostname, username, absolute paths, environment variable values, tokens, raw exception text, and database content are forbidden, proved by a redaction assertion with injected fake sensitive values; a deterministic SQLITE_FULL injection returns the specified non-durable REJECTED/INTERNAL_ERROR receipt, writes no durable receipt record or partial records, and is restart-safe; an exceeded limit triggers the replacement-ADR path (Phase risk R-03)",
+      "source": "Observability-recovery-and-runbooks.md, PHASE.md R-03, reviewer direction, and Codex corrective attempt"
+    },
+    {
+      "name": "offline_verification",
+      "value": "the complete offline canonical command set mirrors the exact unchanged commands of .github/workflows/python-quality.yml: offline format, lint, type, pytest, contracts check, contracts drift-check, architecture, documentation positive and negative, schema negative, workflow policy, artifact audit, offline frozen sync, and offline version; every spike test is covered by the offline pytest run; the non-offline unit-check alone is never the evidence for complete offline verification",
+      "source": "Reviewer direction (DRAFT review round 1, REWORK) and .github/workflows/python-quality.yml"
+    },
+    {
+      "name": "code_disposition",
+      "value": "only the CounterSpike domain evaluator may be retained as a non-public candidate; persistence, migration, workload, and LangGraph checkpoint spike code and tests are experimental and deleted or rewritten unless Slice 00-07 explicitly adopts them",
+      "source": "slices/README.md 00-04 mandate and slice-contract.json"
+    },
+    {
+      "name": "future_implementation_paths",
+      "value": "pyproject.toml (dev group only), uv.lock, src/hermes_pipeline/domain/, src/hermes_pipeline/controller/, src/hermes_pipeline/persistence/, src/hermes_pipeline/stage_executor/, tests/, docs/development/compatibility-targets.md; scripts/, workflows, schemas, contracts/, src/hermes_pipeline/contracts/, src/hermes_pipeline/cli/, and accepted records stay closed",
+      "source": "slice-contract.json permitted_paths"
+    },
+    {
+      "name": "planning_artifact_paths",
+      "value": "docs/roadmap/phase-00-foundation/slices/README.md; docs/roadmap/phase-00-foundation/slices/00-03-contract-toolchain/CLOSEOUT.md; docs/research/00-04-domain-persistence-spike-dependency-research.md; docs/adr/0027-domain-and-persistence-spike-dependencies.md; docs/roadmap/phase-00-foundation/slices/00-04-domain-and-persistence-spikes/SLICE.md; docs/roadmap/phase-00-foundation/slices/00-04-domain-and-persistence-spikes/slice-contract.json",
+      "source": "this manifest"
+    },
+    {
+      "name": "digest_binding_policy",
+      "value": "every file purpose marks its digest source: Base blob 32b4b7a for pre-existing tracked files (byte-verified against git show 32b4b7a:path by the planning self-check), or planning artifact for files introduced or edited by the docs/slice-00-04-planning change; planning-artifact digests bind the planning worktree submission state",
+      "source": "reviewer finding P1 precedent (00-03) and per-entry purpose labels"
+    },
+    {
+      "name": "planning_context",
+      "value": "planning branch docs/slice-00-04-planning is routing metadata only; content is bound by the per-file planning-artifact digests and this manifest hash, while the Git Custodian records the exact planning Candidate SHA, pull request, and merge commit in the publication evidence",
+      "source": "phase-and-slice-operating-model.md and reviewer finding P1 precedent (00-03)"
+    },
+    {
+      "name": "network_after_install_allowed",
+      "value": false,
+      "source": "slice-contract.json"
+    },
+    {
+      "name": "credentials_allowed",
+      "value": false,
+      "source": "slice-contract.json"
+    },
+    {
+      "name": "executor_git_mutation_allowed",
+      "value": false,
+      "source": "slice-contract.json"
+    },
+    {
+      "name": "previous_review_findings",
+      "value": "DRAFT review round 1 returned REWORK (all addressed in revision 2): manifest missing dependency and CI authority inputs; complete offline verification not contractually executable; Alembic had no acceptance criterion; workload and recovery thresholds not reproducible and SQLITE_FULL injection missing; Stage Executor and private persistence port boundary contradictory; raw WAL copy negative case indeterminate; domain oracle too abstract; SQLite safety version rule imprecise; transaction fault and real process crash conflated. DRAFT review round 2 returned REWORK (all addressed in revision 3): ControllerCommandPort missing a safe typed failure boundary allowing raw driver exceptions, SQL, paths, or database content to leak to callers; runner identity lacking a redaction rule; CounterSpike success semantics not a unique oracle. Final READY review found that SubmitResult silently changed the accepted ControllerCommand -> CommandReceipt Interface and required a new external error family despite frozen schemas. Per the two-rework ownership rule, Codex performed one bounded corrective attempt in revisions 4 and 5: it restored the accepted signature, mapped failures through existing CommandReceipt status/error values, and made the architecture-required private COMMAND_ID_CONFLICT classification mandatory while retaining the public CONFLICT/CONFLICT receipt mapping; it changed no Schema, dependency, scope, authority, or product behavior.",
+      "source": "DRAFT review rounds 1 and 2, final READY review, and Codex corrective attempt"
+    },
+    {
+      "name": "executor_rework_budget",
+      "value": "Under one unchanged Slice Contract revision, the assigned Executor receives at most two recorded REWORK attempts. BLOCKED_CONTRACT is excluded. After both attempts still receive REWORK, Codex may run only a separate bounded corrective attempt, followed by fresh review and Git Custodian Candidate creation.",
+      "source": "AGENTS.md and phase-and-slice-operating-model.md"
+    }
+  ],
+  "content_hash": "sha256:85f24e20795e58d6da1a920a056aed31ad0283c86312da8f85643339907ba15f"
+}
