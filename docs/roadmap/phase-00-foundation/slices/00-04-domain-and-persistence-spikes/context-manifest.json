@@ -1,11 +1,11 @@
 {
   "schema_id": "https://schemas.hermes-pipeline.dev/engineering/context-manifest/v1",
   "schema_version": 1,
-  "manifest_id": "ctx_slice-00-04_planner_r6",
+  "manifest_id": "ctx_slice-00-04_planner_r7",
   "role": "PLANNER",
   "slice_id": "slice-00-04",
   "base_sha": "32b4b7a5406bf4ee58b79e2602f77af78ba3a27f",
-  "assembled_at": "2026-08-07T00:00:00.000Z",
+  "assembled_at": "2026-08-08T00:00:00.000Z",
   "files": [
     {
       "path": "AGENTS.md",
@@ -134,8 +134,8 @@
     },
     {
       "path": "docs/development/compatibility-targets.md",
-      "digest": "sha256:fe623f902e42663f2c3cc214bb81773368971726c086b9d3aa91acac3eeacd41",
-      "purpose": "Python, uv, and tool targets (Base blob 32b4b7a; extended by this Slice)"
+      "digest": "sha256:6113f918af125439c0a65eed7ecaf9a9fc744b88e8f36aeb540c790040e65461",
+      "purpose": "Python, uv, and tool targets plus the revision-7 managed interpreter pin and SQLite version-gate record (revision-7 CCR resolution; extended by this Slice)"
     },
     {
       "path": "docs/development/phase-and-slice-operating-model.md",
@@ -169,8 +169,8 @@
     },
     {
       "path": "scripts/check_documentation.py",
-      "digest": "sha256:a102a6d09cb233f6e2e8517dea2993806bec4f6a283d226c43db57133c83059e",
-      "purpose": "Dependency-free documentation checker used by this planning self-check (Base blob 32b4b7a)"
+      "digest": "sha256:e9148030abbfb13ff99d100c4aab8a6242d94513bedc3f3e3272706266bb5433",
+      "purpose": "Dependency-free documentation and workflow-policy checker used by this planning self-check; revision 7 splits the quality-workflow Python constant (3.12.13) and requires UV_MANAGED_PYTHON=1 (revision-7 CCR resolution)"
     },
     {
       "path": "scripts/check_schemas.py",
@@ -194,13 +194,13 @@
     },
     {
       "path": ".python-version",
-      "digest": "sha256:7b55f8e67b5623c4bef3fa691288da9437d79d3aba156de48d481db32ac7d16d",
-      "purpose": "Managed Python 3.12 selection for the runtime and CI environment (Base blob 32b4b7a)"
+      "digest": "sha256:060069118579cda4d81b459fdc857131d1dbb590eba42f9b12aa6e3103d6583f",
+      "purpose": "Exact uv-managed CPython 3.12.13 pin for the runtime and quality CI environment (revision-7 CCR resolution)"
     },
     {
       "path": ".github/workflows/python-quality.yml",
-      "digest": "sha256:02025660df8db6095fec15ada2a9d26ccc2a894aeab9355de6899f201bb60839",
-      "purpose": "CI offline canonical command inventory that the contract offline-* verification commands mirror exactly; it must stay unchanged (Base blob 32b4b7a)"
+      "digest": "sha256:564f293204644387ca878bbb60518eae9211806d76e472ae416a44c3274d5b1d",
+      "purpose": "CI offline canonical command inventory that the contract offline-* verification commands mirror exactly; revision 7 pins setup-uv python-version 3.12.13 and adds UV_MANAGED_PYTHON=1 (revision-7 CCR resolution)"
     },
     {
       "path": "src/hermes_pipeline/__init__.py",
@@ -224,13 +224,13 @@
     },
     {
       "path": "docs/roadmap/phase-00-foundation/slices/00-04-domain-and-persistence-spikes/SLICE.md",
-      "digest": "sha256:27ccfc52e81dfbedfd3be638c6db525ff6ea92cfa86f58c987b44412593f6bbf",
-      "purpose": "READY human-readable Slice contract, revision 6 (planning artifact of the docs/slice-00-04-planning change)"
+      "digest": "sha256:8a6e0879ffbf59105b30e3e8e5dc05adb545582b9f058ff47400e8370a4bb63d",
+      "purpose": "READY human-readable Slice contract, revision 7 (planning artifact of the docs/slice-00-04-planning change; revision 7 resolves the SQLite version-gate CCR)"
     },
     {
       "path": "docs/roadmap/phase-00-foundation/slices/00-04-domain-and-persistence-spikes/slice-contract.json",
-      "digest": "sha256:8b50af6fcb778ca08ae13ebfcadf0f2767af9a59c783c55b1d0f29e4ee56e1b9",
-      "purpose": "READY machine-valid Slice contract, revision 6 (planning artifact of the docs/slice-00-04-planning change)"
+      "digest": "sha256:a8474938d7b2eca3f65b6597032a7557e1c7d840a807accc59444ba72a4a6f0b",
+      "purpose": "READY machine-valid Slice contract, revision 7 (planning artifact of the docs/slice-00-04-planning change; revision 7 extends permitted paths for the managed interpreter pin and splits CI responsibility)"
     }
   ],
   "facts": [
@@ -256,17 +256,17 @@
     },
     {
       "name": "contract_revision",
-      "value": 6,
+      "value": 7,
       "source": "slice-contract.json"
     },
     {
       "name": "contract_status",
       "value": "READY",
-      "source": "slice-contract.json; Codex fresh Standards and Spec reviews passed and the Git Custodian recorded the exact worktree assignment"
+      "source": "slice-contract.json; revision-7 contract update after the human CCR resolution of 2026-08-08"
     },
     {
       "name": "contract_hash",
-      "value": "sha256:78a2c27311c6c9740d5188d806753bcaddcd1dbaa8743d2194d3a89fded36c3e",
+      "value": "sha256:9248a177c2ce1442631362233f193a50d468500b0aa9ef6fd191e926ecaa7b0b",
       "source": "slice-contract.json canonical content hash"
     },
     {
@@ -281,8 +281,8 @@
     },
     {
       "name": "managed_python",
-      "value": ">=3.12,<3.13",
-      "source": "ADR-0020 and compatibility-targets.md"
+      "value": "uv-managed CPython 3.12.13 (Astral build) pinned exactly via .python-version and python-quality.yml with UV_MANAGED_PYTHON=1; requires-python stays >=3.12,<3.13; the SQLite WAL-reset predicate is unchanged and the pin is a precondition, never a substitute, for the version gate",
+      "source": "ADR-0020, compatibility-targets.md, and the revision-7 CCR resolution (human decision 2026-08-08)"
     },
     {
       "name": "uv_version",
@@ -390,6 +390,11 @@
       "source": "slice-contract.json"
     },
     {
+      "name": "ccr_sqlite_version_gate_resolution",
+      "value": "revision 6 attempt 1 stopped BLOCKED_CONTRACT because the managed Windows runtime (CPython 3.12.10) linked SQLite 3.49.1, failing the exact WAL-reset predicate (>=3.51.3 OR (>=3.50.7 AND <3.51.0) OR (>=3.44.6 AND <3.45.0)); human resolution 2026-08-08 (revision 7): predicate unchanged and still an independent per-platform gate; managed interpreter pinned to uv-managed CPython 3.12.13 (Astral build) via .python-version and python-quality.yml (setup-uv python-version 3.12.13, job env UV_MANAGED_PYTHON=1); CI responsibility split — documentation-contracts.yml stays at 3.12, check_documentation.py carries split constants, tests/test_quality_workflow.py gains the managed-Python negative test; permitted paths extended to .python-version, .github/workflows/python-quality.yml, scripts/check_documentation.py, tests/test_quality_workflow.py",
+      "source": "human CCR decision 2026-08-08; SLICE.md Revision 7 section; compatibility-targets.md revision-7 section"
+    },
+    {
       "name": "previous_review_findings",
       "value": "DRAFT review round 1 returned REWORK (all addressed in revision 2): manifest missing dependency and CI authority inputs; complete offline verification not contractually executable; Alembic had no acceptance criterion; workload and recovery thresholds not reproducible and SQLITE_FULL injection missing; Stage Executor and private persistence port boundary contradictory; raw WAL copy negative case indeterminate; domain oracle too abstract; SQLite safety version rule imprecise; transaction fault and real process crash conflated. DRAFT review round 2 returned REWORK (all addressed in revision 3): ControllerCommandPort missing a safe typed failure boundary allowing raw driver exceptions, SQL, paths, or database content to leak to callers; runner identity lacking a redaction rule; CounterSpike success semantics not a unique oracle. Final READY review found that SubmitResult silently changed the accepted ControllerCommand -> CommandReceipt Interface and required a new external error family despite frozen schemas. Per the two-rework ownership rule, Codex performed one bounded corrective attempt in revisions 4 and 5: it restored the accepted signature, mapped failures through existing CommandReceipt status/error values, and made the architecture-required private COMMAND_ID_CONFLICT classification mandatory while retaining the public CONFLICT/CONFLICT receipt mapping; it changed no Schema, dependency, scope, authority, or product behavior.",
       "source": "DRAFT review rounds 1 and 2, final READY review, and Codex corrective attempt"
@@ -400,5 +405,5 @@
       "source": "AGENTS.md and phase-and-slice-operating-model.md"
     }
   ],
-  "content_hash": "sha256:85f24e20795e58d6da1a920a056aed31ad0283c86312da8f85643339907ba15f"
+  "content_hash": "sha256:9c20fdb26ab42ad9300b787a77420d982d2c7aa13d025da5cef22c05a66f8da7"
 }

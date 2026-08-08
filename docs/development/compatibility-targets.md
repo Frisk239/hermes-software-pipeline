@@ -18,13 +18,35 @@ These are feasibility and CI targets for Phase 00, not a public support promise.
 
 | Component | Phase 00 target | Initial local observation |
 | --- | --- | --- |
-| CPython managed runtime | `>=3.12,<3.13` | `.python-version` and `uv.lock` constrain the Python 3.12 minor line; slice-00-02 locally exercised 3.12.10, while CI may resolve another compatible 3.12 patch. |
+| CPython managed runtime | uv-managed CPython `3.12.13` (Astral build), pinned exactly | `.python-version` = `3.12.13` and `python-quality.yml` `setup-uv` `python-version: "3.12.13"` with `UV_MANAGED_PYTHON=1` (revision 7, slice-00-04 CCR); `requires-python` stays `>=3.12,<3.13`. |
 | `uv` | compatible with `0.12.x`; exact version recorded by Slice | `0.12.1` |
 | Git | `>=2.45,<3`; exact binary/version recorded by each repository operation | `2.53.0.windows.2` |
 | Codex CLI | capability-probed; initial target `0.146.x` | `codex-cli 0.146.0` |
 | OpenCode CLI | capability-probed; initial target `1.18.x` | `1.18.12` |
 | Google Chrome | current stable capability-probed through Chrome DevTools MCP | `150.0.7871.187` |
 | Chrome DevTools MCP | exact package/server version selected and frozen by Slice 00-06 | Not yet selected; blocks the browser feasibility probe, not the documentation baseline. |
+
+## Revision-7 managed interpreter pin and SQLite gate (slice-00-04 CCR)
+
+Slice 00-04 attempt 1 stopped with `BLOCKED_CONTRACT`: the managed Windows
+runtime (CPython 3.12.10) linked SQLite `3.49.1`, which fails the exact
+WAL-reset repair-version predicate (`>=3.51.3 OR (>=3.50.7 AND <3.51.0) OR
+(>=3.44.6 AND <3.45.0)`). The human-approved revision-7 resolution keeps the
+predicate unchanged and pins the interpreter instead:
+
+- `.python-version` = `3.12.13` (exact, no `+`); `python-quality.yml` pins
+  `python-version: "3.12.13"` and sets `UV_MANAGED_PYTHON=1` so uv uses only
+  its managed (Astral) builds — a system interpreter of the same version may
+  link a different SQLite library and must never satisfy the gate.
+- `documentation-contracts.yml` stays on `"3.12"`: it runs only stdlib-only
+  bootstrap checks and carries no SQLite persistence conclusion, so it is not
+  bound to the source-only `3.12.13` patch.
+- The SQLite WAL-reset predicate remains the independent acceptance gate
+  (AC-08): `sqlite3.sqlite_version` is recorded on both platforms and must
+  satisfy the predicate before any spike persistence conclusion is claimed.
+  Windows initial observation (2026-08-08): uv-managed CPython `3.12.13`
+  links SQLite `3.53.1` (passes). The Linux value is recorded here after the
+  first dual-platform CI run with the pinned interpreter.
 
 ## Slice-00-02 frozen Python quality resolution
 

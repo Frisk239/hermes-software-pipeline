@@ -1,7 +1,7 @@
 {
   "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
   "schema_version": 1,
-  "document_revision": 6,
+  "document_revision": 7,
   "slice_id": "slice-00-04",
   "phase_id": "phase-00",
   "status": "READY",
@@ -12,6 +12,7 @@
   "assigned_worktree": "C:\\Users\\a2691\\AppData\\Local\\hermes\\managed-worktrees\\hermes-software-pipeline\\slice-00-04",
   "operator_path": "From a clean Windows or Linux checkout, install the exact frozen Python 3.12 development environment once, then run the deterministic spike tests and the complete canonical check set offline; the spike produces written feasibility evidence for the frozen CounterSpike oracle, one atomic SQLite Controller transaction with typed failure boundaries, a fixed single-writer workload envelope with a redacted runner profile, crash, backup, and restore recovery, Stage lease fencing, an Alembic migration spike, and LangGraph replay that cannot advance business state.",
   "must_scope": [
+    "Pin the managed interpreter to the exact uv-managed CPython 3.12.13 (Astral build) per the revision-7 CCR resolution: .python-version is fixed to 3.12.13; python-quality.yml pins setup-uv python-version \"3.12.13\" and sets job env UV_MANAGED_PYTHON=1 so uv uses only managed Python installations and a system interpreter with a different bundled SQLite can never satisfy the version gate; scripts/check_documentation.py carries the revision-7 split workflow-policy constants (REQUIRED_QUALITY_PYTHON_VERSION 3.12.13) while documentation-contracts.yml stays at 3.12; tests/test_quality_workflow.py gains a negative test proving a quality job missing the managed-Python enforcement fails; the SQLite WAL-reset predicate is unchanged and remains an independent per-platform acceptance gate measured via sqlite3.sqlite_version",
     "Add sqlalchemy>=2,<3, alembic>=1.19,<2, langgraph>=1.2,<2, and langgraph-checkpoint-sqlite>=3.1,<4 to the existing dev dependency group only, freeze the complete transitive resolution including sqlite-vec and its wheel admission evidence in uv.lock, and keep [project].dependencies empty; the dependency-family decision is bound by ADR-0027 accepted in this planning change",
     "Spike the fixed product-meaning-free CounterSpike oracle under src/hermes_pipeline/domain/ with a frozen semantic: initial state is strictly (value=0, revision=0); from any (value=v, revision=r), accepting Increment(delta=1) transitions the state strictly to (v+1, r+1) and produces the unique domain Event CounterIncremented whose payload exactly contains the new value and the new revision; command identity is carried by the existing Controller envelope; any delta different from 1 returns the typed INVALID_DELTA result, leaves the state completely unchanged, and produces no domain Event; expected-revision conflict handling remains the Controller persistence layer's responsibility, not the domain's; the evaluator has no I/O, clock, identity, randomness, or framework dependency and is a candidate for retention, clearly marked non-public",
     "Define a typed persistence port private to the Controller: controller depends only on that port and domain values and never imports SQLAlchemy, LangGraph, Alembic, filesystem, or concrete persistence Adapter code, and never executes SQL or filesystem operations itself; the port has a deterministic in-memory test Adapter and one SQLite spike Adapter that may use SQLAlchemy Core",
@@ -40,12 +41,13 @@
     "Making SqliteSaver, SQLAlchemy, Alembic, LangGraph, or any spike dependency a runtime dependency or a business-state authority",
     "Real migrations of production state, production backup or restore, or any operation on a real Workspace",
     "Remote operations, provider calls, Git mutation, secrets, or network access after the dependency-install step",
-    "Changes to scripts/, bootstrap workflow files, .github/workflows/, committed Schemas, contracts/, src/hermes_pipeline/contracts/, src/hermes_pipeline/cli/, or any accepted ADR, planning, review, evidence, or closeout record",
+    "Changes to scripts/ beyond the revision-7 check_documentation.py workflow-policy constants, bootstrap workflow files, .github/workflows/ beyond the revision-7 python-quality.yml interpreter pin and UV_MANAGED_PYTHON enforcement, committed Schemas, contracts/, src/hermes_pipeline/contracts/, src/hermes_pipeline/cli/, or any accepted ADR, planning, review, evidence, or closeout record",
     "Recomputing content_hash in historical planning, review, evidence, or closeout records",
     "Slice 00-05, 00-06, or 00-07 behavior, including any runtime-dependency or managed-runtime isolation decision; that requires a later ADR and Slice under ADR-0027",
     "Changing the accepted ControllerCommand -> CommandReceipt signature, turning spike helper failures into a product public API, or changing committed Schemas for them"
   ],
   "interfaces": [
+    "Managed interpreter (revision-7 CCR resolution): uv-managed CPython 3.12.13 (Astral build) pinned via .python-version and python-quality.yml (setup-uv python-version \"3.12.13\" plus job env UV_MANAGED_PYTHON=1); documentation-contracts.yml remains at 3.12; sqlite3.sqlite_version is recorded per platform against the unchanged WAL-reset predicate and the pinned interpreter is a precondition, not a replacement, for the version gate",
     "src/hermes_pipeline/domain/: the frozen CounterSpike oracle — initial state strictly (value=0, revision=0); from any (value=v, revision=r), accepting Increment(delta=1) transitions strictly to (v+1, r+1) and produces the unique domain Event CounterIncremented whose payload exactly contains the new value and new revision; any delta different from 1 returns typed INVALID_DELTA, leaves state unchanged, and produces no domain Event; standard library and domain value types only; candidate for retention, non-public",
     "ControllerCommandPort.submit(command: ControllerCommand) -> CommandReceipt: the accepted Controller external Interface and the only Interface the Stage Executor may call; it returns the existing receipt model, including a non-durable REJECTED/INTERNAL_ERROR receipt with fixed message persistence unavailable and retryable=true for SQLITE_FULL or persistence unavailability; no durable receipt record or partial records are written on that failure path, and raw sqlite3, SQLAlchemy, or driver exceptions never cross the Interface; the LangGraph spike graph reaches business state only through it",
     "Controller private persistence port: private to controller; the spike submit flow evaluates a command against CounterSpike state and commits Inbox, Event, projection, Outbox, and receipt in one SQLite transaction; the port has a deterministic in-memory Adapter and a SQLite spike Adapter; Controller code imports neither SQLAlchemy nor LangGraph nor concrete Adapters nor filesystem code, enforced by import-boundary tests and architecture check",
@@ -69,15 +71,19 @@
   "permitted_paths": [
     "pyproject.toml",
     "uv.lock",
+    ".python-version",
+    ".github/workflows/python-quality.yml",
+    "scripts/check_documentation.py",
+    "tests/",
+    "tests/test_quality_workflow.py",
     "src/hermes_pipeline/domain/",
     "src/hermes_pipeline/controller/",
     "src/hermes_pipeline/persistence/",
     "src/hermes_pipeline/stage_executor/",
-    "tests/",
     "docs/development/compatibility-targets.md"
   ],
   "prohibited_actions": [
-    "Modify scripts/, .github/workflows/, .gitattributes, schemas/, contracts/, src/hermes_pipeline/contracts/, src/hermes_pipeline/cli/, accepted ADRs, or planning, review, evidence, and closeout records",
+    "Modify scripts/ beyond the revision-7 check_documentation.py workflow-policy constants, .github/workflows/ beyond the revision-7 python-quality.yml interpreter pin and UV_MANAGED_PYTHON enforcement, .gitattributes, schemas/, contracts/, src/hermes_pipeline/contracts/, src/hermes_pipeline/cli/, accepted ADRs, or planning, review, evidence, and closeout records",
     "Add runtime dependencies or change [project].dependencies; add a dependency family beyond ADR-0027; import SQLAlchemy, Alembic, LangGraph, or checkpointer packages from the Hermes plugin entry, --version, or the normal runtime path",
     "Let Controller code import SQLAlchemy, LangGraph, Alembic, filesystem, or a concrete persistence Adapter, or execute SQL or filesystem operations itself",
     "Let the Stage Executor or LangGraph graph code import the private persistence port, a persistence Adapter, SQLAlchemy, or database files, or reach business state except through ControllerCommandPort.submit",
@@ -106,6 +112,7 @@
     ],
     "compatibility": [
       "sqlite3.sqlite_version is recorded on Windows and Linux and gated against the exact predicate: at least 3.51.3, or at least 3.50.7 and below 3.51.0, or at least 3.44.6 and below 3.45.0, with committed accept and reject version vectors; a sub-gate library stops the Slice with a Contract Change Request",
+      "The managed interpreter is pinned to uv-managed CPython 3.12.13 (Astral build) via .python-version and python-quality.yml with UV_MANAGED_PYTHON=1 (revision-7 CCR resolution); documentation-contracts.yml stays at 3.12; the pin is a precondition, never a substitute, for the SQLite version gate",
       "The exact dev-only spike dependency locks, including sqlite-vec wheel admission evidence, and the fixed workload envelope are recorded in docs/development/compatibility-targets.md"
     ],
     "security": [
@@ -738,6 +745,7 @@
   ],
   "required_evidence": [
     "Exact Base and Candidate SHAs, Slice Contract revision, and content hash",
+    "Revision-7 CCR resolution evidence: pinned uv-managed CPython 3.12.13 with UV_MANAGED_PYTHON=1, per-platform sqlite3.sqlite_version against the unchanged predicate, the documentation/quality workflow version split, and the managed-Python enforcement negative test",
     "Changed-path manifest and staged-tree allowlist comparison performed by the Git Custodian",
     "Exact uv, Python, SQLAlchemy, Alembic, LangGraph, langgraph-checkpoint-sqlite, and sqlite-vec versions and the committed uv.lock digest",
     "Bounded output, exit code, start time, and duration for every local command",
@@ -840,5 +848,5 @@
     "Recomputing content_hash in historical planning, review, evidence, or closeout records becomes necessary",
     "The Base SHA changes or required Windows and Linux behavior cannot be equivalent"
   ],
-  "content_hash": "sha256:78a2c27311c6c9740d5188d806753bcaddcd1dbaa8743d2194d3a89fded36c3e"
+  "content_hash": "sha256:9248a177c2ce1442631362233f193a50d468500b0aa9ef6fd191e926ecaa7b0b"
 }
