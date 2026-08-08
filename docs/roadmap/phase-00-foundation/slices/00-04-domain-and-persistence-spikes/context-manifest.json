@@ -229,7 +229,7 @@
     },
     {
       "path": "docs/roadmap/phase-00-foundation/slices/00-04-domain-and-persistence-spikes/slice-contract.json",
-      "digest": "sha256:a8474938d7b2eca3f65b6597032a7557e1c7d840a807accc59444ba72a4a6f0b",
+      "digest": "sha256:aaf5943a727d019af5ac5cef254858961f0347af96cacd1a4a0e2ad675b900fb",
       "purpose": "READY machine-valid Slice contract, revision 7 (planning artifact of the docs/slice-00-04-planning change; revision 7 extends permitted paths for the managed interpreter pin and splits CI responsibility)"
     }
   ],
@@ -405,5 +405,5 @@
       "source": "AGENTS.md and phase-and-slice-operating-model.md"
     }
   ],
-  "content_hash": "sha256:9c20fdb26ab42ad9300b787a77420d982d2c7aa13d025da5cef22c05a66f8da7"
+  "content_hash": "sha256:de8378d616af87f58c8368381268c3c479219c934cb386f1359a92685a1134fe"
 }
