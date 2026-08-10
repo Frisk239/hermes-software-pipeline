@@ -1,0 +1,893 @@
+{
+  "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
+  "schema_version": 1,
+  "document_revision": 5,
+  "slice_id": "slice-00-05",
+  "phase_id": "phase-00",
+  "status": "READY",
+  "predecessors": [
+    "slice-00-02",
+    "slice-00-03",
+    "slice-00-04"
+  ],
+  "base_sha": "46798d86a2e48551a3a634e93d1e4dfe5cbf8786",
+  "assigned_worktree": "C:\\Users\\a2691\\AppData\\Local\\hermes\\managed-worktrees\\hermes-software-pipeline\\slice-00-05",
+  "operator_path": "From a clean Windows or Linux checkout, the integration workflow derives and checks out its exact Candidate SHA, then a real Hermes installation at the pinned release (v2026.8.3, commit 3c27eb6) loads the minimal repository-root Shim (hermes_shim/) from a real source install into an isolated HERMES_HOME. The temporary fixture and installed checkout prove SHA and tree equality to that Candidate; a PluginManager probe proves exact registration counts. The Shim registers hermes pipeline setup|doctor|start|status|stop and a pre_gateway_dispatch hook, bootstraps the fake managed runtime from the dedicated runtime-env/ project (FastAPI/Uvicorn plus declared local hermes-pipeline package inside a ADR-0028-authorized isolated state-root environment), and delivers one authenticated loopback fake command exactly once. Dependency bootstrap completes before all probes and second materialization run offline on Windows and Linux.",
+  "must_scope": [
+    "This is READY Slice Contract revision 5, bound to exact integrated Base SHA 46798d86a2e48551a3a634e93d1e4dfe5cbf8786. The human approved D1: accepted ADR-0028 authorizes FastAPI, Uvicorn, and the declared local hermes-pipeline==0.1.0 package only inside the independent Managed Runtime provisioned from runtime-env/ into <state-root>/runtimes/<version>; the root project dependencies remain empty and Hermes never imports those dependencies. The READY planning package records docs/adr/0028-authorize-fastapi-uvicorn-in-managed-runtime.md with status accepted and binds ADR-0028 before Executor dispatch. Slice-00-04 is a satisfied machine predecessor: it integrated at this Base through PR #9. Descriptor/protocol versioning and the fixed workflow-governance extension remain technical scope, not human options. This contract authorizes only the specified Executor implementation in the assigned worktree; Git writes remain reserved to the Git Custodian.",
+    "Add the repository-root Hermes plugin entry: plugin.yaml (name hermes-software-pipeline, version matching package metadata, kind standalone or omitted, no requires_env, manifest_version at most 1) and root __init__.py that imports only the controlled root directory hermes_shim/ and never imports src/hermes_pipeline; hermes_shim/ is stdlib-only and registers the pipeline CLI command tree (setup, doctor, start, status, stop) via ctx.register_cli_command, the pre_gateway_dispatch hook, and one minimal declared high-level tool; src/hermes_pipeline/cli/ is not a 00-05 writable path; the shim contains no Controller logic, no Agent executor, no Git, no database, no network beyond loopback, and no runtime-dependency import (ADR-0019, ADR-0026, ci-and-testing.md runtime rule), enforced by an import scan",
+    "The pre_gateway_dispatch callback must never raise; any event whose text belongs to the shim fake-probe namespace is answered with action skip unconditionally, including when the runtime is unreachable, so a probe event can never fall through to Prod Main; all other events are left untouched (None); a probe event that reaches Prod Main is a failure of this scope",
+    "Spike a fake managed runtime under src/hermes_pipeline/transport/ only: the runtime entry is launched by the shim as an independent interpreter with a controlled argv array, never a shell string (for example python -m hermes_pipeline.transport with the state root); loopback-only binding (127.0.0.1 and ::1, never wildcard), /livez, /readyz, /v1/version, and /v1/commands with bearer-token authentication, protocol-version header, strict Host and Origin validation, body-size and rate limits, and timeouts; the server implementation is FastAPI/Uvicorn, authorized only by accepted ADR-0028, and a stdlib server is not an equivalent substitute for ADR-0022; the executable locking topology is fixed: dedicated runtime-env/pyproject.toml and runtime-env/uv.lock declare fastapi, uvicorn, and hermes-pipeline==0.1.0, with [tool.uv.sources] hermes-pipeline pointing at the repository root so the explicit root-package dependency installs without PYTHONPATH manipulation. A cross-platform harness starts from an empty environment mapping, supplies the allow-list plus UV_PROJECT_ENVIRONMENT=<fresh-state-root>/runtimes/<version>, invokes controlled uv sync --frozen --project <repo>/runtime-env argv, and proves the target interpreter and sys.prefix are the state-root environment rather than runtime-env/.venv; the root project [project].dependencies stays empty and root uv.lock is untouched. The runtime descriptor is written atomically (temp plus rename) with owner-only ACL or mode and PID, start identity, creation time, port, token generation, release, and state-root identity; the state-root singleton lock is acquired at startup; any startup-step failure leaves the runtime not-ready; no file paths, shell commands, SQL, or raw exceptions cross the HTTP surface",
+    "Fixed protocol values: Host header must equal 127.0.0.1:<port> or [::1]:<port> else 400 plus POLICY_REJECTED; Origin must be absent or exactly http://127.0.0.1:<port> or http://[::1]:<port> else 403 plus POLICY_REJECTED; protocol header X-Hermes-Pipeline-Protocol: 1 required, missing or unsupported value returns 400 plus VALIDATION_ERROR with fixed message unsupported protocol version; bearer token from the descriptor, bad or missing token returns 401 plus AUTHENTICATION_FAILED; body limit 64 KiB on /v1/commands, exceeded returns 413 plus VALIDATION_ERROR; rate limit one client window of 60 seconds with at most 60 requests, exceeded returns 429 plus RATE_LIMITED; shim client connect and read timeout 5 seconds, runtime request budget 10 seconds; unknown path returns 404 plus NOT_FOUND; stale or absent descriptor at the client returns DEPENDENCY_UNAVAILABLE and the shim fails closed; /v1/version reports runtime version, protocol version 1, contract-schema range, release, and state-root identity",
+    "Runtime lifecycle, recovery, and identity: start bootstraps the managed environment per decision D2, launches the runtime, waits for readiness, and writes the descriptor; stop drains, releases the lock, and removes the descriptor; token rotation happens only when the runtime process starts (start, restart, or crash recovery) and a Hermes-process restart merely re-reads the existing descriptor and token, never rotating and never rewriting the descriptor; stale-descriptor algorithm across platforms: every runtime start records pid, a fresh random start_identity (128-bit hex), and the process creation time; a descriptor is stale and removable only when os.kill(pid, 0) reports the process gone or the creation time mismatches (Linux /proc/<pid>/stat field 22; Windows ctypes kernel32 OpenProcess and GetProcessTimes, detecting PID reuse); a live matching process means the descriptor is never removed; os.kill(pid, 0) alone is never proof of identity; port collision is bounded to 3 consecutive attempts each binding a fresh random loopback port, after which the runtime exits with DEPENDENCY_UNAVAILABLE and leaves no descriptor; status and doctor never block beyond the client timeout",
+    "Fake command exactly-once with three crash points: the fake runtime accepts one fake Controller-command envelope (command_id plus payload) and persists a receipt with stdlib sqlite3 in the disposable state root (fixed D4); a duplicate command_id returns the original receipt; crash point A (before persistence) has no receipt row and no ack, and retry with the same command_id processes afresh with exactly one receipt and one effect; crash point B (after persistence, before the response) returns the original receipt on retry with no second effect; crash point C (after the response) leaves the shim holding the receipt with no resend, and any transport retry dedups to the original receipt; a forged receipt not matching the persisted row is rejected; the store and its data are disposable spike artifacts with an explicit disposition and never become production persistence",
+    "Windows descriptor ACL exact ACE set: explicit DACL applied and verified with icacls as a controlled argv subprocess, never a shell string; the exact ACE set is exactly one grant ACE for the current user resolved to the user SID with full control and nothing else, applied as icacls <path> /inheritance:r /grant:r <user-sid>:(F); verification parses icacls output and must show only the current-user SID with full control, and any other subject - Everyone (*S-1-1-0), BUILTIN Users (*S-1-5-32-545), SYSTEM (*S-1-5-18), BUILTIN Administrators (*S-1-5-32-544), or any other - in the descriptor DACL fails verification; negative fixtures with an Everyone read ACE or a SYSTEM full-control ACE are rejected; the residual limit is documented as the host-admin boundary outside the DACL (a local administrator or SYSTEM may still access the file through take-ownership or backup semantics; the threat model does not defend against a malicious host administrator), not as permitted ACEs inside the DACL; POSIX uses 0o600 plus a mode check",
+    "Synthetic /card interception probe: with the shim loaded in a real Hermes process, construct the Feishu-style synthetic event exactly as the installed Feishu adapter does (/card <tag> <json>, MessageType.COMMAND, resolved source) and drive the real gateway dispatch path (GatewayRunner._handle_message); the hook must skip the probe event and submit one authenticated loopback fake command; a Prod Main invocation counter stays at zero; the probe tag is namespaced (for example hermes_pipeline_fake_probe) and no other /card or plain event is intercepted",
+    "Load and registration evidence via the PluginManager probe: hermes plugins list proves manifest and enable state only and is never used as load evidence; a subprocess running the Hermes environment Python with an isolated HERMES_HOME calls get_plugin_manager().discover_and_load() and asserts loaded.enabled is True, loaded.error is None, exactly one tool, exactly one pre_gateway_dispatch hook, exactly one top-level pipeline CLI command, and exactly five pipeline subcommands (setup, doctor, start, status, stop); a deliberately broken plugin fixture asserts loaded.error is set and Hermes keeps running (fail-safe load)",
+    "Lifecycle CLI idempotency (EC-00-11): hermes pipeline setup, doctor, start, status, and stop operate idempotently for the non-production skeleton; repeated identical invocations converge; stop without a running runtime is a no-op with a stable exit code; doctor fails with actionable codes when a required version, descriptor, or state-root component is missing; all commands return structured bounded JSON with stable exit codes; the state root is derived from HERMES_HOME per fixed decision D5",
+    "Negative and adversarial evidence: deterministic negative tests for bad token, wrong protocol version, stale or absent descriptor, malformed descriptor, descriptor path escape (symlink, junction, reparse point), owner-only descriptor ACL on both platforms (Windows explicit DACL with no Everyone or Users ACE verified via icacls; POSIX 0o600), body-size and rate-limit exceedance, Host and Origin mismatch, loopback-only binding, environment and secret leakage with injected secret canaries that never reach the runtime environment, logs, receipts, or the Execution Report, port collision bounded to 3 fresh-port attempts, double-start lock contention, and a DACL containing an Everyone ACE",
+    "Real source-install evidence with Candidate-identity binding: the integration workflow derives HERMES_PIPELINE_CANDIDATE_SHA as github.sha for push or github.event.pull_request.head.sha for pull_request and checks out that exact SHA. In CI on both platforms, assert repository rev-parse HEAD equals that value; then the temporary local fixture runs git clone --no-checkout <repo-path> <fixture> and git -C <fixture> checkout -B main <HERMES_PIPELINE_CANDIDATE_SHA>. Pre-install assertions prove fixture SHA/ref; after hermes plugins install file://<fixture> --enable into isolated HERMES_HOME, prove installed SHA and HEAD^{tree} equal the checked-out Candidate tree. A fixture whose main points at a non-Candidate SHA fails; all Git argv is controlled and confined to the temporary fixture directory, the repository own Git state is untouched; load and registration are additionally proven by the PluginManager probe; no public network is used after dependency bootstrap; no credentials; no real Feishu or GitHub operation",
+    "Reproducible Hermes provision and CI design: clone https://github.com/NousResearch/hermes-agent at the exact release commit 3c27eb6234bf91b8ceee9e9071591b31e9b148cb (tag v2026.8.3), build with Hermes own uv.lock (uv sync --frozen inside the Hermes checkout) into an independent Hermes test environment outside this repository .venv; dependency bootstrap permits this-repository checkout, the pinned Hermes clone, Hermes environment build, and first frozen runtime-env materialization, then network is cut off. Every provision/runtime/probe child starts with an empty mapping and only documented essential/system, fixture-owned, state-root, and role-specific values; the unknown-secret canary is absent. Probes locate Hermes via HERMES_PIPELINE_PROBE_HERMES and use controlled argv; uv run --offline pytest does not assume Hermes exists in the project dev environment. One new workflow .github/workflows/hermes-integration.yml runs Windows and Linux; existing workflows remain untouched. The fixed workflow-governance extension adds check_hermes_integration_workflow plus positive/negative fixtures and commands; it does not need separate human approval. runtime-provision, runtime-provision-offline, and runtime-selfcheck run the state-root harness, not ambient runtime-env/.venv. The required canonical check set continues to pass and leaves no cache or bytecode artifact",
+    "Record the pinned Hermes version, install evidence, probe design, fixed decisions, accepted ADR-0028 scope, and spike dispositions in docs/development/compatibility-targets.md; the research report docs/research/00-05-hermes-shim-runtime-research.md and this slice planning package are part of the planning change; descriptor and protocol versioning is fixed as spike versioned constants plus golden JSON fixtures with committed accept and reject vectors, and the contract-toolchain path is out of scope",
+    "Every spike component (shim spike, fake runtime, receipt store, probe harness, lifecycle spike) carries an explicit experimental marker and a retain-or-delete record; nothing becomes production foundation without an explicit Slice 00-07 adoption",
+    "Machine predecessor and serial execution statement: slice-00-04 is a machine-contract predecessor and is integrated at 46798d86a2e48551a3a634e93d1e4dfe5cbf8786 (PR #9). Git Custodian verified this exact remote-main Base and created the assigned clean execution worktree. This READY contract and refreshed manifest bind to that Base. Slice-00-05 implementation remains serial after 00-04 because both own tests/ and docs/development/compatibility-targets.md; root pyproject.toml and uv.lock remain closed."
+  ],
+  "out_of_scope": [
+    "Production Feishu UI, card rendering, or any real Feishu connection; business approvals, Project RBAC, or any real GitHub or Feishu operation",
+    "Real Pipeline business state machine, Controller production behavior, or LangGraph; production persistence, migration, backup, or restore of any real Workspace",
+    "Public network after the defined dependency-bootstrap stage, provider credentials, secrets, or remote delivery",
+    "Moving FastAPI, Uvicorn, or the declared local hermes-pipeline package outside the accepted ADR-0028 runtime-env/ project; modifying the root pyproject.toml or root uv.lock; using a stdlib server as a substitute for ADR-0022",
+    "Changes to src/hermes_pipeline/cli/, domain/, controller/, persistence/, stage_executor/, contracts/, schemas/, the existing .github/workflows files, accepted ADRs, or planning, review, evidence, and closeout records; scripts/ changes beyond the fixed workflow-governance extension (scripts/check_documentation.py and scripts/fixtures/workflows/ only)",
+    "Slice 00-04 or 00-06 behavior; writing the 00-04 Closeout; recomputing content_hash in historical records",
+    "Desktop or UI work, observability vendors, or any network-exposed listener",
+    "All 00-04 state as a current contract premise or fact source; the 2026-08-10 00-04 and main observations are historical only, while 00-04 integration state is authoritative only from Git Custodian records",
+    "The committed JSON Schema or contract-toolchain path for descriptor and protocol versioning (src/hermes_pipeline/contracts/, schemas/); versioning is fixed to spike versioned constants plus golden JSON fixtures",
+    "Modifications to the two existing workflows (python-quality.yml, documentation-contracts.yml) or to their checkers check_workflow and check_quality_workflow"
+  ],
+  "interfaces": [
+    "Repository root (plugin.yaml and __init__.py) plus hermes_shim/: the Hermes-loaded entry; root __init__.py imports only hermes_shim and never imports src/hermes_pipeline; stdlib and Hermes-guaranteed imports only; registers pipeline CLI commands, the pre_gateway_dispatch hook, and one declared tool; no business state",
+    "src/hermes_pipeline/transport/: the fake managed runtime spike and its entry (python -m hermes_pipeline.transport, launched with a controlled argv by the shim) — loopback server (FastAPI/Uvicorn under accepted ADR-0028), descriptor writer, protocol versioning, limits, and a receipt-store adapter seam with a deterministic fake; disposable spike code",
+    "runtime-env/ (authorized by accepted ADR-0028): dedicated runtime project - pyproject.toml with requires-python >=3.12,<3.13 and direct fastapi, uvicorn, and hermes-pipeline==0.1.0 dependencies; [tool.uv.sources] hermes-pipeline points at repository root with editable false; committed runtime-env/uv.lock; the harness sets UV_PROJECT_ENVIRONMENT to a fresh state-root target, invokes controlled uv sync argv, and proves target interpreter/sys.prefix rather than runtime-env/.venv; no PYTHONPATH manipulation; root project [project].dependencies stays empty",
+    "src/hermes_pipeline/cli/: not a 00-05 writable path (rework #1)",
+    "Runtime descriptor: protocol version, PID, start identity, creation time, port, token generation, active release, and state-root identity; atomic write; owner-only ACL or mode (Windows explicit DACL via icacls); rotation per runtime start only; removal only via the start-identity algorithm",
+    "Loopback protocol: fixed values — Host 127.0.0.1:<port> or [::1]:<port>; Origin absent or the matching loopback origin; X-Hermes-Pipeline-Protocol: 1; 64 KiB body limit; 60 second window with 60 requests; 5 second client timeout and 10 second request budget; stable typed error codes per data-and-api-contracts.md; no file paths, shell, SQL, or Agent tools",
+    "Hermes surface consumed: ctx.register_cli_command, ctx.register_hook with pre_gateway_dispatch, ctx.register_tool, and ctx.manifest; load and registration evidence via the PluginManager probe; plugin load and gating behavior per the installed Hermes contract recorded in the research report",
+    "State root: derived from HERMES_HOME with the accepted child layout (descriptor, runtimes, logs); ownership markers per configuration-and-lifecycle.md; destructive operations validate the resolved path and marker",
+    "Receipt store (spike): disposable stdlib sqlite3; a deterministic fake plus the store; never authoritative for business state; no shared transaction with anything",
+    "The Executor may read every tracked file but may edit only the READY contract's permitted paths in the assigned worktree"
+  ],
+  "binding_adrs": [
+    "ADR-0014",
+    "ADR-0019",
+    "ADR-0020",
+    "ADR-0022",
+    "ADR-0024",
+    "ADR-0025",
+    "ADR-0026",
+    "ADR-0027",
+    "ADR-0028"
+  ],
+  "permitted_paths": [
+    "plugin.yaml",
+    "__init__.py",
+    "hermes_shim/",
+    "src/hermes_pipeline/transport/",
+    "tests/",
+    ".github/workflows/hermes-integration.yml",
+    "scripts/check_documentation.py",
+    "scripts/fixtures/workflows/",
+    "runtime-env/pyproject.toml",
+    "runtime-env/uv.lock",
+    "docs/development/compatibility-targets.md",
+    "docs/research/00-05-hermes-shim-runtime-research.md",
+    "docs/roadmap/phase-00-foundation/slices/README.md",
+    "docs/roadmap/phase-00-foundation/slices/00-05-hermes-shim-runtime/"
+  ],
+  "prohibited_actions": [
+    "Add a runtime dependency outside the ADR-0028-authorized runtime-env/ project, or change root [project].dependencies or root uv.lock without a human-approved ADR and Contract Change Request; create an accepted ADR without human approval; import any third-party package from the Hermes-loaded shim or the normal runtime path",
+    "Use a stdlib HTTP server as a substitute for the ADR-0022 FastAPI/Uvicorn choice; import src/hermes_pipeline from the root __init__.py or hermes_shim/",
+    "Let the pre_gateway_dispatch hook raise, or let any probe-namespace event reach Prod Main or the normal agent dispatch; intercept any non-probe event",
+    "Bind the runtime to anything other than loopback; expose file paths, shell commands, SQL, raw exceptions, or database content over the HTTP surface; emit hostname, username, absolute paths, environment values, tokens, or raw exception text in test output or the Execution Report",
+    "Rotate or rewrite the descriptor token on a Hermes-process restart; delete or modify a live runtime descriptor; remove a stale descriptor without proof from the start-identity algorithm that its process is gone or its creation time mismatches",
+    "Present the fake receipt store, fake runtime, or any spike component as production foundation without an explicit disposition or Slice 00-07 adoption",
+    "Weaken, skip, delete, or mark existing checks to make the Candidate pass",
+    "Use credentials or public network after the defined dependency-bootstrap stage; register or start a real Hermes plugin against a real user profile or any production Workspace; call production Feishu or GitHub",
+    "Execute repository-provided shell strings or add ambient filesystem, Git, network, secret, or process authority",
+    "Commit, push, merge, rebase, reset, clean, stash, alter remotes, Git configuration, hooks, branches, tags, or the user working copy",
+    "Change the root pyproject.toml, root uv.lock, .python-version, the existing workflows, schemas/, contracts/, src/hermes_pipeline/contracts/, accepted ADRs, or planning, review, evidence, and closeout records without a human-approved Contract Change Request; modify scripts/ beyond the fixed workflow-governance extension; modify the two existing workflows or their checkers",
+    "Write the 00-04 Closeout or recompute content_hash in historical planning, review, evidence, or closeout records",
+    "Let the source-install fixture default HEAD differ from the Candidate SHA, or claim install evidence without the pre-install and post-install HEAD assertions",
+    "Create, modify, or move the repository own Git state when building the temporary install fixture; fixture Git writes are confined to the temporary fixture directory"
+  ],
+  "implications": {
+    "data": [
+      "The fake runtime receipt store and runtime state live under disposable spike roots inside the test environment; no runtime or real Workspace data is created",
+      "The state root layout under HERMES_HOME/software-pipeline is exercised by the lifecycle spike and documented; ownership markers are validated before any destructive operation"
+    ],
+    "migration": [
+      "No production-state migration occurs; the spike defines no migration surface; descriptor and protocol are versioned by constants and golden fixtures in the spike, while the contract toolchain remains out of scope",
+      "The isolated runtime environment per D2 is disposable and versioned with the spike; no update or rollback machinery is introduced"
+    ],
+    "compatibility": [
+      "The pinned Hermes release v2026.8.3 (commit 3c27eb6234bf91b8ceee9e9071591b31e9b148cb) with Hermes own uv.lock and an independent environment is recorded as evidence on both platforms",
+      "docs/development/compatibility-targets.md records the pinned Hermes version, probe design, fixed decisions, accepted ADR-0028, fixed workflow-governance extension, and spike dispositions",
+      "Slice 00-04 integrated at 46798d86a2e48551a3a634e93d1e4dfe5cbf8786 (PR #9); this READY contract and Context Manifest bind exactly to that remote-main Base, and any later Base drift requires re-verification and rebinding."
+    ],
+    "security": [
+      "The Hermes-loaded shim stays pure standard library and Hermes-guaranteed; the root entry imports only hermes_shim and never src/hermes_pipeline; no Controller, Agent, Git, database, or runtime-dependency import",
+      "The loopback channel uses a random port, a per-runtime-start random token with rotation only on runtime start, strict Host and Origin validation, a 64 KiB body limit, a 60 second 60-request window, and an owner-only descriptor with an explicit Windows DACL (icacls, no Everyone or Users ACE); negative tests prove bad token, bad version, stale descriptor, path escape, ACL, and secret-canary boundaries on both platforms",
+      "Every provision/runtime/probe child starts from an empty mapping with only the documented fixture-built allow-list; inherited secrets and credential variables are absent, and injected unknown-secret canaries never reach the runtime environment, logs, receipts, or reports"
+    ],
+    "documentation": [
+      "The research report docs/research/00-05-hermes-shim-runtime-research.md records Hermes facts, evidence sources, versions, uncertainties, the accepted D1 decision and ADR-0028, fixed workflow-governance extension, fixed protocol and recovery values, and serial-execution analysis",
+      "docs/development/compatibility-targets.md gains the Hermes pin and probe records; the slices index points at this planning package; the 00-04 Closeout is prepared by the post-acceptance planning and closeout owner, not by this Slice"
+    ]
+  },
+  "acceptance_criteria": [
+    {
+      "criterion_id": "AC-01",
+      "trace_ids": [
+        "EC-00-07"
+      ],
+      "observable_result": "A real Hermes installation at the pinned release loads the minimal manifest and register(ctx) from an isolated HERMES_HOME with no load error. The PluginManager probe (Hermes-environment Python subprocess) asserts loaded.enabled is True, loaded.error is None, exactly one tool, exactly one pre_gateway_dispatch hook, exactly one top-level pipeline CLI command, and exactly five pipeline subcommands. hermes plugins list is used only as secondary manifest or enable evidence.",
+      "verification_command_ids": [
+        "hermes-pluginmanager-probe",
+        "hermes-install-probe",
+        "spike-shim",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-02",
+      "trace_ids": [
+        "EC-00-07",
+        "XSEC-01"
+      ],
+      "observable_result": "The root __init__.py imports only hermes_shim; hermes_shim/ and the Hermes-loaded entry import only the standard library and Hermes-guaranteed modules; no Controller, Agent, Git, database, or runtime-dependency import; --version and the normal runtime path stay unaffected.",
+      "verification_command_ids": [
+        "spike-shim",
+        "architecture-check",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-03",
+      "trace_ids": [
+        "EC-00-07"
+      ],
+      "observable_result": "A real source install from a temporary local Git fixture whose default HEAD is pinned to the event-derived Candidate SHA succeeds non-interactively (no requires_env prompt), enables the plugin, hermes pipeline --help resolves, and repository, fixture, and installed checkout HEAD plus HEAD^{tree} all equal that Candidate; load and registration are proven by the PluginManager probe, not by plugins list alone; a fixture whose main points at a non-Candidate SHA fails the post-install assertion.",
+      "verification_command_ids": [
+        "hermes-install-probe",
+        "hermes-pluginmanager-probe",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-04",
+      "trace_ids": [
+        "EC-00-07"
+      ],
+      "observable_result": "The fake runtime starts from the dedicated runtime-env/ project (under accepted ADR-0028) under the managed environment, serves /livez, /readyz, and /v1/version, binds loopback only, writes the descriptor atomically with owner-only ACL or mode containing PID, start identity, creation time, protocol version, port, token generation, release, and state-root identity; the token is random per runtime start and rotated on restart; a Hermes restart re-reads the existing descriptor and token without rotation or rewrite; a second start on the same state root fails the singleton lock. The cross-platform harness provisions from a clean checkout into fresh state roots, proves target interpreter and sys.prefix rather than runtime-env/.venv, runs a second materialization offline, and excludes the unknown-secret canary.",
+      "verification_command_ids": [
+        "runtime-provision",
+        "runtime-provision-offline",
+        "runtime-selfcheck",
+        "spike-runtime",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-05",
+      "trace_ids": [
+        "EC-00-07",
+        "XSEC-01"
+      ],
+      "observable_result": "Authenticated loopback fake command with the fixed protocol: the happy path returns the receipt; a duplicate command_id returns the original receipt exactly once; bad token returns 401 plus AUTHENTICATION_FAILED; unsupported protocol version returns 400 plus VALIDATION_ERROR with message unsupported protocol version; Host mismatch returns 400 plus POLICY_REJECTED; Origin mismatch returns 403 plus POLICY_REJECTED; oversize body returns 413 plus VALIDATION_ERROR; rate-limit exceedance returns 429 plus RATE_LIMITED; unknown path returns 404 plus NOT_FOUND; stale or absent descriptor returns DEPENDENCY_UNAVAILABLE; each failure carries the stable typed code with no raw exception or sensitive content in the response.",
+      "verification_command_ids": [
+        "spike-runtime",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-06",
+      "trace_ids": [
+        "EC-00-07",
+        "XREL-01"
+      ],
+      "observable_result": "Three crash points: a runtime killed before persistence is retried with the same command_id and processes afresh with exactly one receipt and one effect; a runtime killed after persistence but before the response returns the original receipt on retry with no second effect; a runtime killed after the response leaves the shim holding the receipt with no resend and any transport retry dedups to the original receipt. Hermes killed mid-flight leaves the receipt with the runtime and the next shim start re-reads the existing descriptor and token without rotation. A stale descriptor at next start is cleaned via the start-identity algorithm before the new runtime starts.",
+      "verification_command_ids": [
+        "spike-restart",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-07",
+      "trace_ids": [
+        "EC-00-11"
+      ],
+      "observable_result": "hermes pipeline setup, doctor, start, status, and stop are idempotent on the non-production skeleton: repeated identical invocations converge; stop without a running runtime is a no-op with a stable exit code; start twice without an intermediate stop converges to one runtime; commands return structured bounded JSON with stable exit codes.",
+      "verification_command_ids": [
+        "spike-lifecycle",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-08",
+      "trace_ids": [
+        "EC-00-11",
+        "XOPS-01"
+      ],
+      "observable_result": "doctor reports runtime, protocol, descriptor, and state-root health with actionable codes; an unavailable runtime or missing descriptor is reported, not repaired; no hostname, username, absolute path, environment value, token, raw exception, or database content appears in any output, proved by a redaction assertion with injected fake sensitive values.",
+      "verification_command_ids": [
+        "spike-lifecycle",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-09",
+      "trace_ids": [
+        "EC-00-07",
+        "ADR-0025",
+        "XSEC-01"
+      ],
+      "observable_result": "Synthetic Feishu /card interception: a probe event (/card hermes_pipeline_fake_probe with JSON value, MessageType.COMMAND) driven through the real gateway dispatch path with the shim loaded is skipped with one authenticated loopback fake command submitted and zero Prod Main invocations; probe events are skipped unconditionally including when the runtime is unreachable; non-probe events pass through untouched; the hook never raises.",
+      "verification_command_ids": [
+        "hermes-gateway-probe",
+        "spike-interception",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-10",
+      "trace_ids": [
+        "XSEC-01",
+        "EC-00-10"
+      ],
+      "observable_result": "Negative suite: descriptor path escape outside the state root is rejected before any write; descriptor ACL is owner-only on both platforms (Windows: exactly one grant ACE for the current user with full control and no other subject in the DACL, Everyone, Users, SYSTEM, and Administrators all rejected; POSIX 0o600); environment and secrets are allow-listed and injected secret canaries never reach the runtime environment, logs, receipts, or reports; body-size and rate limits hold; Host and Origin mismatch and loopback-only binding hold; port collision retries are bounded to 3 fresh-port attempts.",
+      "verification_command_ids": [
+        "spike-adversarial",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-11",
+      "trace_ids": [
+        "XPLAT-01",
+        "EC-00-02"
+      ],
+      "observable_result": "Windows and Linux equivalence: the complete canonical check set and Hermes probe suite pass on both platforms with LF and UTF-8 output, no timestamps or paths, and PYTHONDONTWRITEBYTECODE=1; existing workflows stay untouched. The new workflow derives/checks out the event Candidate, provisions pinned Hermes plus first frozen runtime materialization during dependency bootstrap, then runs the second materialization and probes offline through the state-root interpreter. Every child uses the fixture-built allow-list and excludes the unknown-secret canary. The extended workflow checker validates the new workflow and fixtures; the two existing workflows and their checkers are unchanged.",
+      "verification_command_ids": [
+        "frozen-sync",
+        "offline-version",
+        "offline-format",
+        "offline-lint",
+        "offline-type",
+        "offline-pytest",
+        "offline-contracts-check",
+        "offline-contracts-drift",
+        "offline-architecture",
+        "offline-docs-check",
+        "offline-docs-negative",
+        "offline-schema-negative",
+        "offline-workflow-policy",
+        "workflow-policy-hermes",
+        "workflow-policy-hermes-negative",
+        "runtime-provision",
+        "runtime-provision-offline",
+        "runtime-selfcheck",
+        "offline-artifact",
+        "hermes-install-probe",
+        "hermes-pluginmanager-probe",
+        "hermes-gateway-probe"
+      ]
+    },
+    {
+      "criterion_id": "AC-12",
+      "trace_ids": [
+        "XOPS-01",
+        "XSEC-01"
+      ],
+      "observable_result": "Every spike component carries an explicit disposition; the research report and docs/development/compatibility-targets.md record pinned Hermes version, evidence sources, fixed decisions, the exact ADR-0028 text and its accepted READY record before Executor dispatch, fixed workflow-governance extension, and residual risks; no spike code is presented as production foundation.",
+      "verification_command_ids": [
+        "unit-check",
+        "docs-check"
+      ]
+    }
+  ],
+  "required_tests": [
+    "Shim import scan: the root __init__.py imports only hermes_shim; positive pass for hermes_shim stdlib-only imports; negative fixtures importing src/hermes_pipeline, a third-party package, or a runtime dependency fail",
+    "Manifest and PluginManager-probe tests: minimal plugin.yaml and register(ctx) load under the real Hermes installation; the probe asserts loaded.enabled, loaded.error is None, exactly one tool, exactly one pre_gateway_dispatch hook, exactly one top-level pipeline CLI command, and exactly five pipeline subcommands; a broken-plugin fixture asserts loaded.error is set and Hermes keeps running; installer rejection of manifest_version above 1 and of a manifest without __init__.py",
+    "Real source-install probe: derive Candidate SHA from the workflow event, check it out, then hermes plugins install file://<clone> --enable into isolated HERMES_HOME; prove repository, fixture, and installed HEAD plus HEAD^{tree} equality to the Candidate; plugins list is secondary evidence; PluginManager probe after install",
+    "Runtime endpoint tests: /livez, /readyz, /v1/version, and /v1/commands semantics; loopback-only binding; 64 KiB body limit; 60 second 60-request window; Host and Origin validation; 5 second and 10 second timeouts",
+    "Descriptor tests: atomic write, exact field set including creation time, owner-only ACL or mode per the fixed D3 mechanism on both platforms, token randomness and rotation only on runtime start, stale-descriptor cleanup only via the start-identity algorithm, live-descriptor protection, no rotation or rewrite on a Hermes restart",
+    "Authentication and protocol negative tests: bad token, wrong protocol version, stale or absent descriptor, malformed descriptor, and their stable typed failure codes with no raw exception or sensitive content",
+    "Exactly-once tests: duplicate command_id returns the original receipt; no second effect; forged receipts rejected",
+    "Three-crash-point restart matrix: crash before persistence, crash after persistence before the response, crash after the response, and Hermes killed mid-flight; exactly one acknowledged result in every scenario; stale descriptor cleaned before the new runtime starts",
+    "Lifecycle idempotency tests: setup, doctor, start, status, and stop sequences converge; stop without a runtime is a no-op; doctor reports actionable codes; structured bounded JSON with stable exit codes",
+    "Redaction and child-authority assertion: injected fake sensitive values (hostname, username, absolute path, environment variable value, token, and unknown secret canary) never appear in any child environment, test output, or the Execution Report; each child begins from the fixture-built allow-list rather than inherited os.environ",
+    "Synthetic /card interception tests: probe event skipped with one loopback command and zero Prod Main invocations, including with an unreachable runtime; non-probe events pass through; the hook never raises; a probe event reaching the dispatch stub fails",
+    "Adversarial negative tests: descriptor path escape, environment allow-list with secret canaries, port collision with at most 3 fresh-port attempts, double-start lock contention, loopback-only binding, and a Windows DACL containing an Everyone ACE rejected by the verifier",
+    "Platform reproducibility: identical results on Windows and Linux with LF and UTF-8 output and no timestamps or paths; final verification inherits PYTHONDONTWRITEBYTECODE=1",
+    "Complete offline verification: the unchanged canonical offline command set passes on both platforms; the existing workflows stay untouched; probe suites skip without HERMES_PIPELINE_PROBE_HERMES and fail when the variable is set but broken",
+    "Disposition inventory: every spike module and test carries an experimental marker and a retain-or-delete record",
+    "Candidate-binding fixture tests: derive Candidate SHA as github.sha on push or pull_request.head.sha on pull_request; checkout it; fixture main is pinned to it; pre-install rev-parse/symbolic-ref and post-install installed HEAD/HEAD^{tree} equality; non-Candidate default HEAD negative fixture",
+    "Workflow-governance extension tests: check_hermes_integration_workflow passes for the committed hermes-integration.yml and the positive fixtures, fails for the negative fixtures; the two existing workflows and their checkers remain unchanged",
+    "Runtime locking topology tests (under accepted ADR-0028): runtime-provision, runtime-provision-offline, and runtime-selfcheck invoke the cross-platform harness from a clean checkout and fresh state roots; it passes UV_PROJECT_ENVIRONMENT only through a fixture-built child allow-list, proves target interpreter/sys.prefix never runtime-env/.venv, proves offline re-materialization and self-check, and confirms hermes_pipeline resolves without PYTHONPATH while root [project].dependencies stays empty",
+    "Descriptor and protocol versioning golden fixtures: committed accept and reject vectors for the descriptor and the /v1/version response"
+  ],
+  "demonstration": "On the exact event-derived Candidate, Windows and Linux jobs check out the SHA, prove repository/fixture/installed SHA and HEAD^{tree} equality, provision pinned Hermes plus first frozen runtime materialization during dependency bootstrap, then run second materialization and all probes offline through the state-root interpreter. Every child uses the fixture-built allow-list and excludes an unknown-secret canary. The jobs install the local fixture into isolated HERMES_HOME, prove PluginManager registration, run canonical and spike suites, validate fixed workflow policy/negative fixtures, and record bounded Candidate, version, state-root, and residual-risk evidence.",
+  "verification_commands": [
+    {
+      "command_id": "frozen-sync",
+      "argv": [
+        "uv",
+        "sync",
+        "--frozen",
+        "--all-groups"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 600000
+    },
+    {
+      "command_id": "unit-check",
+      "argv": [
+        "uv",
+        "run",
+        "pytest"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 600000
+    },
+    {
+      "command_id": "spike-shim",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pytest",
+        "tests/spike/shim"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "spike-runtime",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pytest",
+        "tests/spike/runtime"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 300000
+    },
+    {
+      "command_id": "spike-restart",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pytest",
+        "tests/spike/restart"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 300000
+    },
+    {
+      "command_id": "spike-lifecycle",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pytest",
+        "tests/spike/lifecycle"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 300000
+    },
+    {
+      "command_id": "spike-interception",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pytest",
+        "tests/spike/interception"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 300000
+    },
+    {
+      "command_id": "spike-adversarial",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pytest",
+        "tests/spike/adversarial"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 300000
+    },
+    {
+      "command_id": "hermes-install-probe",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pytest",
+        "tests/spike/probe/install"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 600000
+    },
+    {
+      "command_id": "hermes-pluginmanager-probe",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pytest",
+        "tests/spike/probe/pluginmanager"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 600000
+    },
+    {
+      "command_id": "hermes-gateway-probe",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pytest",
+        "tests/spike/probe/gateway"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 600000
+    },
+    {
+      "command_id": "contracts-check",
+      "argv": [
+        "uv",
+        "run",
+        "python",
+        "-m",
+        "hermes_pipeline.cli",
+        "contracts",
+        "check"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "architecture-check",
+      "argv": [
+        "uv",
+        "run",
+        "python",
+        "-m",
+        "hermes_pipeline.cli",
+        "architecture",
+        "check"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "docs-check",
+      "argv": [
+        "uv",
+        "run",
+        "python",
+        "scripts/check_documentation.py"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-sync",
+      "argv": [
+        "uv",
+        "sync",
+        "--frozen",
+        "--all-groups",
+        "--offline"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 300000
+    },
+    {
+      "command_id": "offline-version",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "-m",
+        "hermes_pipeline.cli",
+        "--version"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-contracts-check",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "-m",
+        "hermes_pipeline.cli",
+        "contracts",
+        "check"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-contracts-drift",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "-m",
+        "hermes_pipeline.cli",
+        "contracts",
+        "drift-check"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-architecture",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "-m",
+        "hermes_pipeline.cli",
+        "architecture",
+        "check"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-format",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "ruff",
+        "format",
+        "--check",
+        "."
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-lint",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "ruff",
+        "check",
+        "."
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-type",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pyright"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 180000
+    },
+    {
+      "command_id": "offline-pytest",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pytest"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 600000
+    },
+    {
+      "command_id": "offline-docs-check",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "scripts/check_documentation.py"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-docs-negative",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "scripts/check_documentation.py",
+        "--self-test-negative"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-schema-negative",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "scripts/check_schemas.py",
+        "--self-test-negative"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-workflow-policy",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "scripts/check_documentation.py",
+        "--check-workflows"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-artifact",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "scripts/check_repository_artifacts.py"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 30000
+    },
+    {
+      "command_id": "diff-check",
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 30000
+    },
+    {
+      "command_id": "changed-paths",
+      "argv": [
+        "git",
+        "status",
+        "--short"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 30000
+    },
+    {
+      "command_id": "workflow-policy-hermes",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "scripts/check_documentation.py",
+        "--check-hermes-workflow"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "workflow-policy-hermes-negative",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "scripts/check_documentation.py",
+        "--check-hermes-workflow-negative"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "runtime-provision",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pytest",
+        "tests/spike/runtime/test_runtime_provision.py::test_provisions_fresh_state_root"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 600000
+    },
+    {
+      "command_id": "runtime-provision-offline",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pytest",
+        "tests/spike/runtime/test_runtime_provision.py::test_reprovisions_fresh_state_root_offline"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 300000
+    },
+    {
+      "command_id": "runtime-selfcheck",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pytest",
+        "tests/spike/runtime/test_runtime_provision.py::test_runs_selfcheck_in_managed_environment"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    }
+  ],
+  "required_evidence": [
+    "Exact Base and Candidate SHAs, Slice Contract revision, and content hash",
+    "Pinned Hermes release identity (v2026.8.3, commit 3c27eb6234bf91b8ceee9e9071591b31e9b148cb), hermes --version output, and Hermes checkout SHA on both platforms",
+    "Provision evidence: Hermes clone SHA, Hermes own uv.lock build log, independent environment path, first runtime materialization during dependency bootstrap, then the network-cutoff boundary in the workflow",
+    "Changed-path manifest and staged-tree allowlist comparison performed by the Git Custodian",
+    "Bounded output, exit code, start time, and duration for every local command",
+    "Windows and Linux CI run and job URLs bound to the Candidate",
+    "Real source-install evidence: event-derived Candidate SHA and checkout, hermes plugins install file://clone --enable output, plugins list, hermes pipeline --help output, and repository/fixture/installed HEAD plus HEAD^{tree} equality",
+    "PluginManager probe output with the exact registration counts (one tool, one hook, one top-level pipeline command, five subcommands) and the broken-plugin fail-safe fixture output",
+    "Shim import scan and architecture-check output",
+    "Runtime endpoint, descriptor, ACL or mode, token-rotation timing, and singleton-lock evidence",
+    "Authentication and protocol negative matrix with the fixed stable typed failure codes",
+    "Exactly-once dedup receipts and the three-crash-point restart matrix with effect counts per fresh process and token before and after evidence",
+    "Lifecycle idempotency sequences with exit codes and doctor codes",
+    "Redaction assertion evidence with injected fake sensitive values",
+    "Synthetic /card probe scenario output with the Prod Main invocation counter at zero and the hook exception counter at zero",
+    "Adversarial negative fixture outputs including descriptor path escape, closed child-environment allow-list and unknown-secret canary absence, port collision, lock contention, and an Everyone-ACE DACL rejection",
+    "Complete offline verification outputs for the unchanged canonical command set on both platforms",
+    "Workflow policy output for unchanged existing workflows and the fixed hermes-integration workflow checker with positive and negative fixtures",
+    "Disposition inventory mapping every spike path to retain-or-delete",
+    "docs/development/compatibility-targets.md entries for the Hermes pin, probe design, fixed decisions, accepted ADR-0028, fixed workflow-governance extension, and dispositions",
+    "Residual risks and compatibility limitations",
+    "Source-install Candidate binding evidence: event derivation, exact checkout, fixture creation, pre-install and post-install HEAD/HEAD^{tree} assertions, and non-Candidate negative fixture output",
+    "Runtime provisioning evidence (under accepted ADR-0028): runtime-provision, runtime-provision-offline, and runtime-selfcheck harness outputs with runtime-env lock digest, target interpreter/sys.prefix proof, fresh state roots, offline re-materialization, and child-environment canary absence",
+    "Workflow-governance extension evidence: workflow-policy-hermes and workflow-policy-hermes-negative outputs and the unchanged existing-workflow policy output"
+  ],
+  "risks": [
+    {
+      "risk_id": "R-01",
+      "description": "The pre_gateway_dispatch hook raises or a probe-namespace event falls through to Prod Main or the normal agent dispatch, violating ADR-0025 interception semantics.",
+      "impact": "CRITICAL",
+      "mitigation": "Require a never-raise hook with unconditional skip for the probe namespace, prove it with a healthy and an unreachable runtime, and assert a zero Prod Main invocation counter in the probe scenario.",
+      "trigger": "A probe event reaches Prod Main, the hook raises, or a non-probe event is intercepted."
+    },
+    {
+      "risk_id": "R-02",
+      "description": "The fake runtime cannot start, stay healthy, or recover across kills and restarts on a required platform, or an acknowledged result is lost, duplicated, or forged.",
+      "impact": "CRITICAL",
+      "mitigation": "Fix the lifecycle, descriptor, token-rotation, and exactly-once semantics as observable criteria; run the three-crash-point restart matrix and the start-identity stale-descriptor proof on both platforms.",
+      "trigger": "An acknowledged result is lost, duplicated, or forged, a stale descriptor is removed while live, or a restart cannot converge."
+    },
+    {
+      "risk_id": "R-03",
+      "description": "Implementation drifts outside accepted ADR-0028: FastAPI/Uvicorn or the declared local hermes-pipeline package is placed in Hermes or the root runtime path, or a stdlib server substitutes for ADR-0022.",
+      "impact": "HIGH",
+      "mitigation": "Accepted ADR-0028 confines the dependency family to runtime-env/ and the state-root Managed Runtime; the READY Candidate binds ADR-0028 before Executor dispatch while root pyproject.toml/root uv.lock remain closed.",
+      "trigger": "A required runtime dependency is placed outside runtime-env/, Hermes imports it, root dependency files change, or implementation substitutes a stdlib server."
+    },
+    {
+      "risk_id": "R-04",
+      "description": "Windows cannot prove owner-only descriptor protection, or the ACL evidence is weaker than the accepted boundary.",
+      "impact": "HIGH",
+      "mitigation": "The fixed D3 mechanism applies an explicit DACL via icacls with the current-user SID only, rejects Everyone and Users ACEs, verifies the DACL output, and documents residual limits (host-admin boundary).",
+      "trigger": "A descriptor lands with a permissive DACL, an Everyone or Users ACE is present, or the evidence cannot be reproduced on both platforms."
+    },
+    {
+      "risk_id": "R-05",
+      "description": "The gateway interception probe cannot drive the real dispatch path offline (GatewayRunner internals, no-platform gateway startup), leaving only weaker hook-callback evidence.",
+      "impact": "MEDIUM",
+      "mitigation": "Pin the probe topology in decision D7 with the Hermes in-tree test seam as reference; keep the PluginManager probe as the load/registration evidence; record the fallback and its evidence level if the full path is infeasible.",
+      "trigger": "GatewayRunner cannot be driven offline with a synthetic event on a required platform."
+    },
+    {
+      "risk_id": "R-06",
+      "description": "The pinned Hermes release does not reproduce on both CI platforms, or behavior drifts between the release pin and the local installation used for research (be54f28).",
+      "impact": "MEDIUM",
+      "mitigation": "Pin release v2026.8.3 (commit 3c27eb6), build with Hermes own uv.lock into an independent environment, record hermes --version and the checkout SHA as evidence, and stop if a required platform cannot install the pinned release within the CI bounds.",
+      "trigger": "A platform cannot install the pinned release or observed behavior differs without a recorded explanation."
+    },
+    {
+      "risk_id": "R-07",
+      "description": "The runtime environment or probe inherits secrets or sensitive environment values, or the shim or runtime leaks them into logs, receipts, or reports.",
+      "impact": "HIGH",
+      "mitigation": "Start the runtime environment from an allow-list, remove inherited credential variables, and require the redaction assertion with injected fake sensitive values on both platforms.",
+      "trigger": "A secret canary or forbidden field appears in the runtime environment, logs, receipts, test output, or the Execution Report."
+    },
+    {
+      "risk_id": "R-08",
+      "description": "Descriptor path escape, port collision, or double-start contention is handled unsafely on a platform.",
+      "impact": "MEDIUM",
+      "mitigation": "Require negative tests for symlink, junction, and reparse-point escapes before any write, at most 3 fresh-port collision retries, and the singleton lock proof.",
+      "trigger": "An escape reaches the filesystem, a collision is not bounded, or two runtimes claim one state root."
+    },
+    {
+      "risk_id": "R-09",
+      "description": "Slice 00-05 implementation could overlap future work on 00-04-owned shared paths, producing integration ambiguity.",
+      "impact": "MEDIUM",
+      "mitigation": "00-04 is integrated at 46798d86a2e48551a3a634e93d1e4dfe5cbf8786; this contract binds that exact Base and remains serial for the shared paths. Any later drift requires a reverified Base and path-independence proof.",
+      "trigger": "The assigned Base no longer supports the permitted-path independence proof or a shared-path change requires concurrent integration."
+    },
+    {
+      "risk_id": "R-10",
+      "description": "Spike code is treated as production foundation without a recorded disposition, silently constraining Slice 00-07 or later design.",
+      "impact": "MEDIUM",
+      "mitigation": "Mark every spike component experimental with an explicit retain-or-delete record and require the disposition inventory in the evidence.",
+      "trigger": "A spike component is presented as production foundation without a disposition or 00-07 adoption."
+    },
+    {
+      "risk_id": "R-11",
+      "description": "The new hermes-integration.yml workflow is not governed by the existing workflow policy checker, or its governance extension is not implemented.",
+      "impact": "MEDIUM",
+      "mitigation": "The workflow-governance extension is fixed in-Slice technical scope: the READY revision extends scripts/check_documentation.py with check_hermes_integration_workflow plus scripts/fixtures/workflows/ fixtures and the workflow-policy-hermes and workflow-policy-hermes-negative verification commands; the two existing workflows and their checkers are unchanged; the coverage gap of the existing checker is acknowledged and never papered over.",
+      "trigger": "The new workflow changes security posture without the checker extension, the negative fixtures pass, or the existing workflows are modified."
+    },
+    {
+      "risk_id": "R-12",
+      "description": "The source-install fixture does not bind to the exact event-derived Candidate, or runtime provisioning is not executable from a clean checkout into a fresh state-root environment.",
+      "impact": "MEDIUM",
+      "mitigation": "Derive/check out the Candidate from the workflow event; pin the fixture main branch and prove repository/fixture/installed HEAD plus HEAD^{tree}; declare hermes-pipeline==0.1.0 in runtime-env and use the state-root harness with controlled child environment, runtime-provision, runtime-provision-offline, and runtime-selfcheck.",
+      "trigger": "Any event-derived Candidate/fixture/installed SHA or tree differs, a secret canary reaches a child, or the runtime cannot be provisioned into a fresh state root."
+    },
+    {
+      "risk_id": "R-13",
+      "description": "A predecessor or integration Base is treated as current without exact Git evidence.",
+      "impact": "HIGH",
+      "mitigation": "00-04 is a machine predecessor integrated at 46798d86a2e48551a3a634e93d1e4dfe5cbf8786 (PR #9); Git Custodian created clean planning and execution worktrees at this exact Base, and the manifest records refreshed digests.",
+      "trigger": "A Candidate is prepared against another Base without re-verification, or a predecessor claim lacks Git Custodian or integration evidence."
+    }
+  ],
+  "retry_budget": 3,
+  "stop_conditions": [
+    "Accepted ADR-0028 is absent, not accepted, or not listed in binding_adrs before Executor dispatch; a runtime dependency outside the ADR-0028-authorized runtime-env/ project is needed; or a root pyproject.toml/root uv.lock or existing-workflow change outside fixed hermes-integration governance is needed without a human-approved ADR and Contract Change Request",
+    "A stdlib server is used as an equivalent substitute for the ADR-0022 FastAPI/Uvicorn choice, or an accepted ADR is created without human approval",
+    "The pre_gateway_dispatch hook must raise, a probe-namespace event must reach Prod Main, or a non-probe event must be intercepted",
+    "An acknowledged fake command is lost, duplicated, or forged across the restart matrix; a stale descriptor is removed while live; a Hermes restart rotates or rewrites the token; or the start-identity algorithm cannot be reproduced on a required platform",
+    "The runtime cannot bind loopback only, cannot write a protected descriptor, or two runtimes claim one state root",
+    "A failure mode returns an unstable typed code, leaks a raw exception or sensitive content, or a secret canary reaches the runtime environment, logs, receipts, or reports",
+    "Descriptor path escape cannot be rejected before any write on a required platform, or owner-only ACL or mode evidence cannot be produced on both platforms including the Windows explicit-DACL verification",
+    "The pinned Hermes release cannot be installed or loaded on a required platform within the CI bounds, or the provision is not reproducible",
+    "A spike component is presented as production foundation without a recorded disposition or explicit Slice 00-07 adoption",
+    "Implementation requires paths outside the READY permitted_paths, changes scripts beyond the fixed hermes-integration governance extension, changes schemas/contracts/existing workflows/accepted ADRs, or changes planning/review/evidence/closeout records without a human-approved Contract Change Request",
+    "Recomputing content_hash in historical planning, review, evidence, or closeout records becomes necessary",
+    "The Base SHA changes without re-verification and rebinding, or required Windows and Linux behavior cannot be equivalent",
+    "Slice 00-04 integration at Base 46798d86a2e48551a3a634e93d1e4dfe5cbf8786 cannot be evidenced, or this READY contract/manifest cannot be rebound and revalidated if the exact Base changes.",
+    "The event-derived Candidate cannot be checked out or repository/fixture/installed SHA and tree equality cannot be proven",
+    "The runtime environment cannot be provisioned from a clean checkout into a fresh state root with the fixed runtime-env/ topology, cannot run the offline re-materialization/self-check, or inherits an unapproved environment value",
+    "Descriptor or protocol versioning must use the contract-toolchain path, or the workflow-governance extension must modify the two existing workflows or their checkers"
+  ],
+  "content_hash": "sha256:c179c804824f63a0976075aadd5d1a0a89697ee7aa2e019ac26f6506eb4e74fa"
+}
