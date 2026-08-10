@@ -51,17 +51,30 @@ def _run_with_blocked_toolchain(argv: list[str]) -> subprocess.CompletedProcess[
     )
 
 
+def _assert_bounded_subprocess_result(
+    proc: subprocess.CompletedProcess[str],
+    expected_returncode: int,
+    required_output: str,
+) -> None:
+    """Validate bounded CLI output without rendering it on regression."""
+    combined = proc.stdout + proc.stderr
+    if (
+        proc.returncode != expected_returncode
+        or required_output not in combined
+        or "Traceback" in combined
+        or len(combined.encode("utf-8")) > 512
+    ):
+        raise AssertionError("lazy-dispatch subprocess returned unsafe output")
+
+
 def test_version_works_without_toolchain_imports() -> None:
     proc = _run_with_blocked_toolchain(["--version"])
-    assert proc.returncode == 0
-    assert proc.stdout.strip() == "0.1.0"
+    _assert_bounded_subprocess_result(proc, 0, "0.1.0")
 
 
 def test_contracts_check_returns_bounded_error_without_toolchain() -> None:
     proc = _run_with_blocked_toolchain(["contracts", "check"])
-    assert proc.returncode == 1
-    assert "contract toolchain unavailable" in (proc.stdout + proc.stderr)
-    assert "Traceback" not in proc.stdout + proc.stderr
+    _assert_bounded_subprocess_result(proc, 1, "contract toolchain unavailable")
 
 
 def test_plugin_entry_and_version_never_import_toolchain() -> None:
@@ -75,8 +88,7 @@ def test_plugin_entry_and_version_never_import_toolchain() -> None:
         check=False,
         cwd=REPO_ROOT,
     )
-    assert proc.returncode == 0
-    assert proc.stdout.strip() == "0.1.0"
+    _assert_bounded_subprocess_result(proc, 0, "0.1.0")
 
 
 def test_subcommand_parse_errors_happen_before_toolchain_import() -> None:
