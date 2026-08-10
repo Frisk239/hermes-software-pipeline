@@ -1,9 +1,15 @@
-# Managed Python quality checks (slice-00-02).
+# Managed Python quality checks (slice-00-02; revision 7, slice-00-04 CCR).
 # Installs the frozen uv 0.12.1 environment once, then runs every canonical
 # check and repeats frozen sync plus version/contract/architecture smoke
 # checks offline on the required Windows and Linux runners. The job is
 # read-only, persists no checkout credential, consumes no secret, and
 # limits network to checkout, tool setup, and the first frozen sync.
+# Revision 7 (slice-00-04 CCR): the managed interpreter is pinned to the
+# exact uv-managed CPython 3.12.13 (Astral build) via setup-uv
+# python-version and the committed .python-version, and UV_MANAGED_PYTHON=1
+# forces uv to use only managed Python installations so a system interpreter
+# with a different bundled SQLite can never satisfy the SQLite WAL-reset
+# version gate (AC-08). The SQLite predicate itself is unchanged.
 name: python-quality
 on:
   push:
@@ -16,6 +22,7 @@ jobs:
       PYTHONDONTWRITEBYTECODE: "1"
       PYRIGHT_PYTHON_GLOBAL_NODE: "0"
       PYRIGHT_PYTHON_NODEJS_WHEEL: "1"
+      UV_MANAGED_PYTHON: "1"
     strategy:
       fail-fast: false
       matrix:
@@ -28,7 +35,7 @@ jobs:
       - uses: astral-sh/setup-uv@v9.0.0
         with:
           version: "0.12.1"
-          python-version: "3.12"
+          python-version: "3.12.13"
       - name: Install frozen environment
         run: uv sync --frozen --all-groups
       - name: Format check

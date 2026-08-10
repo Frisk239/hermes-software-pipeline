@@ -76,6 +76,43 @@ def test_quality_workflow_rejects_ambient_node(tmp_path: Path, checker: Any) -> 
     assert "env must be exactly" in report.render()
 
 
+def test_quality_workflow_rejects_missing_managed_python_enforcement(
+    tmp_path: Path, checker: Any
+) -> None:
+    """Revision 7 (slice-00-04 CCR): the quality job must force uv-managed
+    Python; dropping UV_MANAGED_PYTHON fails the workflow policy check."""
+    workflow = _copy_workflow(tmp_path)
+    text = workflow.read_text(encoding="utf-8")
+    workflow.write_text(
+        text.replace('      UV_MANAGED_PYTHON: "1"\n', ""),
+        encoding="utf-8",
+    )
+    report = checker.Reporter()
+    checker.check_quality_workflow(tmp_path, report)
+    assert report.has_issues
+    assert "env must be exactly" in report.render()
+
+
+def test_quality_workflow_rejects_system_python_version(
+    tmp_path: Path, checker: Any
+) -> None:
+    """Revision 7 (slice-00-04 CCR): the quality job must pin the exact
+    uv-managed CPython 3.12.13; any other setup-uv python-version fails."""
+    workflow = _copy_workflow(tmp_path)
+    text = workflow.read_text(encoding="utf-8")
+    workflow.write_text(
+        text.replace(
+            '          python-version: "3.12.13"\n',
+            '          python-version: "3.12"\n',
+        ),
+        encoding="utf-8",
+    )
+    report = checker.Reporter()
+    checker.check_quality_workflow(tmp_path, report)
+    assert report.has_issues
+    assert "setup-uv step must pin uv" in report.render()
+
+
 def test_quality_workflow_rejects_compact_secret_context(
     tmp_path: Path, checker: Any
 ) -> None:

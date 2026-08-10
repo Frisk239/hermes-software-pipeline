@@ -118,7 +118,14 @@ RUNS_ON_MATRIX_EXPRESSION = "${{ matrix.os }}"
 REQUIRED_RUNNERS = ("windows-latest", "ubuntu-latest")
 CHECKOUT_ACTION = "actions/checkout@v4"
 SETUP_PYTHON_ACTION = "actions/setup-python@v5"
+# Documentation workflow interpreter (stdlib-only checks; revision 7 keeps it
+# at the 3.12 line and never binds it to the source-only 3.12.13 patch).
 REQUIRED_PYTHON_VERSION = "3.12"
+# Python quality workflow interpreter (revision 7, slice-00-04 CCR): the
+# exact uv-managed CPython 3.12.13 Astral build is pinned because it links
+# the SQLite library required by the WAL-reset version gate (AC-08); a
+# system interpreter of the same version may link a different SQLite.
+REQUIRED_QUALITY_PYTHON_VERSION = "3.12.13"
 PERSIST_CREDENTIALS_DISABLED = ("false", False)
 SETUP_UV_ACTION = "astral-sh/setup-uv@v9.0.0"
 REQUIRED_UV_VERSION = "0.12.1"
@@ -126,6 +133,10 @@ REQUIRED_QUALITY_ENV = {
     "PYTHONDONTWRITEBYTECODE": "1",
     "PYRIGHT_PYTHON_GLOBAL_NODE": "0",
     "PYRIGHT_PYTHON_NODEJS_WHEEL": "1",
+    # Revision 7 (slice-00-04 CCR): uv must use only managed Python
+    # installations so a system interpreter with a different bundled SQLite
+    # can never satisfy the SQLite WAL-reset version gate.
+    "UV_MANAGED_PYTHON": "1",
 }
 REQUIRED_QUALITY_WORKFLOW_COMMANDS = (
     "uv sync --frozen --all-groups",
@@ -824,11 +835,12 @@ def _check_quality_action_steps(
                 and set(with_block) == {"version", "python-version"}
                 and str(with_block.get("version")).strip("\"'") == REQUIRED_UV_VERSION
                 and str(with_block.get("python-version")).strip("\"'")
-                == REQUIRED_PYTHON_VERSION
+                == REQUIRED_QUALITY_PYTHON_VERSION
             ):
                 report.issue(
                     f"{workflow}: setup-uv step must pin uv "
-                    f"{REQUIRED_UV_VERSION} and Python {REQUIRED_PYTHON_VERSION}"
+                    f"{REQUIRED_UV_VERSION} and Python "
+                    f"{REQUIRED_QUALITY_PYTHON_VERSION}"
                 )
         else:
             report.issue(f"{workflow}: unsupported action {uses!r}")

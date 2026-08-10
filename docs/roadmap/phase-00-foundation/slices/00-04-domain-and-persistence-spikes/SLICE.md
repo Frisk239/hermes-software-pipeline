@@ -6,7 +6,7 @@ Phase: `phase-00`
 
 Status: `READY`
 
-Document revision: `6`
+Document revision: `7` (revision 6 stopped with `BLOCKED_CONTRACT`; revision 7 resolves the CCR below)
 
 Predecessor: `slice-00-03` accepted and integrated at `32b4b7a5406bf4ee58b79e2602f77af78ba3a27f`
 
@@ -51,7 +51,7 @@ From a clean Windows or Linux checkout, install the frozen Python 3.12 developme
 - making `SqliteSaver`, SQLAlchemy, Alembic, LangGraph, or any spike dependency a runtime dependency or a business-state authority;
 - real migrations of production state, production backup/restore, or any operation on a real Workspace;
 - remote operations, provider calls, Git mutation, secrets, or network access after the dependency-install step;
-- changes to `scripts/`, bootstrap workflow files, `.github/workflows/`, committed Schemas, `contracts/`, `src/hermes_pipeline/contracts/`, `src/hermes_pipeline/cli/`, or any accepted ADR, planning, review, evidence, or closeout record;
+- changes to `scripts/` beyond the revision-7 `check_documentation.py` workflow-policy constants, bootstrap workflow files, `.github/workflows/` beyond the revision-7 `python-quality.yml` interpreter pin and `UV_MANAGED_PYTHON` enforcement, committed Schemas, `contracts/`, `src/hermes_pipeline/contracts/`, `src/hermes_pipeline/cli/`, or any accepted ADR, planning, review, evidence, or closeout record;
 - recomputing `content_hash` in historical planning, review, evidence, or closeout records;
 - Slice 00-05, 00-06, or 00-07 behavior, including any runtime-dependency or managed-runtime isolation decision (that requires a later ADR and Slice under ADR-0027);
 - changing the accepted `ControllerCommand -> CommandReceipt` signature, turning spike helper failures into a product public API, or changing committed Schemas for them.
@@ -107,4 +107,14 @@ On the exact Candidate, both Windows and Linux jobs install the frozen environme
 - Offline verification (reviewer-directed, rework #1): the complete offline canonical command set mirrors the exact unchanged commands of `.github/workflows/python-quality.yml`; every spike test is covered by the offline pytest run; the non-offline `unit-check` alone is never the evidence for complete offline verification.
 - Code disposition (slices/README 00-04 mandate): only the CounterSpike domain evaluator may be retained as a non-public candidate; persistence, migration, workload, and LangGraph checkpoint spikes are experimental and deleted or rewritten unless Slice 00-07 explicitly adopts them.
 - Out-of-scope confirmation: no cross-database transaction, no production service, no Hermes behavior, no real business state machine, no runtime dependency, no remote operation, and no product public API for spike typed failures is part of this Slice; those require their own approved contract and ADR.
-- Future implementation allowed paths (kept minimal, per this planning change): `pyproject.toml` (dev group only), `uv.lock`, `src/hermes_pipeline/domain/`, `src/hermes_pipeline/controller/`, `src/hermes_pipeline/persistence/`, `src/hermes_pipeline/stage_executor/`, `tests/`, and `docs/development/compatibility-targets.md`; `scripts/`, `.github/workflows/`, `schemas/`, `contracts/`, `src/hermes_pipeline/contracts/`, `src/hermes_pipeline/cli/`, and all accepted planning, review, evidence, and closeout records stay closed unless a Contract Change Request approves otherwise.
+- Future implementation allowed paths (revision 7, per this CCR): `pyproject.toml` (dev group only), `uv.lock`, `.python-version`, `.github/workflows/python-quality.yml`, `scripts/check_documentation.py` (revision-7 workflow-policy constants only), `tests/` (including `tests/test_quality_workflow.py`), `src/hermes_pipeline/domain/`, `src/hermes_pipeline/controller/`, `src/hermes_pipeline/persistence/`, `src/hermes_pipeline/stage_executor/`, and `docs/development/compatibility-targets.md`; all other `scripts/`, `.github/workflows/`, `schemas/`, `contracts/`, `src/hermes_pipeline/contracts/`, `src/hermes_pipeline/cli/`, and all accepted planning, review, evidence, and closeout records stay closed unless a Contract Change Request approves otherwise.
+
+## Revision 7 (2026-08-08) — CCR resolution: managed interpreter pin for the SQLite version gate
+
+Attempt 1 under revision 6 stopped with `BLOCKED_CONTRACT`: the managed Windows runtime (CPython 3.12.10) linked SQLite `3.49.1`, failing the exact WAL-reset repair-version predicate (`>=3.51.3 OR (>=3.50.7 AND <3.51.0) OR (>=3.44.6 AND <3.45.0)`). Per the stop condition, no spike persistence conclusion was claimed and a Contract Change Request was submitted. Human decision (2026-08-08):
+
+- **The SQLite predicate is unchanged** and remains an independent per-platform acceptance gate measured via `sqlite3.sqlite_version`; official SQLite fix points are only 3.51.3 and the two named backports, with no 3.49.x relaxation basis.
+- **The managed interpreter is pinned to the exact uv-managed CPython `3.12.13` (Astral build)**: `.python-version` = `3.12.13` (no `+`); `python-quality.yml` pins `setup-uv` `python-version: "3.12.13"` and sets job env `UV_MANAGED_PYTHON=1`, forcing uv to use only managed Python installations so a system interpreter with a different bundled SQLite can never satisfy the gate.
+- **CI responsibility split**: `documentation-contracts.yml` stays at `"3.12"` — it runs only stdlib-only bootstrap checks and carries no SQLite persistence conclusion, so it is not bound to the source-only `3.12.13` patch. `scripts/check_documentation.py` carries split constants (`REQUIRED_PYTHON_VERSION` 3.12 for the documentation workflow; `REQUIRED_QUALITY_PYTHON_VERSION` 3.12.13 for the quality workflow) and requires `UV_MANAGED_PYTHON=1` in the quality job env; `tests/test_quality_workflow.py` gains a negative test proving a quality job missing the managed-Python enforcement fails.
+- **Authorized paths extended for this revision**: `.python-version`, `.github/workflows/python-quality.yml`, `scripts/check_documentation.py` (revision-7 constants only), `tests/test_quality_workflow.py`.
+- `docs/development/compatibility-targets.md` records the pin decision and the Windows initial observation (uv-managed CPython 3.12.13 links SQLite 3.53.1); the Linux value is recorded after the first dual-platform CI run with the pinned interpreter.
