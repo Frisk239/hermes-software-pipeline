@@ -1,0 +1,509 @@
+{
+  "schema_id": "https://schemas.hermes-pipeline.dev/engineering/context-manifest/v1",
+  "schema_version": 1,
+  "manifest_id": "ctx_slice-00-05_planner_r5",
+  "role": "PLANNER",
+  "slice_id": "slice-00-05",
+  "base_sha": "46798d86a2e48551a3a634e93d1e4dfe5cbf8786",
+  "assembled_at": "2026-08-10T00:00:00.000Z",
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "digest": "sha256:3908e4507cfbaf1a0d6dd80565ad56832272730c58d4e895f0be53e6e444bde1",
+      "purpose": "Repository constitution and rework-ownership policy (Base blob 46798d)"
+    },
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:97960150474d5b0c2b459770f48299f4d897bb30b91f9de5f13d73d027d915b4",
+      "purpose": "Canonical product and domain vocabulary (Base blob 46798d)"
+    },
+    {
+      "path": "docs/agents/roles/planner-reviewer.md",
+      "digest": "sha256:34a6ef4243121fa6133c32a55f2e9c2c5c1605153fcf58f7adc69f46c59ba7cb",
+      "purpose": "Binding Codex Planner-Designer-Reviewer role contract (Base blob 46798d)"
+    },
+    {
+      "path": "docs/roadmap/TRACEABILITY.md",
+      "digest": "sha256:cc858ef5387503b2154d59c0dc5ad7aeb934fb69e073d07ab53cf828271f1182",
+      "purpose": "Phase requirement and verification traceability incl. EC-00-07/EC-00-11 ownership (Base blob 46798d)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/PHASE.md",
+      "digest": "sha256:5acb46cdc68794bf69e5c708fb9813048f3d19170a7502f4f82a0f77de7d8f0d",
+      "purpose": "Approved Phase 00 outcome, invariants, exits, and slice map (Base blob 46798d)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/phase-plan.json",
+      "digest": "sha256:34035ae526cb363e8b8a009fbea7a0246dd87c33337f1086cf079cfa2d5aea3f",
+      "purpose": "Approved Phase 00 machine plan incl. slice-00-05 ownership of EC-00-07/EC-00-11 (Base blob 46798d)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/README.md",
+      "digest": "sha256:50a370ddfe2437d458abd36484aad58a184f1907d642e4b6fb9bc464cc107e48",
+      "purpose": "Slice map and next-Slice pointer updated to the 00-05 READY revision 5 after 00-04 integration (planning artifact)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-01-repository-baseline/CLOSEOUT.md",
+      "digest": "sha256:9d365267fa747208bfef1d9c71b372045eec931fda67a222ac72c15bcb61b72d",
+      "purpose": "Accepted predecessor capability, evidence, and debt (Base blob 46798d)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-02-python-quality-skeleton/CLOSEOUT.md",
+      "digest": "sha256:b09431e39f7c8d17f834af8cf21a9830cad45e4e9ae86547578b8f002e8877ca",
+      "purpose": "Accepted Slice 00-02 closeout; predecessor of 00-05 (Base blob 46798d)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-03-contract-toolchain/CLOSEOUT.md",
+      "digest": "sha256:0e24f5bccf258475fb1f587a08249f7568d195f0fe062bd9731d543e5440789b",
+      "purpose": "Accepted Slice 00-03 closeout and handover prerequisites; integrated at 32b4b7a (Base blob 46798d)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-03-contract-toolchain/SLICE.md",
+      "digest": "sha256:2bc7277788074bdf196bf6a2fa844c3710eaa23a11110012b17a6f08066440b8",
+      "purpose": "Accepted Slice 00-03 human-readable contract (Base blob 46798d)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-03-contract-toolchain/slice-contract.json",
+      "digest": "sha256:ecd968bdcfc344230d50e18e88ba389d624eb1781a8f4ae7aa79302f4478a83f",
+      "purpose": "Accepted Slice 00-03 machine contract (Base blob 46798d)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-04-domain-and-persistence-spikes/SLICE.md",
+      "digest": "sha256:8a6e0879ffbf59105b30e3e8e5dc05adb545582b9f058ff47400e8370a4bb63d",
+      "purpose": "Integrated Slice 00-04 human-readable contract; a satisfied machine predecessor of 00-05 (Base blob 46798d)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-04-domain-and-persistence-spikes/slice-contract.json",
+      "digest": "sha256:aaf5943a727d019af5ac5cef254858961f0347af96cacd1a4a0e2ad675b900fb",
+      "purpose": "Integrated Slice 00-04 machine contract; a satisfied predecessor at the READY Base (Base blob 46798d)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-04-domain-and-persistence-spikes/context-manifest.json",
+      "digest": "sha256:e4938029f3eb3660dc6c3a38eec041b0aaaefb37474b5852b062fd30b79439b6",
+      "purpose": "Integrated Slice 00-04 planning Context Manifest retained as predecessor evidence (Base blob 46798d)"
+    },
+    {
+      "path": "docs/research/00-04-domain-persistence-spike-dependency-research.md",
+      "digest": "sha256:dfe20ddda4fc54500fc5c489717fbb7beca093ea548e38260cea3ce4212061d8",
+      "purpose": "Slice 00-04 research precedent for dependency-decision style (Base blob 46798d)"
+    },
+    {
+      "path": "docs/research/00-05-hermes-shim-runtime-research.md",
+      "digest": "sha256:06b5a8f9f718c6353bf0c759625749dea1269908e0ce5574f8e78d3c86ee32ae",
+      "purpose": "Slice 00-05 research report revision 5: accepted ADR-0028, READY Base rebind, runtime topology, and Candidate fixture (planning artifact)"
+    },
+    {
+      "path": "docs/adr/0014-keep-pipeline-authority-outside-stage-workflow-engine.md",
+      "digest": "sha256:124920ba5602762accd9645d216a485562d44eb6f2f88a7601d81d638b6f3b24",
+      "purpose": "Controller authority and checkpoint boundary decision (Base blob 46798d)"
+    },
+    {
+      "path": "docs/adr/0019-isolate-runtime-behind-thin-hermes-shim.md",
+      "digest": "sha256:34749f93ff34501ebbbf951a26b540f56e2e6a3181570be556601be4a7e73e46",
+      "purpose": "Thin Shim and runtime isolation decision; the shim is stdlib-only and fails closed (Base blob 46798d)"
+    },
+    {
+      "path": "docs/adr/0020-use-python-312-and-uv-for-managed-runtime.md",
+      "digest": "sha256:02c3403aeaed29563f0f3f3a25bf8e4a872b204cf88b5e5199b32daf00f9ba3e",
+      "purpose": "Binding Python 3.12 and uv environment decision for the managed runtime (Base blob 46798d)"
+    },
+    {
+      "path": "docs/adr/0021-use-sqlite-single-writer-for-version-1.md",
+      "digest": "sha256:3ef94448ebc54e60d87da73ebc2895bce15d4857026cfd756e03cc5a32571590",
+      "purpose": "SQLite single-writer decision; binding for production persistence, not for the disposable fake receipt store (Base blob 46798d)"
+    },
+    {
+      "path": "docs/adr/0022-use-authenticated-loopback-http-control-interface.md",
+      "digest": "sha256:8f34dc548e5591f68dc366c9b5d1d86b463a8aa4fc418c09d8fd9c63961551d0",
+      "purpose": "Accepted loopback Control Interface decision; ADR-0028 authorizes its FastAPI/Uvicorn dependency isolation (Base blob 46798d)"
+    },
+    {
+      "path": "docs/adr/0023-use-langgraph-only-inside-stage-executor.md",
+      "digest": "sha256:a90719bb2b3b87599769e3420b6f93cb733e5d7c1a31836fd5ade5fc7810ce4f",
+      "purpose": "LangGraph confinement decision; out of 00-05 scope (Base blob 46798d)"
+    },
+    {
+      "path": "docs/adr/0024-use-pydantic-models-and-json-schema-contracts.md",
+      "digest": "sha256:7e0c6c5b33113d11fe22d647d96d6eea7de9a683979c85b96dbe975e9cd073aa",
+      "purpose": "Pydantic sole-authoring-source contract decision; the spike descriptor/protocol versioning is fixed to spike constants plus golden fixtures (Base blob 46798d)"
+    },
+    {
+      "path": "docs/adr/0025-use-hermes-gateway-for-feishu-and-poll-github.md",
+      "digest": "sha256:0ef3ce86798ad9a03fe5a75afa732a842e80c5c911c0b87888aec2b8b5ae2c32",
+      "purpose": "Hermes Gateway Feishu interception decision; the synthetic /card probe criteria bind here (Base blob 46798d)"
+    },
+    {
+      "path": "docs/adr/0026-contract-toolchain-development-dependencies.md",
+      "digest": "sha256:b779787e17a7f4090ce15dbab5530980732bd30eaa19c94ccebfb511335ca3de",
+      "purpose": "Dev-only toolchain dependency precedent; the Hermes plugin entry and normal runtime path stay pure standard library (Base blob 46798d)"
+    },
+    {
+      "path": "docs/adr/0027-domain-and-persistence-spike-dependencies.md",
+      "digest": "sha256:924f9a0f4faf6f77d4264e8713b7c922054f4550659e6ff714934cb271f8a06e",
+      "purpose": "Dev-only spike dependency precedent; accepted ADR-0028 now authorizes the separate managed-runtime family (Base blob 46798d)"
+    },
+    {
+      "path": "docs/architecture/system-and-module-design.md",
+      "digest": "sha256:adabdcdf7b7673106510a45f867ab58fea48d3ebfc6114e74be95bead8fc986c",
+      "purpose": "Module boundaries, process topology, Control Interface, descriptor, and startup/shutdown rules (Base blob 46798d)"
+    },
+    {
+      "path": "docs/architecture/data-and-api-contracts.md",
+      "digest": "sha256:bda7ff9a2fdac790a6744d5304df16ea62ebb1fc0d5f71c50724bd63682033b8",
+      "purpose": "Control Interface rules, error contract, canonicalization, and hashing rules (Base blob 46798d)"
+    },
+    {
+      "path": "docs/design/technology-stack.md",
+      "digest": "sha256:c853026004e759777e457f18200e0b1091987f45cecbd17f8d888ac415861b97",
+      "purpose": "Accepted v1 stack incl. thin-shim constraint and required Phase 0 feasibility slices (Base blob 46798d)"
+    },
+    {
+      "path": "docs/design/source-installation-and-update.md",
+      "digest": "sha256:2dd8dcb0b25978172b7f7d4c44e6496531a14c168c5e9fa4f29f412301ba7c3a",
+      "purpose": "Source-install contract, durable-state layout, and update boundaries (Base blob 46798d)"
+    },
+    {
+      "path": "docs/development/coding-and-test-standard.md",
+      "digest": "sha256:b4d689f55b2d20c9fcbc9ba25578fb61471d970b49a5a91ddf50d6bab907b83a",
+      "purpose": "Python coding and deterministic test standard; raw exceptions must not cross Interfaces (Base blob 46798d)"
+    },
+    {
+      "path": "docs/development/ci-and-testing.md",
+      "digest": "sha256:8953023372b964f8edecb5a68158677c3c9712d0d239219261c65782093496bf",
+      "purpose": "CI, branch, dependency, and release-gate rules incl. the runtime dependency rule (Base blob 46798d)"
+    },
+    {
+      "path": "docs/development/compatibility-targets.md",
+      "digest": "sha256:c74a7991cf2b2ca177654bb3613e7c3690886cd74d83e07ba9919106755ce9e4",
+      "purpose": "Phase 00 compatibility targets, including the integrated 00-04 and planned Hermes probe evidence (Base blob 46798d)"
+    },
+    {
+      "path": "docs/development/phase-and-slice-operating-model.md",
+      "digest": "sha256:5bbfee9a5cde6f31acf74a9f39a05869b10de1b3f17abfc51332ca1146702218",
+      "purpose": "Slice lifecycle, worktree, evidence, review, and rework-ownership rules (Base blob 46798d)"
+    },
+    {
+      "path": "docs/operations/configuration-and-lifecycle.md",
+      "digest": "sha256:61e736f5f5ca05238c64597b5fd213c5e9ebc5335d8a35d883d8311e35f3d109",
+      "purpose": "Data roots, startup, shutdown, and lifecycle command rules; state-root layout (Base blob 46798d)"
+    },
+    {
+      "path": "docs/operations/observability-recovery-and-runbooks.md",
+      "digest": "sha256:ca388d78948625718d5277dabd111a01f7ff4de3b916c6f7eaa16ba74eeeaa82",
+      "purpose": "Health views, reconciliation, and recovery rules (Base blob 46798d)"
+    },
+    {
+      "path": "docs/security/threat-model-and-trust-boundaries.md",
+      "digest": "sha256:9ca0be39effded97a3fdafdca4d380fd83b3f60bbb7bae601dc42c3a8e045387",
+      "purpose": "Loopback Interface defenses, process defenses, and required security tests (Base blob 46798d)"
+    },
+    {
+      "path": "schemas/engineering/slice-contract.schema.json",
+      "digest": "sha256:a1a004e5bb7e5e4c1c10ca9b9ccff2f7a37259f703141ea5ea0da6c3d7680a80",
+      "purpose": "Machine validation schema for the 00-05 Slice Contract (Base blob 46798d)"
+    },
+    {
+      "path": "schemas/engineering/context-manifest.schema.json",
+      "digest": "sha256:bbf4d7f7568f91476404c28ef2554cbb9bbaddb219eeed2b088f62f929991210",
+      "purpose": "Machine validation schema for this Context Manifest (Base blob 46798d)"
+    },
+    {
+      "path": "schemas/common/definitions.schema.json",
+      "digest": "sha256:51eab419183f06688230ee9ec739275642c9a4c3a6dffa26f107356302ff2149",
+      "purpose": "Shared $defs for digest, SHA, path, risk, and timestamp types (Base blob 46798d)"
+    },
+    {
+      "path": "scripts/check_documentation.py",
+      "digest": "sha256:e9148030abbfb13ff99d100c4aab8a6242d94513bedc3f3e3272706266bb5433",
+      "purpose": "Dependency-free documentation and workflow-policy checker at Base; 00-05 fixed extension scope is governed by this contract (Base blob 46798d)"
+    },
+    {
+      "path": "scripts/check_schemas.py",
+      "digest": "sha256:dc213d0f303946f3593dfe66adb39cdb726b02ff354afe1fffec4c7b9c1c93a7",
+      "purpose": "Immutable bootstrap Schema gate used by this planning self-check (Base blob 46798d)"
+    },
+    {
+      "path": "scripts/check_repository_artifacts.py",
+      "digest": "sha256:b4d7cc301ff2aa0cf113c5ff650849b30f0f754ae8dee9d08aa4116db129ca96",
+      "purpose": "Final cache and bytecode artifact audit (Base blob 46798d)"
+    },
+    {
+      "path": "pyproject.toml",
+      "digest": "sha256:4ae07d6d5790e2de4333d8362f53bb9b405df3f930840e0f3d1a31ee34b8c6de",
+      "purpose": "Root project dependency groups; root runtime dependencies remain empty under accepted ADR-0028 (Base blob 46798d)"
+    },
+    {
+      "path": "uv.lock",
+      "digest": "sha256:065e5f9fe05c101f9171927c37f033c8057d45c7bb45373726430962c25c5679",
+      "purpose": "Root frozen resolution remains unchanged; the Managed Runtime uses its separate runtime-env lock (Base blob 46798d)"
+    },
+    {
+      "path": ".python-version",
+      "digest": "sha256:060069118579cda4d81b459fdc857131d1dbb590eba42f9b12aa6e3103d6583f",
+      "purpose": "Interpreter pin at the READY Base (Base blob 46798d)"
+    },
+    {
+      "path": ".github/workflows/python-quality.yml",
+      "digest": "sha256:564f293204644387ca878bbb60518eae9211806d76e472ae416a44c3274d5b1d",
+      "purpose": "Existing CI command inventory at Base; remains untouched by 00-05 (Base blob 46798d)"
+    },
+    {
+      "path": ".github/workflows/documentation-contracts.yml",
+      "digest": "sha256:efacf794036daa9df9da4be99f78adb7dfc574befbdc9a7909000df78f76adfb",
+      "purpose": "Stdlib-only bootstrap documentation CI at Base; stays untouched (Base blob 46798d)"
+    },
+    {
+      "path": "src/hermes_pipeline/__init__.py",
+      "digest": "sha256:969eaa51a71dd9d86e19c9fb6d55e126f58bea3a42dea47cc02ec2786f05dc4b",
+      "purpose": "Runtime package entry; must stay free of third-party imports; the Hermes-loaded shim does not import this src package (Base blob 46798d)"
+    },
+    {
+      "path": "src/hermes_pipeline/cli/__init__.py",
+      "digest": "sha256:a8fc54d7473aafb05f42c3e558eb000ce5a4b4f6dda1ee85984e966c2bfc19be",
+      "purpose": "CLI module entry; not a 00-05 writable path (Base blob 46798d)"
+    },
+    {
+      "path": "src/hermes_pipeline/cli/_main.py",
+      "digest": "sha256:7a99e3078c93132b5389e782f2aef0317bfdea25c32c11ed0e8797a02ea0aaf8",
+      "purpose": "Runtime entry implementing --version and command dispatch; untouched (Base blob 46798d)"
+    },
+    {
+      "path": "src/hermes_pipeline/cli/__main__.py",
+      "digest": "sha256:abb81b611ed4cc886034eecd91a644e74650429c426a8910e4a7d315330723dc",
+      "purpose": "python -m hermes_pipeline.cli entry; untouched (Base blob 46798d)"
+    },
+    {
+      "path": "src/hermes_pipeline/transport/__init__.py",
+      "digest": "sha256:2972ff8e83c1cd1eb3de4d6c92ccd2c40f82efbb0fa6b4d875421f11399919d5",
+      "purpose": "Transport module owned by this Slice for the fake runtime spike and its python -m hermes_pipeline.transport entry (Base blob 46798d)"
+    },
+    {
+      "path": "tests/conftest.py",
+      "digest": "sha256:33507a7747d6719e0a2e2ab594f4b3367737079a98e219dde8a4b98fe18ce419",
+      "purpose": "Shared deterministic test facilities; shared with 00-04 - one reason 00-05 implementation is serial after 00-04 completion (Base blob 46798d)"
+    },
+    {
+      "path": "tests/facilities.py",
+      "digest": "sha256:1a1d40b59e4b382036830eb67ad3257e2a9a27817c89067cb082e173b7804e69",
+      "purpose": "Deterministic identity, clock, and temp-root facilities (Base blob 46798d)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-05-hermes-shim-runtime/SLICE.md",
+      "digest": "sha256:65c445359f1a583c34686b92dc5b4564ea7b0a6749d4cb79ccf5d13a1e02b481",
+      "purpose": "READY human-readable Slice contract, revision 5, bound to accepted ADR-0028 and integrated 00-04 (planning artifact)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-05-hermes-shim-runtime/slice-contract.json",
+      "digest": "sha256:dc5bbd9029e435d56d3e656da35b046d785bf60cc3e0cfaadc2ba934c20e26a8",
+      "purpose": "READY machine-valid Slice contract revision 5; canonical content hash is recorded by the contract_hash fact (planning artifact)"
+    },
+    {
+      "path": "docs/adr/0028-authorize-fastapi-uvicorn-in-managed-runtime.md",
+      "digest": "sha256:c74580d8df92b603c68eea62fbc4e9fe9f71d446e62158d28d03f23b0bbac2bd",
+      "purpose": "Accepted ADR-0028: FastAPI/Uvicorn and declared local package only in the isolated Managed Runtime (planning artifact)"
+    }
+  ],
+  "facts": [
+    {
+      "name": "assigned_planning_worktree",
+      "value": "C:\\Users\\a2691\\AppData\\Local\\hermes\\managed-worktrees\\hermes-software-pipeline\\slice-00-05-ready-planning",
+      "source": "Git Custodian-created detached and clean READY planning worktree at exact remote-main Base 46798d on 2026-08-10"
+    },
+    {
+      "name": "repository_read_scope",
+      "value": "all tracked files",
+      "source": "AGENTS.md and Planner role contract"
+    },
+    {
+      "name": "manifest_semantics",
+      "value": "governing context, not a read allowlist",
+      "source": "phase-and-slice-operating-model.md"
+    },
+    {
+      "name": "manifest_file_count",
+      "value": 59,
+      "source": "Manifest files array count after the READY rebind and accepted ADR-0028 inclusion"
+    },
+    {
+      "name": "contract_revision",
+      "value": 5,
+      "source": "READY slice-contract.json"
+    },
+    {
+      "name": "contract_status",
+      "value": "READY",
+      "source": "READY slice-contract.json after D1 acceptance and 00-04 integration"
+    },
+    {
+      "name": "contract_hash",
+      "value": "sha256:c179c804824f63a0976075aadd5d1a0a89697ee7aa2e019ac26f6506eb4e74fa",
+      "source": "slice-contract.json revision 5 canonical content hash (RFC 8785, content_hash field absent)"
+    },
+    {
+      "name": "base_sha",
+      "value": "46798d86a2e48551a3a634e93d1e4dfe5cbf8786",
+      "source": "Git Custodian verified exact origin/main after PR #9 integration; the READY planning and execution worktrees are detached at this Base"
+    },
+    {
+      "name": "origin_main_at_dispatch",
+      "value": "46798d86a2e48551a3a634e93d1e4dfe5cbf8786",
+      "source": "Git Custodian fetch and remote-main verification on 2026-08-10 for READY rebind"
+    },
+    {
+      "name": "predecessor_integrated_sha",
+      "value": "46798d86a2e48551a3a634e93d1e4dfe5cbf8786",
+      "source": "Slice 00-04 integrated at this SHA through PR #9; earlier 00-02 and 00-03 predecessors remain integrated beneath it"
+    },
+    {
+      "name": "slice_00_04_machine_predecessor",
+      "value": "slice-00-04 is a satisfied machine-contract predecessor: it integrated at 46798d86a2e48551a3a634e93d1e4dfe5cbf8786 (PR #9); Git Custodian refreshed the Base, manifest summaries, and isolated-worktree proof for this READY contract",
+      "source": "slice-contract.json predecessors plus Git Custodian READY Rebind Setup report"
+    },
+    {
+      "name": "hermes_release_pin",
+      "value": "v2026.8.3 = commit 3c27eb6234bf91b8ceee9e9071591b31e9b148cb (2026-08-03)",
+      "source": "GitHub release page fetched 2026-08-10; compatibility-targets.md baseline; provision uses Hermes own uv.lock plus first runtime materialization during dependency bootstrap, then network cutoff"
+    },
+    {
+      "name": "hermes_local_install_evidence",
+      "value": "C:\\Users\\a2691\\AppData\\Local\\hermes\\hermes-agent at git HEAD be54f28b16906f4153f618eeb4369495667af7ce; hermes --version v0.20.0 (2026.8.3); host Python 3.11.15",
+      "source": "read-only inspection 2026-08-10; primary evidence for plugin-contract facts in the research report"
+    },
+    {
+      "name": "shim_code_placement",
+      "value": "the Hermes-loaded entry is the repository root plugin.yaml and __init__.py; the root __init__.py imports only the controlled root directory hermes_shim/ (stdlib-only) and never imports src/hermes_pipeline; src/hermes_pipeline/cli/ is not a 00-05 writable path; the runtime entry lives only under src/hermes_pipeline/transport/ and is launched by the shim with a controlled argv array (for example python -m hermes_pipeline.transport)",
+      "source": "ADR-0019, ci-and-testing.md runtime rule, verified Hermes load path (hermes_cli/plugins.py _load_directory_module), and REWORK #1 finding 2"
+    },
+    {
+      "name": "pre_gateway_dispatch_semantics",
+      "value": "fires once per incoming MessageEvent for user-originated messages only, before auth, pairing, and session setup; kwargs event, gateway, session_store; result dicts skip (drop), rewrite (replace text), allow or None (normal dispatch); a hook invocation exception is caught and dispatch continues fail-open; the 00-05 hook must never raise and must skip probe-namespace events unconditionally",
+      "source": "gateway/run.py 14277-14318 and tests/gateway/test_pre_gateway_dispatch.py at install HEAD be54f28"
+    },
+    {
+      "name": "synthetic_card_shape",
+      "value": "Feishu interactive card button clicks become synthetic COMMAND events with text /card <action_tag> [<json>], message_type COMMAND, wrapped in MessageEvent with resolved source; routed through the same gateway dispatch path where pre_gateway_dispatch fires; duplicate action tokens dropped within a 15-minute window",
+      "source": "plugins/platforms/feishu/adapter.py 3042-3095 at install HEAD be54f28"
+    },
+    {
+      "name": "source_install_boundaries",
+      "value": "hermes plugins install clones git (depth 1, 60s timeout), validates manifest_version <= 1, rejects subdir traversal, prompts requires_env, saves plugins.enabled in config.yaml, and advises hermes gateway restart; file:// and http:// URLs accepted with an insecure-scheme warning; update is an in-place git pull requiring a .git dir; uninstall removes the checkout only; durable state lives outside the checkout; CI fixture default HEAD must be pinned to the event-derived Candidate SHA",
+      "source": "hermes_cli/plugins_cmd.py at install HEAD be54f28; planning revisions 3 and 4"
+    },
+    {
+      "name": "load_evidence_pluginmanager_probe",
+      "value": "hermes plugins list proves manifest and enable state only (hermes_cli/plugins_cmd.py 1112-1134); load and registration evidence comes from a PluginManager probe in an isolated Hermes Python subprocess asserting loaded.enabled, loaded.error is None, exactly one tool, exactly one pre_gateway_dispatch hook, exactly one top-level pipeline CLI command, and exactly five pipeline subcommands; a broken-plugin fixture asserts loaded.error is set and Hermes keeps running",
+      "source": "hermes_cli/plugins.py 314-331, 1814-1863 at install HEAD be54f28; REWORK #1 finding 3"
+    },
+    {
+      "name": "state_root_layout",
+      "value": "runtime data root derived from HERMES_HOME (fixed decision D5) with children descriptor, controller, checkpoints, artifacts, worktrees, verification, logs, backups, updates; each child has an ownership marker; runtime environments install into <state-root>/runtimes/<version>/",
+      "source": "configuration-and-lifecycle.md; source-installation-and-update.md layout"
+    },
+    {
+      "name": "loopback_protocol_fixed_values",
+      "value": "Host must equal 127.0.0.1:<port> or [::1]:<port> else 400 POLICY_REJECTED; Origin absent or the matching loopback origin else 403 POLICY_REJECTED; X-Hermes-Pipeline-Protocol: 1 required else 400 VALIDATION_ERROR with message unsupported protocol version; bearer token from the descriptor else 401 AUTHENTICATION_FAILED; 64 KiB body limit else 413 VALIDATION_ERROR; 60 second window with 60 requests else 429 RATE_LIMITED; shim client timeout 5 s and runtime request budget 10 s; unknown path 404 NOT_FOUND; stale or absent descriptor DEPENDENCY_UNAVAILABLE with the shim failing closed; /v1/version reports runtime version, protocol version 1, contract-schema range, release, and state-root identity; versioning is fixed to spike constants plus golden JSON fixtures",
+      "source": "ADR-0022, data-and-api-contracts.md, threat-model-and-trust-boundaries.md, and REWORK #1/#2 findings"
+    },
+    {
+      "name": "recovery_fixed_semantics",
+      "value": "token rotation only when the runtime process starts (start, restart, crash recovery); a Hermes restart re-reads the existing descriptor and token without rotation or rewrite; stale-descriptor algorithm: os.kill(pid, 0) plus creation-time comparison (Linux /proc/<pid>/stat field 22; Windows ctypes kernel32 OpenProcess and GetProcessTimes), os.kill alone never proof of identity; port collision bounded to 3 fresh-port attempts then DEPENDENCY_UNAVAILABLE; three crash points (before persistence, after persistence before response, after response) with fixed retry outcomes",
+      "source": "REWORK #1 finding 5; research report section 2.2 and 2.5"
+    },
+    {
+      "name": "windows_acl_exact_ace_set",
+      "value": "exactly one grant ACE for the current user SID with full control and nothing else, applied as icacls <path> /inheritance:r /grant:r <user-sid>:(F); verification parses icacls output and rejects any other subject in the descriptor DACL incl. Everyone (*S-1-1-0), BUILTIN Users (*S-1-5-32-545), SYSTEM (*S-1-5-18), and BUILTIN Administrators (*S-1-5-32-544); negative fixtures with an Everyone or SYSTEM ACE rejected; residual host-admin boundary documented outside the DACL; POSIX 0o600 plus a mode check",
+      "source": "REWORK #1/#2 findings; research report section 2.4"
+    },
+    {
+      "name": "runtime_locking_topology",
+      "value": "dedicated runtime project at repository root runtime-env/ with its own pyproject.toml and committed runtime-env/uv.lock, explicit fastapi, uvicorn, and hermes-pipeline==0.1.0 dependencies, and a path source at repository root. The cross-platform harness invokes controlled uv sync with UV_PROJECT_ENVIRONMENT beneath the state root, proves the target interpreter and sys.prefix, and keeps root dependencies empty under accepted ADR-0028",
+      "source": "accepted ADR-0028 and research report section 3.4"
+    },
+    {
+      "name": "candidate_binding_fixture",
+      "value": "CI source-install fixture: derive HERMES_PIPELINE_CANDIDATE_SHA as github.sha on push or pull_request.head.sha on pull_request; checkout it; git clone --no-checkout <repo-path> <fixture>; git -C <fixture> checkout -B main <HERMES_PIPELINE_CANDIDATE_SHA>; pre-install repository/fixture SHA and ref assertions; install hermes plugins install file://<fixture> --enable; post-install installed SHA and HEAD^{tree} equality; non-Candidate negative fixture; fixture Git writes confined to the temporary directory",
+      "source": "REWORK #2 Candidate binding plus Codex bounded corrective clarification; research report section 3.6"
+    },
+    {
+      "name": "runtime_dependencies",
+      "value": "[]",
+      "source": "pyproject.toml at Base e238ecf; ci-and-testing.md runtime dependency rule; the runtime environment uses the dedicated runtime-env/ lock, not the root lock"
+    },
+    {
+      "name": "d1_accepted_authorization",
+      "value": "D1 is accepted: ADR-0028 authorizes FastAPI/Uvicorn and declared local hermes-pipeline==0.1.0 only inside independent Managed Runtime state-root environments, with root dependencies empty and Hermes never importing them. The READY planning package records the accepted ADR and binds it before Executor dispatch; no second human approval exists.",
+      "source": "User acceptance; accepted ADR-0028; Slice Contract revision 5"
+    },
+    {
+      "name": "workflow_governance_fixed_scope",
+      "value": "the existing --check-workflows checker covers exactly documentation-contracts.yml and python-quality.yml (scripts/check_documentation.py 604-752) and does not cover a new hermes-integration.yml; the READY revision extends scripts/check_documentation.py with check_hermes_integration_workflow (strict YAML-subset parse, on exactly push and pull_request, permissions contents read only, no secrets context, matrix covering ubuntu-latest and windows-latest, pinned action versions, exact offline probe command inventory, network-cutoff boundary marker) plus scripts/fixtures/workflows/ positive and negative fixtures and the workflow-policy-hermes and workflow-policy-hermes-negative verification commands; the two existing workflows and their checkers are unchanged",
+      "source": "REWORK #2 finding 1; research report section 3.5"
+    },
+    {
+      "name": "hermes_provision_design",
+      "value": "clone pinned Hermes commit 3c27eb6 and build with Hermes own uv.lock into independent environment; dependency bootstrap also includes first frozen runtime-env materialization into fresh state root, then cutoff. Every provision/runtime/probe child starts with fixture-built allow-list, never os.environ copy; probes use HERMES_PIPELINE_PROBE_HERMES with controlled argv; unknown-secret canary absent; uv run --offline pytest never assumes Hermes exists in project dev environment",
+      "source": "REWORK #1 finding 4 plus Codex bounded corrective clarification; research report section 3.5"
+    },
+    {
+      "name": "parallelism_verdict",
+      "value": "Slice 00-04 integrated at 46798d86a2e48551a3a634e93d1e4dfe5cbf8786; 00-05 implementation remains serial for tests/ and docs/development/compatibility-targets.md. The READY contract and manifest bind this exact Base; later drift requires re-verification and a path-independence proof.",
+      "source": "research report section 4.3 and Slice Contract revision 5"
+    },
+    {
+      "name": "planning_artifact_paths",
+      "value": "docs/adr/0028-authorize-fastapi-uvicorn-in-managed-runtime.md; docs/roadmap/phase-00-foundation/slices/README.md; docs/research/00-05-hermes-shim-runtime-research.md; docs/roadmap/phase-00-foundation/slices/00-05-hermes-shim-runtime/SLICE.md; docs/roadmap/phase-00-foundation/slices/00-05-hermes-shim-runtime/slice-contract.json",
+      "source": "READY planning artifacts; this Context Manifest omits itself to avoid self-reference"
+    },
+    {
+      "name": "digest_binding_policy",
+      "value": "Every file purpose marks its digest source: Base blob 46798d for pre-existing tracked files, or planning artifact for files introduced or edited by the READY planning change. All digests bind the current ready-planning worktree bytes.",
+      "source": "Per-entry purpose labels and READY planning self-check"
+    },
+    {
+      "name": "planning_context",
+      "value": "The READY planning worktree is a detached content-preparation area; branch, planning Candidate SHA, pull request, and merge commit are Git Custodian publication evidence. Contract and manifest hashes plus planning-artifact digests bind the content.",
+      "source": "phase-and-slice-operating-model.md"
+    },
+    {
+      "name": "network_after_install_allowed",
+      "value": false,
+      "source": "slice-contract.json"
+    },
+    {
+      "name": "credentials_allowed",
+      "value": false,
+      "source": "slice-contract.json"
+    },
+    {
+      "name": "executor_git_mutation_allowed",
+      "value": false,
+      "source": "slice-contract.json"
+    },
+    {
+      "name": "planner_read_only_declaration",
+      "value": "Codex performed bounded planning-document preparation only in the assigned ready-planning worktree: no implementation, dependency installation, uv sync, Hermes plugin start, account login, production Feishu/GitHub call, or Git write.",
+      "source": "READY planning activity record"
+    },
+    {
+      "name": "future_base_drift_gate",
+      "value": "This READY contract binds exact Base 46798d86a2e48551a3a634e93d1e4dfe5cbf8786. If the integration Base changes before Candidate creation, re-verify the exact target, rebuild manifest digests, and reissue the contract/manifest rather than silently advancing.",
+      "source": "AGENTS.md and Slice Contract stop conditions"
+    },
+    {
+      "name": "rework_two_scope",
+      "value": "DRAFT rework history fixed D1 convergence, workflow technical scope, runtime-env topology, Candidate fixture, machine ordering, and facts/ACL. Revision 5 records accepted ADR-0028 and the READY rebind; no product behavior, dependency authorization beyond D1, acceptance outcome, or implementation scope changed.",
+      "source": "revision history and human D1 acceptance"
+    },
+    {
+      "name": "ready_adr_binding_evidence",
+      "value": "docs/adr/0028-authorize-fastapi-uvicorn-in-managed-runtime.md exists with status accepted; ADR-0028 is listed in Slice Contract binding_adrs; both are required pre-dispatch evidence and the Executor never writes the ADR.",
+      "source": "accepted ADR-0028 and Slice Contract revision 5"
+    },
+    {
+      "name": "assigned_execution_worktree",
+      "value": "C:\\Users\\a2691\\AppData\\Local\\hermes\\managed-worktrees\\hermes-software-pipeline\\slice-00-05",
+      "source": "Git Custodian-created detached and clean execution worktree at exact remote-main Base 46798d on 2026-08-10"
+    }
+  ],
+  "content_hash": "sha256:09bcbf6412689a65316da4f76db06857d72f3d71372e8cb3e96bb808e1e8387c"
+}
