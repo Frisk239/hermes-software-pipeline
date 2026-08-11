@@ -192,6 +192,183 @@ REQUIRED_WORKFLOW_NEGATIVE_FIXTURES = frozenset(
     }
 )
 
+# --------------------------------------------------------------------------
+# Hermes integration workflow governance (slice-00-05 fixed technical scope)
+# --------------------------------------------------------------------------
+# The existing --check-workflows checker covers exactly the two existing
+# workflows and does not cover hermes-integration.yml; that coverage gap is
+# acknowledged and never papered over. This fixed in-Slice extension adds
+# check_hermes_integration_workflow with a strict YAML-subset parse, `on:`
+# exactly push/pull_request, read-only permissions, no secrets context,
+# matrix coverage of ubuntu-latest and windows-latest, pinned action
+# versions, the exact offline probe command inventory, and a network-cutoff
+# boundary comment marker, plus positive/negative fixtures under
+# scripts/fixtures/workflows/ and the verification commands
+# workflow-policy-hermes / workflow-policy-hermes-negative. The two
+# existing workflows and their checkers are not modified.
+
+HERMES_WORKFLOW_PATH = Path(".github/workflows/hermes-integration.yml")
+ALLOWED_HERMES_WORKFLOW_TOP_LEVEL = {"name", "on", "permissions", "jobs"}
+ALLOWED_HERMES_WORKFLOW_JOB = {"strategy", "runs-on", "steps"}
+ALLOWED_HERMES_WORKFLOW_STEP = {"uses", "name", "run", "with", "shell"}
+HERMES_WORKFLOW_JOB_NAME = "hermes-integration"
+HERMES_SHELL = "bash"
+# Network-cutoff boundary comment marker (dependency bootstrap above,
+# offline probes and second materialization below).
+NETWORK_CUTOFF_MARKER = "# NETWORK-CUTOFF"
+# The checkout step must pin the event-derived Candidate SHA up front so
+# every later assertion (derive, fixture, installed checkout) is bound to
+# the exact Candidate.
+HERMES_CHECKOUT_REF = "${{ github.event.pull_request.head.sha || github.sha }}"
+# The only network-capable actions are the first two bootstrap steps.  Their
+# position is security-relevant: an action below NETWORK-CUTOFF would be able
+# to fetch code after the workflow claims to be offline.
+HERMES_BOOTSTRAP_ACTIONS = (CHECKOUT_ACTION, SETUP_UV_ACTION)
+# Fixed bootstrap sequence before the first runtime materialization:
+# checkout -> setup-uv -> bootstrap sync -> derive candidate -> provision
+# Hermes -> build install fixture -> first materialization. Auxiliary
+# shell: bash steps are pinned by name and content patterns; no other bash
+# step is allowed anywhere in the job, and none may appear after the
+# network cutoff.
+HERMES_BASH_STEP_NAMES = (
+    "Derive candidate SHA and verify checkout",
+    "Provision pinned Hermes release into independent environment",
+    "Build candidate-pinned install fixture",
+)
+HERMES_BOOTSTRAP_COMMAND = "uv sync --frozen --all-groups"
+HERMES_FIRST_MATERIALIZATION_COMMAND = (
+    "uv run --offline pytest "
+    "tests/spike/runtime/test_runtime_provision.py::test_provisions_fresh_state_root"
+)
+# Exact offline probe command inventory of the hermes-integration job:
+# bootstrap, the three runtime provision commands, the three Hermes probe
+# suites, and the canonical offline command set.
+REQUIRED_HERMES_WORKFLOW_COMMANDS = (
+    HERMES_BOOTSTRAP_COMMAND,
+    HERMES_FIRST_MATERIALIZATION_COMMAND,
+    "uv run --offline pytest "
+    "tests/spike/runtime/test_runtime_provision.py::test_reprovisions_fresh_state_root_offline",
+    "uv run --offline pytest "
+    "tests/spike/runtime/test_runtime_provision.py::test_runs_selfcheck_in_managed_environment",
+    "uv run --offline pytest tests/spike/probe/install",
+    "uv run --offline pytest tests/spike/probe/pluginmanager",
+    "uv run --offline pytest tests/spike/probe/gateway",
+    "uv run --offline ruff format --check .",
+    "uv run --offline ruff check .",
+    "uv run --offline pyright",
+    "uv run --offline pytest",
+    "uv run --offline python -m hermes_pipeline.cli contracts check",
+    "uv run --offline python -m hermes_pipeline.cli contracts drift-check",
+    "uv run --offline python -m hermes_pipeline.cli architecture check",
+    "uv run --offline python scripts/check_documentation.py",
+    "uv run --offline python scripts/check_documentation.py --self-test-negative",
+    "uv run --offline python scripts/check_schemas.py --self-test-negative",
+    "uv run --offline python scripts/check_documentation.py --check-workflows",
+    "uv sync --frozen --all-groups --offline",
+    "uv run --offline python -m hermes_pipeline.cli --version",
+    "uv run --offline python scripts/check_documentation.py --check-hermes-workflow",
+    "uv run --offline python scripts/check_documentation.py "
+    "--check-hermes-workflow-negative",
+    "uv run --offline python scripts/check_repository_artifacts.py",
+)
+# Commands allowed only below the cutoff marker (offline surface): the
+# full inventory minus the bootstrap sync and the first materialization.
+HERMES_OFFLINE_COMMANDS = frozenset(
+    command
+    for command in REQUIRED_HERMES_WORKFLOW_COMMANDS
+    if command not in (HERMES_BOOTSTRAP_COMMAND, HERMES_FIRST_MATERIALIZATION_COMMAND)
+)
+# Network-implying command surface rejected in auxiliary bash steps and in
+# every step below the cutoff: fetch/install tooling and remote git
+# operations. ``git clone`` is deliberately excluded: the pinned provision
+# step clones the pinned Hermes repository at a fixed commit and the
+# fixture step clones the local workspace with ``--no-checkout``; both are
+# anchored by their content patterns instead.
+NETWORK_COMMAND_RE = re.compile(
+    r"\b(curl|wget|pip|npm|yarn|apt|apt-get|yum|docker|podman)\b"
+    r"|git (fetch|pull|remote|push)"
+    r"|uv (add|remove|lock)(?![\w-]*)"
+)
+# Exact, reviewed scripts of the pinned auxiliary bash steps: the run body
+# must equal the fixed script byte-for-byte (modulo surrounding whitespace)
+# so no unauthorized command can be appended to a correctly named step.
+HERMES_DERIVE_SCRIPT = (
+    "set -euo pipefail\n"
+    'if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then\n'
+    '  candidate="${{ github.event.pull_request.head.sha }}"\n'
+    "else\n"
+    '  candidate="${{ github.sha }}"\n'
+    "fi\n"
+    'echo "HERMES_PIPELINE_CANDIDATE_SHA=$candidate" >> "$GITHUB_ENV"\n'
+    'test "$(git rev-parse HEAD)" = "$candidate"'
+)
+HERMES_PROVISION_SCRIPT = (
+    "set -euo pipefail\n"
+    'HERMES_DIR="$RUNNER_TEMP/hermes-agent"\n'
+    "git clone --depth 1 --branch v2026.8.3 --single-branch "
+    'https://github.com/NousResearch/hermes-agent "$HERMES_DIR"\n'
+    'test "$(git -C "$HERMES_DIR" rev-parse HEAD)" = '
+    '"3c27eb6234bf91b8ceee9e9071591b31e9b148cb"\n'
+    'uv sync --frozen --python 3.11 --project "$HERMES_DIR"\n'
+    'if [ -f "$HERMES_DIR/venv/Scripts/python.exe" ]; then\n'
+    '  echo "HERMES_PIPELINE_PROBE_HERMES=$HERMES_DIR/venv/Scripts/python.exe" '
+    '>> "$GITHUB_ENV"\n'
+    'elif [ -f "$HERMES_DIR/.venv/Scripts/python.exe" ]; then\n'
+    '  echo "HERMES_PIPELINE_PROBE_HERMES=$HERMES_DIR/.venv/Scripts/python.exe" '
+    '>> "$GITHUB_ENV"\n'
+    'elif [ -f "$HERMES_DIR/venv/bin/python" ]; then\n'
+    '  echo "HERMES_PIPELINE_PROBE_HERMES=$HERMES_DIR/venv/bin/python" '
+    '>> "$GITHUB_ENV"\n'
+    'elif [ -f "$HERMES_DIR/.venv/bin/python" ]; then\n'
+    '  echo "HERMES_PIPELINE_PROBE_HERMES=$HERMES_DIR/.venv/bin/python" '
+    '>> "$GITHUB_ENV"\n'
+    "else\n"
+    '  echo "Hermes interpreter not found" >&2\n'
+    "  exit 1\n"
+    "fi"
+)
+HERMES_FIXTURE_SCRIPT = (
+    "set -euo pipefail\n"
+    'fixture="$RUNNER_TEMP/candidate-fixture"\n'
+    'git clone --no-checkout "file://$GITHUB_WORKSPACE" "$fixture"\n'
+    'git -C "$fixture" checkout -B main "$HERMES_PIPELINE_CANDIDATE_SHA"\n'
+    'test "$(git -C "$fixture" rev-parse HEAD)" = "$HERMES_PIPELINE_CANDIDATE_SHA"\n'
+    'test "$(git -C "$fixture" rev-parse HEAD^{tree})" = '
+    '"$(git -C "$GITHUB_WORKSPACE" rev-parse HEAD^{tree})"\n'
+    'echo "HERMES_PIPELINE_INSTALL_FIXTURE=$fixture" >> "$GITHUB_ENV"'
+)
+HERMES_BASH_SCRIPTS = {
+    "Derive candidate SHA and verify checkout": HERMES_DERIVE_SCRIPT,
+    "Provision pinned Hermes release into independent environment": (
+        HERMES_PROVISION_SCRIPT
+    ),
+    "Build candidate-pinned install fixture": HERMES_FIXTURE_SCRIPT,
+}
+REQUIRED_HERMES_WORKFLOW_NEGATIVE_FIXTURES = frozenset(
+    {
+        "arbitrary-bootstrap-bash",
+        "bad-trigger",
+        "bash-extra-clone",
+        "bash-extra-curl",
+        "bash-extra-env",
+        "bash-extra-python-c",
+        "command-before-cutoff",
+        "derive-before-bootstrap",
+        "extra-command",
+        "invalid-yaml",
+        "missing-checkout-ref",
+        "missing-command",
+        "missing-marker",
+        "missing-permissions",
+        "network-after-cutoff",
+        "persist-credentials",
+        "secrets-context",
+        "unpinned-action",
+        "wrong-job-name",
+        "wrong-matrix",
+    }
+)
+
 FENCE_RE = re.compile(r"^\s*```")
 LINK_RE = re.compile(r"\[[^\]]*\]\(([^)\s]+)")
 BACKTICK_SPAN_RE = re.compile(r"`+[^`]*`+")
@@ -484,13 +661,12 @@ def _parse_mapping(
             if index < len(cleaned) and _indent(cleaned[index][1]) > indent:
                 child_indent = _indent(cleaned[index][1])
                 while index < len(cleaned):
-                    lineno2, raw2 = cleaned[index]
+                    _lineno2, raw2 = cleaned[index]
                     if _indent(raw2) < child_indent:
                         break
-                    if _indent(raw2) > child_indent:
-                        raise WorkflowSyntaxError(
-                            f"line {lineno2}: inconsistent block-scalar indentation"
-                        )
+                    # Lines may indent deeper than child_indent (their
+                    # content); only the block's base indentation is
+                    # stripped, matching YAML block-scalar semantics.
                     block_lines.append(raw2[child_indent:])
                     index += 1
             mapping[key] = "\n".join(block_lines)
@@ -539,13 +715,9 @@ def _parse_sequence(
                 if index < len(cleaned) and _indent(cleaned[index][1]) > current_indent:
                     child_indent = _indent(cleaned[index][1])
                     while index < len(cleaned):
-                        lineno2, raw2 = cleaned[index]
+                        _lineno2, raw2 = cleaned[index]
                         if _indent(raw2) < child_indent:
                             break
-                        if _indent(raw2) > child_indent:
-                            raise WorkflowSyntaxError(
-                                f"line {lineno2}: inconsistent block-scalar indentation"
-                            )
                         block_lines.append(raw2[child_indent:])
                         index += 1
                 item[key] = "\n".join(block_lines)
@@ -752,6 +924,387 @@ def check_workflows(root: Path, report: Reporter) -> None:
     """Validate every governed GitHub Actions workflow."""
     check_workflow(root, report)
     check_quality_workflow(root, report)
+
+
+def check_hermes_integration_workflow(root: Path, report: Reporter) -> None:
+    """Validate the slice-00-05 hermes-integration workflow policy.
+
+    Deterministic structural check of the committed configuration (it does
+    not execute the workflow): strict YAML-subset parse; ``on:`` exactly
+    push/pull_request; ``permissions: {contents: read}``; no secrets
+    context; one ``hermes-integration`` job whose matrix covers
+    ubuntu-latest and windows-latest with ``runs-on`` bound to the matrix
+    axis; pinned checkout/setup-uv action versions; the exact offline
+    probe command inventory (auxiliary provisioning steps must declare
+    ``shell: bash``); and the network-cutoff boundary comment marker.
+    """
+    workflow = root / HERMES_WORKFLOW_PATH
+    if workflow.is_symlink():
+        report.issue(f"{workflow}: workflow file must not be a symbolic link")
+        return
+    if not workflow.is_file():
+        report.issue(f"{workflow}: workflow file missing")
+        return
+    if not workflow.resolve().is_relative_to(root):
+        report.issue(f"{workflow}: workflow file resolves outside the checked root")
+        return
+    try:
+        text = workflow.read_text(encoding="utf-8")
+    except UnicodeDecodeError as exc:
+        report.issue(f"{workflow}: not valid UTF-8 ({exc.reason} at byte {exc.start})")
+        return
+    if NETWORK_CUTOFF_MARKER not in text:
+        report.issue(
+            f"{workflow}: missing network-cutoff boundary marker "
+            f"{NETWORK_CUTOFF_MARKER!r}"
+        )
+    try:
+        document = parse_workflow(text)
+    except WorkflowSyntaxError as exc:
+        report.issue(f"{workflow}: invalid workflow YAML ({exc})")
+        return
+
+    _check_no_secret_context(workflow, text, report)
+
+    for key in sorted(set(document) - ALLOWED_HERMES_WORKFLOW_TOP_LEVEL):
+        report.issue(f"{workflow}: unknown top-level key {key!r}")
+    on_value = _as_mapping(document.get("on"))
+    if on_value is None or set(on_value) != REQUIRED_WORKFLOW_ON:
+        report.issue(
+            f"{workflow}: 'on:' must map exactly the push and pull_request triggers"
+        )
+    elif any(value is not None for value in on_value.values()):
+        report.issue(
+            f"{workflow}: push and pull_request triggers must not contain "
+            "additional configuration"
+        )
+    permissions = _as_mapping(document.get("permissions"))
+    if permissions != {"contents": "read"}:
+        report.issue(
+            f"{workflow}: permissions must be exactly {{'contents': 'read'}} "
+            f"(got {permissions!r})"
+        )
+    jobs = _as_mapping(document.get("jobs"))
+    if jobs is None or set(jobs) != {HERMES_WORKFLOW_JOB_NAME}:
+        report.issue(
+            f"{workflow}: jobs must contain exactly the "
+            f"{HERMES_WORKFLOW_JOB_NAME!r} job"
+        )
+        return
+    job = _as_mapping(jobs[HERMES_WORKFLOW_JOB_NAME])
+    if job is None:
+        report.issue(f"{workflow}: job {HERMES_WORKFLOW_JOB_NAME!r} must be a mapping")
+        return
+    for key in sorted(set(job) - ALLOWED_HERMES_WORKFLOW_JOB):
+        report.issue(
+            f"{workflow}: job {HERMES_WORKFLOW_JOB_NAME!r} has unknown key {key!r}"
+        )
+    _check_hermes_job_os_coverage(workflow, job, report)
+    _check_hermes_job_commands(workflow, job, report)
+    _check_hermes_action_steps(workflow, job, report)
+    _check_hermes_cutoff_positions(workflow, text, job, report)
+
+
+def _check_hermes_cutoff_positions(
+    workflow: Path, text: str, job: dict[str, Any], report: Reporter
+) -> None:
+    """Every offline command must sit below the network-cutoff marker.
+
+    The marker is a comment boundary in the file; its byte position is
+    compared against each run command's occurrence so an offline-only
+    command placed above the cutoff (or the first materialization placed
+    below it) is rejected regardless of the step grammar.
+    """
+    marker_pos = text.find(NETWORK_CUTOFF_MARKER)
+    if marker_pos < 0:
+        return  # already reported as missing
+    steps = _as_sequence(job.get("steps"))
+    if steps is None:
+        return
+    for raw_step in steps:
+        step = _as_mapping(raw_step)
+        if step is None or "run" not in step:
+            continue
+        command = str(step.get("run", "")).strip()
+        if not command:
+            continue
+        # Whole-line match: a bare prefix search would mis-locate shorter
+        # commands (e.g. the full-suite ``uv run --offline pytest`` inside
+        # the longer first-materialization command).
+        line_re = re.compile(rf"(?m)^\s*run:\s*{re.escape(command)}\s*$")
+        match = line_re.search(text)
+        if match is None:
+            continue  # YAML normalization difference; grammar checks cover it
+        position = match.start()
+        if command in HERMES_OFFLINE_COMMANDS and position < marker_pos:
+            report.issue(
+                f"{workflow}: offline command {command!r} must run below "
+                "the network-cutoff marker"
+            )
+        if command == HERMES_FIRST_MATERIALIZATION_COMMAND and position > marker_pos:
+            report.issue(
+                f"{workflow}: first materialization must run above the "
+                "network-cutoff marker"
+            )
+
+
+def _check_hermes_job_os_coverage(
+    workflow: Path, job: dict[str, Any], report: Reporter
+) -> None:
+    """The matrix must cover exactly the two required runners."""
+    strategy = _as_mapping(job.get("strategy"))
+    matrix: dict[str, Any] = {}
+    if strategy is not None:
+        for key in sorted(set(strategy) - ALLOWED_WORKFLOW_STRATEGY):
+            report.issue(f"{workflow}: hermes job has unknown strategy key {key!r}")
+        parsed = _as_mapping(strategy.get("matrix"))
+        if parsed is not None:
+            matrix = parsed
+        elif strategy.get("matrix") is not None:
+            report.issue(f"{workflow}: hermes job 'matrix' must be a mapping")
+    if set(matrix) != {MATRIX_OS_KEY}:
+        report.issue(
+            f"{workflow}: hermes job matrix must contain only the "
+            f"'{MATRIX_OS_KEY}' axis"
+        )
+    os_values = _as_sequence(matrix.get(MATRIX_OS_KEY))
+    if os_values is None:
+        report.issue(
+            f"{workflow}: hermes job must declare a matrix '{MATRIX_OS_KEY}' axis"
+        )
+    elif len(os_values) != len(REQUIRED_RUNNERS) or set(os_values) != set(
+        REQUIRED_RUNNERS
+    ):
+        report.issue(
+            f"{workflow}: hermes job matrix os must contain exactly "
+            f"{', '.join(REQUIRED_RUNNERS)}"
+        )
+    if job.get("runs-on") != RUNS_ON_MATRIX_EXPRESSION:
+        report.issue(
+            f"{workflow}: hermes job runs-on must be exactly "
+            f"{RUNS_ON_MATRIX_EXPRESSION} (got {job.get('runs-on')!r})"
+        )
+
+
+def _check_hermes_job_commands(
+    workflow: Path, job: dict[str, Any], report: Reporter
+) -> None:
+    """Enforce the fixed bootstrap order, pinned bash steps, and the
+    offline-only surface below the network cutoff.
+
+    Step order must be exactly: bootstrap sync, the three pinned bash
+    steps (derive candidate, provision Hermes, build install fixture),
+    first runtime materialization, then only the frozen offline command
+    set below the cutoff. Any other bash step, any network-implying
+    command, or any offline command placed above the cutoff is rejected.
+    """
+    steps = _as_sequence(job.get("steps"))
+    if steps is None:
+        report.issue(f"{workflow}: hermes job has no steps list")
+        return
+    expected_bash = list(HERMES_BASH_STEP_NAMES)
+    bootstrap_action_index = 0
+    bash_index = 0
+    bootstrap_done = False
+    materialized = False
+    seen_offline: list[str] = []
+    for step_index, raw_step in enumerate(steps):
+        step = _as_mapping(raw_step)
+        if step is None:
+            report.issue(f"{workflow}: hermes job has a malformed step")
+            continue
+        for key in sorted(set(step) - ALLOWED_HERMES_WORKFLOW_STEP):
+            report.issue(f"{workflow}: hermes job step has unknown key {key!r}")
+        has_run = "run" in step
+        has_uses = "uses" in step
+        if has_run == has_uses:
+            report.issue(
+                f"{workflow}: hermes job step must contain exactly "
+                "one of 'run' or 'uses'"
+            )
+            continue
+        if not has_run:
+            uses = step.get("uses")
+            if materialized:
+                report.issue(
+                    f"{workflow}: no action step may run below the network cutoff"
+                )
+                continue
+            if bootstrap_done:
+                report.issue(
+                    f"{workflow}: action steps must be the first two pinned "
+                    "bootstrap steps"
+                )
+                continue
+            expected_action = (
+                HERMES_BOOTSTRAP_ACTIONS[bootstrap_action_index]
+                if bootstrap_action_index < len(HERMES_BOOTSTRAP_ACTIONS)
+                else None
+            )
+            if step_index >= len(HERMES_BOOTSTRAP_ACTIONS) or uses != expected_action:
+                report.issue(
+                    f"{workflow}: action steps must be exactly the first "
+                    f"{len(HERMES_BOOTSTRAP_ACTIONS)} pinned bootstrap actions"
+                )
+                continue
+            bootstrap_action_index += 1
+            continue
+        run = step["run"]
+        if step.get("with") is not None:
+            report.issue(f"{workflow}: hermes job run step cannot contain 'with'")
+        if not isinstance(run, str) or not run.strip():
+            report.issue(f"{workflow}: hermes job has an empty run step")
+            continue
+        command = run.strip()
+        if not materialized and bootstrap_action_index != len(HERMES_BOOTSTRAP_ACTIONS):
+            report.issue(
+                f"{workflow}: the first {len(HERMES_BOOTSTRAP_ACTIONS)} steps "
+                "must be the pinned bootstrap actions"
+            )
+            continue
+        if step.get("shell") is not None:
+            if step.get("shell") != HERMES_SHELL:
+                report.issue(
+                    f"{workflow}: auxiliary run step must declare "
+                    f"shell: {HERMES_SHELL} (got {step.get('shell')!r})"
+                )
+                continue
+            if materialized:
+                report.issue(
+                    f"{workflow}: no bash step may run below the network cutoff"
+                )
+                continue
+            if not bootstrap_done:
+                report.issue(
+                    f"{workflow}: pinned bash step must follow the bootstrap sync"
+                )
+            name = step.get("name")
+            if (
+                not isinstance(name, str)
+                or bash_index >= len(expected_bash)
+                or name != expected_bash[bash_index]
+            ):
+                report.issue(
+                    f"{workflow}: bash steps must be exactly the pinned "
+                    f"sequence {expected_bash!r} (got {name!r})"
+                )
+                continue
+            _check_hermes_bash_content(workflow, name, command, report)
+            bash_index += 1
+            continue
+        if materialized:
+            if command not in HERMES_OFFLINE_COMMANDS:
+                report.issue(
+                    f"{workflow}: below the network cutoff only the frozen "
+                    f"offline command set is allowed (got {command!r})"
+                )
+            else:
+                seen_offline.append(command)
+            continue
+        if command == HERMES_BOOTSTRAP_COMMAND and not bootstrap_done:
+            bootstrap_done = True
+        elif (
+            command == HERMES_FIRST_MATERIALIZATION_COMMAND
+            and bootstrap_done
+            and bash_index == len(expected_bash)
+        ):
+            materialized = True
+        elif command == HERMES_BOOTSTRAP_COMMAND:
+            report.issue(
+                f"{workflow}: bootstrap sync must run exactly once, before "
+                "the pinned bash steps"
+            )
+        elif command == HERMES_FIRST_MATERIALIZATION_COMMAND:
+            report.issue(
+                f"{workflow}: first materialization must follow the "
+                "bootstrap sync and all pinned bash steps"
+            )
+        else:
+            report.issue(
+                f"{workflow}: unsupported bootstrap-phase run command {command!r}"
+            )
+    if not materialized:
+        report.issue(
+            f"{workflow}: hermes job must complete bootstrap sync, the "
+            "pinned bash steps, and the first materialization before the "
+            "offline command set"
+        )
+    if bootstrap_action_index != len(HERMES_BOOTSTRAP_ACTIONS):
+        report.issue(
+            f"{workflow}: hermes job must begin with the pinned bootstrap "
+            "actions before any run step"
+        )
+    if sorted(seen_offline) != sorted(HERMES_OFFLINE_COMMANDS):
+        report.issue(
+            f"{workflow}: hermes job offline commands must match the frozen "
+            "offline inventory exactly"
+        )
+
+
+def _check_hermes_bash_content(
+    workflow: Path, name: str, command: str, report: Reporter
+) -> None:
+    """Validate one pinned bash step's body against the fixed script.
+
+    The body must equal the reviewed script exactly (whitespace-stripped);
+    any appended or altered command — curl, python -c, an extra clone, an
+    environment read — changes the bytes and is rejected.
+    """
+    script = HERMES_BASH_SCRIPTS[name]
+    if command.strip() != script.strip():
+        report.issue(
+            f"{workflow}: bash step {name!r} must match the fixed reviewed "
+            "script exactly (no appended or altered commands)"
+        )
+
+
+def _check_hermes_action_steps(
+    workflow: Path, job: dict[str, Any], report: Reporter
+) -> None:
+    """Pin the checkout and setup-uv actions with exact safe settings."""
+    steps = _as_sequence(job.get("steps"))
+    if steps is None:
+        return
+    counts = {CHECKOUT_ACTION: 0, SETUP_UV_ACTION: 0}
+    for raw_step in steps:
+        step = _as_mapping(raw_step)
+        if step is None or "uses" not in step:
+            continue
+        uses = step.get("uses")
+        with_block = _as_mapping(step.get("with"))
+        if uses == CHECKOUT_ACTION:
+            counts[CHECKOUT_ACTION] += 1
+            if not (
+                with_block is not None
+                and set(with_block) == {"persist-credentials", "ref"}
+                and with_block.get("persist-credentials")
+                in PERSIST_CREDENTIALS_DISABLED
+                and str(with_block.get("ref")) == HERMES_CHECKOUT_REF
+            ):
+                report.issue(
+                    f"{workflow}: checkout step must set only "
+                    "with.persist-credentials: false and the exact "
+                    "event-derived Candidate ref"
+                )
+        elif uses == SETUP_UV_ACTION:
+            counts[SETUP_UV_ACTION] += 1
+            if not (
+                with_block is not None
+                and set(with_block) == {"version", "python-version"}
+                and str(with_block.get("version")).strip("\"'") == REQUIRED_UV_VERSION
+                and str(with_block.get("python-version")).strip("\"'")
+                == REQUIRED_QUALITY_PYTHON_VERSION
+            ):
+                report.issue(
+                    f"{workflow}: setup-uv step must pin uv "
+                    f"{REQUIRED_UV_VERSION} and Python "
+                    f"{REQUIRED_QUALITY_PYTHON_VERSION}"
+                )
+        else:
+            report.issue(f"{workflow}: unsupported action {uses!r}")
+    for action, count in counts.items():
+        if count != 1:
+            report.issue(f"{workflow}: must use {action} exactly once")
 
 
 def _check_no_secret_context(workflow: Path, text: str, report: Reporter) -> None:
@@ -1091,6 +1644,59 @@ def run_self_test_negative(root: Path) -> tuple[list[str], bool]:
     return lines, all_ok
 
 
+def run_hermes_workflow_self_test(root: Path) -> tuple[list[str], bool]:
+    """Execute the checker against the hermes-integration workflow fixtures.
+
+    The positive fixture passes and every negative fixture exits nonzero,
+    proving the stable CLI exit behavior of the fixed workflow-governance
+    extension.
+    """
+    script = Path(__file__).resolve()
+    lines: list[str] = []
+    all_ok = True
+
+    def run_case(name: str, argv: list[str], should_pass: bool) -> None:
+        nonlocal all_ok
+        try:
+            proc = subprocess.run(argv, capture_output=True, text=True, timeout=30)
+        except subprocess.TimeoutExpired:
+            ok = False
+            proc = None
+        else:
+            expected_code = EXIT_OK if should_pass else EXIT_FAIL
+            ok = proc.returncode == expected_code
+        all_ok = all_ok and ok
+        actual = "timeout" if proc is None else f"exit {proc.returncode}"
+        lines.append(
+            f"hermes-workflow fixture {name}: expected exit "
+            f"{EXIT_OK if should_pass else EXIT_FAIL}, got {actual} -> "
+            f"{'PASS' if ok else 'FAIL'}"
+        )
+
+    try:
+        fixtures = fixture_roots(
+            root,
+            "workflows/positive",
+            "workflows/negative",
+            REQUIRED_HERMES_WORKFLOW_NEGATIVE_FIXTURES,
+        )
+    except ValueError as exc:
+        return [f"hermes-workflow fixture inventory: FAIL ({exc})"], False
+    for name, path, should_pass in fixtures:
+        run_case(
+            name,
+            [
+                sys.executable,
+                str(script),
+                "--check-hermes-workflow",
+                "--root",
+                str(path),
+            ],
+            should_pass,
+        )
+    return lines, all_ok
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Dependency-free repository documentation checker."
@@ -1120,6 +1726,17 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="validate all governed CI workflows and exact command mappings",
     )
+    parser.add_argument(
+        "--check-hermes-workflow",
+        action="store_true",
+        help="validate the hermes-integration CI workflow policy (slice-00-05)",
+    )
+    parser.add_argument(
+        "--check-hermes-workflow-negative",
+        action="store_true",
+        help="execute the hermes-integration workflow fixtures and "
+        "assert nonzero exits",
+    )
     args = parser.parse_args(argv)
     if args.check_workflow and args.check_workflows:
         parser.error("--check-workflow and --check-workflows are mutually exclusive")
@@ -1135,6 +1752,9 @@ def main(argv: list[str] | None = None) -> int:
     elif args.check_workflows:
         if not report.has_issues:
             check_workflows(root, report)
+    elif args.check_hermes_workflow:
+        if not report.has_issues:
+            check_hermes_integration_workflow(root, report)
     else:
         if not report.has_issues:
             check_documentation(
@@ -1148,6 +1768,8 @@ def main(argv: list[str] | None = None) -> int:
     self_test_ok = True
     if args.self_test_negative:
         self_test_lines, self_test_ok = run_self_test_negative(root)
+    elif args.check_hermes_workflow_negative:
+        self_test_lines, self_test_ok = run_hermes_workflow_self_test(root)
 
     if report.has_issues:
         print("check_documentation: FAIL")
@@ -1157,10 +1779,12 @@ def main(argv: list[str] | None = None) -> int:
         print("check_documentation: FAIL (self-test-negative)")
         print(render_bounded_lines(self_test_lines))
         return EXIT_FAIL
-    if args.self_test_negative:
+    if args.self_test_negative or args.check_hermes_workflow_negative:
         print(render_bounded_lines(self_test_lines))
     if args.check_workflow or args.check_workflows:
         print("check_documentation: workflow configuration OK")
+    elif args.check_hermes_workflow:
+        print("check_documentation: hermes-integration workflow configuration OK")
     else:
         print(
             f"check_documentation: OK ({report.scanned} governed text file(s) checked)"

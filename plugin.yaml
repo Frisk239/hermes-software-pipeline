@@ -1,0 +1,14 @@
+# Hermes plugin manifest for the Hermes Software Pipeline shim (slice-00-05
+# feasibility spike). SPIKE-EXPERIMENTAL marker:
+# DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+#
+# The Hermes-loaded entry stays a thin, standard-library and
+# Hermes-guaranteed shim (ADR-0019): it registers the `pipeline` CLI command
+# tree, one pre_gateway_dispatch hook, and one declared tool; it never
+# imports src/hermes_pipeline and never loads FastAPI/Uvicorn (accepted
+# ADR-0028 confines those to the isolated runtime-env Managed Runtime).
+name: hermes-software-pipeline
+version: 0.1.0
+description: Hermes Software Pipeline thin shim (Slice 00-05 spike)
+kind: standalone
+manifest_version: 1

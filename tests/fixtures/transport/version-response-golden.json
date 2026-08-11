@@ -1,0 +1,7 @@
+{
+  "runtime_version": "0.1.0",
+  "protocol_version": 1,
+  "contract_schema_range": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1:1",
+  "release": "hermes-pipeline-0.1.0-slice-00-05-spike",
+  "state_root_identity": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+}
