@@ -28,9 +28,14 @@ except ImportError:  # Windows
 fcntl: Any = _fcntl
 
 try:  # Windows
-    import msvcrt
+    import msvcrt as _msvcrt
 except ImportError:
-    msvcrt = None  # type: ignore[assignment]
+    _msvcrt = None  # type: ignore[assignment]
+
+# msvcrt's locking/constant surface is absent from the Linux typeshed stub.
+# Keep this Windows-only binding behind the same Any boundary as fcntl above;
+# every use remains guarded by the platform sentinel.
+msvcrt: Any = _msvcrt
 
 
 class StateRootLockError(Exception):

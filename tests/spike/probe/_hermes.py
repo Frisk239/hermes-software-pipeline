@@ -104,6 +104,8 @@ def run_hermes_cli(
         env=probe_env(hermes_home),
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         timeout=timeout,
     )
 
@@ -123,6 +125,8 @@ def run_probe_script(
         env=probe_env(hermes_home),
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         timeout=timeout,
     )
 

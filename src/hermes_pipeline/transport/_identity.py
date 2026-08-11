@@ -23,6 +23,20 @@ from pathlib import Path
 from typing import Any, cast
 
 
+def _win32_bindings() -> tuple[Any, Any]:
+    """Return ctypes and kernel32 behind a Windows-only type boundary.
+
+    ``ctypes.windll`` is deliberately unavailable in the Linux typeshed stub.
+    The callers are reached only under ``os.name == "nt"``; keeping the
+    platform binding local preserves that runtime gate while letting Linux CI
+    type-check the shared module.
+    """
+    import ctypes
+
+    ctypes_api: Any = ctypes
+    return ctypes_api, ctypes_api.windll.kernel32
+
+
 def read_process_start_marker(pid: int) -> dict[str, str] | None:
     """Read the platform start marker for a PID (None when unreadable)."""
     if os.name == "nt":
@@ -52,24 +66,22 @@ def _linux_starttime_ticks(pid: int) -> str | None:
 
 
 def _win32_creation_time(pid: int) -> str | None:
-    import ctypes
-
     PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
-    kernel32 = ctypes.windll.kernel32
+    ctypes_api, kernel32 = _win32_bindings()
     handle = kernel32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, pid)
     if not handle:
         return None
     try:
-        creation = ctypes.c_ulonglong()
-        exit_time = ctypes.c_ulonglong()
-        kernel_time = ctypes.c_ulonglong()
-        user_time = ctypes.c_ulonglong()
+        creation = ctypes_api.c_ulonglong()
+        exit_time = ctypes_api.c_ulonglong()
+        kernel_time = ctypes_api.c_ulonglong()
+        user_time = ctypes_api.c_ulonglong()
         ok = kernel32.GetProcessTimes(
             handle,
-            ctypes.byref(creation),
-            ctypes.byref(exit_time),
-            ctypes.byref(kernel_time),
-            ctypes.byref(user_time),
+            ctypes_api.byref(creation),
+            ctypes_api.byref(exit_time),
+            ctypes_api.byref(kernel_time),
+            ctypes_api.byref(user_time),
         )
         if not ok:
             return None
@@ -89,17 +101,15 @@ def _win32_process_gone(pid: int) -> bool | None:
     the process has terminated. ERROR_INVALID_PARAMETER (87) on open means
     the PID does not exist at all.
     """
-    import ctypes
-
     PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
     STILL_ACTIVE = 259
-    kernel32 = ctypes.windll.kernel32
+    ctypes_api, kernel32 = _win32_bindings()
     handle = kernel32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, pid)
     if not handle:
         return kernel32.GetLastError() == 87
     try:
-        exit_code = ctypes.c_ulong()
-        ok = kernel32.GetExitCodeProcess(handle, ctypes.byref(exit_code))
+        exit_code = ctypes_api.c_ulong()
+        ok = kernel32.GetExitCodeProcess(handle, ctypes_api.byref(exit_code))
         return bool(ok and exit_code.value != STILL_ACTIVE)
     finally:
         kernel32.CloseHandle(handle)
