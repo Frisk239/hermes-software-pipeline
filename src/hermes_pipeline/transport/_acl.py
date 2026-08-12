@@ -22,6 +22,7 @@ POSIX: ``0o600`` plus a mode check.
 
 from __future__ import annotations
 
+import contextlib
 import os
 import re
 import stat
@@ -178,14 +179,12 @@ def apply_windows_dacl(path: Path) -> list[str]:
         "*S-1-1-0",
         "*S-1-3-4",
     ):
-        try:
+        with contextlib.suppress(OSError, subprocess.TimeoutExpired):
             subprocess.run(
                 ["icacls", str(path), "/remove", principal],
                 capture_output=True,
                 timeout=30,
             )
-        except (OSError, subprocess.TimeoutExpired):
-            pass
     return []
 
 
