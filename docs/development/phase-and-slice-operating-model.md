@@ -237,9 +237,37 @@ If both Executor rework attempts receive `REWORK` and the contract remains sound
 5. The independent Executor implements and self-verifies it.
 6. A fresh Codex review accepts it or returns exact findings.
 7. Accepted Slices integrate through the protected Git workflow.
-8. Codex updates remaining Slice assumptions from the accepted repository state.
+8. Codex runs the post-merge downstream decision audit (see below) and resolves every affected conclusion before the next affected planning artifact becomes `READY`.
 9. After all Slices, Codex runs the Phase Gate and writes `CLOSEOUT.md`.
 10. The next Phase is planned from that Closeout, not from old chat memory.
+
+## Post-merge Downstream Decision Audit
+
+Whenever an accepted Slice integrates through the protected Git workflow, Codex must run a **Post-merge Downstream Decision Audit** before any affected downstream planning artifact becomes `READY`. The audit replaces the informal habit of "updating remaining Slice assumptions": every downstream artifact the integration could affect is reviewed against the integrated repository state, and each review yields an explicit, recorded conclusion.
+
+The audit reviews all affected downstream artifacts, including:
+
+- DRAFT Slice plans and Slice Contracts — their Base SHA, predecessors, binding ADRs, permitted paths, acceptance criteria, and verification assumptions;
+- DRAFT ADRs and other proposed decision documents;
+- generated Context Manifests;
+- CI, compatibility, migration, and documentation assumptions changed by the integration.
+
+Each audit record binds its conclusions to exact identities and must record:
+
+- the **source integration SHA** — the merge commit that integrated the accepted Slice;
+- the target Slice's **Planning Base** — the Base SHA currently bound by the affected downstream Slice Contract — and its **Integration Base** — the target head against which the downstream Slice will be validated when it integrates;
+- the **reviewed objects** — paths, revisions, and content hashes of the downstream artifacts examined;
+- **evidence** — the commands, outputs, or diffs that justify each conclusion.
+
+Every audited item concludes with exactly one of:
+
+- `UPDATED` — the downstream artifact must change to match the integrated repository state; the change is completed and recorded in the same audit;
+- `NO_CHANGE` — the downstream artifact remains valid against the integrated repository state;
+- `CCR_REQUIRED` — the integration invalidates an approved contract or decision so deeply that a Contract Change Request or ADR must precede further work.
+
+A Slice is not `READY` while any affected downstream audit item remains `UPDATED` or `CCR_REQUIRED`. `UPDATED` items are resolved by completing and recording the downstream update; `CCR_REQUIRED` items are resolved by a recorded Contract Change Request or accepted decision. The same audit applies at Phase closeout to the downstream Phase Plan and ADRs of the next Phase: a Phase does not close while a downstream Phase Plan or ADR remains `UPDATED` or `CCR_REQUIRED` without a recorded disposition.
+
+The audit never rewrites accepted contracts, review records, or closeouts retroactively. A historical gap — an integration that predates this rule — is repaired only by appending a traceable audit record with its own revision and evidence, never by editing the historical artifacts in place.
 
 ## Change control
 
@@ -259,7 +287,8 @@ A Slice is `READY` only if:
 - scope and authority are explicit;
 - acceptance and evidence are executable;
 - the worktree can be created safely;
-- no unresolved product question affects implementation.
+- no unresolved product question affects implementation;
+- no affected post-merge downstream audit item remains `UPDATED` or `CCR_REQUIRED`.
 
 A Slice is `ACCEPTED` only if:
 
@@ -274,6 +303,7 @@ A Phase is complete only if:
 - cross-Slice integration and recovery scenarios pass;
 - normative docs, schemas, ADRs, and `CONTEXT.md` match the code;
 - installation, upgrade, and rollback implications are verified;
+- the post-merge downstream decision audit covers the downstream Phase Plan and ADRs of the next Phase with no unresolved `UPDATED` or `CCR_REQUIRED` conclusion;
 - the Closeout names delivered capability, evidence, debt, and the next Phase's prerequisites.
 
 ## Anti-patterns
@@ -284,5 +314,6 @@ A Phase is complete only if:
 - accepting “tests passed” without commands, outputs, and Candidate identity;
 - Codex reviewing and silently fixing the same Candidate;
 - starting the next Slice before the previous verdict is durable;
+- integrating a Slice and "updating assumptions" in chat or by silent edits instead of recording a post-merge downstream decision audit;
 - keeping plan changes only in chat;
 - treating a large Phase as one Agent session or one unrestricted worktree.
