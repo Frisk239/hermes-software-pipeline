@@ -56,13 +56,13 @@ Every finding cites exact evidence, a criterion or standard, severity, and requi
 
 ## Post-merge downstream decision audit
 
-After an accepted Slice integrates, Codex audits every downstream DRAFT artifact the integration can affect — Slice plans and contracts, DRAFT ADRs, Context Manifests, and CI/compatibility assumptions — and records one explicit conclusion per item.
+After an accepted Slice integrates, Codex audits every downstream DRAFT artifact the integration can affect — Slice plans and contracts, DRAFT ADRs, Context Manifests, and CI, compatibility, migration, and documentation assumptions — and records one explicit conclusion per item.
 
 Audit input includes:
 
 - the source integration SHA of the merged Slice;
 - the target Slice's Planning Base and Integration Base;
-- the exact revisions and content hashes of the downstream artifacts reviewed.
+- the reviewed paths, exact revisions, and content hashes of the downstream artifacts reviewed.
 
 Audit output includes:
 
