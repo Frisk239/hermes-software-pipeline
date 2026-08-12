@@ -107,33 +107,35 @@ def verify_descriptor_acl_text(
     """Validate parsed DACL text: exactly one current-user (F) ACE.
 
     Returns a list of problems (empty when the DACL is exactly the accepted
-    single-ACE set). Inherited ACEs (flag ``I``) are host-inherited noise
-    outside the file's explicit DACL and are ignored for the exact-one
-    check; only explicit ACEs are validated.
+    single-ACE set). Fail-closed: any explicit non-current-user ACE is
+    rejected; inherited ACEs are not part of the file's explicit DACL and
+    remain outside the threat model.
     """
     problems: list[str] = []
     aces = parse_icacls_aces(text)
     if not aces:
-        return ["no ACE found in icacls output"]
-    explicit = [(s, f) for s, f in aces if "i" not in f.lower()]
-    if not explicit:
         return ["no ACE found in icacls output"]
     allowed: set[str] = {current_sid.lower()} if current_sid else set()
     if current_sid:
         allowed.add(f"*{current_sid.lower()}")
     if current_user:
         allowed.add(current_user.lower())
-    for subject, flags in explicit:
+    for subject, flags in aces:
+        if "i" in flags.lower():
+            continue
         normalized = subject.lower()
         if normalized not in allowed:
             problems.append(f"descriptor DACL contains subject {subject!r}")
             continue
         if "f" not in flags.lower():
             problems.append(f"current-user ACE lacks full control: ({flags})")
-    if len(explicit) != 1:
+    explicit_count = sum(1 for _, f in aces if "i" not in f.lower())
+    if explicit_count != 1:
         problems.append(
-            f"descriptor DACL must contain exactly one ACE (got {len(explicit)})"
+            f"descriptor DACL must contain exactly one ACE (got {explicit_count})"
         )
+    if not explicit_count:
+        problems.append("no ACE found in icacls output")
     return problems
 
 
@@ -146,6 +148,13 @@ def apply_windows_dacl(path: Path) -> list[str]:
     virtualized Windows, cannot map a well-formed local SID to a name and
     fail the plain-SID form with ERROR_NONE_MAPPED; ``*SID`` is the
     documented icacls form and behaves identically everywhere.)
+
+    On GHA windows-2025 the file may inherit explicit ACEs for
+    NT AUTHORITY\\SYSTEM, BUILTIN\\Administrators and OWNER RIGHTS from the
+    parent TEMP directory; ``/inheritance:r`` copies them as explicit, so the
+    DACL still contains 3-4 explicit ACEs. The hardening pass explicitly
+    removes those well-known principals after the grant, converging to the
+    contract-required exact-one explicit ACE.
     """
     sid, _ = current_user_identities()
     if sid is None:
@@ -157,6 +166,26 @@ def apply_windows_dacl(path: Path) -> list[str]:
         return [f"icacls application failed: {type(exc).__name__}"]
     if proc.returncode != 0:
         return [f"icacls application failed (exit {proc.returncode})"]
+    for principal in (
+        "NT AUTHORITY\\SYSTEM",
+        "BUILTIN\\Administrators",
+        "BUILTIN\\Users",
+        "Everyone",
+        "OWNER RIGHTS",
+        "*S-1-5-18",
+        "*S-1-5-32-544",
+        "*S-1-5-32-545",
+        "*S-1-1-0",
+        "*S-1-3-4",
+    ):
+        try:
+            subprocess.run(
+                ["icacls", str(path), "/remove", principal],
+                capture_output=True,
+                timeout=30,
+            )
+        except (OSError, subprocess.TimeoutExpired):
+            pass
     return []
 
 

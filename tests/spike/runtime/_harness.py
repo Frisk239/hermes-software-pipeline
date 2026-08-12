@@ -281,15 +281,41 @@ def wait_runtime_ready(state_root: Path, timeout: float = READY_WAIT_SECONDS) ->
 
     Connection refusals during startup are expected (the runtime may not
     have bound its loopback socket yet) and are retried until the bounded
-    deadline; only a deadline expiry fails.
+    deadline; only a deadline expiry fails. On port collision the runtime
+    rewrites the descriptor with a fresh port (bounded ≤3), so the loop
+    re-reads the descriptor each cycle without extra staleness filtering.
     """
     from hermes_shim import _client
 
-    document = wait_for_descriptor(state_root, timeout)
+    wait_for_descriptor(state_root, timeout)
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
         try:
-            probe = _client.readyz(int(document["port"]), str(document["token"]))
+            document = json.loads(
+                (state_root / "descriptor" / "runtime.json").read_text("utf-8")
+            )
+        except (OSError, ValueError):
+            time.sleep(0.25)
+            continue
+        if not isinstance(document, dict):
+            time.sleep(0.25)
+            continue
+        document = cast(dict[str, Any], document)
+        raw_port = document.get("port")
+        raw_token = document.get("token")
+        try:
+            port_val = int(str(raw_port)) if raw_port is not None else None
+            token_val = str(raw_token) if raw_token is not None else None
+        except (ValueError, TypeError):
+            time.sleep(0.25)
+            continue
+        if port_val is None or token_val is None:
+            time.sleep(0.25)
+            continue
+        port: int = port_val
+        token: str = token_val
+        try:
+            probe = _client.readyz(port, token)
         except _client.RuntimeUnavailableError:
             time.sleep(0.25)
             continue
