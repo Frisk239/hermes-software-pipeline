@@ -26,7 +26,7 @@ permissions:
 jobs:
   hermes-integration:
     env:
-      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONDONTWRITEBYTECODE: "0"
     strategy:
       fail-fast: false
       matrix:

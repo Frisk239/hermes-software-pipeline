@@ -209,8 +209,12 @@ REQUIRED_WORKFLOW_NEGATIVE_FIXTURES = frozenset(
 
 HERMES_WORKFLOW_PATH = Path(".github/workflows/hermes-integration.yml")
 ALLOWED_HERMES_WORKFLOW_TOP_LEVEL = {"name", "on", "permissions", "jobs"}
-ALLOWED_HERMES_WORKFLOW_JOB = {"strategy", "runs-on", "steps"}
+ALLOWED_HERMES_WORKFLOW_JOB = {"env", "strategy", "runs-on", "steps"}
 ALLOWED_HERMES_WORKFLOW_STEP = {"uses", "name", "run", "with", "shell"}
+REQUIRED_HERMES_ENV = {"PYTHONDONTWRITEBYTECODE": "1"}
+# The strict parser preserves scalar quote delimiters. Accept only the three
+# YAML spellings that give GitHub Actions the exact value "1".
+HERMES_ENV_VALUE_SPELLINGS = frozenset({"1", '"1"', "'1'"})
 HERMES_WORKFLOW_JOB_NAME = "hermes-integration"
 HERMES_SHELL = "bash"
 # Network-cutoff boundary comment marker (dependency bootstrap above,
@@ -348,6 +352,7 @@ REQUIRED_HERMES_WORKFLOW_NEGATIVE_FIXTURES = frozenset(
     {
         "arbitrary-bootstrap-bash",
         "bad-trigger",
+        "bash-after-cutoff",
         "bash-extra-clone",
         "bash-extra-curl",
         "bash-extra-env",
@@ -355,15 +360,19 @@ REQUIRED_HERMES_WORKFLOW_NEGATIVE_FIXTURES = frozenset(
         "command-before-cutoff",
         "derive-before-bootstrap",
         "extra-command",
+        "extra-env",
         "invalid-yaml",
         "missing-checkout-ref",
         "missing-command",
+        "missing-env",
         "missing-marker",
         "missing-permissions",
         "network-after-cutoff",
         "persist-credentials",
+        "quote-wrapped-env",
         "secrets-context",
         "unpinned-action",
+        "wrong-env-value",
         "wrong-job-name",
         "wrong-matrix",
     }
@@ -998,6 +1007,19 @@ def check_hermes_integration_workflow(root: Path, report: Reporter) -> None:
     for key in sorted(set(job) - ALLOWED_HERMES_WORKFLOW_JOB):
         report.issue(
             f"{workflow}: job {HERMES_WORKFLOW_JOB_NAME!r} has unknown key {key!r}"
+        )
+    raw_env = _as_mapping(job.get("env"))
+    env_value = raw_env.get("PYTHONDONTWRITEBYTECODE") if raw_env is not None else None
+    hermes_env_ok = (
+        raw_env is not None
+        and set(raw_env) == set(REQUIRED_HERMES_ENV)
+        and isinstance(env_value, str)
+        and env_value in HERMES_ENV_VALUE_SPELLINGS
+    )
+    if not hermes_env_ok:
+        report.issue(
+            f"{workflow}: job {HERMES_WORKFLOW_JOB_NAME!r} env must be exactly "
+            f"{REQUIRED_HERMES_ENV!r}"
         )
     _check_hermes_job_os_coverage(workflow, job, report)
     _check_hermes_job_commands(workflow, job, report)

@@ -25,6 +25,7 @@ FIXTURES = REPO_ROOT / "scripts" / "fixtures" / "workflows"
 REQUIRED_NEGATIVE_FIXTURES = {
     "arbitrary-bootstrap-bash",
     "bad-trigger",
+    "bash-after-cutoff",
     "bash-extra-clone",
     "bash-extra-curl",
     "bash-extra-env",
@@ -32,15 +33,19 @@ REQUIRED_NEGATIVE_FIXTURES = {
     "command-before-cutoff",
     "derive-before-bootstrap",
     "extra-command",
+    "extra-env",
     "invalid-yaml",
     "missing-checkout-ref",
     "missing-command",
+    "missing-env",
     "missing-marker",
     "missing-permissions",
     "network-after-cutoff",
     "persist-credentials",
+    "quote-wrapped-env",
     "secrets-context",
     "unpinned-action",
+    "wrong-env-value",
     "wrong-job-name",
     "wrong-matrix",
 }
@@ -131,3 +136,14 @@ def test_existing_workflow_policy_unchanged() -> None:
     """The two existing workflows and their checker still pass."""
     proc = _run(["--check-workflows", "--root", str(REPO_ROOT)])
     assert proc.returncode == 0, proc.stdout + proc.stderr
+
+
+def test_committed_workflow_matches_positive_fixture() -> None:
+    """Actual workflow and positive fixture must be byte-identical."""
+    committed = (
+        REPO_ROOT / ".github" / "workflows" / "hermes-integration.yml"
+    ).read_bytes()
+    fixture = (
+        FIXTURES / "positive" / ".github" / "workflows" / "hermes-integration.yml"
+    ).read_bytes()
+    assert committed == fixture, "committed workflow diverged from positive fixture"

@@ -27,6 +27,7 @@ jobs:
   hermes-integration:
     env:
       PYTHONDONTWRITEBYTECODE: "1"
+      EXTRA_VAR: "oops"
     strategy:
       fail-fast: false
       matrix:
