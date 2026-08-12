@@ -2,10 +2,9 @@
 
 These are planning-level Slice definitions. Codex expands only the next dependency-ready Slice into a machine-valid immutable Slice Contract using the exact current Base SHA.
 
-Slice 00-04 was accepted and integrated at `46798d86a2e48551a3a634e93d1e4dfe5cbf8786` (PR #9). The READY contract for the next Slice is:
+Slice 00-04 was accepted and integrated at `46798d86a2e48551a3a634e93d1e4dfe5cbf8786` (PR #9), and Slice 00-05 was accepted and integrated at `102d08f814b6c0a939662e6c488870310a97c1ee` (PR #11). Slice 00-06 remains DRAFT; its contract and manifest are under planning-branch revision and have not yet integrated into `main`.
 
-- `00-05-hermes-shim-runtime/SLICE.md`;
-- `00-05-hermes-shim-runtime/slice-contract.json`.
+Every Slice integration triggers the post-merge downstream decision audit defined in `docs/development/phase-and-slice-operating-model.md`. The 00-05 → 00-06 transition predates that rule, so the first audit record must be backfilled as a traceable entry for 00-06 before it becomes `READY`. The READY contract for the next Slice will be produced from that audit and the 00-06 DRAFT:
 
 ## 00-01 Repository baseline
 
@@ -83,6 +82,8 @@ Out: production Feishu UI and any business approval.
 Demonstration: a real local Hermes Gateway delivers one authenticated fake command exactly once; killing/restarting either process does not forge or lose an acknowledged result.
 
 ## 00-06 Agent/runtime security spikes
+
+Status: DRAFT — contract and manifest are under planning-branch revision and are not yet on `main`. Before this Slice becomes `READY`, the post-merge downstream decision audit for the 00-05 → 00-06 transition must be recorded, and any `UPDATED` or `CCR_REQUIRED` conclusion must be resolved.
 
 Must deliver:
 

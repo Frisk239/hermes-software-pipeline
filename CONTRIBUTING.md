@@ -22,6 +22,8 @@ Open a discussion before preparing changes that alter product scope, architectur
 - Do not independently edit generated contract artifacts.
 - Add deterministic tests at the lowest boundary that proves the behavior.
 - Update normative documentation, fixtures, compatibility notes, and runbooks with the behavior they govern.
+- After a Slice integrates, complete the post-merge downstream decision audit (see `docs/development/phase-and-slice-operating-model.md`) and record each conclusion (`UPDATED`, `NO_CHANGE`, `CCR_REQUIRED`) before affected downstream artifacts reach `READY`.
+- "Update the ADR" is an obligation only when an audit concludes `UPDATED` — it is not a mandate to mechanically revise every ADR after every integration.
 - Never weaken, skip, delete, or mark tests merely to make a Candidate pass.
 - Never include credentials, raw model transcripts, private Project content, or sensitive evidence.
 

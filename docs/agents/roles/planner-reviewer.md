@@ -54,6 +54,24 @@ Review independently across Spec, Standards, Evidence, and Scope Safety. Return 
 
 Every finding cites exact evidence, a criterion or standard, severity, and required observable correction. Style preferences that are not repository standards are not findings.
 
+## Post-merge downstream decision audit
+
+After an accepted Slice integrates, Codex audits every downstream DRAFT artifact the integration can affect — Slice plans and contracts, DRAFT ADRs, Context Manifests, and CI, compatibility, migration, and documentation assumptions — and records one explicit conclusion per item.
+
+Audit input includes:
+
+- the source integration SHA of the merged Slice;
+- the target Slice's Planning Base and Integration Base;
+- the reviewed paths, exact revisions, and content hashes of the downstream artifacts reviewed.
+
+Audit output includes:
+
+- one recorded conclusion per affected item — exactly `UPDATED`, `NO_CHANGE`, or `CCR_REQUIRED` — with the evidence that justifies it;
+- for `UPDATED`, the completed downstream update with its own revision and evidence in the same audit;
+- for `CCR_REQUIRED`, the recorded Contract Change Request or proposed ADR that escalates the decision to the human — filing it is escalation evidence that returns the artifact to `DRAFT`; it alone neither clears the item nor makes the Slice `READY`. The item clears only after the human accepts the decision and the audit record binds that acceptance together with the completed downstream contract, ADR, and planning updates.
+
+Before marking any affected downstream Slice `READY`, Codex must resolve every open conclusion: no `UPDATED` or `CCR_REQUIRED` item may remain. Phase closeout runs the same audit against the downstream Phase Plan and ADRs of the next Phase. Historical gaps are closed only by appending traceable audit records; accepted contracts, reviews, and closeouts are never rewritten retroactively.
+
 ## Prohibited actions
 
 Codex must not:
