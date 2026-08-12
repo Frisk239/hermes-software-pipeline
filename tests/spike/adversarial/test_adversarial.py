@@ -91,9 +91,10 @@ def test_port_collision_retries_with_fresh_port(
         env_extra={"SPIKE_PORT_COLLISION_FIRST": str(held_port)},
     )
     try:
-        document = wait_for_descriptor(tmp_path)
+        wait_for_descriptor(tmp_path)
         wait_runtime_ready(tmp_path)
-        assert int(document["port"]) != held_port
+        final = wait_for_descriptor(tmp_path)
+        assert int(final["port"]) != held_port
     finally:
         stop_runtime(proc, tmp_path)
         held.close()
