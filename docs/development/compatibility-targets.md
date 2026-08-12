@@ -189,6 +189,109 @@ Contract Change Request before any spike persistence conclusion is claimed.
 | Windows | uv-managed CPython `3.12.13` | `3.53.1` (passes) | passes |
 | Windows and Linux CI | uv-managed CPython `3.12.13` | Every Candidate-bound `pytest` matrix log prints the exact linked value in the bounded `slice-00-04 platform-evidence` header; the gate asserts the predicate in that same job. | must pass before a persistence conclusion |
 
+## Slice-00-05 Hermes shim and managed-runtime spike (accepted ADR-0028)
+
+Slice 00-05 proves the Hermes plugin surface (thin shim, source install,
+PluginManager load, `pre_gateway_dispatch` interception), the isolated
+Managed Runtime (FastAPI/Uvicorn under accepted ADR-0028), and the
+authenticated loopback Control Interface. All spike components carry an
+explicit `SPIKE-EXPERIMENTAL` marker with
+`DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07`; nothing becomes production
+foundation without an explicit Slice 00-07 adoption.
+
+### Hermes pin and evidence sources
+
+| Component | Pinned value | Evidence |
+| --- | --- | --- |
+| Hermes release | tag `v2026.8.3` = commit `3c27eb6234bf91b8ceee9e9071591b31e9b148cb` (2026-08-03) | GitHub release page fetched 2026-08-10; provisioned in `hermes-integration.yml` with Hermes' own `uv.lock` |
+| Hermes probe environment | independent `HERMES_PIPELINE_PROBE_HERMES` (Hermes environment Python) | probe suites skip without it, fail when set but broken; required in CI |
+| Host Python | `>=3.11,<3.14` (declared by the pinned Hermes release) | research report §1.1 |
+| Probe design | PluginManager load/registration probe; source-install Candidate binding; `GatewayRunner._handle_message` synthetic `/card` probe (fixture-based, offline; Hermes' own test seam is the reference) | research report §1.6/§1.10/§3.5/§3.6 |
+
+### Managed Runtime pin (accepted ADR-0028)
+
+FastAPI/Uvicorn and the declared local `hermes-pipeline==0.1.0` package
+exist **only** inside the dedicated `runtime-env/` project (own
+`pyproject.toml` + committed `runtime-env/uv.lock`) and materialize
+beneath `<state-root>/runtimes/<version>/` via the cross-platform harness
+(`UV_PROJECT_ENVIRONMENT` + controlled `uv sync --frozen --project
+runtime-env` argv). The root `[project].dependencies` stays empty; the
+root `uv.lock` is untouched; Hermes never imports those dependencies.
+
+| Component | Frozen version | Role |
+| --- | --- | --- |
+| FastAPI | `0.141.1` | Loopback Control Interface framework (ADR-0022), loopback-only |
+| Uvicorn | `0.52.1` | ASGI server, bound to `127.0.0.1` only |
+| `hermes-pipeline` | `0.1.0` (path source, editable false) | Runtime entry `python -m hermes_pipeline.transport`; no `PYTHONPATH` |
+
+### Fixed spike decisions (research report §5)
+
+| ID | Decision | Fixed value |
+| --- | --- | --- |
+| D1 | FastAPI/Uvicorn + local package authorization | accepted ADR-0028: only in the isolated Managed Runtime |
+| D2 | Runtime installation/isolation | dedicated `runtime-env/` project with committed lock; state-root target interpreter/sys.prefix proof |
+| D3 | Windows descriptor ACL | exactly one grant ACE for the current user SID with `(F)`; `icacls <path> /inheritance:r /grant:r *<sid>:(F)`; verification rejects every other subject incl. Everyone/Users/SYSTEM/Administrators; POSIX `0o600`; residual host-admin boundary documented outside the DACL |
+| D4 | Fake receipt store | stdlib `sqlite3` in the disposable state root; JSON/memory rejected |
+| D5 | Lifecycle state root | `<HERMES_HOME>/software-pipeline/` with `descriptor/`, `runtimes/`, `logs/` children and ownership markers |
+| D6 | Hermes CI provision | pinned release commit, Hermes' own `uv.lock`, independent environment, dependency-bootstrap network cutoff |
+| D7 | Interception probe topology | real Hermes process + real plugin load + synthetic `MessageEvent` through `GatewayRunner._handle_message` (offline) |
+
+### Fixed protocol and recovery values
+
+Host must equal `127.0.0.1:<port>` or `[::1]:<port>` (else `400` +
+`POLICY_REJECTED`); Origin absent or the matching loopback origin (else
+`403` + `POLICY_REJECTED`); `X-Hermes-Pipeline-Protocol: 1` required
+(else `400` + `VALIDATION_ERROR`, message `unsupported protocol
+version`); bearer token from the descriptor (else `401` +
+`AUTHENTICATION_FAILED`); 64 KiB body limit on `/v1/commands` (else `413`
++ `VALIDATION_ERROR`); 60-second / 60-request fixed window (else `429` +
+`RATE_LIMITED`); shim client timeouts 5 s, runtime request budget 10 s;
+unknown path `404` + `NOT_FOUND`; stale/absent descriptor at the client
+`DEPENDENCY_UNAVAILABLE` (fail closed). Token rotation happens only when
+the runtime process starts; a Hermes restart re-reads the existing
+descriptor/token without rotation or rewrite. Descriptor and protocol
+versioning is fixed as spike versioned constants plus golden JSON fixtures
+(`tests/fixtures/transport/`); the contract-toolchain path is out of
+scope.
+
+### Spike dispositions
+
+| Spike component | Paths | Disposition |
+| --- | --- | --- |
+| Hermes shim | `plugin.yaml`, `__init__.py`, `hermes_shim/` | retain candidate for 00-07 adoption (stdlib-only entry) |
+| Fake managed runtime | `src/hermes_pipeline/transport/` | DELETE_UNLESS_ADOPTED_BY_00-07 (loopback spike only) |
+| Receipt store | `transport/_receipts.py` + disposable sqlite file | DELETE_UNLESS_ADOPTED_BY_00-07 (never production persistence) |
+| Lifecycle CLI | `hermes_shim/_cli.py`, `_lifecycle.py` | retain candidate for 00-07 adoption (idempotent non-production skeleton) |
+| Probe harness | `tests/spike/probe/`, `tests/spike/runtime/_harness.py` | retain as CI evidence machinery |
+| Provision topology | `runtime-env/` | retain candidate under accepted ADR-0028 |
+
+### Workflow governance extension (fixed in-Slice scope)
+
+`scripts/check_documentation.py` gains `check_hermes_integration_workflow`
+(`--check-hermes-workflow` / `--check-hermes-workflow-negative`) and
+`scripts/fixtures/workflows/` positive/negative fixtures; the two existing
+workflows and their checkers are unchanged.
+
+### Residual risks
+
+- The loopback client explicitly bypasses any system-configured HTTP proxy
+  (empty `ProxyHandler`): a resident proxy (e.g. Clash/v2ray) could observe
+  or rewrite the bearer token. The runtime's strict Host/Origin validation
+  rejects proxied/rewritten requests, tokens rotate on every runtime start,
+  and a regression test proves requests never traverse a dead proxy; a
+  local proxy process remains inside the documented host-software trust
+  boundary.
+- `pre_gateway_dispatch` interception semantics depend on the pinned
+  Hermes release; behavior drift on upstream `main` requires re-probing.
+- Windows descriptor DACL verification covers the DACL only; a local
+  administrator or SYSTEM can still access the file through host-admin
+  mechanisms outside the DACL (documented host-admin boundary).
+- The loopback port is probed then rebound by uvicorn (small TOCTOU
+  window); collisions are bounded to 3 fresh-port attempts.
+- The fake runtime and receipt store are disposable spike artifacts; they
+  never become production foundation without explicit Slice 00-07
+  adoption.
+
 ## Compatibility policy
 
 - Exact dependency versions and hashes belong in `uv.lock`; this document records tested product/tool ranges.

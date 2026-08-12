@@ -1,0 +1,25 @@
+# Dedicated Managed Runtime project for the Slice 00-05 spike.
+# SPIKE-EXPERIMENTAL marker:
+# DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+#
+# Accepted ADR-0028 confines FastAPI, Uvicorn, and the declared local
+# hermes-pipeline==0.1.0 package to this independent runtime project. The
+# environment is materialized beneath <state-root>/runtimes/<version>/ via
+# the cross-platform harness (UV_PROJECT_ENVIRONMENT + controlled
+# `uv sync --frozen --project runtime-env` argv); the root project
+# [project].dependencies stays empty and the root uv.lock is untouched.
+# [tool.uv.sources] resolves the declared root package from the repository
+# root without PYTHONPATH manipulation or an editable install.
+[project]
+name = "hermes-pipeline-runtime-env"
+version = "0.1.0"
+description = "Isolated Managed Runtime environment (Hermes Software Pipeline spike)"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi>=0.115,<1",
+    "uvicorn>=0.30,<1",
+    "hermes-pipeline==0.1.0",
+]
+
+[tool.uv.sources]
+hermes-pipeline = { path = "..", editable = false }

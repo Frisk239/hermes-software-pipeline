@@ -1,0 +1,16 @@
+{
+  "descriptor_version": 1,
+  "protocol_version": 1,
+  "pid": "not-an-int",
+  "start_identity": "0123456789abcdef0123456789abcdef",
+  "creation_time": "2026-01-01T00:00:00.000000Z",
+  "process_start_marker": {
+    "value": "4242",
+    "source": "proc_stat_field22"
+  },
+  "port": 49152,
+  "token": "abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
+  "token_generation": 1,
+  "release": "hermes-pipeline-0.1.0-slice-00-05-spike",
+  "state_root_identity": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+}
