@@ -46,11 +46,15 @@ def test_canary_absent_from_runtime_environment_and_logs(
         wait_runtime_ready(tmp_path)
         # The runtime's own environment never carries the canary: the probe
         # child itself starts from the allow-list, never os.environ.
-        from hermes_shim._provision import build_child_env
+        from hermes_shim._provision import (
+            build_child_env,
+            interpreter_path,
+            runtime_environment_dir,
+        )
 
         env_probe = subprocess.run(
             [
-                str(tmp_path / "runtimes" / "0.1.0" / "Scripts" / "python.exe"),
+                str(interpreter_path(runtime_environment_dir(tmp_path))),
                 "-c",
                 f"import os; print(os.environ.get({CANARY!r}, ''))",
             ],

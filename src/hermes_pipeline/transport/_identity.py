@@ -50,7 +50,8 @@ def read_process_start_marker(pid: int) -> dict[str, str] | None:
     return {"value": value, "source": "proc_stat_field22"}
 
 
-def _linux_starttime_ticks(pid: int) -> str | None:
+def _linux_stat_fields(pid: int) -> list[str] | None:
+    """Read fields after Linux ``/proc/<pid>/stat``'s parenthesized comm."""
     try:
         stat = Path(f"/proc/{pid}/stat").read_text(encoding="utf-8")
     except OSError:
@@ -59,10 +60,27 @@ def _linux_starttime_ticks(pid: int) -> str | None:
     # 22, so split after the LAST ')' of the comm field (a legal process
     # name may itself contain ')').
     try:
-        tail = stat.rsplit(")", 1)[1].split()
-        return tail[22 - 3]  # field 22 is index 19 of the tail list
-    except (IndexError, ValueError):
+        return stat.rsplit(")", 1)[1].split()
+    except IndexError:
         return None
+
+
+def _linux_starttime_ticks(pid: int) -> str | None:
+    fields = _linux_stat_fields(pid)
+    if fields is None:
+        return None
+    try:
+        return fields[22 - 3]  # field 22 is index 19 of the tail list
+    except IndexError:
+        return None
+
+
+def _linux_process_is_zombie(pid: int) -> bool | None:
+    """Return whether a Linux process is a zombie, or None if unreadable."""
+    fields = _linux_stat_fields(pid)
+    if not fields:
+        return None
+    return fields[0] == "Z"  # field 3: process state
 
 
 def _win32_creation_time(pid: int) -> str | None:
@@ -145,11 +163,12 @@ def process_matches_identity(pid: int, expected: Any) -> bool:
                 return False
         elif current.get("value") != expected_marker.get("value"):
             return False
-        # The marker matches; on Windows the process object may still be a
-        # terminated one (handles held elsewhere), so prove liveness there.
+        # The marker matches; Windows process objects can outlive a process,
+        # and Linux zombies retain a readable /proc marker. Prove liveness
+        # before preserving a descriptor in either case.
         if os.name == "nt":
             return not _win32_process_gone(pid)
-        return True
+        return _linux_process_is_zombie(pid) is not True
     # The marker cannot be read: the process is gone, inside a PID-reuse
     # window, or not queryable. A descriptor may be removed only when the
     # process is provably absent; any unverifiable state fails closed and

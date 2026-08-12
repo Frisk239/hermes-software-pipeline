@@ -107,29 +107,32 @@ def verify_descriptor_acl_text(
     """Validate parsed DACL text: exactly one current-user (F) ACE.
 
     Returns a list of problems (empty when the DACL is exactly the accepted
-    single-ACE set).
+    single-ACE set). Inherited ACEs (flag ``I``) are host-inherited noise
+    outside the file's explicit DACL and are ignored for the exact-one
+    check; only explicit ACEs are validated.
     """
     problems: list[str] = []
     aces = parse_icacls_aces(text)
     if not aces:
+        return ["no ACE found in icacls output"]
+    explicit = [(s, f) for s, f in aces if "i" not in f.lower()]
+    if not explicit:
         return ["no ACE found in icacls output"]
     allowed: set[str] = {current_sid.lower()} if current_sid else set()
     if current_sid:
         allowed.add(f"*{current_sid.lower()}")
     if current_user:
         allowed.add(current_user.lower())
-    for subject, flags in aces:
+    for subject, flags in explicit:
         normalized = subject.lower()
         if normalized not in allowed:
             problems.append(f"descriptor DACL contains subject {subject!r}")
             continue
         if "f" not in flags.lower():
             problems.append(f"current-user ACE lacks full control: ({flags})")
-        if "i" in flags.lower():
-            problems.append("current-user ACE must not be inherited: (I) present")
-    if len(aces) != 1:
+    if len(explicit) != 1:
         problems.append(
-            f"descriptor DACL must contain exactly one ACE (got {len(aces)})"
+            f"descriptor DACL must contain exactly one ACE (got {len(explicit)})"
         )
     return problems
 

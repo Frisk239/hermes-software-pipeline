@@ -14,6 +14,7 @@ from __future__ import annotations
 import os
 import subprocess
 import sys
+from types import SimpleNamespace
 
 import pytest
 
@@ -54,6 +55,38 @@ def test_linux_stat_comm_with_parentheses(
     )
 
     assert shim_ticks(1234) == "999"  # pyright: ignore[reportPrivateUsage]
+
+
+def test_linux_zombie_marker_is_never_live(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A readable matching ``/proc`` marker does not make a zombie live."""
+    from pathlib import Path
+
+    from hermes_shim import _descriptor as shim_descriptor
+
+    from hermes_pipeline.transport import _identity as runtime_identity
+
+    stat_text = (
+        "1234 (zombie) Z 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 999 18 19 20"
+    )
+
+    def fake_read_text(self: Path, encoding: str = "utf-8") -> str:
+        return stat_text
+
+    def fake_kill(_pid: int, _signal: int) -> None:
+        return None
+
+    monkeypatch.setattr(Path, "read_text", fake_read_text)
+    linux_os = SimpleNamespace(name="posix", kill=fake_kill)
+    monkeypatch.setattr(runtime_identity, "os", linux_os)
+    monkeypatch.setattr(shim_descriptor, "os", linux_os)
+
+    marker = {"value": "999", "source": "proc_stat_field22"}
+    assert runtime_identity._linux_process_is_zombie(1234)  # pyright: ignore[reportPrivateUsage]
+    assert shim_descriptor._linux_process_is_zombie(1234)  # pyright: ignore[reportPrivateUsage]
+    assert not runtime_identity.process_matches_identity(1234, marker)
+    assert not shim_descriptor.process_matches_identity(1234, marker)
 
 
 def test_self_process_marker_readable_and_matching() -> None:
