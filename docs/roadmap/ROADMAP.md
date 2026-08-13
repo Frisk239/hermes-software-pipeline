@@ -23,6 +23,8 @@ No product behavior is implemented in Phase 0.
 
 ## Phase 1 — Deterministic Controller kernel
 
+Approved plan: `docs/roadmap/phase-01-controller-kernel/PHASE.md` (attestation `engapr_phase-01_20260813_01`). Next Slice draft: `slices/01-01-domain-kernel/`.
+
 **Exit capability:** a fake Pipeline Command is accepted or rejected deterministically, survives restart, produces deduplicated Events/projections/Outbox Effects, and cannot be advanced by a stale worker.
 
 Candidate Slices:

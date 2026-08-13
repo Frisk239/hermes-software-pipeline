@@ -1,0 +1,221 @@
+{
+  "schema_id": "https://schemas.hermes-pipeline.dev/engineering/phase-plan/v1",
+  "schema_version": 1,
+  "document_revision": 1,
+  "phase_id": "phase-01",
+  "title": "Deterministic Controller Kernel",
+  "status": "APPROVED",
+  "owner": "Frisk239",
+  "base_sha": "e778a5246c4bec3f6a54aec2fdb315ab66ca756e",
+  "outcome": "A fake Pipeline Command is accepted or rejected deterministically, survives process restart, produces deduplicated Events, rebuildable projections, and Outbox Effects, and cannot be advanced by a stale worker generation.",
+  "prerequisites": [
+    "Phase 00 integrated through e778a5246c4bec3f6a54aec2fdb315ab66ca756e",
+    "Human accepted P1-P5 on 2026-08-13",
+    "ADR-0014 and ADR-0021 remain accepted"
+  ],
+  "accepted_adrs": [
+    "ADR-0001",
+    "ADR-0014",
+    "ADR-0018",
+    "ADR-0020",
+    "ADR-0021",
+    "ADR-0024"
+  ],
+  "module_boundaries": [
+    "Pipeline Controller domain aggregate",
+    "Controller persistence kernel",
+    "Authorized fixture read",
+    "Outbox dispatch",
+    "Stage lease and fencing"
+  ],
+  "slices": [
+    {
+      "slice_id": "slice-01-01",
+      "title": "Domain kernel",
+      "depends_on": [],
+      "owns_exit_criteria": [
+        "EC-01-01"
+      ],
+      "demonstration": "Pure evaluator accepts ConfirmRequirement and rejects invalid transitions without I/O."
+    },
+    {
+      "slice_id": "slice-01-02",
+      "title": "Durable transaction",
+      "depends_on": [
+        "slice-01-01"
+      ],
+      "owns_exit_criteria": [
+        "EC-01-02"
+      ],
+      "demonstration": "Acknowledged fake commands survive restart without loss or duplication."
+    },
+    {
+      "slice_id": "slice-01-03",
+      "title": "Projection and read",
+      "depends_on": [
+        "slice-01-02"
+      ],
+      "owns_exit_criteria": [
+        "EC-01-03"
+      ],
+      "demonstration": "Projection rebuilds from the Event Log; read returns fixture fields only."
+    },
+    {
+      "slice_id": "slice-01-04",
+      "title": "Outbox and replay",
+      "depends_on": [
+        "slice-01-03"
+      ],
+      "owns_exit_criteria": [
+        "EC-01-04"
+      ],
+      "demonstration": "Outbox replay does not append a second business Event."
+    },
+    {
+      "slice_id": "slice-01-05",
+      "title": "Lease and fencing",
+      "depends_on": [
+        "slice-01-02"
+      ],
+      "owns_exit_criteria": [
+        "EC-01-05"
+      ],
+      "demonstration": "A stale lease generation cannot change Pipeline state."
+    },
+    {
+      "slice_id": "slice-01-06",
+      "title": "Crash demonstration",
+      "depends_on": [
+        "slice-01-04",
+        "slice-01-05"
+      ],
+      "owns_exit_criteria": [
+        "EC-01-06"
+      ],
+      "demonstration": "Fault-injected pause/cancel/cleanup and Phase Closeout bind to the integrated Candidate."
+    }
+  ],
+  "invariants": [
+    "Controller domain code has no LangGraph, SQL, filesystem, or Adapter import.",
+    "SQLite remains the single-writer v1 store.",
+    "counter_spike stays a non-public oracle.",
+    "read performs no Project RBAC.",
+    "No new dependency family."
+  ],
+  "acceptance_dimensions": {
+    "testing": [
+      "Deterministic unit and property tests for the aggregate; persistence tests cover restart, conflict, and fencing."
+    ],
+    "migration": [
+      "Kernel schema is introduced with an explicit migration seam; no production Workspace migration."
+    ],
+    "security": [
+      "No secret interpolation; no Agent or Git authority in this Phase."
+    ],
+    "documentation": [
+      "PHASE.md, slice contracts, and Phase Closeout stay synchronized."
+    ],
+    "demonstration": [
+      "One fake command path survives restart and rejects a stale worker on the integrated Candidate."
+    ]
+  },
+  "exit_criteria": [
+    {
+      "criterion_id": "EC-01-01",
+      "observable_result": "Domain evaluator is pure and deterministic; invalid commands leave state unchanged.",
+      "owner_slice_ids": [
+        "slice-01-01"
+      ]
+    },
+    {
+      "criterion_id": "EC-01-02",
+      "observable_result": "One atomic SQLite transaction covers Inbox, Events, and revision; restart neither loses nor duplicates an acknowledged command.",
+      "owner_slice_ids": [
+        "slice-01-02"
+      ]
+    },
+    {
+      "criterion_id": "EC-01-03",
+      "observable_result": "Projection rebuilds from the Event Log; read returns only authorized fixture fields.",
+      "owner_slice_ids": [
+        "slice-01-03"
+      ]
+    },
+    {
+      "criterion_id": "EC-01-04",
+      "observable_result": "Outbox replay is idempotent; a second delivery does not append a second business Event.",
+      "owner_slice_ids": [
+        "slice-01-04"
+      ]
+    },
+    {
+      "criterion_id": "EC-01-05",
+      "observable_result": "Results from an expired lease generation cannot change Pipeline state.",
+      "owner_slice_ids": [
+        "slice-01-05"
+      ]
+    },
+    {
+      "criterion_id": "EC-01-06",
+      "observable_result": "Crash, pause, and cancel demonstration and Phase Closeout are recorded on the integrated Candidate.",
+      "owner_slice_ids": [
+        "slice-01-06"
+      ]
+    }
+  ],
+  "exclusions": [
+    "Full production Stage state machine",
+    "Project RBAC, Feishu, GitHub, Agent execution, Managed Worktree",
+    "Promoting keep-marked transport or runtime_broker as sealed runtime",
+    "New dependency families"
+  ],
+  "risks": [
+    {
+      "risk_id": "R-01",
+      "description": "Rewriting 00-04 persistence silently promotes spike code.",
+      "impact": "HIGH",
+      "mitigation": "01-02 must rewrite behind ControllerPort and flip dispositions explicitly.",
+      "trigger": "Production kernel imports spike modules as the public Interface."
+    },
+    {
+      "risk_id": "R-02",
+      "description": "Acknowledged commands are lost or duplicated across restart.",
+      "impact": "CRITICAL",
+      "mitigation": "Fault-inject every durable boundary in 01-02 and 01-06.",
+      "trigger": "A second Event or missing receipt after restart."
+    },
+    {
+      "risk_id": "R-03",
+      "description": "Stale fencing still advances state.",
+      "impact": "HIGH",
+      "mitigation": "Generation checks before every mutation in 01-05.",
+      "trigger": "An expired lease result is accepted."
+    }
+  ],
+  "stop_conditions": [
+    "SQLite loses or duplicates an acknowledged command",
+    "LangGraph is required inside the Controller",
+    "A new dependency family becomes necessary",
+    "The fake aggregate is rejected in favor of the full Stage machine"
+  ],
+  "phase_gate": {
+    "reviewer_role": "CODEX_PLANNER_DESIGNER_REVIEWER",
+    "required_evidence": [
+      "Every accepted Slice Closeout",
+      "Windows and Linux CI results",
+      "Crash-consistency demonstration",
+      "Draft Phase Closeout"
+    ],
+    "allowed_verdicts": [
+      "PASS",
+      "REWORK",
+      "BLOCKED_CONTRACT"
+    ]
+  },
+  "human_approval": {
+    "required": true,
+    "status": "APPROVED",
+    "attestation_id": "engapr_phase-01_20260813_01"
+  },
+  "content_hash": "sha256:3423941bdaac31b0cdc0e25d0363f02d3d7e74e6316ec84630956ee22f3dfeb0"
+}
