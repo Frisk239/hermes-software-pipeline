@@ -562,3 +562,21 @@ Revision 13 appends the final Standards synchronization; revisions 1-12 remain u
 - All 54 Manifest raw-byte digests match, the Slice Contract r14 canonical hash remains valid, the tool-lock authorization chain remains closed, and the assigned execution worktree remains clean at exact Base `9cf24b876cc7422386ed54c277900ff1e3c2c2bf`.
 
 Fresh independent Standards and Spec reviews return PASS. This append closes the audit reference without changing any Manifest input after its final hash.
+
+## Revision 14 -- 00-06 integration, downstream 00-07 (2026-08-13)
+
+Revision 14 appends the required post-merge audit for Slice 00-06 integration. Revisions 1-13 remain unchanged. Before this append, revisions 1-13 were a 66,492-byte prefix with raw SHA-256 `sha256:3ebfadf049120dbe770031df00f0de5fd07cea2bbb071e7eb6c48552995a5a5c`.
+
+- Source integration SHA: `078411b20283288ab2ec85f081d3ed463fba96e4` (PR #14).
+- Downstream Slice 00-07 has no DRAFT Slice Contract, Context Manifest, or proposed ADR. Planning Base for any future 00-07 contract is this integration SHA. Integration Base at audit time is the same head.
+- Reviewed objects at `078411b20283288ab2ec85f081d3ed463fba96e4`:
+
+| # | Path | Identity | Conclusion |
+| --- | --- | --- | --- |
+| 1 | `docs/roadmap/phase-00-foundation/PHASE.md` | `sha256:5acb46cdc68794bf69e5c708fb9813048f3d19170a7502f4f82a0f77de7d8f0d` | `NO_CHANGE` — 00-07 remains the integration Slice; exit criteria unchanged |
+| 2 | `docs/roadmap/phase-00-foundation/phase-plan.json` | `sha256:34035ae526cb363e8b8a009fbea7a0246dd87c33337f1086cf079cfa2d5aea3f` | `NO_CHANGE` — 00-07 still depends on 00-04/05/06 |
+| 3 | `docs/roadmap/phase-00-foundation/slices/README.md` at `078411b` | `sha256:52e9dc5a60992f64522c7379864cfb457322dc2d7e818f61d8a9467e0b00d7fa` | `UPDATED` — index still said 00-06 planning was not on `main`; this documentation Candidate records 00-06 integrated at `078411b` and names 00-07 next |
+| 4 | Slice 00-07 contract / manifest / ADRs | absent | `NO_CHANGE` — no READY artifact exists; 00-07 must be expanded from Base `078411b` before any Executor dispatch |
+| 5 | Accepted ADR-0029 / ADR-0030 | accepted texts on `078411b` | `NO_CHANGE` — integration does not reopen them |
+
+No item is `CCR_REQUIRED`. Item 3 is resolved in the same documentation Candidate as this revision. Slice 00-07 must not be marked `READY` until a new contract is written against Base `078411b20283288ab2ec85f081d3ed463fba96e4`.
