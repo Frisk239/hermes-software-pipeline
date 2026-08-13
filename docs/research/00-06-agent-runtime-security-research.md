@@ -104,6 +104,13 @@ It must demonstrate a real browser operation, temporary-profile cleanup, process
 
 READY review and Git Custodian worktree assignment are complete in revision 14. ADR-0029 and ADR-0030 are accepted, the contract is bound to exact Base `9cf24b876cc7422386ed54c277900ff1e3c2c2bf`, and execution is limited to the assigned Managed Worktree and machine-contract permitted paths. A later human-approved revision is still required if Chrome for Testing must become sealed or Windows Codex needs a real sealed probe without an independently sourced exact signer identity. D2 and D3 are those ADRs. D4 is the two-line E2E. D5 is the three-register model. D6 is the four-state matrix. There is no open D1.
 
+## 00-07 handover inventory (Executor attempt 1)
+
+- Probe commands: `tools_bootstrap.py` (`bootstrap`/`verify`/`selfcheck`/`probe-codex`/`probe-opencode`) and `controlled_e2e.py`; fake-only pytest under `tests/spike/security`, `capability`, `e2e`, and `adversarial-security`.
+- Fixture inventory: committed slice `fixtures/` goldens copied to `tests/fixtures/security/`.
+- Capability verdicts: hard network deny `UNSUPPORTED_RUNTIME` without OS egress proof; filesystem `OBSERVED_ONLY` without a lower-privilege identity; loopback E2E is not OS egress proof.
+- Disposition inventory: every 00-06 spike module and test is `SPIKE-EXPERIMENTAL` / `DELETE_UNLESS_ADOPTED_BY_00-07`.
+
 ## Primary references consulted
 
 - Node.js release signing keys: <https://github.com/nodejs/release-keys>

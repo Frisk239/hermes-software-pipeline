@@ -1,6 +1,5 @@
-"""runtime_broker Module skeleton (slice-00-02).
+"""runtime_broker Module — Slice 00-06 sealed-tool spike.
 
-Supervised execution of Agent and browser child processes. The
-Module boundary is fixed by ``docs/architecture/system-and-module-design.md``;
-this skeleton deliberately carries no business behavior.
+SPIKE-EXPERIMENTAL marker:
+DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
 """

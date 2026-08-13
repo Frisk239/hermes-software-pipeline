@@ -1,0 +1,78 @@
+fixture docs/positive: expected exit 0, got exit 0 -> PASS
+  check_documentation: OK (14 governed text file(s) checked)
+fixture docs/broken-link: expected exit 1, got exit 1 -> PASS
+  check_documentation: FAIL
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\docs\broken-link\docs\README.md:5: local link does not resolve: does-not-exist.md
+fixture docs/invalid-utf8-adr: expected exit 1, got exit 1 -> PASS
+  check_documentation: FAIL
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\docs\invalid-utf8-adr\docs\adr\0001-example.md: not valid UTF-8 (invalid start byte at byte 65)
+fixture docs/missing-root-entry: expected exit 1, got exit 1 -> PASS
+  check_documentation: FAIL
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\docs\missing-root-entry\SECURITY.md: required root entry point missing
+fixture docs/oversized-link: expected exit 1, got exit 1 -> PASS
+  check_documentation: FAIL
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\docs\oversized-link\docs\README.md:5: local link does not resolve: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...
+fixture docs/path-escape: expected exit 1, got exit 1 -> PASS
+  check_documentation: FAIL
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\docs\path-escape\docs\README.md:5: local link escapes the checked root: ../../../outside.md
+fixture docs/proposed-adr: expected exit 1, got exit 1 -> PASS
+  check_documentation: FAIL
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\docs\proposed-adr\docs\adr\0001-example.md: ADR status 'proposed' is not terminal (allowed: accepted, superseded)
+fixture docs/replacement-char: expected exit 1, got exit 1 -> PASS
+  check_documentation: FAIL
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\docs\replacement-char\docs\README.md: contains U+FFFD replacement character(s)
+fixture docs/unbalanced-fence: expected exit 1, got exit 1 -> PASS
+  check_documentation: FAIL
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\docs\unbalanced-fence\docs\README.md: unbalanced code fence (odd count 1; fence line(s) 5)
+fixture docs/unignored-invalid: expected exit 1, got exit 1 -> PASS
+  check_documentation: FAIL
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\docs\unignored-invalid\bad.md: unbalanced code fence (odd count 1; fence line(s) 5)
+fixture docs/ignored-paths: expected exit 0, got exit 0 -> PASS
+  check_documentation: OK (3 governed text file(s) checked)
+fixture workflow/positive: expected exit 0, got exit 0 -> PASS
+  check_documentation: workflow configuration OK
+fixture workflow/bad-trigger: expected exit 1, got exit 1 -> PASS
+  check_documentation: FAIL
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\workflow\bad-trigger\.github\workflows\documentation-contracts.yml: 'on:' must map exactly the push and pull_request t...
+fixture workflow/chained-command: expected exit 1, got exit 1 -> PASS
+  check_documentation: FAIL
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\workflow\chained-command\.github\workflows\documentation-contracts.yml: job 'bootstrap-checks' has unsupported run com...
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\workflow\chained-command\.github\workflows\documentation-contracts.yml: job 'bootstrap-checks' must run each required ...
+fixture workflow/echo-command: expected exit 1, got exit 1 -> PASS
+  check_documentation: FAIL
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\workflow\echo-command\.github\workflows\documentation-contracts.yml: job 'bootstrap-checks' has unsupported run comman...
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\workflow\echo-command\.github\workflows\documentation-contracts.yml: job 'bootstrap-checks' must run each required off...
+fixture workflow/extra-permission: expected exit 1, got exit 1 -> PASS
+  check_documentation: FAIL
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\workflow\extra-permission\.github\workflows\documentation-contracts.yml: permissions must be exactly {'contents': 'rea...
+fixture workflow/invalid-yaml: expected exit 1, got exit 1 -> PASS
+  check_documentation: FAIL
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\workflow\invalid-yaml\.github\workflows\documentation-contracts.yml: invalid workflow YAML (line 2: expected 'key: val...
+fixture workflow/lookalike-action: expected exit 1, got exit 1 -> PASS
+  check_documentation: FAIL
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\workflow\lookalike-action\.github\workflows\documentation-contracts.yml: job 'bootstrap-checks' uses unsupported actio...
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\workflow\lookalike-action\.github\workflows\documentation-contracts.yml: job 'bootstrap-checks' must use actions/check...
+fixture workflow/missing-checkout: expected exit 1, got exit 1 -> PASS
+  check_documentation: FAIL
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\workflow\missing-checkout\.github\workflows\documentation-contracts.yml: job 'bootstrap-checks' must use actions/check...
+fixture workflow/missing-command: expected exit 1, got exit 1 -> PASS
+  check_documentation: FAIL
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\workflow\missing-command\.github\workflows\documentation-contracts.yml: job 'bootstrap-checks' must run each required ...
+fixture workflow/missing-permissions: expected exit 1, got exit 1 -> PASS
+  check_documentation: FAIL
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\workflow\missing-permissions\.github\workflows\documentation-contracts.yml: missing read-only 'permissions:' block
+fixture workflow/missing-setup-python: expected exit 1, got exit 1 -> PASS
+  check_documentation: FAIL
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\workflow\missing-setup-python\.github\workflows\documentation-contracts.yml: job 'bootstrap-checks' must use actions/s...
+fixture workflow/name-only-step: expected exit 1, got exit 1 -> PASS
+  check_documentation: FAIL
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\workflow\name-only-step\.github\workflows\documentation-contracts.yml: job 'bootstrap-checks' step must contain exactl...
+fixture workflow/persist-credentials: expected exit 1, got exit 1 -> PASS
+  check_documentation: FAIL
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\workflow\persist-credentials\.github\workflows\documentation-contracts.yml: job 'bootstrap-checks' checkout step must ...
+fixture workflow/trailing-root: expected exit 1, got exit 1 -> PASS
+  check_documentatio
+... (output truncated)
+check_documentation: OK (343 governed text file(s) checked)
+
+--- stderr ---
