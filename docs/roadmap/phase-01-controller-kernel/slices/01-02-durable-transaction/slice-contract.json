@@ -1,0 +1,182 @@
+{
+  "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
+  "schema_version": 1,
+  "document_revision": 1,
+  "slice_id": "slice-01-02",
+  "phase_id": "phase-01",
+  "status": "READY",
+  "predecessors": [
+    "slice-01-01"
+  ],
+  "base_sha": "cdf0872078151af8b4f84319c4a30c196bdbc8e3",
+  "assigned_worktree": "C:\\Users\\a2691\\AppData\\Local\\hermes\\managed-worktrees\\hermes-software-pipeline\\slice-01-02",
+  "operator_path": "From a clean checkout run frozen offline pytest including tests/controller. Use a temp SQLite file. No network after install.",
+  "must_scope": [
+    "READY revision 1 at Base cdf0872078151af8b4f84319c4a30c196bdbc8e3. Rewrite 00-04 transaction semantics onto domain.apply. Assigned worktree C:\\Users\\a2691\\AppData\\Local\\hermes\\managed-worktrees\\hermes-software-pipeline\\slice-01-02.",
+    "Create src/hermes_pipeline/controller/kernel.py class KernelController implementing ControllerPort. Constructor takes a KernelStore and injectable clock/id only if needed for CommandReceipt.recorded_at (use a passed recorded_at: str defaulting to a fixed test clock, never datetime.now in production path without injection). submit(command: ControllerCommand) -> CommandReceipt. read(query) always returns PipelineView(pipeline_id=query.pipeline_id, revision=0, status='UNKNOWN').",
+    "KernelStore in src/hermes_pipeline/persistence/kernel_store.py uses sqlite3 only. Schema: inbox(command_id PRIMARY KEY, payload_hash TEXT NOT NULL, receipt_json TEXT NOT NULL); events(event_id INTEGER PRIMARY KEY AUTOINCREMENT, pipeline_id TEXT NOT NULL, event_type TEXT NOT NULL, payload_json TEXT NOT NULL); pipelines(pipeline_id PRIMARY KEY, status TEXT NOT NULL, revision INTEGER NOT NULL, text TEXT NOT NULL). submit opens one BEGIN IMMEDIATE transaction covering inbox+events+pipelines or rolls back completely.",
+    "CONFIRM_REQUIREMENT requires payload key text (str). REJECT_REQUIREMENT requires payload key reason (str). Missing/wrong type or unknown command_type -> REJECTED VALIDATION_ERROR message unsupported command, no durable write.",
+    "Load pipelines row or UNCONFIRMED revision 0 empty text. Call domain.apply. EMPTY_REQUIREMENT -> REJECTED VALIDATION_ERROR empty requirement. INVALID_TRANSITION -> REJECTED VALIDATION_ERROR invalid transition. ACCEPTED writes inbox, one event, updated pipelines row, returns ACCEPTED receipt with observed_revision = new revision and one event_id.",
+    "If inbox already has command_id: compare payload_hash of RFC 8785 canonical JSON of command.payload; equal -> return stored receipt (status DEDUPLICATED if originally accepted, or the stored status); unequal -> CONFLICT CONFLICT command identity conflict. If command.expected_revision != current pipelines.revision (missing row counts as 0) -> CONFLICT CONFLICT expected revision conflict before apply.",
+    "sqlite3.IntegrityError or OperationalError including disk full -> REJECTED INTERNAL_ERROR persistence unavailable retryable=true and no leftover partial rows (rollback).",
+    "Restart test: submit accept, close store, new KernelStore same path, resubmit same command_id and payload, receipt matches and events table has one row.",
+    "Do not import CounterSpike, spike_controller, or sqlite_spike from kernel.py or kernel_store.py. Leave those files KEEP_MARKED_EVIDENCE.",
+    "Tests in tests/controller/test_kernel_submit.py cover accept confirm, reject, empty, invalid, identity conflict, revision conflict, restart dedup, persistence unavailable (PRAGMA max_page_count or monkeypatch). Export KernelController from controller/__init__.py."
+  ],
+  "out_of_scope": [
+    "Projection rebuild and real ControllerPort.read fields",
+    "Outbox, leases, LangGraph",
+    "Editing domain/pipeline.py semantics or counter_spike.py",
+    "New Schemas or dependency families"
+  ],
+  "interfaces": [
+    "controller/kernel.py: KernelController.submit/read",
+    "persistence/kernel_store.py: sqlite3 KernelStore"
+  ],
+  "binding_adrs": [
+    "ADR-0014",
+    "ADR-0021",
+    "ADR-0024"
+  ],
+  "permitted_paths": [
+    "src/hermes_pipeline/controller/",
+    "src/hermes_pipeline/persistence/kernel_store.py",
+    "tests/controller/",
+    "docs/roadmap/phase-01-controller-kernel/slices/README.md"
+  ],
+  "prohibited_actions": [
+    "Import spike_controller or CounterSpike into the kernel",
+    "Use datetime.now without injection",
+    "Write Outbox or projection tables",
+    "Add root runtime dependencies",
+    "Commit, push, merge, rebase, or alter remotes",
+    "Weaken existing checks"
+  ],
+  "implications": {
+    "data": [
+      "Disposable SQLite files in tests only."
+    ],
+    "migration": [
+      "New kernel tables; no production Workspace migration."
+    ],
+    "compatibility": [
+      "Windows and Linux pytest required."
+    ],
+    "security": [
+      "No raw sqlite errors in CommandReceipt.message."
+    ],
+    "documentation": [
+      "Slice index points at 01-02."
+    ]
+  },
+  "acceptance_criteria": [
+    {
+      "criterion_id": "AC-01",
+      "trace_ids": [
+        "EC-01-02"
+      ],
+      "observable_result": "Accepted CONFIRM_REQUIREMENT persists one inbox row, one event, and pipelines.status OPEN.",
+      "verification_command_ids": [
+        "kernel-tests"
+      ]
+    },
+    {
+      "criterion_id": "AC-02",
+      "trace_ids": [
+        "EC-01-02"
+      ],
+      "observable_result": "Restart plus same command_id returns the stored receipt and does not add a second event.",
+      "verification_command_ids": [
+        "kernel-tests"
+      ]
+    },
+    {
+      "criterion_id": "AC-03",
+      "trace_ids": [
+        "EC-01-02"
+      ],
+      "observable_result": "Identity and revision conflicts and domain rejections use the fixed messages; persistence failure is non-durable.",
+      "verification_command_ids": [
+        "kernel-tests"
+      ]
+    },
+    {
+      "criterion_id": "AC-04",
+      "trace_ids": [
+        "EC-00-02"
+      ],
+      "observable_result": "Existing offline pytest and pyright still pass.",
+      "verification_command_ids": [
+        "offline-pytest",
+        "offline-type"
+      ]
+    }
+  ],
+  "required_tests": [
+    "Accept confirm and reject",
+    "Empty and invalid domain mappings",
+    "Unsupported command type",
+    "Identity conflict",
+    "Revision conflict",
+    "Restart dedup",
+    "Persistence unavailable rollback"
+  ],
+  "demonstration": "Submit a confirm, kill the store, reopen, resubmit: one event, same receipt.",
+  "verification_commands": [
+    {
+      "command_id": "kernel-tests",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pytest",
+        "tests/controller",
+        "-q"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 180000
+    },
+    {
+      "command_id": "offline-pytest",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pytest"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 600000
+    },
+    {
+      "command_id": "offline-type",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pyright"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 300000
+    }
+  ],
+  "required_evidence": [
+    "Base and Candidate SHAs",
+    "Kernel test output",
+    "Full offline pytest and pyright"
+  ],
+  "risks": [
+    {
+      "risk_id": "R-01",
+      "description": "Kernel silently wraps the 00-04 spike.",
+      "impact": "HIGH",
+      "mitigation": "Import-boundary test forbids CounterSpike and spike_controller.",
+      "trigger": "kernel.py imports those modules."
+    }
+  ],
+  "retry_budget": 2,
+  "stop_conditions": [
+    "Atomic inbox+event+pipelines cannot be done with sqlite3",
+    "A new dependency family is required"
+  ],
+  "content_hash": "sha256:af22de409506750c69066c45df6e4b4c55e23d1de59d057842bb05cdf012a4bf"
+}
