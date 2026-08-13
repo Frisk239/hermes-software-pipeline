@@ -113,9 +113,7 @@ class IsolationError(RuntimeError):
         self.code = UNSUPPORTED_RUNTIME
 
 
-def evaluate_child_probe_report(
-    report: Mapping[str, object], *, windows: bool
-) -> bool:
+def evaluate_child_probe_report(report: Mapping[str, object], *, windows: bool) -> bool:
     """True only when the locked child assertions all hold."""
     if report.get("outside_read") != "access_denied":
         return False
@@ -335,9 +333,7 @@ def _demonstrate_windows_child(state_root: Path, snapshot: Path) -> bool:
             return False
         if not isinstance(loaded, dict):
             return False
-        return evaluate_child_probe_report(
-            cast(dict[str, Any], loaded), windows=True
-        )
+        return evaluate_child_probe_report(cast(dict[str, Any], loaded), windows=True)
     except (OSError, subprocess.TimeoutExpired):
         return False
     finally:
@@ -378,9 +374,7 @@ def _demonstrate_linux_child(state_root: Path, snapshot: Path) -> bool:
         loaded = json.loads(completed.stdout.decode("utf-8"))
         if not isinstance(loaded, dict):
             return False
-        return evaluate_child_probe_report(
-            cast(dict[str, Any], loaded), windows=False
-        )
+        return evaluate_child_probe_report(cast(dict[str, Any], loaded), windows=False)
     except (OSError, subprocess.TimeoutExpired, json.JSONDecodeError):
         return False
     finally:
