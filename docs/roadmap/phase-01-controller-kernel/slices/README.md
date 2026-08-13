@@ -2,10 +2,7 @@
 
 These are planning-level Slice definitions. Codex expands only the next dependency-ready Slice into a machine-valid immutable Slice Contract using the exact current Base SHA.
 
-The current draft contract for the next Slice is:
-
-- `01-01-domain-kernel/SLICE.md`;
-- `01-01-domain-kernel/slice-contract.json` (READY revision 2).
+Slice 01-01 was accepted and integrated at `cdf0872078151af8b4f84319c4a30c196bdbc8e3` (PR #20). The next Slice is `01-02-durable-transaction`.
 
 ## 01-01 Domain kernel
 
