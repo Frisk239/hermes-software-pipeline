@@ -1,16 +1,16 @@
 {
   "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
   "schema_version": 1,
-  "document_revision": 1,
+  "document_revision": 2,
   "slice_id": "slice-01-01",
   "phase_id": "phase-01",
-  "status": "DRAFT",
+  "status": "READY",
   "predecessors": [],
   "base_sha": "e778a5246c4bec3f6a54aec2fdb315ab66ca756e",
-  "assigned_worktree": "not-assigned-pending-custodian",
+  "assigned_worktree": "C:\\Users\\a2691\\AppData\\Local\\hermes\\managed-worktrees\\hermes-software-pipeline\\slice-01-01",
   "operator_path": "From a clean checkout run the frozen offline suite plus the new domain tests. No network after dependency install.",
   "must_scope": [
-    "DRAFT revision 1 at Base e778a5246c4bec3f6a54aec2fdb315ab66ca756e. Phase 01 P1-P5 apply. READY needs review and a Custodian worktree.",
+    "READY revision 2 at Base e778a5246c4bec3f6a54aec2fdb315ab66ca756e. Phase 01 P1-P5 apply. Assigned worktree C:\\Users\\a2691\\AppData\\Local\\hermes\\managed-worktrees\\hermes-software-pipeline\\slice-01-01.",
     "Create src/hermes_pipeline/domain/pipeline.py with frozen dataclasses PipelineState(status: Literal['UNCONFIRMED','OPEN','REJECTED'], revision: int, text: str), ConfirmRequirement(text: str), RejectRequirement(reason: str), RequirementConfirmed(text: str), RequirementRejected(reason: str), PipelineResult(state, outcome: Literal['ACCEPTED','EMPTY_REQUIREMENT','INVALID_TRANSITION'], event). Function apply(state, command) -> PipelineResult.",
     "Initial state is PipelineState(status='UNCONFIRMED', revision=0, text=''). ConfirmRequirement from UNCONFIRMED with nonempty stripped text yields OPEN, revision+1, RequirementConfirmed. RejectRequirement from UNCONFIRMED with nonempty stripped reason yields REJECTED, revision+1, RequirementRejected. Empty or whitespace-only text/reason yields EMPTY_REQUIREMENT, unchanged state, event None. Any other pair yields INVALID_TRANSITION, unchanged state, event None.",
     "Create src/hermes_pipeline/domain/clock.py with Protocol Clock.now() -> datetime. The evaluator must not import datetime.now or call Clock. Create src/hermes_pipeline/domain/errors.py exporting the outcome literals only.",
@@ -186,5 +186,5 @@
     "Implementation requires persistence or a new public Schema",
     "The three-state fake aggregate is rejected"
   ],
-  "content_hash": "sha256:222b1a437ec7b9b8aa3a9abd6be0ccc749dde8e18d19b463f341ed0030a5b004"
+  "content_hash": "sha256:93c1370bc3557aeec4ed8aecc9165cecd6cb382f2b0dfb841f1266df00310377"
 }

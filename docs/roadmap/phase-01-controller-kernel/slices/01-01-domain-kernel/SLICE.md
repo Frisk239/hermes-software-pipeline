@@ -1,6 +1,6 @@
 # Slice 01-01 — Domain Kernel (DRAFT, revision 1)
 
-Status: **DRAFT**. Phase 01 is approved. This Slice is not READY until independent review and a Custodian-assigned worktree at Base `e778a5246c4bec3f6a54aec2fdb315ab66ca756e`.
+Status: **READY** (revision 2). Assigned worktree: `C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-01-01`. Machine contract is authoritative.
 
 ## Must
 

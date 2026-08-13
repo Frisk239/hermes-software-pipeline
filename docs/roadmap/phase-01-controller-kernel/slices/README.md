@@ -5,7 +5,7 @@ These are planning-level Slice definitions. Codex expands only the next dependen
 The current draft contract for the next Slice is:
 
 - `01-01-domain-kernel/SLICE.md`;
-- `01-01-domain-kernel/slice-contract.json` (DRAFT revision 1).
+- `01-01-domain-kernel/slice-contract.json` (READY revision 2).
 
 ## 01-01 Domain kernel
 
