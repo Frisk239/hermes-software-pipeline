@@ -1,0 +1,190 @@
+{
+  "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
+  "schema_version": 1,
+  "document_revision": 2,
+  "slice_id": "slice-01-01",
+  "phase_id": "phase-01",
+  "status": "READY",
+  "predecessors": [],
+  "base_sha": "e778a5246c4bec3f6a54aec2fdb315ab66ca756e",
+  "assigned_worktree": "C:\\Users\\a2691\\AppData\\Local\\hermes\\managed-worktrees\\hermes-software-pipeline\\slice-01-01",
+  "operator_path": "From a clean checkout run the frozen offline suite plus the new domain tests. No network after dependency install.",
+  "must_scope": [
+    "READY revision 2 at Base e778a5246c4bec3f6a54aec2fdb315ab66ca756e. Phase 01 P1-P5 apply. Assigned worktree C:\\Users\\a2691\\AppData\\Local\\hermes\\managed-worktrees\\hermes-software-pipeline\\slice-01-01.",
+    "Create src/hermes_pipeline/domain/pipeline.py with frozen dataclasses PipelineState(status: Literal['UNCONFIRMED','OPEN','REJECTED'], revision: int, text: str), ConfirmRequirement(text: str), RejectRequirement(reason: str), RequirementConfirmed(text: str), RequirementRejected(reason: str), PipelineResult(state, outcome: Literal['ACCEPTED','EMPTY_REQUIREMENT','INVALID_TRANSITION'], event). Function apply(state, command) -> PipelineResult.",
+    "Initial state is PipelineState(status='UNCONFIRMED', revision=0, text=''). ConfirmRequirement from UNCONFIRMED with nonempty stripped text yields OPEN, revision+1, RequirementConfirmed. RejectRequirement from UNCONFIRMED with nonempty stripped reason yields REJECTED, revision+1, RequirementRejected. Empty or whitespace-only text/reason yields EMPTY_REQUIREMENT, unchanged state, event None. Any other pair yields INVALID_TRANSITION, unchanged state, event None.",
+    "Create src/hermes_pipeline/domain/clock.py with Protocol Clock.now() -> datetime. The evaluator must not import datetime.now or call Clock. Create src/hermes_pipeline/domain/errors.py exporting the outcome literals only.",
+    "Tests in tests/domain/test_pipeline_aggregate.py cover accept, reject, empty, invalid, and a Hypothesis property that sequences never leave {UNCONFIRMED, OPEN, REJECTED}. An import-boundary test forbids domain/pipeline.py from importing sqlalchemy, langgraph, sqlite3, pathlib, or hermes_pipeline.controller.",
+    "Do not modify counter_spike.py. Export new types from domain/__init__.py without removing the counter oracle."
+  ],
+  "out_of_scope": [
+    "Persistence, ControllerPort wiring, projections, Outbox, leases",
+    "Project RBAC, Feishu, GitHub, Agent execution",
+    "Editing counter_spike.py or keep-marked persistence spikes",
+    "New dependency families or Schemas"
+  ],
+  "interfaces": [
+    "src/hermes_pipeline/domain/pipeline.py: apply(state, command) -> PipelineResult",
+    "src/hermes_pipeline/domain/clock.py: Clock Protocol unused by apply"
+  ],
+  "binding_adrs": [
+    "ADR-0014",
+    "ADR-0020",
+    "ADR-0024"
+  ],
+  "permitted_paths": [
+    "src/hermes_pipeline/domain/",
+    "tests/domain/",
+    "docs/roadmap/phase-01-controller-kernel/slices/README.md"
+  ],
+  "prohibited_actions": [
+    "Import I/O, SQL, LangGraph, or wall-clock now inside the evaluator",
+    "Edit counter_spike.py",
+    "Add root runtime dependencies",
+    "Commit, push, merge, rebase, reset, or alter remotes",
+    "Weaken or skip existing checks"
+  ],
+  "implications": {
+    "data": [
+      "No runtime data."
+    ],
+    "migration": [
+      "None."
+    ],
+    "compatibility": [
+      "Windows and Linux unit tests required."
+    ],
+    "security": [
+      "Domain treats command text as untrusted data and stores it only in memory."
+    ],
+    "documentation": [
+      "Slice index points at this draft."
+    ]
+  },
+  "acceptance_criteria": [
+    {
+      "criterion_id": "AC-01",
+      "trace_ids": [
+        "EC-01-01"
+      ],
+      "observable_result": "ConfirmRequirement and RejectRequirement from UNCONFIRMED with nonempty input transition exactly as specified.",
+      "verification_command_ids": [
+        "domain-tests"
+      ]
+    },
+    {
+      "criterion_id": "AC-02",
+      "trace_ids": [
+        "EC-01-01"
+      ],
+      "observable_result": "Empty input and illegal transitions leave state unchanged and emit no event.",
+      "verification_command_ids": [
+        "domain-tests"
+      ]
+    },
+    {
+      "criterion_id": "AC-03",
+      "trace_ids": [
+        "EC-01-01"
+      ],
+      "observable_result": "pipeline.py imports no I/O, SQL, LangGraph, or datetime.now.",
+      "verification_command_ids": [
+        "domain-tests",
+        "architecture-check"
+      ]
+    },
+    {
+      "criterion_id": "AC-04",
+      "trace_ids": [
+        "EC-00-02"
+      ],
+      "observable_result": "Existing frozen offline suite still passes.",
+      "verification_command_ids": [
+        "offline-pytest",
+        "offline-type"
+      ]
+    }
+  ],
+  "required_tests": [
+    "Accept confirm from UNCONFIRMED",
+    "Accept reject from UNCONFIRMED",
+    "Empty text and reason",
+    "Illegal transitions from OPEN and REJECTED",
+    "Hypothesis: status stays in the three-state set",
+    "Import-boundary for pipeline.py"
+  ],
+  "demonstration": "Unit tests show a confirmed fake requirement opens the pipeline and a second confirm is INVALID_TRANSITION with unchanged revision.",
+  "verification_commands": [
+    {
+      "command_id": "domain-tests",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pytest",
+        "tests/domain",
+        "-q"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 180000
+    },
+    {
+      "command_id": "offline-pytest",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pytest"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 600000
+    },
+    {
+      "command_id": "offline-type",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pyright"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 300000
+    },
+    {
+      "command_id": "architecture-check",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "-m",
+        "hermes_pipeline.cli",
+        "architecture",
+        "check"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    }
+  ],
+  "required_evidence": [
+    "Base and Candidate SHAs",
+    "Domain test output",
+    "Full offline pytest and pyright",
+    "Changed-path inventory"
+  ],
+  "risks": [
+    {
+      "risk_id": "R-01",
+      "description": "Domain grows into the full Stage machine.",
+      "impact": "HIGH",
+      "mitigation": "Only the three states and two commands are in scope.",
+      "trigger": "A PRD or Development transition is added."
+    }
+  ],
+  "retry_budget": 2,
+  "stop_conditions": [
+    "Implementation requires persistence or a new public Schema",
+    "The three-state fake aggregate is rejected"
+  ],
+  "content_hash": "sha256:93c1370bc3557aeec4ed8aecc9165cecd6cb382f2b0dfb841f1266df00310377"
+}
