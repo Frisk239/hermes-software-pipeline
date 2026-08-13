@@ -1,0 +1,29 @@
+ M docs/development/compatibility-targets.md
+ M docs/research/00-06-agent-runtime-security-research.md
+ M src/hermes_pipeline/runtime_broker/__init__.py
+?? src/hermes_pipeline/runtime_broker/_acl.py
+?? src/hermes_pipeline/runtime_broker/_auth.py
+?? src/hermes_pipeline/runtime_broker/_capability.py
+?? src/hermes_pipeline/runtime_broker/_codes.py
+?? src/hermes_pipeline/runtime_broker/_codex.py
+?? src/hermes_pipeline/runtime_broker/_digest.py
+?? src/hermes_pipeline/runtime_broker/_e2e.py
+?? src/hermes_pipeline/runtime_broker/_host.py
+?? src/hermes_pipeline/runtime_broker/_identity.py
+?? src/hermes_pipeline/runtime_broker/_isolation.py
+?? src/hermes_pipeline/runtime_broker/_observations.py
+?? src/hermes_pipeline/runtime_broker/_opencode.py
+?? src/hermes_pipeline/runtime_broker/_policy.py
+?? src/hermes_pipeline/runtime_broker/_process.py
+?? src/hermes_pipeline/runtime_broker/_provision.py
+?? src/hermes_pipeline/runtime_broker/_redaction.py
+?? src/hermes_pipeline/runtime_broker/_snapshot.py
+?? src/hermes_pipeline/runtime_broker/controlled_e2e.py
+?? src/hermes_pipeline/runtime_broker/tools_bootstrap.py
+?? tests/fixtures/security/
+?? tests/spike/adversarial-security/
+?? tests/spike/capability/
+?? tests/spike/e2e/
+?? tests/spike/security/
+
+--- stderr ---

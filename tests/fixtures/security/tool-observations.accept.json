@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "tool_record_digest": "sha256:53509131a48c4eb981a7a04d1ab73d6d95864f62310fb3c31bc691739081344e",
+  "run_binding_digest": "sha256:0959dca78f5f68c3f4fd75247d2dc54d7565c97aeada82099b5139fd22f94282",
+  "asset_verification_result": {
+    "status": "ok",
+    "code": "VERIFIED",
+    "bounded_text": "locked assets verified"
+  },
+  "version_output": {
+    "status": "ok",
+    "code": "VERSION",
+    "bounded_text": "opencode 1.18.12"
+  },
+  "capability_probe_result": {
+    "status": "ok",
+    "code": "PROBED",
+    "bounded_text": "four-state matrix recorded"
+  },
+  "isolation_proof_result": {
+    "status": "ok",
+    "code": "ENFORCED",
+    "bounded_text": "identity, outside-root read/write, snapshot read-only, state-root write, and egress denial proved"
+  },
+  "observed_at_utc": "2026-08-13T00:01:00.000Z"
+}

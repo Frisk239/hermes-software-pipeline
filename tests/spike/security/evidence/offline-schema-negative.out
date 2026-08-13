@@ -1,0 +1,37 @@
+fixture positive: expected exit 0, got exit 0 -> PASS
+  check_schemas: OK (2 Schema document(s) checked)
+fixture bad-array-index: expected exit 1, got exit 1 -> PASS
+  check_schemas: FAIL
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\schemas\bad-array-index\bad-array-index.schema.json: $ref at '/properties/leadingZero' JSON Pointer does not resolve: ...
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\schemas\bad-array-index\bad-array-index.schema.json: $ref at '/properties/minusZero' JSON Pointer does not resolve: #/...
+fixture bad-pointer: expected exit 1, got exit 1 -> PASS
+  check_schemas: FAIL
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\schemas\bad-pointer\bad-pointer.schema.json: $ref at '/properties/digest' JSON Pointer does not resolve: #/$defs/sha25...
+fixture broken-json: expected exit 1, got exit 1 -> PASS
+  check_schemas: FAIL
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\schemas\broken-json\broken.schema.json: invalid JSON (line 7, column 1: Expecting property name enclosed in double quo...
+fixture duplicate-id: expected exit 1, got exit 1 -> PASS
+  check_schemas: FAIL
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\schemas\duplicate-id\b.schema.json: duplicate $id 'https://schemas.hermes-pipeline.dev/engineering/duplicate/v1' (also...
+fixture invalid-schema: expected exit 1, got exit 1 -> PASS
+  check_schemas: FAIL
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\schemas\invalid-schema\not-a-schema.json: Schema document is not a JSON object
+fixture missing-schema: expected exit 1, got exit 1 -> PASS
+  check_schemas: FAIL
+  expected bootstrap Schema $id not declared: https://schemas.hermes-pipeline.dev/common/definitions/v1
+  expected bootstrap Schema $id not declared: https://schemas.hermes-pipeline.dev/engineering/closeout/v1
+  expected bootstrap Schema $id not declared: https://schemas.hermes-pipeline.dev/engineering/context-manifest/v1
+  expected bootstrap Schema $id not declared: https://schemas.hermes-pipeline.dev/engineering/contract-change-request/v1
+  expected bootstrap Schema $id not declared: https://schemas.hermes-pipeline.dev/engineering/execution-report/v1
+  expected bootstrap Schema $id not declared: https://schemas.hermes-pipeline.dev/engineering/phase-plan/v1
+  expected bootstrap Schema $id not declared: https://schemas.hermes-pipeline.dev/engineering/review-verdict/v1
+  ... (output truncated)
+fixture oversized-ref: expected exit 1, got exit 1 -> PASS
+  check_schemas: FAIL
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\schemas\oversized-ref\oversized.schema.json: $ref at '/properties/digest' does not resolve to a declared Schema: https...
+fixture unresolvable-ref: expected exit 1, got exit 1 -> PASS
+  check_schemas: FAIL
+  C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-06\scripts\fixtures\negative\schemas\unresolvable-ref\unresolvable.schema.json: $ref at '/properties/digest' does not resolve to a declared Schema:...
+check_schemas: OK (14 Schema document(s) checked)
+
+--- stderr ---

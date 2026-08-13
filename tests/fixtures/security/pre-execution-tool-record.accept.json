@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "planning_base_sha": "9cf24b876cc7422386ed54c277900ff1e3c2c2bf",
+  "candidate_sha": "9cf24b876cc7422386ed54c277900ff1e3c2c2bf",
+  "candidate_tree_digest": "0123456789abcdef0123456789abcdef01234567",
+  "integration_base_sha": "9cf24b876cc7422386ed54c277900ff1e3c2c2bf",
+  "integration_candidate_sha": "9cf24b876cc7422386ed54c277900ff1e3c2c2bf",
+  "integration_candidate_tree_digest": "0123456789abcdef0123456789abcdef01234567",
+  "source_tree_digest": "0123456789abcdef0123456789abcdef01234567",
+  "tool_lock_digest": "sha256:77d4a6705034cd6b0a01860fce2ee1e73bf7a8e8601f9e3778dbfd809483e8c1",
+  "selected_platform": "windows-x64",
+  "selected_tool_lock_entries": [
+    {
+      "tool": "node",
+      "platform": "windows-x64",
+      "asset": "node-v22.23.2-win-x64.zip",
+      "integrity": "1177b4137ba5adaa56354ae40f1080c7450e8ae09cecb47da459d1c52ac99f97"
+    }
+  ],
+  "custodian_origin": "git-custodian"
+}

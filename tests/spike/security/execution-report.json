@@ -1,0 +1,600 @@
+{
+  "schema_id": "https://schemas.hermes-pipeline.dev/engineering/execution-report/v1",
+  "schema_version": 1,
+  "report_id": "exec_slice-00-06_attempt3",
+  "slice_id": "slice-00-06",
+  "contract_revision": 14,
+  "attempt": 3,
+  "base_sha": "9cf24b876cc7422386ed54c277900ff1e3c2c2bf",
+  "candidate_sha": "41f0169023063d6c6996e82daaeeab3a504dfa58",
+  "context_manifest_hash": "sha256:fd654c649066755a6907a606139e9808263bd9fa59b913b8eefc3a324d7e5d2f",
+  "changed_paths": [
+    "docs/development/compatibility-targets.md",
+    "docs/research/00-06-agent-runtime-security-research.md",
+    "src/hermes_pipeline/runtime_broker/__init__.py",
+    "src/hermes_pipeline/runtime_broker/_acl.py",
+    "src/hermes_pipeline/runtime_broker/_auth.py",
+    "src/hermes_pipeline/runtime_broker/_capability.py",
+    "src/hermes_pipeline/runtime_broker/_codes.py",
+    "src/hermes_pipeline/runtime_broker/_codex.py",
+    "src/hermes_pipeline/runtime_broker/_digest.py",
+    "src/hermes_pipeline/runtime_broker/_e2e.py",
+    "src/hermes_pipeline/runtime_broker/_host.py",
+    "src/hermes_pipeline/runtime_broker/_identity.py",
+    "src/hermes_pipeline/runtime_broker/_isolation.py",
+    "src/hermes_pipeline/runtime_broker/_observations.py",
+    "src/hermes_pipeline/runtime_broker/_opencode.py",
+    "src/hermes_pipeline/runtime_broker/_policy.py",
+    "src/hermes_pipeline/runtime_broker/_process.py",
+    "src/hermes_pipeline/runtime_broker/_provision.py",
+    "src/hermes_pipeline/runtime_broker/_redaction.py",
+    "src/hermes_pipeline/runtime_broker/_snapshot.py",
+    "src/hermes_pipeline/runtime_broker/controlled_e2e.py",
+    "src/hermes_pipeline/runtime_broker/tools_bootstrap.py",
+    "tests/fixtures/security/README.md",
+    "tests/fixtures/security/host-gate.accept.json",
+    "tests/fixtures/security/host-gate.reject-extra-field.json",
+    "tests/fixtures/security/pre-execution-tool-record.accept.json",
+    "tests/fixtures/security/pre-execution-tool-record.reject-runtime-field.json",
+    "tests/fixtures/security/run-binding.accept.json",
+    "tests/fixtures/security/tool-observations.accept.json",
+    "tests/spike/adversarial-security/conftest.py",
+    "tests/spike/adversarial-security/test_adversarial_security.py",
+    "tests/spike/capability/conftest.py",
+    "tests/spike/capability/test_capability_matrix.py",
+    "tests/spike/e2e/conftest.py",
+    "tests/spike/e2e/test_e2e_browser_composition.py",
+    "tests/spike/e2e/test_e2e_wiring.py",
+    "tests/spike/security/_write_execution_report.py",
+    "tests/spike/security/conftest.py",
+    "tests/spike/security/evidence/changed-paths.out",
+    "tests/spike/security/evidence/controlled-e2e.out",
+    "tests/spike/security/evidence/diff-check.out",
+    "tests/spike/security/evidence/docs-check.out",
+    "tests/spike/security/evidence/fake-only-gate.out",
+    "tests/spike/security/evidence/frozen-sync.out",
+    "tests/spike/security/evidence/offline-architecture.out",
+    "tests/spike/security/evidence/offline-artifact.out",
+    "tests/spike/security/evidence/offline-contracts-check.out",
+    "tests/spike/security/evidence/offline-contracts-drift.out",
+    "tests/spike/security/evidence/offline-docs-check.out",
+    "tests/spike/security/evidence/offline-docs-negative.out",
+    "tests/spike/security/evidence/offline-format.out",
+    "tests/spike/security/evidence/offline-lint.out",
+    "tests/spike/security/evidence/offline-pytest.out",
+    "tests/spike/security/evidence/offline-schema-negative.out",
+    "tests/spike/security/evidence/offline-type.out",
+    "tests/spike/security/evidence/offline-version.out",
+    "tests/spike/security/evidence/offline-workflow-policy.out",
+    "tests/spike/security/evidence/probe-codex-real.out",
+    "tests/spike/security/evidence/probe-codex.out",
+    "tests/spike/security/evidence/probe-opencode-real.out",
+    "tests/spike/security/evidence/probe-opencode.out",
+    "tests/spike/security/evidence/spike-adversarial-security.out",
+    "tests/spike/security/evidence/spike-capability.out",
+    "tests/spike/security/evidence/spike-e2e.out",
+    "tests/spike/security/evidence/spike-security.out",
+    "tests/spike/security/evidence/tools-bootstrap.out",
+    "tests/spike/security/evidence/tools-cutoff-verify.out",
+    "tests/spike/security/evidence/tools-selfcheck.out",
+    "tests/spike/security/evidence/unit-check.out",
+    "tests/spike/security/execution-report.json",
+    "tests/spike/security/test_auth_goldens.py",
+    "tests/spike/security/test_codex_adapter_probe.py",
+    "tests/spike/security/test_fake_only_gate.py",
+    "tests/spike/security/test_host_paths.py",
+    "tests/spike/security/test_opencode_adapter_probe.py",
+    "tests/spike/security/test_process_tree.py",
+    "tests/spike/security/test_redaction.py",
+    "tests/spike/security/test_runner_collection.py",
+    "tests/spike/security/test_tool_identity.py"
+  ],
+  "command_results": [
+    {
+      "command_id": "frozen-sync",
+      "exit_code": 0,
+      "started_at": "2026-08-13T04:02:31.519917Z",
+      "duration_ms": 38,
+      "output_artifact": {
+        "artifact_id": "art_00-06_frozen_sync",
+        "manifest_digest": "sha256:c886ba5403f08e319a04d9076d0d4e39f73510b19b7d600c6b32dd23e46522da",
+        "role": "stdout-frozen-sync"
+      }
+    },
+    {
+      "command_id": "unit-check",
+      "exit_code": 0,
+      "started_at": "2026-08-13T04:02:31.559204Z",
+      "duration_ms": 6021,
+      "output_artifact": {
+        "artifact_id": "art_00-06_unit_check",
+        "manifest_digest": "sha256:cd6ee8f36655c17d68bb15a66bbed45f2178116d36ad495b396f90cc6342af29",
+        "role": "stdout-unit-check"
+      }
+    },
+    {
+      "command_id": "tools-bootstrap",
+      "exit_code": 1,
+      "started_at": "2026-08-13T04:02:37.580820Z",
+      "duration_ms": 160,
+      "output_artifact": {
+        "artifact_id": "art_00-06_tools_bootstrap",
+        "manifest_digest": "sha256:297e029283f383d71955a1c5c2c6b5e72658b6c483cfe1a7e22f337c0cf3d0d7",
+        "role": "stdout-tools-bootstrap"
+      }
+    },
+    {
+      "command_id": "tools-cutoff-verify",
+      "exit_code": 1,
+      "started_at": "2026-08-13T04:02:37.778231Z",
+      "duration_ms": 164,
+      "output_artifact": {
+        "artifact_id": "art_00-06_tools_cutoff_verify",
+        "manifest_digest": "sha256:297e029283f383d71955a1c5c2c6b5e72658b6c483cfe1a7e22f337c0cf3d0d7",
+        "role": "stdout-tools-cutoff-verify"
+      }
+    },
+    {
+      "command_id": "tools-selfcheck",
+      "exit_code": 1,
+      "started_at": "2026-08-13T04:02:37.943655Z",
+      "duration_ms": 165,
+      "output_artifact": {
+        "artifact_id": "art_00-06_tools_selfcheck",
+        "manifest_digest": "sha256:297e029283f383d71955a1c5c2c6b5e72658b6c483cfe1a7e22f337c0cf3d0d7",
+        "role": "stdout-tools-selfcheck"
+      }
+    },
+    {
+      "command_id": "probe-codex",
+      "exit_code": 0,
+      "started_at": "2026-08-13T04:02:38.109261Z",
+      "duration_ms": 1070,
+      "output_artifact": {
+        "artifact_id": "art_00-06_probe_codex",
+        "manifest_digest": "sha256:b21844b623b8de554b995d41a62f164198b88b438215af73af7f0deb80378c92",
+        "role": "stdout-probe-codex"
+      }
+    },
+    {
+      "command_id": "probe-opencode",
+      "exit_code": 0,
+      "started_at": "2026-08-13T04:02:39.180751Z",
+      "duration_ms": 1015,
+      "output_artifact": {
+        "artifact_id": "art_00-06_probe_opencode",
+        "manifest_digest": "sha256:d4b8093d7589d8d641321cddacd2a40c4514b45ef7fa9282eafacc462417f582",
+        "role": "stdout-probe-opencode"
+      }
+    },
+    {
+      "command_id": "probe-codex-real",
+      "exit_code": 1,
+      "started_at": "2026-08-13T04:02:40.197068Z",
+      "duration_ms": 153,
+      "output_artifact": {
+        "artifact_id": "art_00-06_probe_codex_real",
+        "manifest_digest": "sha256:297e029283f383d71955a1c5c2c6b5e72658b6c483cfe1a7e22f337c0cf3d0d7",
+        "role": "stdout-probe-codex-real"
+      }
+    },
+    {
+      "command_id": "probe-opencode-real",
+      "exit_code": 1,
+      "started_at": "2026-08-13T04:02:40.351522Z",
+      "duration_ms": 158,
+      "output_artifact": {
+        "artifact_id": "art_00-06_probe_opencode_real",
+        "manifest_digest": "sha256:297e029283f383d71955a1c5c2c6b5e72658b6c483cfe1a7e22f337c0cf3d0d7",
+        "role": "stdout-probe-opencode-real"
+      }
+    },
+    {
+      "command_id": "spike-security",
+      "exit_code": 0,
+      "started_at": "2026-08-13T04:02:40.510337Z",
+      "duration_ms": 3239,
+      "output_artifact": {
+        "artifact_id": "art_00-06_spike_security",
+        "manifest_digest": "sha256:5a7961dbba9f7f856396a196e360759f35709c667ab13392cd6ef22926b2c3e3",
+        "role": "stdout-spike-security"
+      }
+    },
+    {
+      "command_id": "spike-capability",
+      "exit_code": 0,
+      "started_at": "2026-08-13T04:02:43.750056Z",
+      "duration_ms": 1029,
+      "output_artifact": {
+        "artifact_id": "art_00-06_spike_capability",
+        "manifest_digest": "sha256:44e926507a83b320a040d2492f3e6de03789bde252621f4b46d675726f5a86de",
+        "role": "stdout-spike-capability"
+      }
+    },
+    {
+      "command_id": "spike-e2e",
+      "exit_code": 0,
+      "started_at": "2026-08-13T04:02:44.779354Z",
+      "duration_ms": 1199,
+      "output_artifact": {
+        "artifact_id": "art_00-06_spike_e2e",
+        "manifest_digest": "sha256:8f8387991efc50a10e164cd2ceb39143784cdfc6a90df7ce5ce1613d4177217f",
+        "role": "stdout-spike-e2e"
+      }
+    },
+    {
+      "command_id": "spike-adversarial-security",
+      "exit_code": 0,
+      "started_at": "2026-08-13T04:02:45.979198Z",
+      "duration_ms": 1172,
+      "output_artifact": {
+        "artifact_id": "art_00-06_spike_adversarial_security",
+        "manifest_digest": "sha256:bc2bcbd86658719547da2a8558c518017c91cab4695a88b89677648385b4f7bd",
+        "role": "stdout-spike-adversarial-security"
+      }
+    },
+    {
+      "command_id": "controlled-e2e",
+      "exit_code": 1,
+      "started_at": "2026-08-13T04:02:47.152141Z",
+      "duration_ms": 154,
+      "output_artifact": {
+        "artifact_id": "art_00-06_controlled_e2e",
+        "manifest_digest": "sha256:297e029283f383d71955a1c5c2c6b5e72658b6c483cfe1a7e22f337c0cf3d0d7",
+        "role": "stdout-controlled-e2e"
+      }
+    },
+    {
+      "command_id": "docs-check",
+      "exit_code": 0,
+      "started_at": "2026-08-13T04:02:47.307287Z",
+      "duration_ms": 289,
+      "output_artifact": {
+        "artifact_id": "art_00-06_docs_check",
+        "manifest_digest": "sha256:45b3ded2e947ac286ca1a0169c295f9a9276b0d27ca9a1f97a084da78633c779",
+        "role": "stdout-docs-check"
+      }
+    },
+    {
+      "command_id": "offline-version",
+      "exit_code": 0,
+      "started_at": "2026-08-13T04:02:47.597340Z",
+      "duration_ms": 124,
+      "output_artifact": {
+        "artifact_id": "art_00-06_offline_version",
+        "manifest_digest": "sha256:7a2db9a80d26000ad4c51baacf35ae949b18fd64dc489f225b0903d96a17d59b",
+        "role": "stdout-offline-version"
+      }
+    },
+    {
+      "command_id": "offline-contracts-check",
+      "exit_code": 0,
+      "started_at": "2026-08-13T04:02:47.722621Z",
+      "duration_ms": 446,
+      "output_artifact": {
+        "artifact_id": "art_00-06_offline_contracts_check",
+        "manifest_digest": "sha256:1425935d655888a1861b7cc14524d6830237620dc37892fa3e9d08a4aef1d172",
+        "role": "stdout-offline-contracts-check"
+      }
+    },
+    {
+      "command_id": "offline-contracts-drift",
+      "exit_code": 0,
+      "started_at": "2026-08-13T04:02:48.170550Z",
+      "duration_ms": 327,
+      "output_artifact": {
+        "artifact_id": "art_00-06_offline_contracts_drift",
+        "manifest_digest": "sha256:f1342f9260c1a4a92f9ffeddaa6060286791cb1422e8e9f901bdfea80db05368",
+        "role": "stdout-offline-contracts-drift"
+      }
+    },
+    {
+      "command_id": "offline-architecture",
+      "exit_code": 0,
+      "started_at": "2026-08-13T04:02:48.499294Z",
+      "duration_ms": 219,
+      "output_artifact": {
+        "artifact_id": "art_00-06_offline_architecture",
+        "manifest_digest": "sha256:2702de6dbe0062ab1f199c09302d45245fd29209d4926beef29faae20e966fe3",
+        "role": "stdout-offline-architecture"
+      }
+    },
+    {
+      "command_id": "offline-format",
+      "exit_code": 0,
+      "started_at": "2026-08-13T04:02:48.719202Z",
+      "duration_ms": 78,
+      "output_artifact": {
+        "artifact_id": "art_00-06_offline_format",
+        "manifest_digest": "sha256:826a073470fa76c41b97c179fd53ed27febbba2e3fb04492c4c2574decf52324",
+        "role": "stdout-offline-format"
+      }
+    },
+    {
+      "command_id": "offline-lint",
+      "exit_code": 0,
+      "started_at": "2026-08-13T04:02:48.798934Z",
+      "duration_ms": 74,
+      "output_artifact": {
+        "artifact_id": "art_00-06_offline_lint",
+        "manifest_digest": "sha256:86c6a4e03a772515f99191dda4d70020b3b1e0679438b0e0889c9bbb93db0413",
+        "role": "stdout-offline-lint"
+      }
+    },
+    {
+      "command_id": "offline-type",
+      "exit_code": 0,
+      "started_at": "2026-08-13T04:02:48.873672Z",
+      "duration_ms": 4683,
+      "output_artifact": {
+        "artifact_id": "art_00-06_offline_type",
+        "manifest_digest": "sha256:4ce35369c1307dc1a7b12d308a809b99f0ef08ab3aeb243ef50122e70e260de8",
+        "role": "stdout-offline-type"
+      }
+    },
+    {
+      "command_id": "offline-pytest",
+      "exit_code": 0,
+      "started_at": "2026-08-13T04:02:53.558049Z",
+      "duration_ms": 113467,
+      "output_artifact": {
+        "artifact_id": "art_00-06_offline_pytest",
+        "manifest_digest": "sha256:19f506815e632fcdd3bf0e44ac2b22824ac799c81a4e4771583d8cb24926ae20",
+        "role": "stdout-offline-pytest"
+      }
+    },
+    {
+      "command_id": "offline-docs-check",
+      "exit_code": 0,
+      "started_at": "2026-08-13T04:04:47.026107Z",
+      "duration_ms": 282,
+      "output_artifact": {
+        "artifact_id": "art_00-06_offline_docs_check",
+        "manifest_digest": "sha256:45b3ded2e947ac286ca1a0169c295f9a9276b0d27ca9a1f97a084da78633c779",
+        "role": "stdout-offline-docs-check"
+      }
+    },
+    {
+      "command_id": "offline-docs-negative",
+      "exit_code": 0,
+      "started_at": "2026-08-13T04:04:47.309696Z",
+      "duration_ms": 2457,
+      "output_artifact": {
+        "artifact_id": "art_00-06_offline_docs_negative",
+        "manifest_digest": "sha256:40e1b482b2d53e5dadfed4f0779dd7de1191622684b024a19b351c4f42c85255",
+        "role": "stdout-offline-docs-negative"
+      }
+    },
+    {
+      "command_id": "offline-schema-negative",
+      "exit_code": 0,
+      "started_at": "2026-08-13T04:04:49.768082Z",
+      "duration_ms": 739,
+      "output_artifact": {
+        "artifact_id": "art_00-06_offline_schema_negative",
+        "manifest_digest": "sha256:407ef59cc160aa4b0258e3bb4a20e077aa16c92ea6ca33d8f44a9db0d7a9804b",
+        "role": "stdout-offline-schema-negative"
+      }
+    },
+    {
+      "command_id": "offline-workflow-policy",
+      "exit_code": 0,
+      "started_at": "2026-08-13T04:04:50.544556Z",
+      "duration_ms": 111,
+      "output_artifact": {
+        "artifact_id": "art_00-06_offline_workflow_policy",
+        "manifest_digest": "sha256:22aec4190bb57c1d7a3c4425038295106a87d96fdc1c4e57a1c2556d694a48df",
+        "role": "stdout-offline-workflow-policy"
+      }
+    },
+    {
+      "command_id": "offline-artifact",
+      "exit_code": 0,
+      "started_at": "2026-08-13T04:05:23.285093Z",
+      "duration_ms": 100,
+      "output_artifact": {
+        "artifact_id": "art_00-06_offline_artifact",
+        "manifest_digest": "sha256:b46e09ed7f564a2310b189dabf2a9622f45d05a13dae72db8f48ac74841c770a",
+        "role": "stdout-offline-artifact"
+      }
+    },
+    {
+      "command_id": "diff-check",
+      "exit_code": 0,
+      "started_at": "2026-08-13T04:04:50.753626Z",
+      "duration_ms": 84,
+      "output_artifact": {
+        "artifact_id": "art_00-06_diff_check",
+        "manifest_digest": "sha256:d8760763be63067f00789fcf42648cb7e89259b37690e733415676ec0b8b6596",
+        "role": "stdout-diff-check"
+      }
+    },
+    {
+      "command_id": "changed-paths",
+      "exit_code": 0,
+      "started_at": "2026-08-13T04:04:50.838597Z",
+      "duration_ms": 60,
+      "output_artifact": {
+        "artifact_id": "art_00-06_changed_paths",
+        "manifest_digest": "sha256:37cbaa5888ed4015648b530365a038aea8a0a352fdb1f68d88251b8678f466a2",
+        "role": "stdout-changed-paths"
+      }
+    },
+    {
+      "command_id": "fake-only-gate",
+      "exit_code": 0,
+      "started_at": "2026-08-13T04:04:50.898759Z",
+      "duration_ms": 1832,
+      "output_artifact": {
+        "artifact_id": "art_00-06_fake_only_gate",
+        "manifest_digest": "sha256:f7bc72235b04a02c5c519b934dd25d2349e1896d42713c11df1452fa4fd4fdb6",
+        "role": "stdout-fake-only-gate"
+      }
+    }
+  ],
+  "artifact_refs": [
+    {
+      "artifact_id": "art_00-06_frozen_sync",
+      "manifest_digest": "sha256:c886ba5403f08e319a04d9076d0d4e39f73510b19b7d600c6b32dd23e46522da",
+      "role": "stdout-frozen-sync"
+    },
+    {
+      "artifact_id": "art_00-06_unit_check",
+      "manifest_digest": "sha256:cd6ee8f36655c17d68bb15a66bbed45f2178116d36ad495b396f90cc6342af29",
+      "role": "stdout-unit-check"
+    },
+    {
+      "artifact_id": "art_00-06_tools_bootstrap",
+      "manifest_digest": "sha256:297e029283f383d71955a1c5c2c6b5e72658b6c483cfe1a7e22f337c0cf3d0d7",
+      "role": "stdout-tools-bootstrap"
+    },
+    {
+      "artifact_id": "art_00-06_tools_cutoff_verify",
+      "manifest_digest": "sha256:297e029283f383d71955a1c5c2c6b5e72658b6c483cfe1a7e22f337c0cf3d0d7",
+      "role": "stdout-tools-cutoff-verify"
+    },
+    {
+      "artifact_id": "art_00-06_tools_selfcheck",
+      "manifest_digest": "sha256:297e029283f383d71955a1c5c2c6b5e72658b6c483cfe1a7e22f337c0cf3d0d7",
+      "role": "stdout-tools-selfcheck"
+    },
+    {
+      "artifact_id": "art_00-06_probe_codex",
+      "manifest_digest": "sha256:b21844b623b8de554b995d41a62f164198b88b438215af73af7f0deb80378c92",
+      "role": "stdout-probe-codex"
+    },
+    {
+      "artifact_id": "art_00-06_probe_opencode",
+      "manifest_digest": "sha256:d4b8093d7589d8d641321cddacd2a40c4514b45ef7fa9282eafacc462417f582",
+      "role": "stdout-probe-opencode"
+    },
+    {
+      "artifact_id": "art_00-06_probe_codex_real",
+      "manifest_digest": "sha256:297e029283f383d71955a1c5c2c6b5e72658b6c483cfe1a7e22f337c0cf3d0d7",
+      "role": "stdout-probe-codex-real"
+    },
+    {
+      "artifact_id": "art_00-06_probe_opencode_real",
+      "manifest_digest": "sha256:297e029283f383d71955a1c5c2c6b5e72658b6c483cfe1a7e22f337c0cf3d0d7",
+      "role": "stdout-probe-opencode-real"
+    },
+    {
+      "artifact_id": "art_00-06_spike_security",
+      "manifest_digest": "sha256:5a7961dbba9f7f856396a196e360759f35709c667ab13392cd6ef22926b2c3e3",
+      "role": "stdout-spike-security"
+    },
+    {
+      "artifact_id": "art_00-06_spike_capability",
+      "manifest_digest": "sha256:44e926507a83b320a040d2492f3e6de03789bde252621f4b46d675726f5a86de",
+      "role": "stdout-spike-capability"
+    },
+    {
+      "artifact_id": "art_00-06_spike_e2e",
+      "manifest_digest": "sha256:8f8387991efc50a10e164cd2ceb39143784cdfc6a90df7ce5ce1613d4177217f",
+      "role": "stdout-spike-e2e"
+    },
+    {
+      "artifact_id": "art_00-06_spike_adversarial_security",
+      "manifest_digest": "sha256:bc2bcbd86658719547da2a8558c518017c91cab4695a88b89677648385b4f7bd",
+      "role": "stdout-spike-adversarial-security"
+    },
+    {
+      "artifact_id": "art_00-06_controlled_e2e",
+      "manifest_digest": "sha256:297e029283f383d71955a1c5c2c6b5e72658b6c483cfe1a7e22f337c0cf3d0d7",
+      "role": "stdout-controlled-e2e"
+    },
+    {
+      "artifact_id": "art_00-06_docs_check",
+      "manifest_digest": "sha256:45b3ded2e947ac286ca1a0169c295f9a9276b0d27ca9a1f97a084da78633c779",
+      "role": "stdout-docs-check"
+    },
+    {
+      "artifact_id": "art_00-06_offline_version",
+      "manifest_digest": "sha256:7a2db9a80d26000ad4c51baacf35ae949b18fd64dc489f225b0903d96a17d59b",
+      "role": "stdout-offline-version"
+    },
+    {
+      "artifact_id": "art_00-06_offline_contracts_check",
+      "manifest_digest": "sha256:1425935d655888a1861b7cc14524d6830237620dc37892fa3e9d08a4aef1d172",
+      "role": "stdout-offline-contracts-check"
+    },
+    {
+      "artifact_id": "art_00-06_offline_contracts_drift",
+      "manifest_digest": "sha256:f1342f9260c1a4a92f9ffeddaa6060286791cb1422e8e9f901bdfea80db05368",
+      "role": "stdout-offline-contracts-drift"
+    },
+    {
+      "artifact_id": "art_00-06_offline_architecture",
+      "manifest_digest": "sha256:2702de6dbe0062ab1f199c09302d45245fd29209d4926beef29faae20e966fe3",
+      "role": "stdout-offline-architecture"
+    },
+    {
+      "artifact_id": "art_00-06_offline_format",
+      "manifest_digest": "sha256:826a073470fa76c41b97c179fd53ed27febbba2e3fb04492c4c2574decf52324",
+      "role": "stdout-offline-format"
+    },
+    {
+      "artifact_id": "art_00-06_offline_lint",
+      "manifest_digest": "sha256:86c6a4e03a772515f99191dda4d70020b3b1e0679438b0e0889c9bbb93db0413",
+      "role": "stdout-offline-lint"
+    },
+    {
+      "artifact_id": "art_00-06_offline_type",
+      "manifest_digest": "sha256:4ce35369c1307dc1a7b12d308a809b99f0ef08ab3aeb243ef50122e70e260de8",
+      "role": "stdout-offline-type"
+    },
+    {
+      "artifact_id": "art_00-06_offline_pytest",
+      "manifest_digest": "sha256:19f506815e632fcdd3bf0e44ac2b22824ac799c81a4e4771583d8cb24926ae20",
+      "role": "stdout-offline-pytest"
+    },
+    {
+      "artifact_id": "art_00-06_offline_docs_check",
+      "manifest_digest": "sha256:45b3ded2e947ac286ca1a0169c295f9a9276b0d27ca9a1f97a084da78633c779",
+      "role": "stdout-offline-docs-check"
+    },
+    {
+      "artifact_id": "art_00-06_offline_docs_negative",
+      "manifest_digest": "sha256:40e1b482b2d53e5dadfed4f0779dd7de1191622684b024a19b351c4f42c85255",
+      "role": "stdout-offline-docs-negative"
+    },
+    {
+      "artifact_id": "art_00-06_offline_schema_negative",
+      "manifest_digest": "sha256:407ef59cc160aa4b0258e3bb4a20e077aa16c92ea6ca33d8f44a9db0d7a9804b",
+      "role": "stdout-offline-schema-negative"
+    },
+    {
+      "artifact_id": "art_00-06_offline_workflow_policy",
+      "manifest_digest": "sha256:22aec4190bb57c1d7a3c4425038295106a87d96fdc1c4e57a1c2556d694a48df",
+      "role": "stdout-offline-workflow-policy"
+    },
+    {
+      "artifact_id": "art_00-06_offline_artifact",
+      "manifest_digest": "sha256:b46e09ed7f564a2310b189dabf2a9622f45d05a13dae72db8f48ac74841c770a",
+      "role": "stdout-offline-artifact"
+    },
+    {
+      "artifact_id": "art_00-06_diff_check",
+      "manifest_digest": "sha256:d8760763be63067f00789fcf42648cb7e89259b37690e733415676ec0b8b6596",
+      "role": "stdout-diff-check"
+    },
+    {
+      "artifact_id": "art_00-06_changed_paths",
+      "manifest_digest": "sha256:37cbaa5888ed4015648b530365a038aea8a0a352fdb1f68d88251b8678f466a2",
+      "role": "stdout-changed-paths"
+    },
+    {
+      "artifact_id": "art_00-06_fake_only_gate",
+      "manifest_digest": "sha256:f7bc72235b04a02c5c519b934dd25d2349e1896d42713c11df1452fa4fd4fdb6",
+      "role": "stdout-fake-only-gate"
+    }
+  ],
+  "self_assessment": "READY_FOR_REVIEW",
+  "submitted_at": "2026-08-13T04:04:52Z",
+  "risks": [
+    "UNCOMMITTED: candidate_sha is worktree HEAD 41f0169 only. It does not contain this implementation. No implementation Candidate exists until Git Custodian commits.",
+    "Authorized Host success commands were invoked without Custodian snapshot/record/binding/gate and without a demonstrated isolation proof. Their exit_code is 1 (DEPENDENCY_UNAVAILABLE). They are not reported as success.",
+    "Windows sealed Codex, Chrome for Testing, and hard network deny remain UNSUPPORTED_RUNTIME."
+  ],
+  "content_hash": "sha256:2454a30e1bf8580fc6acd3e301a32a3ce0db566d22e323bee4d203d235a732fb"
+}

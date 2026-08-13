@@ -317,6 +317,46 @@ Exact asset identities and closed argv remain in the 00-06 `tool-lock.json`.
 required before any of these tools enter the root, Hermes, or a production
 service.
 
+### Slice-00-06 four-state capability matrix (project probe register)
+
+Dated Executor observation on the assigned Windows worktree. `--offline` and
+cutoff markers are not OS-level egress evidence. Same-user ACL filesystem
+enforcement is `OBSERVED_ONLY`. Hard network deny is `UNSUPPORTED_RUNTIME`
+until an OS-level egress block is demonstrated.
+
+| Field | Windows | Linux (same mapping; dual-platform CI repeats) |
+| --- | --- | --- |
+| filesystem.read/write/path_escape | OBSERVED_ONLY | OBSERVED_ONLY |
+| executables.allowlist / no_shell_strings | OBSERVED_ONLY | OBSERVED_ONLY |
+| network.loopback | OBSERVED_ONLY | OBSERVED_ONLY |
+| network.egress | UNSUPPORTED_RUNTIME | UNSUPPORTED_RUNTIME |
+| secrets.* | OBSERVED_ONLY | OBSERVED_ONLY |
+| browser.* | OBSERVED_ONLY | OBSERVED_ONLY |
+| resources.* | OBSERVED_ONLY | OBSERVED_ONLY |
+| side_effects.* | OBSERVED_ONLY | OBSERVED_ONLY |
+
+Loopback E2E is labeled not an OS-level egress-block proof. Chrome for Testing
+remains experimental/`no_official_checksum`. Windows sealed Codex remains
+`UNSUPPORTED_RUNTIME`.
+
+### Slice-00-06 spike dispositions
+
+| Spike component | Paths | Disposition |
+| --- | --- | --- |
+| Host runners | `runtime_broker/tools_bootstrap.py`, `controlled_e2e.py` | DELETE_UNLESS_ADOPTED_BY_00-07 |
+| Auth/isolation/process/redaction | `runtime_broker/_*.py` | DELETE_UNLESS_ADOPTED_BY_00-07 |
+| Security/capability/e2e/adversarial tests | `tests/spike/security/`, `capability/`, `e2e/`, `adversarial-security/` | DELETE_UNLESS_ADOPTED_BY_00-07 |
+| Authorization goldens (copies) | `tests/fixtures/security/` | DELETE_UNLESS_ADOPTED_BY_00-07 |
+
+### Residual risks (00-06)
+
+- Authorized Host bootstrap/E2E/real probes require a Custodian-issued
+  no-`.git` snapshot, pre-execution record, run binding, single-use gate, and
+  the locked isolation proof. Absent proof, runners fail closed as
+  `UNSUPPORTED_RUNTIME` and start zero children.
+- Isolation proof (AppContainer / user+mount+pid+netns) is not available in
+  ordinary PR CI.
+
 ## Compatibility policy
 
 - Exact dependency versions and hashes belong in `uv.lock`; this document records tested product/tool ranges.
