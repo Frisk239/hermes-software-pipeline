@@ -104,6 +104,95 @@ if sys.platform == "win32":
         ctypes.POINTER(_PROCESSENTRY32W),
     ]
 
+    def _windows_job() -> int:
+        handle = _KERNEL32.CreateJobObjectW(None, None)
+        if not handle:
+            raise OSError("CreateJobObjectW failed")
+        info = _JOBOBJECT_EXTENDED_LIMIT_INFORMATION()
+        info.BasicLimitInformation.LimitFlags = _JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+        ok = _KERNEL32.SetInformationJobObject(
+            handle,
+            _JobObjectExtendedLimitInformation,
+            ctypes.byref(info),
+            ctypes.sizeof(info),
+        )
+        if not ok:
+            _KERNEL32.CloseHandle(handle)
+            raise OSError("SetInformationJobObject failed")
+        return int(handle)
+
+    def _run_fenced_windows(
+        argv: Sequence[str],
+        *,
+        cwd: str | None,
+        env: Mapping[str, str] | None,
+        timeout_s: float,
+        output_bytes: int,
+        cancel_event: threading.Event | None,
+    ) -> BoundedResult:
+        job = _windows_job()
+        child = subprocess.Popen(
+            list(argv),
+            cwd=cwd,
+            env=dict(env) if env is not None else None,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            creationflags=_CREATE_SUSPENDED,
+        )
+        process_handle = _KERNEL32.OpenProcess(_PROCESS_ALL_ACCESS, False, child.pid)
+        try:
+            if not process_handle or not _KERNEL32.AssignProcessToJobObject(
+                job, process_handle
+            ):
+                _KERNEL32.TerminateJobObject(job, 1)
+                raise OSError("AssignProcessToJobObject failed")
+            _NTDLL.NtResumeProcess(process_handle)
+            timed_out = False
+            cancelled = False
+            if cancel_event is not None:
+                finished = threading.Event()
+
+                def _wait() -> None:
+                    with contextlib.suppress(Exception):
+                        child.communicate(timeout=timeout_s)
+                    finished.set()
+
+                worker = threading.Thread(target=_wait, daemon=True)
+                worker.start()
+                if cancel_event.wait(timeout_s):
+                    cancelled = True
+                    _KERNEL32.TerminateJobObject(job, 1)
+                elif not finished.wait(0):
+                    timed_out = True
+                    _KERNEL32.TerminateJobObject(job, 1)
+                worker.join(timeout=5)
+                stdout = b""
+                stderr = b""
+                if child.stdout is not None and not child.stdout.closed:
+                    stdout = child.stdout.read()
+                if child.stderr is not None and not child.stderr.closed:
+                    stderr = child.stderr.read()
+            else:
+                try:
+                    stdout, stderr = child.communicate(timeout=timeout_s)
+                except subprocess.TimeoutExpired:
+                    timed_out = True
+                    _KERNEL32.TerminateJobObject(job, 1)
+                    stdout, stderr = child.communicate(timeout=5)
+            survivors = zero_survivors(child.pid)
+            return BoundedResult(
+                returncode=int(child.returncode or 1),
+                stdout=stdout[:output_bytes],
+                stderr=stderr[:output_bytes],
+                timed_out=timed_out,
+                cancelled=cancelled,
+                survivors=survivors,
+            )
+        finally:
+            if process_handle:
+                _KERNEL32.CloseHandle(process_handle)
+            _KERNEL32.CloseHandle(job)
+
 
 @dataclass
 class BoundedResult:
@@ -115,24 +204,6 @@ class BoundedResult:
     timed_out: bool
     cancelled: bool
     survivors: tuple[int, ...]
-
-
-def _windows_job() -> int:
-    handle = _KERNEL32.CreateJobObjectW(None, None)
-    if not handle:
-        raise OSError("CreateJobObjectW failed")
-    info = _JOBOBJECT_EXTENDED_LIMIT_INFORMATION()
-    info.BasicLimitInformation.LimitFlags = _JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
-    ok = _KERNEL32.SetInformationJobObject(
-        handle,
-        _JobObjectExtendedLimitInformation,
-        ctypes.byref(info),
-        ctypes.sizeof(info),
-    )
-    if not ok:
-        _KERNEL32.CloseHandle(handle)
-        raise OSError("SetInformationJobObject failed")
-    return int(handle)
 
 
 def _pid_alive(pid: int) -> bool:
@@ -275,76 +346,3 @@ def run_fenced(
         cancelled=cancelled,
         survivors=survivors,
     )
-
-
-def _run_fenced_windows(
-    argv: Sequence[str],
-    *,
-    cwd: str | None,
-    env: Mapping[str, str] | None,
-    timeout_s: float,
-    output_bytes: int,
-    cancel_event: threading.Event | None,
-) -> BoundedResult:
-    job = _windows_job()
-    child = subprocess.Popen(
-        list(argv),
-        cwd=cwd,
-        env=dict(env) if env is not None else None,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        creationflags=_CREATE_SUSPENDED,
-    )
-    process_handle = _KERNEL32.OpenProcess(_PROCESS_ALL_ACCESS, False, child.pid)
-    try:
-        if not process_handle or not _KERNEL32.AssignProcessToJobObject(
-            job, process_handle
-        ):
-            _KERNEL32.TerminateJobObject(job, 1)
-            raise OSError("AssignProcessToJobObject failed")
-        _NTDLL.NtResumeProcess(process_handle)
-        timed_out = False
-        cancelled = False
-        if cancel_event is not None:
-            finished = threading.Event()
-
-            def _wait() -> None:
-                with contextlib.suppress(Exception):
-                    child.communicate(timeout=timeout_s)
-                finished.set()
-
-            worker = threading.Thread(target=_wait, daemon=True)
-            worker.start()
-            if cancel_event.wait(timeout_s):
-                cancelled = True
-                _KERNEL32.TerminateJobObject(job, 1)
-            elif not finished.wait(0):
-                timed_out = True
-                _KERNEL32.TerminateJobObject(job, 1)
-            worker.join(timeout=5)
-            stdout = b""
-            stderr = b""
-            if child.stdout is not None and not child.stdout.closed:
-                stdout = child.stdout.read()
-            if child.stderr is not None and not child.stderr.closed:
-                stderr = child.stderr.read()
-        else:
-            try:
-                stdout, stderr = child.communicate(timeout=timeout_s)
-            except subprocess.TimeoutExpired:
-                timed_out = True
-                _KERNEL32.TerminateJobObject(job, 1)
-                stdout, stderr = child.communicate(timeout=5)
-        survivors = zero_survivors(child.pid)
-        return BoundedResult(
-            returncode=int(child.returncode or 1),
-            stdout=stdout[:output_bytes],
-            stderr=stderr[:output_bytes],
-            timed_out=timed_out,
-            cancelled=cancelled,
-            survivors=survivors,
-        )
-    finally:
-        if process_handle:
-            _KERNEL32.CloseHandle(process_handle)
-        _KERNEL32.CloseHandle(job)

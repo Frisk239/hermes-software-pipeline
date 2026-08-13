@@ -20,7 +20,7 @@ SLICE_DIR = (
     / "slices"
     / "00-06-agent-runtime-security-spikes"
 )
-PLATFORM = "windows-x64" if sys.platform == "win32" else "linux-x64"
+PLATFORM: str = "windows-x64" if sys.platform == "win32" else "linux-x64"
 DANGEROUS_CODEX_FLAGS = (
     "--dangerously-bypass-approvals-and-sandbox",
     "--dangerously-bypass-hook-trust",
