@@ -1,7 +1,7 @@
 """Shared spike constants for the Hermes Shim (slice-00-05).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: ADOPTED_BY_00-07
 
 Versioned spike constants shared by the Hermes-loaded shim and the fake
 managed runtime. The runtime entry under ``src/hermes_pipeline/transport/``

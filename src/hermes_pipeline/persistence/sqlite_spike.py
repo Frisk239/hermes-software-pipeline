@@ -1,7 +1,7 @@
 """SQLite spike Controller persistence Adapter (slice-00-04).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: KEEP_MARKED_EVIDENCE
 
 The SQLite spike Adapter implements the private Controller persistence port
 with SQLAlchemy Core and one explicit SQLite driver transaction mode

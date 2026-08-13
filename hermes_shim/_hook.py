@@ -1,7 +1,7 @@
 """pre_gateway_dispatch hook for the Hermes Shim (slice-00-05).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: ADOPTED_BY_00-07
 
 The hook fires once per incoming user-originated MessageEvent before auth
 and agent dispatch. Contract-pinned semantics:

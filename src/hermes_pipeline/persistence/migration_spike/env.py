@@ -1,7 +1,7 @@
 """Alembic migration environment for the slice-00-04 spike.
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: KEEP_MARKED_EVIDENCE
 
 This environment runs migrations against a temporary spike database only.
 ``context.begin_transaction()`` is a *logical* migration transaction: its

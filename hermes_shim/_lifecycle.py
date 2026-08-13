@@ -1,7 +1,7 @@
 """Lifecycle logic for the Hermes Shim (slice-00-05).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: ADOPTED_BY_00-07
 
 Implements the idempotent ``hermes pipeline setup|doctor|start|status|stop``
 semantics for the non-production skeleton. ``start`` bootstraps the managed

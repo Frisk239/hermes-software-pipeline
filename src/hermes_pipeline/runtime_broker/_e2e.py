@@ -1,7 +1,7 @@
 """Locked controlled-E2E wiring: fixture page, mock provider, OpenCode config.
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: KEEP_MARKED_EVIDENCE
 """
 
 from __future__ import annotations

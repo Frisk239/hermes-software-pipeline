@@ -1,7 +1,7 @@
 """Disposable fake receipt store (slice-00-05, fixed decision D4).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: KEEP_MARKED_EVIDENCE
 
 The fake runtime accepts one fake Controller-command envelope
 (``command_id`` + payload) and persists a receipt with stdlib ``sqlite3``

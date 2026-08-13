@@ -1,6 +1,6 @@
 # Hermes integration probe workflow (slice-00-05, new file only).
 # SPIKE-EXPERIMENTAL marker:
-# DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+# DISPOSITION: ADOPTED_BY_00-07
 #
 # Runs the Slice 00-05 Hermes probe suite and the complete canonical
 # offline check set on the required Windows and Linux runners. The job

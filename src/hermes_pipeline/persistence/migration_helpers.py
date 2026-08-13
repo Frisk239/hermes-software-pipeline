@@ -1,7 +1,7 @@
 """Alembic migration helper for the slice-00-04 spike (AC-12).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: KEEP_MARKED_EVIDENCE
 
 Upgrade and rollback run on a temporary spike database. The helper returns
 bounded typed results (``MigrationResult``) and never exposes raw driver

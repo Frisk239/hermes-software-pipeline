@@ -1,7 +1,7 @@
 """Event hash-chain computation for the Controller Event Log (slice-00-04).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: KEEP_MARKED_EVIDENCE
 
 The authoritative Event Log is an append-only chain: every Event row stores
 ``previous_event_hash`` (the hash of the immediately preceding Event, or

@@ -1,0 +1,104 @@
+ M .github/workflows/hermes-integration.yml
+ M .github/workflows/python-quality.yml
+ M README.md
+ M __init__.py
+ M docs/development/compatibility-targets.md
+ M docs/roadmap/phase-00-foundation/slices/README.md
+ M hermes_shim/__init__.py
+ M hermes_shim/_cli.py
+ M hermes_shim/_client.py
+ M hermes_shim/_constants.py
+ M hermes_shim/_descriptor.py
+ M hermes_shim/_hook.py
+ M hermes_shim/_lifecycle.py
+ M hermes_shim/_provision.py
+ M hermes_shim/_state.py
+ M hermes_shim/_tool.py
+ M plugin.yaml
+ M runtime-env/pyproject.toml
+ M scripts/check_documentation.py
+ M scripts/fixtures/workflows/positive/.github/workflows/hermes-integration.yml
+ M src/hermes_pipeline/artifacts/__init__.py
+ M src/hermes_pipeline/controller/__init__.py
+ M src/hermes_pipeline/controller/_command_port.py
+ M src/hermes_pipeline/controller/_persistence_port.py
+ M src/hermes_pipeline/controller/spike_controller.py
+ M src/hermes_pipeline/delivery/__init__.py
+ M src/hermes_pipeline/interaction/__init__.py
+ M src/hermes_pipeline/operations/__init__.py
+ M src/hermes_pipeline/persistence/backup.py
+ M src/hermes_pipeline/persistence/event_chain.py
+ M src/hermes_pipeline/persistence/in_memory.py
+ M src/hermes_pipeline/persistence/leases.py
+ M src/hermes_pipeline/persistence/migration_helpers.py
+ M src/hermes_pipeline/persistence/migration_spike/alembic.ini
+ M src/hermes_pipeline/persistence/migration_spike/env.py
+ M src/hermes_pipeline/persistence/migration_spike/versions/0001_create_spike_table.py
+ M src/hermes_pipeline/persistence/migration_spike/versions/0002_add_execution_marker.py
+ M src/hermes_pipeline/persistence/sqlite_spike.py
+ M src/hermes_pipeline/persistence/sqlite_version_gate.py
+ M src/hermes_pipeline/repository/__init__.py
+ M src/hermes_pipeline/runtime_broker/__init__.py
+ M src/hermes_pipeline/runtime_broker/_acl.py
+ M src/hermes_pipeline/runtime_broker/_auth.py
+ M src/hermes_pipeline/runtime_broker/_capability.py
+ M src/hermes_pipeline/runtime_broker/_codes.py
+ M src/hermes_pipeline/runtime_broker/_codex.py
+ M src/hermes_pipeline/runtime_broker/_digest.py
+ M src/hermes_pipeline/runtime_broker/_e2e.py
+ M src/hermes_pipeline/runtime_broker/_host.py
+ M src/hermes_pipeline/runtime_broker/_identity.py
+ M src/hermes_pipeline/runtime_broker/_isolation.py
+ M src/hermes_pipeline/runtime_broker/_observations.py
+ M src/hermes_pipeline/runtime_broker/_opencode.py
+ M src/hermes_pipeline/runtime_broker/_policy.py
+ M src/hermes_pipeline/runtime_broker/_process.py
+ M src/hermes_pipeline/runtime_broker/_provision.py
+ M src/hermes_pipeline/runtime_broker/_redaction.py
+ M src/hermes_pipeline/runtime_broker/_snapshot.py
+ M src/hermes_pipeline/runtime_broker/controlled_e2e.py
+ M src/hermes_pipeline/runtime_broker/tools_bootstrap.py
+ M src/hermes_pipeline/stage_executor/__init__.py
+ M src/hermes_pipeline/stage_executor/_boundary.py
+ M src/hermes_pipeline/stage_executor/_graph_spike.py
+ M src/hermes_pipeline/transport/__init__.py
+ M src/hermes_pipeline/transport/__main__.py
+ M src/hermes_pipeline/transport/_acl.py
+ M src/hermes_pipeline/transport/_constants.py
+ M src/hermes_pipeline/transport/_descriptor.py
+ M src/hermes_pipeline/transport/_identity.py
+ M src/hermes_pipeline/transport/_lock.py
+ M src/hermes_pipeline/transport/_main.py
+ M src/hermes_pipeline/transport/_protocol.py
+ M src/hermes_pipeline/transport/_receipts.py
+ M src/hermes_pipeline/transport/_server.py
+ M src/hermes_pipeline/transport/_state.py
+ M tests/spike/test_disposition.py
+?? docs/development/compatibility-manifest.preview.json
+?? docs/roadmap/phase-00-foundation/CLOSEOUT.md
+?? docs/roadmap/phase-00-foundation/slices/00-07-foundation-integration/_write_execution_report.py
+?? docs/roadmap/phase-00-foundation/slices/00-07-foundation-integration/evidence/
+?? docs/roadmap/phase-00-foundation/slices/00-07-foundation-integration/execution-report.json
+?? scripts/check_dependency_audit.py
+?? scripts/sbom_preview.py
+?? src/hermes_pipeline/artifacts/fake.py
+?? src/hermes_pipeline/artifacts/ports.py
+?? src/hermes_pipeline/controller/fake.py
+?? src/hermes_pipeline/controller/ports.py
+?? src/hermes_pipeline/delivery/fake.py
+?? src/hermes_pipeline/delivery/ports.py
+?? src/hermes_pipeline/interaction/fake.py
+?? src/hermes_pipeline/interaction/ports.py
+?? src/hermes_pipeline/operations/fake.py
+?? src/hermes_pipeline/operations/ports.py
+?? src/hermes_pipeline/repository/fake.py
+?? src/hermes_pipeline/repository/ports.py
+?? src/hermes_pipeline/runtime_broker/fake.py
+?? src/hermes_pipeline/runtime_broker/ports.py
+?? src/hermes_pipeline/stage_executor/fake.py
+?? src/hermes_pipeline/stage_executor/ports.py
+?? tests/modules/
+?? tests/test_dependency_audit.py
+?? tests/test_sbom_preview.py
+
+--- stderr ---

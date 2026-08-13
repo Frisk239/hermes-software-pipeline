@@ -1,7 +1,7 @@
 """Spike Controller implementing ControllerCommandPort (slice-00-04).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: KEEP_MARKED_EVIDENCE
 
 The spike Controller is the deterministic submit orchestration behind the
 accepted ``ControllerCommandPort.submit(command: ControllerCommand) ->

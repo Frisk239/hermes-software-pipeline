@@ -4,9 +4,9 @@ Hermes Software Pipeline is a planned Hermes plugin and managed local runtime fo
 
 ## Status
 
-**Design baseline in preparation — no runnable product exists yet.**
+**Phase 00 foundation integration — non-production skeleton only.**
 
-The architecture and version 1 technology decisions are accepted. Phase 00 has established the repository baseline, the managed Python quality skeleton (`hermes-pipeline` 0.1.0 under Python 3.12 and uv 0.12.1), and the contract toolchain: the 14 bootstrap JSON Schemas, the OpenAPI catalog, and the compatibility registry are generated deterministically from versioned Pydantic v2 authoring types, with a read-only drift gate proving the committed projections match generation byte-for-byte. The Hermes Shim, platform-security feasibility, and remaining Phase 00 slices are still pending. Do not install this repository expecting production Pipeline behavior.
+The architecture and version 1 technology decisions are accepted. Phase 00 has established the repository baseline, the managed Python quality skeleton (`hermes-pipeline` 0.1.0 under Python 3.12 and uv 0.12.1), the contract toolchain, and the eight External Interface Protocols with deterministic fakes. The Hermes plugin now exposes a non-production `hermes pipeline` lifecycle skeleton (`setup`, `doctor`, `start`, `status`, `stop`). Isolation, Chrome for Testing, and Windows sealed Codex remain unsupported or experimental. Do not install this repository expecting production Pipeline behavior.
 
 See:
 
@@ -16,6 +16,7 @@ See:
 - [engineering roadmap](docs/roadmap/ROADMAP.md);
 - [capability and verification traceability](docs/roadmap/TRACEABILITY.md);
 - [Phase 00 plan](docs/roadmap/phase-00-foundation/PHASE.md);
+- [Phase 00 closeout](docs/roadmap/phase-00-foundation/CLOSEOUT.md);
 - [development readiness audit](docs/development/development-readiness-audit.md).
 
 ## Product promise
@@ -43,20 +44,22 @@ Version 1 is a local, single-Workspace product. It does not promise:
 
 Repository content, Agent output, chat content, browser pages, provider callbacks, and model-generated tool arguments are untrusted data. See the [threat model](docs/security/threat-model-and-trust-boundaries.md).
 
-## Planned installation shape
+## Non-production lifecycle skeleton
 
 The public operator interface is the plugin-owned `hermes pipeline` command tree. The Python distribution is `hermes-pipeline`, its import package is `hermes_pipeline`, and the managed runtime uses the internal `hermes-pipeline-runtime` entry point.
 
-The intended source-install flow is:
+The five lifecycle commands exist as a non-production skeleton:
 
 ```text
 hermes plugins install Frisk239/hermes-software-pipeline --enable
 hermes pipeline setup
 hermes pipeline doctor
-hermes gateway restart
+hermes pipeline start
+hermes pipeline status
+hermes pipeline stop
 ```
 
-These commands do not exist in the repository yet. Phase 00 must prove the exact Hermes installation and lifecycle contract before they are documented as supported.
+They provision a disposable state root and a keep-marked fake loopback runtime. They are not a production Control Interface, do not apply updates, and do not claim sealed isolation.
 
 ## Repository checks
 
@@ -68,6 +71,8 @@ python scripts/check_schemas.py
 python scripts/check_schemas.py --self-test-negative
 python scripts/check_documentation.py --check-workflows
 python scripts/check_repository_artifacts.py
+python scripts/sbom_preview.py
+python scripts/check_dependency_audit.py
 ```
 
 `scripts/check_documentation.py` validates governed text files: strict UTF-8 decoding, absence of replacement characters, balanced Markdown fences, resolvable local Markdown links confined to the repository root, terminal ADR status in `docs/adr/`, and the required root entry point files. Governed-file discovery honors the checked root's `.gitignore`, so ignored local content (`reference/` clones, `.venv`, and standard tool caches) is never scanned while unignored governed files still are. `scripts/check_schemas.py` is the untouched dependency-free bootstrap gate: JSON parsing, unique `$id` values under `https://schemas.hermes-pipeline.dev/`, resolution of every local or absolute `$ref` and JSON Pointer fragment, and an exact match of the declared `$id` set against the locked 14 bootstrap Schemas. `--check-workflows` parses both committed workflow files with a strict grammar (rejecting unparsed trailing content, unterminated quotes, and unknown constructs) and verifies read-only permissions, no persisted checkout credentials, exact Windows/Linux matrix binding, the frozen quality-command inventory, and the bundled-Node policy. `--self-test-negative` executes the checkers against deliberately broken fixtures, asserting stable nonzero exits, and all diagnostic output is sanitized and bounded. `scripts/check_repository_artifacts.py` fails if verification leaves bytecode or tool-cache artifacts in the source tree.
@@ -83,6 +88,8 @@ uv run pytest
 uv run python -m hermes_pipeline.cli contracts check
 uv run python -m hermes_pipeline.cli contracts drift-check
 uv run python -m hermes_pipeline.cli architecture check
+uv run python scripts/sbom_preview.py
+uv run python scripts/check_dependency_audit.py
 ```
 
 `contracts check` is the full read-only validator: the 14-Schema identity lock, Draft 2020-12 meta-validation, `$ref` closure, instance validation with a local RFC 3339 `FormatChecker`, the f36 baseline corpus three-way gate (immutable snapshots, strict Pydantic models, generated Schemas), OpenAPI and compatibility-registry checks, canonical-hash verification, and a canary-leak scan. `contracts drift-check` regenerates every projection into a temporary directory and byte-compares it with the committed files; `contracts generate` is the only command that writes the generated artifacts, and the toolchain is lazy-imported only after the `contracts` subcommand is parsed, so `--version` and the normal runtime path stay pure standard library. `scripts/check_schemas.py` remains the dependency-free bootstrap gate and a consistency test keeps both validators aligned. `architecture check` runs the standard-library AST import-boundary checker against `src/hermes_pipeline` (stable file/line/rule diagnostics, no `import-linter`). Those default repository checks intentionally require a Hermes Pipeline source checkout; a standalone installed console supports `--version`, and `architecture check --root <path>` remains explicit-path capable. Pyright uses its lockfile-provided `nodejs-wheel-binaries` runtime instead of ambient Node. CI sets `PYTHONDONTWRITEBYTECODE=1` for every verification process so the final artifact audit observes the source tree rather than bytecode generated by the verifier. After the environment is installed, the same checks rerun offline (for example `uv sync --frozen --all-groups --offline` and `uv run --offline python -m hermes_pipeline.cli --version`) with no credentials and no further network access.

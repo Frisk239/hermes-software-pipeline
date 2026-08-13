@@ -1,7 +1,7 @@
 """Loopback protocol validation and handlers (slice-00-05).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: KEEP_MARKED_EVIDENCE
 
 The fixed loopback protocol as pure, framework-independent logic so the
 full matrix is deterministically testable in the dev environment without

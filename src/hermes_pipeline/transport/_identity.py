@@ -1,7 +1,7 @@
 """Process identity helpers for the fake managed runtime (slice-00-05).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: KEEP_MARKED_EVIDENCE
 
 Cross-platform process-start markers used by the stale-descriptor
 algorithm. A descriptor is stale and removable only when

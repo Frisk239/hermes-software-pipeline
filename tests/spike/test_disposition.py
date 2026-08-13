@@ -16,8 +16,9 @@ Marker contract:
 - every spike source file contains exactly one ``DISPOSITION: <record>``
   line;
 - only ``src/hermes_pipeline/domain/counter_spike.py`` may carry
-  ``RETAIN_NON_PUBLIC_CANDIDATE``; everything else must carry
-  ``DELETE_UNLESS_ADOPTED_BY_00-07``.
+  ``RETAIN_NON_PUBLIC_CANDIDATE``; adopted 00-07 Interfaces carry
+  ``ADOPTED_BY_00-07``; keep-marked spikes carry
+  ``KEEP_MARKED_EVIDENCE`` or ``DELETE_UNLESS_ADOPTED_BY_00-07``.
 """
 
 from __future__ import annotations
@@ -32,6 +33,12 @@ EXPERIMENTAL_MARKER = "SPIKE-EXPERIMENTAL"
 DISPOSITION_PREFIX = "DISPOSITION:"
 RETAIN_MARKER = "RETAIN_NON_PUBLIC_CANDIDATE"
 DELETE_MARKER = "DELETE_UNLESS_ADOPTED_BY_00-07"
+ADOPTED_MARKER = "ADOPTED_BY_00-07"
+KEEP_MARKED = "KEEP_MARKED_EVIDENCE"
+PHASE_DELETE = "DELETE_UNLESS_ADOPTED_BY_PHASE_01"
+ALLOWED_MARKERS = frozenset(
+    {RETAIN_MARKER, DELETE_MARKER, ADOPTED_MARKER, KEEP_MARKED, PHASE_DELETE}
+)
 
 #: The one component permitted to be retained as a non-public candidate.
 RETAINED_PATH = "src/hermes_pipeline/domain/counter_spike.py"
@@ -61,11 +68,11 @@ def _read(path: Path) -> str:
 
 
 def test_every_spike_file_carries_experimental_marker() -> None:
-    """Negative: a spike module lacking the experimental marker fails."""
+    """Negative: a keep-marked spike module lacking the experimental marker fails."""
     missing = [
         path.relative_to(REPO_ROOT).as_posix()
         for path in _spike_source_files()
-        if EXPERIMENTAL_MARKER not in _read(path)
+        if ADOPTED_MARKER not in _read(path) and EXPERIMENTAL_MARKER not in _read(path)
     ]
     assert missing == [], f"spike files missing experimental marker: {missing}"
 
@@ -86,7 +93,7 @@ def test_every_spike_file_carries_exact_disposition() -> None:
             )
             continue
         marker = dispositions[0].split(DISPOSITION_PREFIX, 1)[1].strip()
-        if marker not in (RETAIN_MARKER, DELETE_MARKER):
+        if marker not in ALLOWED_MARKERS:
             problems.append(f"{rel}: unknown disposition {marker!r}")
     assert problems == [], "\n".join(problems)
 

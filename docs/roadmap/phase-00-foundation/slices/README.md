@@ -2,7 +2,7 @@
 
 These are planning-level Slice definitions. Codex expands only the next dependency-ready Slice into a machine-valid immutable Slice Contract using the exact current Base SHA.
 
-Slice 00-04 was accepted and integrated at `46798d86a2e48551a3a634e93d1e4dfe5cbf8786` (PR #9), Slice 00-05 at `102d08f814b6c0a939662e6c488870310a97c1ee` (PR #11), and Slice 00-06 at `078411b20283288ab2ec85f081d3ed463fba96e4` (PR #14). The current draft contract for the next Slice is:
+Slice 00-04 was accepted and integrated at `46798d86a2e48551a3a634e93d1e4dfe5cbf8786` (PR #9), Slice 00-05 at `102d08f814b6c0a939662e6c488870310a97c1ee` (PR #11), and Slice 00-06 at `078411b20283288ab2ec85f081d3ed463fba96e4` (PR #14). Slice 00-07 is the executing foundation-integration contract:
 
 - `00-07-foundation-integration/SLICE.md`;
 - `00-07-foundation-integration/slice-contract.json` (READY revision 2, Base `078411b20283288ab2ec85f081d3ed463fba96e4`).
@@ -86,7 +86,7 @@ Demonstration: a real local Hermes Gateway delivers one authenticated fake comma
 
 ## 00-06 Agent/runtime security spikes
 
-Status: READY (revision 14) — contract and manifest remain planning-branch artifacts and are not yet on `main`. ADR-0029 and ADR-0030 are accepted. Revision 14 pins real CLI probes, exact controlled E2E behavior, a closed authorization digest chain, and complete isolation evidence; fresh independent Standards/Spec review passed and the Git Custodian assigned the clean execution worktree at the exact Base.
+Status: ACCEPTED and integrated at `078411b20283288ab2ec85f081d3ed463fba96e4` (PR #14). ADR-0029 and ADR-0030 remain accepted. Isolation, Chrome for Testing, and Windows sealed Codex stay unsupported or experimental.
 
 Must deliver:
 

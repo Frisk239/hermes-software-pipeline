@@ -1,0 +1,3 @@
+contracts check: OK (14 Schema document(s), 174 corpus entries [53 positive], 14 OpenAPI components, 14 registry keys)
+
+--- stderr ---

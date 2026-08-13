@@ -195,9 +195,10 @@ Slice 00-05 proves the Hermes plugin surface (thin shim, source install,
 PluginManager load, `pre_gateway_dispatch` interception), the isolated
 Managed Runtime (FastAPI/Uvicorn under accepted ADR-0028), and the
 authenticated loopback Control Interface. All spike components carry an
-explicit `SPIKE-EXPERIMENTAL` marker with
-`DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07`; nothing becomes production
-foundation without an explicit Slice 00-07 adoption.
+explicit `SPIKE-EXPERIMENTAL` marker. Slice 00-07 adopted the Shim
+lifecycle in place and left `transport/` plus `runtime-env/` as
+`KEEP_MARKED_EVIDENCE`. Isolation, Chrome for Testing, and Windows sealed
+Codex remain unsupported or experimental.
 
 ### Hermes pin and evidence sources
 
@@ -258,12 +259,12 @@ scope.
 
 | Spike component | Paths | Disposition |
 | --- | --- | --- |
-| Hermes shim | `plugin.yaml`, `__init__.py`, `hermes_shim/` | retain candidate for 00-07 adoption (stdlib-only entry) |
-| Fake managed runtime | `src/hermes_pipeline/transport/` | DELETE_UNLESS_ADOPTED_BY_00-07 (loopback spike only) |
-| Receipt store | `transport/_receipts.py` + disposable sqlite file | DELETE_UNLESS_ADOPTED_BY_00-07 (never production persistence) |
-| Lifecycle CLI | `hermes_shim/_cli.py`, `_lifecycle.py` | retain candidate for 00-07 adoption (idempotent non-production skeleton) |
-| Probe harness | `tests/spike/probe/`, `tests/spike/runtime/_harness.py` | retain as CI evidence machinery |
-| Provision topology | `runtime-env/` | retain candidate under accepted ADR-0028 |
+| Hermes shim | `plugin.yaml`, `__init__.py`, `hermes_shim/` | ADOPTED_BY_00-07 (non-production lifecycle skeleton) |
+| Fake managed runtime | `src/hermes_pipeline/transport/` | KEEP_MARKED_EVIDENCE (loopback demo only) |
+| Receipt store | `transport/_receipts.py` + disposable sqlite file | KEEP_MARKED_EVIDENCE (never production persistence) |
+| Lifecycle CLI | `hermes_shim/_cli.py`, `_lifecycle.py` | ADOPTED_BY_00-07 (idempotent non-production skeleton) |
+| Probe harness | `tests/spike/probe/`, `tests/spike/runtime/_harness.py` | KEEP_MARKED_EVIDENCE (CI evidence machinery) |
+| Provision topology | `runtime-env/` | KEEP_MARKED_EVIDENCE under accepted ADR-0028 |
 
 ### Workflow governance extension (fixed in-Slice scope)
 
@@ -288,9 +289,8 @@ workflows and their checkers are unchanged.
   mechanisms outside the DACL (documented host-admin boundary).
 - The loopback port is probed then rebound by uvicorn (small TOCTOU
   window); collisions are bounded to 3 fresh-port attempts.
-- The fake runtime and receipt store are disposable spike artifacts; they
-  never become production foundation without explicit Slice 00-07
-  adoption.
+- The fake runtime and receipt store remain keep-marked evidence; they
+  are not production Control Interface foundation.
 
 ## Slice-00-06 agent and runtime security spikes (accepted ADR-0029 and ADR-0030)
 
@@ -343,10 +343,11 @@ remains experimental/`no_official_checksum`. Windows sealed Codex remains
 
 | Spike component | Paths | Disposition |
 | --- | --- | --- |
-| Host runners | `runtime_broker/tools_bootstrap.py`, `controlled_e2e.py` | DELETE_UNLESS_ADOPTED_BY_00-07 |
-| Auth/isolation/process/redaction | `runtime_broker/_*.py` | DELETE_UNLESS_ADOPTED_BY_00-07 |
-| Security/capability/e2e/adversarial tests | `tests/spike/security/`, `capability/`, `e2e/`, `adversarial-security/` | DELETE_UNLESS_ADOPTED_BY_00-07 |
-| Authorization goldens (copies) | `tests/fixtures/security/` | DELETE_UNLESS_ADOPTED_BY_00-07 |
+| Host runners | `runtime_broker/tools_bootstrap.py`, `controlled_e2e.py` | KEEP_MARKED_EVIDENCE |
+| Auth/isolation/process/redaction | `runtime_broker/_*.py` | KEEP_MARKED_EVIDENCE |
+| Public Runtime Broker Protocol | `runtime_broker/ports.py`, `fake.py` | ADOPTED_BY_00-07 (does not wrap vendor CLIs) |
+| Security/capability/e2e/adversarial tests | `tests/spike/security/`, `capability/`, `e2e/`, `adversarial-security/` | KEEP_MARKED_EVIDENCE |
+| Authorization goldens (copies) | `tests/fixtures/security/` | KEEP_MARKED_EVIDENCE |
 
 ### Residual risks (00-06)
 

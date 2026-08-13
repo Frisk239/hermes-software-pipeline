@@ -1,7 +1,7 @@
 """Versioned spike constants for the fake managed runtime (slice-00-05).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: KEEP_MARKED_EVIDENCE
 
 Mirror of the shim-side spike constants; both sides are bound together by
 the committed golden JSON fixtures under ``tests/fixtures/transport/``.

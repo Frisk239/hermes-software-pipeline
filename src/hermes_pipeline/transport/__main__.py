@@ -1,4 +1,8 @@
-"""``python -m hermes_pipeline.transport`` entry (slice-00-05 spike)."""
+"""``python -m hermes_pipeline.transport`` entry (keep-marked fake runtime).
+
+SPIKE-EXPERIMENTAL marker:
+DISPOSITION: KEEP_MARKED_EVIDENCE
+"""
 
 from __future__ import annotations
 

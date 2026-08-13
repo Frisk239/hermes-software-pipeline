@@ -1,7 +1,7 @@
 """Managed Runtime provisioning for the Hermes Shim (slice-00-05).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: ADOPTED_BY_00-07
 
 Cross-platform provisioning of the ADR-0028-authorized ``runtime-env/``
 project into ``<state-root>/runtimes/<version>/``. The child process starts

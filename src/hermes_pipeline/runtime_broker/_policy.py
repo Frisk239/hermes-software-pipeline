@@ -1,7 +1,7 @@
 """Hostile-input rejection used by 00-06 adapters.
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: KEEP_MARKED_EVIDENCE
 """
 
 from __future__ import annotations

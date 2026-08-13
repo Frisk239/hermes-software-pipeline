@@ -1,7 +1,7 @@
 """LangGraph checkpoint spike graph (slice-00-04, AC-11).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: KEEP_MARKED_EVIDENCE
 
 Local feasibility evidence only (ADR-0023): a deterministic graph node that
 calls **only** ``ControllerCommandPort.submit`` with a stable Controller

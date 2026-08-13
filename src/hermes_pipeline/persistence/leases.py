@@ -1,7 +1,7 @@
 """Stage lease and fencing spike (slice-00-04, AC-10).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: KEEP_MARKED_EVIDENCE
 
 Stage Attempt/Run leases carry monotonically increasing fencing
 generations. A result carrying an expired or superseded generation is
