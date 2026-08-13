@@ -1,6 +1,6 @@
 # Phase 00 Closeout — Engineering Foundation and Technology Lock
 
-Status: `DRAFT` (Slice 00-07 execution; not yet Phase-Gate accepted)
+Status: `PENDING_HUMAN_GATE` (Slice 00-07 accepted and merged; material conclusions still need Repository Governance Owner attestation)
 
 Contract: Slice 00-07 revision 2 (`content_hash` `sha256:f2de1f88dc6b4e7089ec209953b5742a7637bc1355319ba5dbce4edbec8cbe40`)
 
@@ -8,7 +8,9 @@ Planning Base SHA: `078411b20283288ab2ec85f081d3ed463fba96e4`
 
 Planning merge / worktree start HEAD: `d5672acd53df8630b2ac3be8d50c723ee60f9cc2`
 
-Candidate SHA: assigned by the Git Custodian when this worktree is committed.
+Candidate SHA: `dfd3a7e315bdcbfd2af56b841ba29626806efbf2`
+
+Integrated SHA: `b9d126a5613e29e38c6db6c3d49a50f024124e2e`
 
 ## Delivered capability
 
@@ -52,8 +54,8 @@ No new ADR was required.
 - Slice 00-05 integrated: `102d08f814b6c0a939662e6c488870310a97c1ee`
 - Slice 00-06 integrated / 00-07 Planning Base: `078411b20283288ab2ec85f081d3ed463fba96e4`
 - 00-07 contract landed: `d5672acd53df8630b2ac3be8d50c723ee60f9cc2`
-
-Windows and Linux CI on the Candidate is required after Git Custodian publication.
+- 00-07 Candidate: `dfd3a7e315bdcbfd2af56b841ba29626806efbf2`
+- 00-07 integrated: `b9d126a5613e29e38c6db6c3d49a50f024124e2e` (PR #17)
 
 ## Residual risks
 
@@ -66,7 +68,7 @@ Windows and Linux CI on the Candidate is required after Git Custodian publicatio
 
 ## Phase 1 prerequisites
 
-- A human-accepted Phase 00 Gate on the exact Candidate.
+- A human-accepted Phase 00 Gate on integrated SHA `b9d126a5613e29e38c6db6c3d49a50f024124e2e` (or the Closeout follow-up merge).
 - Phase 1 must not promote keep-marked spikes, isolation, CfT, or Windows sealed Codex without a new ADR.
 - Phase 1 business state machine, Project RBAC, live Feishu/GitHub, and automatic update apply remain out of scope until separately contracted.
 - Compatibility changes outside the preview pins (Python 3.12.13, uv 0.12.1, `hermes-pipeline` 0.1.0) require a compatibility Slice.
