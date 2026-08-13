@@ -1,0 +1,440 @@
+{
+  "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
+  "schema_version": 1,
+  "document_revision": 2,
+  "slice_id": "slice-00-07",
+  "phase_id": "phase-00",
+  "status": "READY",
+  "predecessors": [
+    "slice-00-04",
+    "slice-00-05",
+    "slice-00-06"
+  ],
+  "base_sha": "078411b20283288ab2ec85f081d3ed463fba96e4",
+  "assigned_worktree": "C:\\Users\\a2691\\AppData\\Local\\hermes\\managed-worktrees\\hermes-software-pipeline\\slice-00-07",
+  "operator_path": "From a clean Windows or Linux checkout of the Candidate, run the existing frozen offline quality suite plus the new stdlib SBOM preview and dependency-audit commands, then prove hermes pipeline setup|doctor|start|status|stop remain idempotent and a fake Hermes command survives restart. No public network after dependency bootstrap. No new dependency family.",
+  "must_scope": [
+    "READY revision 2 at Planning Base 078411b20283288ab2ec85f081d3ed463fba96e4. Human accepted D1-D6 on 2026-08-13. Assigned worktree C:\\Users\\a2691\\AppData\\Local\\hermes\\managed-worktrees\\hermes-software-pipeline\\slice-00-07. No new ADR.",
+    "Exact files (create if missing). Protocols in src/hermes_pipeline/<pkg>/ports.py; fakes in src/hermes_pipeline/<pkg>/fake.py; contract tests in tests/modules/test_<pkg>_port.py. Packages: controller, stage_executor, runtime_broker, artifacts, repository, delivery, interaction, operations. Export Protocols from each package __init__.py. Types are frozen dataclasses in the same ports.py. No new JSON Schema.",
+    "controller/ports.py: ControllerPort.submit(command: ControllerCommand) -> CommandReceipt (reuse existing types and 00-04 failure mapping); ControllerPort.read(query: PipelineQuery) -> PipelineView. PipelineQuery has only pipeline_id: str. PipelineView has pipeline_id: str, revision: int, status: Literal['UNKNOWN']. FakeController stores last submit and returns PipelineView(status='UNKNOWN', revision=0) for unknown ids. No RBAC.",
+    "stage_executor/ports.py: start(execution_input: ExecutionInput) -> ExecutionHandle; resume(resume_input: ResumeInput) -> ExecutionHandle; cancel(cancel_request: ExecutionCancelRequest) -> CancelReceipt; inspect(run_id: str) -> ExecutionSnapshot. Each input dataclass has only run_id: str. Handle/Snapshot/Receipt have run_id plus status Literal['PENDING','CANCELLED','UNSUPPORTED']. Fake has no LangGraph import.",
+    "runtime_broker/ports.py: launch/signal/inspect/collect with RuntimeLaunchRequest(runtime_id: str), RuntimeHandle(runtime_id, status='FAKE'), RuntimeSignalReceipt(ok=False, code='UNSUPPORTED'), RuntimeSnapshot(runtime_id, status='FAKE'), RuntimeOutcome(runtime_id, status='FAKE'). Fake must not import or exec Codex/OpenCode/Chrome. Existing Host/probe modules stay KEEP_MARKED_EVIDENCE and must not implement this Protocol.",
+    "artifacts/ports.py: put(ArtifactPutRequest(payload: bytes)) -> ArtifactRecord(artifact_id: str, digest: str); open(artifact_id: str) -> bytes; verify(artifact_id: str) -> ArtifactVerification(ok: bool). Fake keys memory by sha256 hex. repository/ports.py: prepare/create_candidate/verify/cleanup each take a request with name: str and return a record with ok: bool, action: str; FakeRepository records calls and never calls git. delivery/ports.py: publish/reconcile take name: str and return ok: bool, action: Literal['RECORDED']; FakeDelivery has no approve/merge methods. interaction/ports.py: deliver(text: str) -> InteractionReceipt(ok: bool); ingest(event: str) -> ControllerCommand using one committed fixture command id cmd_00-07-probe; FakeInteraction.ingest rejects any event containing 'approve'. operations/ports.py: health() -> HealthReport(ok: bool, checks: tuple[str, ...]); reconcile/backup/restore take name: str and return status='UNSUPPORTED' when writer_active is True on the fake.",
+    "Adopt plugin.yaml, root __init__.py, and hermes_shim/ lifecycle. Change DISPOSITION to ADOPTED_BY_00-07. Do not move commands into src/hermes_pipeline/cli/. Revalidate EC-00-07 and EC-00-11 on this Candidate: PluginManager counts, source-install SHA binding, setup/doctor/start/status/stop idempotency, doctor structured JSON, restart exactly-once fake command. Update README to state the five commands exist as a non-production skeleton.",
+    "transport/ and runtime-env/ remain keep-marked. hermes-integration.yml is adopted as the EC-00-07 demonstration workflow. Root pyproject.toml [project].dependencies stays empty. Root uv.lock changes only if a new stdlib-only script requires no lock change.",
+    "scripts/sbom_preview.py prints one JSON object to stdout: {schema:'hermes-sbom-preview/v1', lock_file:'uv.lock', packages:[{name, version, source}, ...]} sorted by name then version. Read uv.lock with tomllib only. scripts/check_dependency_audit.py exit 0 when pyproject [project].dependencies is empty and uv.lock exists; exit 1 with bounded text if a runtime dependency is present. Wire both after Repository artifact audit in python-quality.yml and update scripts/fixtures/workflows exact command multisets. No upload-artifact, no permission change.",
+    "docs/development/compatibility-manifest.preview.json is exactly {schema:'hermes-compat-preview/v1', package:'hermes-pipeline', version:'0.1.0', python:'3.12.13', uv:'0.12.1', update_apply:'manual-only'}. No new Schema.",
+    "Write docs/roadmap/phase-00-foundation/CLOSEOUT.md for EC-00-12: delivered capability, evidence SHAs, residual risks, Phase 1 prerequisites. Record D1-D6 and the retain/keep-marked/delete table. Isolation, CfT, and Windows sealed Codex remain UNSUPPORTED or experimental.",
+    "counter_spike remains RETAIN_NON_PUBLIC_CANDIDATE. Flip other adopted files from DELETE_UNLESS_ADOPTED_BY_00-07 to ADOPTED_BY_00-07. Leave keep-marked files on DELETE_UNLESS_ADOPTED_BY_PHASE_01 or KEEP_MARKED_EVIDENCE. Do not silently promote keep-marked spikes to production foundation."
+  ],
+  "out_of_scope": [
+    "Phase 1 Pipeline business state machine, Project RBAC, live Feishu/GitHub, production prompts, remote merge, or deployment",
+    "Moving lifecycle CLI into src/hermes_pipeline/cli/ or importing third-party packages from the Hermes-loaded Shim",
+    "CycloneDX, syft, trivy, pip-audit, OSV, GitHub dependency-submission, or any public-network vulnerability check",
+    "actions/upload-artifact, actions:write, or any new GitHub Action beyond the existing checkout and setup-uv pair",
+    "New committed JSON Schema or OpenAPI contract for Interfaces or the compatibility manifest",
+    "Automatic update apply, destructive migration, or production backup/restore of a real Workspace",
+    "Presenting runtime_broker, CfT, or Windows Codex as a sealed production runtime",
+    "Rewriting accepted ADRs or historical Closeouts except to add this Slice's Phase Closeout and disposition updates in permitted paths"
+  ],
+  "interfaces": [
+    "src/hermes_pipeline/controller/: Protocol submit + read; fake in-memory Adapter; adopt existing submit failure mapping",
+    "src/hermes_pipeline/stage_executor/: Protocol start/resume/cancel/inspect plus fake",
+    "src/hermes_pipeline/runtime_broker/: Protocol launch/signal/inspect/collect plus fake; existing Host/probes stay keep-marked and must not implement this Protocol by wrapping vendor CLIs",
+    "src/hermes_pipeline/artifacts/: Protocol put/open/verify plus fake",
+    "src/hermes_pipeline/repository/: Protocol prepare/create_candidate/verify/cleanup plus fake; no Git mutation",
+    "src/hermes_pipeline/delivery/: Protocol publish/reconcile plus fake; no approve/merge",
+    "src/hermes_pipeline/interaction/: Protocol deliver/ingest plus fake; cannot accept approval",
+    "src/hermes_pipeline/operations/: Protocol health/reconcile/backup/restore plus fake",
+    "hermes_shim/ and plugin.yaml: adopted lifecycle CLI and hook",
+    "scripts/sbom_preview.py and scripts/check_dependency_audit.py: stdlib offline tools",
+    "The Executor may read every tracked file but may edit only permitted paths"
+  ],
+  "binding_adrs": [
+    "ADR-0014",
+    "ADR-0019",
+    "ADR-0020",
+    "ADR-0022",
+    "ADR-0024",
+    "ADR-0026",
+    "ADR-0027",
+    "ADR-0028",
+    "ADR-0029",
+    "ADR-0030"
+  ],
+  "permitted_paths": [
+    "README.md",
+    "plugin.yaml",
+    "__init__.py",
+    "hermes_shim/",
+    "src/hermes_pipeline/",
+    "tests/",
+    "scripts/",
+    ".github/workflows/python-quality.yml",
+    ".github/workflows/hermes-integration.yml",
+    "docs/development/compatibility-targets.md",
+    "docs/development/compatibility-manifest.preview.json",
+    "docs/roadmap/phase-00-foundation/CLOSEOUT.md",
+    "docs/roadmap/phase-00-foundation/slices/README.md",
+    "docs/roadmap/phase-00-foundation/slices/00-07-foundation-integration/"
+  ],
+  "prohibited_actions": [
+    "Add a root runtime dependency or a new dependency family without an accepted ADR",
+    "Move pipeline lifecycle commands into src/hermes_pipeline/cli/",
+    "Import third-party packages from the Hermes-loaded Shim",
+    "Call live models, public CVE services, or production Feishu/GitHub",
+    "Add upload-artifact or change workflow permissions",
+    "Claim sealed runtime for isolation, CfT, or Windows Codex",
+    "Mutate Git, approve, or merge through Repository or Delivery fakes",
+    "Commit, push, merge, rebase, reset, clean, stash, or alter remotes",
+    "Weaken, skip, or delete existing checks"
+  ],
+  "implications": {
+    "data": [
+      "No production Workspace data. Fakes and adopted spike state stay under disposable HERMES_HOME fixtures."
+    ],
+    "migration": [
+      "No production-state migration. Compatibility manifest is preview-only and must not apply updates."
+    ],
+    "compatibility": [
+      "Windows and Linux required. Python 3.12.13 and uv 0.12.1 remain the pins."
+    ],
+    "security": [
+      "Required CI stays offline after bootstrap. Fakes have no ambient Git, network, or secret authority."
+    ],
+    "documentation": [
+      "README, compatibility-targets, Phase CLOSEOUT, and disposition table must match D1-D6."
+    ]
+  },
+  "acceptance_criteria": [
+    {
+      "criterion_id": "AC-01",
+      "trace_ids": [
+        "EC-00-01",
+        "EC-00-02"
+      ],
+      "observable_result": "Existing frozen offline quality commands still pass on Windows and Linux.",
+      "verification_command_ids": [
+        "frozen-sync",
+        "offline-format",
+        "offline-lint",
+        "offline-type",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-02",
+      "trace_ids": [
+        "EC-00-03"
+      ],
+      "observable_result": "Contract check and drift-check still pass; this Slice adds no Schema drift.",
+      "verification_command_ids": [
+        "offline-contracts-check",
+        "offline-contracts-drift"
+      ]
+    },
+    {
+      "criterion_id": "AC-03",
+      "trace_ids": [
+        "EC-00-04",
+        "EC-00-05",
+        "EC-00-06"
+      ],
+      "observable_result": "Existing 00-04 spike tests still pass; Controller.submit mapping is unchanged; read is covered by fake contract tests only.",
+      "verification_command_ids": [
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-04",
+      "trace_ids": [
+        "EC-00-07",
+        "EC-00-11"
+      ],
+      "observable_result": "Adopted Shim commands setup/doctor/start/status/stop are idempotent; PluginManager and install probes pass; fake command survives restart on the Candidate.",
+      "verification_command_ids": [
+        "offline-pytest",
+        "hermes-integration"
+      ]
+    },
+    {
+      "criterion_id": "AC-05",
+      "trace_ids": [
+        "EC-00-08",
+        "EC-00-09",
+        "EC-00-10"
+      ],
+      "observable_result": "Existing 00-06 fake_only security tests still pass; no sealed-runtime claim is added.",
+      "verification_command_ids": [
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-06",
+      "trace_ids": [
+        "EC-00-12"
+      ],
+      "observable_result": "Each of the eight External Interfaces has a Protocol, fake, and shared contract test; doctor/health uses Operations.health fake.",
+      "verification_command_ids": [
+        "offline-pytest",
+        "architecture-check"
+      ]
+    },
+    {
+      "criterion_id": "AC-07",
+      "trace_ids": [
+        "EC-00-12"
+      ],
+      "observable_result": "sbom_preview and dependency_audit run offline, are deterministic, and are required in python-quality.yml.",
+      "verification_command_ids": [
+        "sbom-preview",
+        "dependency-audit",
+        "workflow-check"
+      ]
+    },
+    {
+      "criterion_id": "AC-08",
+      "trace_ids": [
+        "EC-00-12"
+      ],
+      "observable_result": "compatibility-manifest.preview.json is committed and Phase CLOSEOUT.md records D1-D6, evidence SHAs, residual risks, and Phase 1 prerequisites.",
+      "verification_command_ids": [
+        "docs-check"
+      ]
+    }
+  ],
+  "required_tests": [
+    "Shared contract tests for all eight Interface fakes",
+    "Controller.read fake does not perform RBAC and returns fixture fields only",
+    "Delivery fake cannot approve or merge",
+    "Repository fake performs no Git mutation",
+    "Interaction fake cannot accept an approval",
+    "Operations backup/restore return unsupported while claiming a writer is active",
+    "Runtime Broker fake does not start vendor CLIs",
+    "Shim import scan still forbids src.hermes_pipeline and third-party imports",
+    "Lifecycle idempotency and restart exactly-once regressions",
+    "SBOM preview deterministic over uv.lock",
+    "Dependency audit rejects a planted root runtime dependency fixture"
+  ],
+  "demonstration": "On the exact Candidate, a clean Windows or Linux path runs uv sync --frozen --all-groups, the full offline suite, sbom_preview, and dependency_audit; hermes pipeline setup/start delivers one authenticated fake command through the adopted Shim; kill/restart does not duplicate the acknowledged result; doctor and status emit bounded health JSON.",
+  "verification_commands": [
+    {
+      "command_id": "frozen-sync",
+      "argv": [
+        "uv",
+        "sync",
+        "--frozen",
+        "--all-groups",
+        "--offline"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 600000
+    },
+    {
+      "command_id": "offline-format",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "ruff",
+        "format",
+        "--check",
+        "."
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-lint",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "ruff",
+        "check",
+        "."
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-type",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pyright"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 300000
+    },
+    {
+      "command_id": "offline-pytest",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pytest"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 600000
+    },
+    {
+      "command_id": "offline-contracts-check",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "-m",
+        "hermes_pipeline.cli",
+        "contracts",
+        "check"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 180000
+    },
+    {
+      "command_id": "offline-contracts-drift",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "-m",
+        "hermes_pipeline.cli",
+        "contracts",
+        "drift-check"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 180000
+    },
+    {
+      "command_id": "architecture-check",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "-m",
+        "hermes_pipeline.cli",
+        "architecture",
+        "check"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "docs-check",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "scripts/check_documentation.py"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "workflow-check",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "scripts/check_documentation.py",
+        "--check-workflows"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "sbom-preview",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "scripts/sbom_preview.py"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "dependency-audit",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "scripts/check_dependency_audit.py"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "hermes-integration",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pytest",
+        "tests/spike/lifecycle",
+        "tests/spike/shim",
+        "-q"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 600000
+    },
+    {
+      "command_id": "changed-paths",
+      "argv": [
+        "git",
+        "status",
+        "--short"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 30000
+    }
+  ],
+  "required_evidence": [
+    "Base and Candidate SHAs",
+    "Changed-path inventory inside permitted_paths",
+    "Command results for every verification_command_id",
+    "Windows and Linux CI on the Candidate",
+    "Disposition table matching D1-D6",
+    "Phase CLOSEOUT.md draft bound to the Candidate"
+  ],
+  "risks": [
+    {
+      "risk_id": "R-01",
+      "description": "Adopting Shim/transport silently treats spike code as production foundation.",
+      "impact": "HIGH",
+      "mitigation": "Disposition markers and CLOSEOUT must say adopt vs keep-marked; transport stays keep-marked.",
+      "trigger": "A Module claims production persistence or Control Interface authority."
+    },
+    {
+      "risk_id": "R-02",
+      "description": "Workflow command multiset update is incomplete and CI rejects the new scripts.",
+      "impact": "MEDIUM",
+      "mitigation": "Update python-quality.yml and scripts/fixtures/workflows in the same Candidate.",
+      "trigger": "check_documentation.py --check-workflows fails."
+    },
+    {
+      "risk_id": "R-03",
+      "description": "Interface types sprawl into new public Schemas.",
+      "impact": "MEDIUM",
+      "mitigation": "Contract forbids new Schema/OpenAPI; stop for ADR if serialization must be public.",
+      "trigger": "Implementation needs schemas/ or contracts/ changes."
+    }
+  ],
+  "retry_budget": 2,
+  "stop_conditions": [
+    "A new dependency family, GitHub Action, or public vulnerability service is required",
+    "Lifecycle cannot stay in the Shim without breaking Hermes load",
+    "EC-00-07 or EC-00-11 cannot be revalidated on the Candidate",
+    "Implementation requires paths outside permitted_paths or a new public Schema"
+  ],
+  "content_hash": "sha256:f2de1f88dc6b4e7089ec209953b5742a7637bc1355319ba5dbce4edbec8cbe40"
+}
