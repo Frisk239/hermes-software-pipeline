@@ -2,9 +2,9 @@
 
 These are planning-level Slice definitions. Codex expands only the next dependency-ready Slice into a machine-valid immutable Slice Contract using the exact current Base SHA.
 
-Slice 00-04 was accepted and integrated at `46798d86a2e48551a3a634e93d1e4dfe5cbf8786` (PR #9), and Slice 00-05 was accepted and integrated at `102d08f814b6c0a939662e6c488870310a97c1ee` (PR #11). Slice 00-06 remains DRAFT; its contract and manifest are under planning-branch revision and have not yet integrated into `main`.
+Slice 00-04 was accepted and integrated at `46798d86a2e48551a3a634e93d1e4dfe5cbf8786` (PR #9), and Slice 00-05 was accepted and integrated at `102d08f814b6c0a939662e6c488870310a97c1ee` (PR #11). Slice 00-06 is READY at planning revision 14, bound to Base `9cf24b876cc7422386ed54c277900ff1e3c2c2bf` with a clean assigned execution worktree; its planning package has not yet integrated into `main`.
 
-Every Slice integration triggers the post-merge downstream decision audit defined in `docs/development/phase-and-slice-operating-model.md`. The 00-05 → 00-06 transition predates that rule, so the first audit record must be backfilled as a traceable entry for 00-06 before it becomes `READY`. The READY contract for the next Slice will be produced from that audit and the 00-06 DRAFT:
+Every Slice integration triggers the post-merge downstream decision audit defined in `docs/development/phase-and-slice-operating-model.md`. The 00-05 → 00-06 transition predates that rule, so its first append-only audit record is backfilled in `00-06-agent-runtime-security-spikes/downstream-audit.md`. Append-only revision 10 records the r14 READY review and Git Custodian worktree assignment; revisions 11-12 bind the synchronized identities and final Codex Responses interface; revision 13 records the final projection synchronization; no `UPDATED` or `CCR_REQUIRED` item remains open.
 
 ## 00-01 Repository baseline
 
@@ -83,7 +83,7 @@ Demonstration: a real local Hermes Gateway delivers one authenticated fake comma
 
 ## 00-06 Agent/runtime security spikes
 
-Status: DRAFT — contract and manifest are under planning-branch revision and are not yet on `main`. Before this Slice becomes `READY`, the post-merge downstream decision audit for the 00-05 → 00-06 transition must be recorded, and any `UPDATED` or `CCR_REQUIRED` conclusion must be resolved.
+Status: READY (revision 14) — contract and manifest remain planning-branch artifacts and are not yet on `main`. ADR-0029 and ADR-0030 are accepted. Revision 14 pins real CLI probes, exact controlled E2E behavior, a closed authorization digest chain, and complete isolation evidence; fresh independent Standards/Spec review passed and the Git Custodian assigned the clean execution worktree at the exact Base.
 
 Must deliver:
 

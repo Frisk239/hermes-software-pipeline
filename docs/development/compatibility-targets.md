@@ -24,7 +24,7 @@ These are feasibility and CI targets for Phase 00, not a public support promise.
 | Codex CLI | capability-probed; initial target `0.146.x` | `codex-cli 0.146.0` |
 | OpenCode CLI | capability-probed; initial target `1.18.x` | `1.18.12` |
 | Google Chrome | current stable capability-probed through Chrome DevTools MCP | `150.0.7871.187` |
-| Chrome DevTools MCP | exact package/server version selected and frozen by Slice 00-06 | Not yet selected; blocks the browser feasibility probe, not the documentation baseline. |
+| Chrome DevTools MCP | exact package/server version selected and frozen by Slice 00-06 | `chrome-devtools-mcp@1.7.0`, pinned by the committed npm lock and SRI under accepted ADR-0029; Chrome for Testing remains an experimental non-sealed target. |
 
 ## Revision-7 managed interpreter pin and SQLite gate (slice-00-04 CCR)
 
@@ -291,6 +291,31 @@ workflows and their checkers are unchanged.
 - The fake runtime and receipt store are disposable spike artifacts; they
   never become production foundation without explicit Slice 00-07
   adoption.
+
+## Slice-00-06 agent and runtime security spikes (accepted ADR-0029 and ADR-0030)
+
+Slice 00-06 is READY at Contract revision 14 after a fresh independent Standards
+and Spec review closed the rejected r13 real-probe, E2E, digest-chain, and
+isolation-evidence findings, and after Git Custodian assignment of a clean execution worktree at
+Base `9cf24b876cc7422386ed54c277900ff1e3c2c2bf`. The accepted ADRs confine
+the 00-06 browser and Agent-CLI tool families to a disposable Verification
+Sandbox. They do not authorize root-project, Hermes-process, or production
+dependencies; READY authorizes only the bounded experimental Slice contract.
+
+Authoritative texts: `docs/adr/0029-confine-browser-tool-runtime.md` and
+`docs/adr/0030-confine-agent-cli-tool-runtime.md`. Human attestation:
+`engadr_0029-0030_20260813_01` (2026-08-13, Repository Governance Owner
+`Frisk239`).
+
+| Decision | Accepted meaning |
+| --- | --- |
+| ADR-0029 | Node `22.23.2`, committed npm inputs, and `chrome-devtools-mcp@1.7.0` SRI are the sealed browser-tool claim. Chrome for Testing `151.0.7922.77` is an experimental unsealed target and cannot satisfy a hard gate. |
+| ADR-0030 | Codex `0.146.0` and OpenCode `1.18.12` stay outside the root. Windows sealed Codex is `UNSUPPORTED_RUNTIME` until an independently sourced exact Authenticode signer is pinned. Host is the privileged 00-06 test runner, not Host Operator. |
+
+Exact asset identities and closed argv remain in the 00-06 `tool-lock.json`.
+00-07 may retain, rewrite, or delete these spike pins. A later ADR is
+required before any of these tools enter the root, Hermes, or a production
+service.
 
 ## Compatibility policy
 

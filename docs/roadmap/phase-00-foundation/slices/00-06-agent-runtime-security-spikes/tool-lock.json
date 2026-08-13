@@ -1,0 +1,457 @@
+{
+  "document": "Slice 00-06 tool lock (READY, revision 14) - the single versioned identity and execution-policy source for the sealed tool runtime supply chain. Revision 14 retains the revision-12 authorization/gate/npm/snapshot/CLI pins and adds the reviewed real probes, exact controlled E2E, valid golden digest chain inputs, and identity/filesystem/network isolation proof.",
+  "locked_at": "2026-08-13",
+  "supply_chain_model": "A - standard npm project model: adjacent package.json (stable name hermes-browser-runtime, chrome-devtools-mcp pinned to exactly 1.7.0 without caret/range), package-lock.json (lockfileVersion 3), and the lock-owned .npmrc are committed directly consumable inputs. The Sandbox Host verifies and byte-copies the package files unchanged, copies the locked npmrc to a state-root userconfig, uses only the exact controlled no-audit/no-fund/no-update-notifier npm argv and clean state-root environment, then proves fresh offline reconstruction. No later stage uses npm, npx, a registry fetch, latest, a range, lifecycle scripts, inherited configuration, or ambient credentials/proxies. Published peer optional semantics are preserved exactly.",
+  "browser_runtime_inputs": {
+    "package_manifest": "docs/roadmap/phase-00-foundation/slices/00-06-agent-runtime-security-spikes/package.json",
+    "package_manifest_digest": "sha256:753a18ae9548e51fa57ae7f8e80b2a2208028ad015cb91ceadfe1625bb034a31",
+    "lockfile": "docs/roadmap/phase-00-foundation/slices/00-06-agent-runtime-security-spikes/package-lock.json",
+    "lockfile_digest": "sha256:f691d5dae8a9a8129cdbe6fcd603e562d60360b843703140b9ff9fbb466d8bb9",
+    "npmrc": "docs/roadmap/phase-00-foundation/slices/00-06-agent-runtime-security-spikes/.npmrc",
+    "npmrc_digest": "sha256:d61adb1098d59a10d2ec140829cad10d4613c8ba1ddcab0cbd8d56b06a5fa543",
+    "consumer": "The Sandbox Host byte-verifies and copies package.json and package-lock.json unchanged into a fresh standard project under <state-root>/tools/browser-runtime/project/, copies the verified lock-owned .npmrc to <state-root>/tools/browser-runtime/npmrc, and creates an empty <state-root>/tools/browser-runtime/empty-global-npmrc. It permits no project or inherited user/global npmrc.",
+    "controlled_npm": {
+      "online_argv": [
+        "<selected-locked-npm-executable>",
+        "ci",
+        "--ignore-scripts",
+        "--audit=false",
+        "--fund=false",
+        "--update-notifier=false",
+        "--cache",
+        "<state-root>/tools/npm-cache",
+        "--userconfig",
+        "<state-root>/tools/browser-runtime/npmrc",
+        "--globalconfig",
+        "<state-root>/tools/browser-runtime/empty-global-npmrc"
+      ],
+      "offline_argv": [
+        "<selected-locked-npm-executable>",
+        "ci",
+        "--offline",
+        "--ignore-scripts",
+        "--audit=false",
+        "--fund=false",
+        "--update-notifier=false",
+        "--cache",
+        "<state-root>/tools/npm-cache",
+        "--userconfig",
+        "<state-root>/tools/browser-runtime/npmrc",
+        "--globalconfig",
+        "<state-root>/tools/browser-runtime/empty-global-npmrc"
+      ],
+      "clean_environment": "The Host starts from an explicit allow-list. HOME, XDG_CONFIG_HOME, USERPROFILE, APPDATA, LOCALAPPDATA, npm cache, userconfig, and globalconfig resolve only below state-root. It removes inherited NPM_CONFIG_*, npm credentials/registry overrides, proxy variables (HTTP_PROXY, HTTPS_PROXY, ALL_PROXY, NO_PROXY), certificate overrides, and user/project configuration; only the canonical argv/configuration above is admitted.",
+      "cutoff_proof": "Run offline_argv in a fresh disposable state-root project containing only the verified byte-copied package files. A cache miss, network attempt, inherited configuration, or argv deviation fails closed.",
+      "npm_executable_by_platform": {
+        "windows-x64": "<state-root>/tools/node/windows-x64/node-v22.23.2-win-x64/npm.cmd",
+        "linux-x64": "<state-root>/tools/node/linux-x64/node-v22.23.2-linux-x64/bin/npm"
+      },
+      "argv0_rule": "Both online_argv[0] and offline_argv[0] are the selected locked npm executable. Ambient PATH npm is forbidden."
+    },
+    "verification_order": [
+      "verify committed package.json digest equals tool-lock browser_runtime_inputs.package_manifest_digest",
+      "verify committed package-lock.json digest equals tool-lock browser_runtime_inputs.lockfile_digest",
+      "verify name hermes-browser-runtime and exact chrome-devtools-mcp 1.7.0 pin with no caret/range",
+      "verify package-lock.json packages['node_modules/chrome-devtools-mcp'].integrity equals the locked SRI value",
+      "verify committed .npmrc digest equals tool-lock browser_runtime_inputs.npmrc_digest",
+      "byte-copy the two verified package inputs unchanged into a fresh standard state-root project and copy the verified .npmrc only to the declared state-root userconfig",
+      "run only controlled_npm.online_argv during controlled online bootstrap with its clean state-root environment",
+      "after cutoff, prove controlled_npm.offline_argv in a fresh disposable project from the verified cache"
+    ],
+    "offline_consumption": "Only the Host may run the controlled online bootstrap. After cutoff, npm reconstruction must be a fresh offline proof from the verified state-root cache and exact offline argv. The Custodian pre-execution record stores only static input/selected-platform identities; the Host stores verification and tool results only in separate post-execution observations.",
+    "failure_conditions": "Any digest, name, exact-pin, SRI, npmrc, copy, argv, environment, offline reconstruction, or cache-boundary failure is BLOCKED_CONTRACT plus CCR. No fallback to npm install, npx, latest, range, first-download identity, ambient config, or proxy/credential is allowed."
+  },
+  "browser_launch_policy": {
+    "node_executable_by_platform": {
+      "windows-x64": "<state-root>/tools/node/windows-x64/node-v22.23.2-win-x64/node.exe",
+      "linux-x64": "<state-root>/tools/node/linux-x64/node-v22.23.2-linux-x64/bin/node"
+    },
+    "chrome_for_testing_executable_by_platform": {
+      "windows-x64": "<state-root>/tools/browser-runtime/chrome-for-testing/win64/chrome-win64/chrome.exe",
+      "linux-x64": "<state-root>/tools/browser-runtime/chrome-for-testing/linux64/chrome-linux64/chrome"
+    },
+    "path_selection_rule": "The Host chooses exactly one path from the locked OS/CPU mapping after traversal-safe extraction and proves it stays below state-root and matches the locked platform/version record. This path proof does not claim a missing official Chrome for Testing checksum.",
+    "mcp_argv": [
+      "<selected-locked-node-executable>",
+      "<state-root>/tools/browser-runtime/project/node_modules/chrome-devtools-mcp/build/src/bin/chrome-devtools-mcp.js",
+      "--headless",
+      "--isolated",
+      "--executable-path",
+      "<selected-locked-cft-executable>",
+      "--allowed-url-pattern",
+      "http://127.0.0.1:<host-reserved-fixture-port>/*",
+      "--no-usage-statistics",
+      "--no-performance-crux"
+    ],
+    "mcp_environment": {
+      "CHROME_DEVTOOLS_MCP_NO_UPDATE_CHECKS": "1"
+    },
+    "closed_invocation_rule": "The Host constructs exactly mcp_argv and mcp_environment, with no user, repository, environment, config-file, or arbitrary extra argument source. The fixture port is Host-reserved and the literal allow-list is loopback-only.",
+    "rejected_attachment_or_override_inputs": [
+      "--browser-url",
+      "--ws-endpoint",
+      "--auto-connect",
+      "--channel",
+      "--user-data-dir",
+      "--allow-unrestricted-paths",
+      "--allowUnrestrictedPaths",
+      "all arbitrary Chrome argument overrides",
+      "all unlisted MCP options or configuration sources"
+    ],
+    "isolation_semantics": "--isolated requests an MCP-managed temporary browser profile cleaned on close; it is not an operating-system isolation claim.",
+    "egress_boundary": "The policy disables MCP usage statistics, CrUX, and update checks and restricts MCP navigation to the Host loopback fixture. It does not prove Chrome or the operating system denies egress; that requires separate capability evidence."
+  },
+  "verification_order": [
+    "Git Custodian resolves the exact Candidate, exact Integration Candidate, and their bound tree identities",
+    "Git Custodian alone materializes a controlled no-.git snapshot from that exact Integration Candidate, verifies the snapshot contains no .git and its tree/source-tree digest equals the bound Integration-Candidate tree digest, then delivers it as a Custodian-owned read-only validation handoff to Host while exposing it only as the source tree usable by the Sandbox Agent child boundary",
+    "Git Custodian constructs the immutable pre-execution tool identity record from only tool-lock data, selected platform, Candidate, Integration Candidate, the verified source-tree digest, and other locked static inputs; no real binary, provisioning, --version, or capability probe may precede this record",
+    "Git Custodian computes the record's RFC 8785 identity digest as tool_record_digest and issues immutable run-binding.json that binds it",
+    "Git Custodian issues the single-use host gate carrying the canonical run-binding digest",
+    "Verification Sandbox Host receives the read-only validation handoff and may only read, inspect, and validate the delivered snapshot's no-.git condition and digest together with the pre-execution record, run binding, host gate, and all seven Host inputs before any real process; it has no Git, snapshot materialization, copy, transformation, mutation, or separate-source execution authority",
+    "only after those checks, Host provisions and verifies immutable assets, runs --version, and runs the capability probe under the correct execution line",
+    "Host writes post-execution tool-observations.json under state-root, referencing both tool_record_digest and run_binding_digest and recording verification/version/probe/timestamp results; it never rewrites the pre-execution record",
+    "apply the declared cutoff; no later stage may fetch moving dependencies"
+  ],
+  "controlled_snapshot_model": {
+    "location": "<custodian-controlled-location>/integration-candidate-snapshot/, outside the Host-writable state-root; Custodian makes a read-only validation handoff to Host and exposes it only as the source tree usable by the no-.git Sandbox Agent child boundary",
+    "owner_and_delivery": "Git Custodian alone resolves the exact Candidate and Integration Candidate, materializes this snapshot from the exact Integration Candidate before the pre-execution record, verifies it contains no .git, and delivers it as a Custodian-owned read-only validation handoff to Host while exposing it only as the source tree usable by the Sandbox Agent child. Normal CI and Custodian Git operations remain legitimate before delivery.",
+    "identity_rule": "The Custodian verifies this snapshot's tree/source-tree digest equals the exact Integration-Candidate tree digest. --source-tree-digest, pre_execution_record.source_tree_digest, and run_binding.source_tree_digest must all equal that verified digest; no alternate source identity is accepted. Host may read/inspect only to validate this identity and no-.git condition.",
+    "host_validation_and_prohibitions": "The Host may only read, inspect, and validate the received snapshot handoff's read-only delivery identity, absence of .git, and digest equality against the binding and --source-tree-digest. It may not use the snapshot as a separate executable source. The Host has no Git authority and may not resolve, materialize, copy, transform, or mutate the snapshot.",
+    "discovery_rule": "Host derives the snapshot path as dirname(abspath(--tool-record))/integration-candidate-snapshot/. This is not an eighth CLI input. The seven Host inputs remain unchanged.",
+    "child_cwd": "The discovered snapshot path. The child may only read it. Host never copies the snapshot into state-root.",
+    "child_home": "<state-root>/child-home",
+    "inspect_oracle": "Host rejects unless: (1) the discovered path exists and is a directory; (2) it contains no .git file and no .git directory; (3) --source-tree-digest, pre-execution-tool-record.source_tree_digest, run-binding.source_tree_digest, and run-binding.integration_candidate_tree_digest are identical. Host does not use Git and does not recompute a Git tree."
+  },
+  "run_binding_model": {
+    "location": "<custodian-controlled-location>/run-binding.json, outside the no-.git child snapshot",
+    "owner": "Git Custodian",
+    "canonical_digest": "sha256 over RFC 8785 canonical JSON",
+    "required_fields": [
+      "schema_version",
+      "planning_base_sha",
+      "candidate_sha",
+      "candidate_tree_digest",
+      "integration_base_sha",
+      "integration_candidate_sha",
+      "integration_candidate_tree_digest",
+      "source_tree_digest",
+      "tool_lock_digest",
+      "tool_record_digest",
+      "custodian_origin",
+      "run_id",
+      "issued_at_utc",
+      "expires_at_utc",
+      "single_use_nonce"
+    ],
+    "tool_record_digest_rule": "tool_record_digest is the RFC 8785 digest of the Custodian-issued immutable pre-execution tool identity record. Its identity contains only tool-lock, selected-platform, Candidate, Integration Candidate, the Custodian-verified source-tree digest, and other locked static data; it excludes all runtime observations and run_binding_digest.",
+    "source_tree_digest_rule": "source_tree_digest is exactly the Custodian-verified controlled snapshot tree/source-tree digest and exactly the Integration-Candidate tree digest. The record, binding, --source-tree-digest, and delivered snapshot must agree on this one value. Host may only read/inspect the validation handoff to verify that equality.",
+    "references": "The single-use host gate carries the canonical run-binding digest. The pre-execution record remains read-only and is never backpatched with that digest. Before process creation the Host reads/inspects/validates the Custodian-delivered snapshot validation handoff and recomputes/validates the pre-execution identity digest; it requires the snapshot, seven inputs, record, binding, and host gate to agree. It never executes the snapshot as a separate source. Post-execution observations reference both digests separately.",
+    "host_mandatory_inputs": [
+      "--state-root",
+      "--candidate-sha",
+      "--source-tree-digest",
+      "--tool-lock",
+      "--tool-record",
+      "--host-gate",
+      "--run-binding"
+    ],
+    "issuance_and_execution_order": "Custodian resolves Candidate/Integration Candidate and tree identities -> Custodian materializes and verifies the no-.git controlled snapshot and its exact source-tree digest -> Custodian delivers a read-only validation handoff to Host and exposes the snapshot only as the source tree usable by the Sandbox Agent child -> Custodian static pre-execution tool identity record -> Custodian run binding -> Custodian single-use host gate -> Host reads/inspects/validates snapshot handoff, record, binding, gate, and seven inputs without separate-source execution -> Host provisions/verifies assets and runs version/probe -> Host writes tool-observations.json -> cutoff.",
+    "invalidation": "Any change to static pre-execution identity, Candidate, either tree digest, verified source-tree digest, Integration Base, exact Integration Candidate, tool-lock, tool-record digest, origin, run id, nonce, or expiry invalidates authorization. The Custodian must issue a new snapshot, pre-execution record, binding, and gate and the Host must complete a full rerun. A runtime observation mismatch or failed verification/version/probe result fails closed and never rewrites the pre-execution record."
+  },
+  "tool_record_format": {
+    "location": "<custodian-controlled-location>/pre-execution-tool-record.json, outside the no-.git child snapshot",
+    "owner_and_access": "Git Custodian issues this immutable pre-execution record before any real binary, provisioning, --version, or capability probe. It is passed by --tool-record from a Custodian-controlled location and is read-only to the Host and every child.",
+    "identity_section": "The RFC 8785-canonical identity section is the sole source of tool_record_digest used by run-binding.json. It is constructed only from tool-lock, selected platform, Candidate, Integration Candidate, the Custodian-verified source-tree digest, and other locked static data; it contains no runtime result and no self-referential digest.",
+    "static_identity_fields": [
+      "schema_version",
+      "planning_base_sha",
+      "candidate_sha",
+      "candidate_tree_digest",
+      "integration_base_sha",
+      "integration_candidate_sha",
+      "integration_candidate_tree_digest",
+      "source_tree_digest",
+      "tool_lock_digest",
+      "selected_platform",
+      "selected_tool_lock_entries",
+      "custodian_origin"
+    ],
+    "forbidden_runtime_or_cycle_fields": [
+      "version_output",
+      "capability_probe_result",
+      "observed_at_utc or any observed timestamp",
+      "asset_verification_result",
+      "run_binding_digest",
+      "any runtime observation, execution result, or post-execution field"
+    ],
+    "host_validation": "Before any real process the Host may only read/inspect the received snapshot validation handoff to verify its read-only delivery identity, no-.git condition, and exact source-tree digest; verifies the record location/immutability; recomputes the record's RFC 8785 identity digest; and requires all of those values to equal the run binding and seven inputs. It never writes this record, never executes the snapshot as a separate source, and never performs Git, snapshot materialization, copy, transformation, or mutation."
+  },
+  "tool_observations_format": {
+    "location": "<state-root>/tools/tool-observations.json",
+    "writer_and_timing": "Only the Verification Sandbox Host writes observations, and only after it has read/inspected/validated the Custodian-delivered no-.git read-only snapshot validation handoff, pre-execution tool record, run binding, host gate, and seven mandatory inputs before process creation.",
+    "required_fields": [
+      "schema_version",
+      "tool_record_digest",
+      "run_binding_digest",
+      "asset_verification_result",
+      "version_output",
+      "capability_probe_result",
+      "isolation_proof_result",
+      "observed_at_utc"
+    ],
+    "separation_rule": "tool-observations.json is post-execution evidence only. It is never passed as --tool-record, never changes or backfills the Custodian record or binding, and is not an authorization input.",
+    "failure_rule": "A missing/mismatched digest, failed asset verification, failed version/probe result, or inconsistent observation fails closed. The Host records bounded/redacted failure evidence where permitted and never promotes it into the pre-execution identity.",
+    "schema_version": 1,
+    "additionalProperties": false,
+    "result_envelope": {
+      "type": "object",
+      "required": [
+        "status",
+        "code",
+        "bounded_text"
+      ],
+      "additionalProperties": false,
+      "status": "ok | failed | unsupported",
+      "code": "string",
+      "bounded_text": "Hermes-redacted string, at most 4096 bytes"
+    }
+  },
+  "signature_rules": {
+    "node_gpg": "SHASUMS256.txt.asc must verify with gpg against only this pinned primary-fingerprint set from https://github.com/nodejs/release-keys: 5BE8A3F6C8A5C01D106C0AD820B1A390B168D356, DD792F5973C6DE52C432CBDAC77ABFA00DDBF2B7, CC68F5A3106FF448322E48ED27F5E38D5B0A215F, 8FCCA13FEF1D0C2E91008E09770F7A9A5AE15600, 890C08DB8579162FEE0DF9DB8BEAB4DFCF555EF4, C82FA3AE1CBEDC6BE46B9360C43CEC45C17AB93C, 108F52B48DB57BB0CC439B2997B01419BD92F80A, A363A499291CBBC940DD62E41F10027AF002F8B0, 71DCFD284A79C3B38668286BC97EC7A07EDE3FC1, FD3A5288F042B6850C66B31F09FE44734EB7990E, 61FC681DFB92A079F1685E77973F295594EC4689, 114F43EE0176B71C7BC219DD50A3051F888C628D, C4F0DFFF4E8C1A8236409D08E73BC641CC11F4C8, DD8F2338BAE7501E3DD5AC78C273792F7D83545D, A48C2BEE680E841632CD4E44F07496B3EB3C1762, B9E2F5981AA6E0CD28160D9FF13993A75599653C, 7937DFD2AB06298B2293C3187D33FF9D0246406D. A Good signature from a subkey must chain to one listed primary fingerprint; any other signer fails closed.",
+    "codex_sigstore_linux": "Supplemental evidence only: the locked archive SHA-256 is the executable hard gate. This Slice introduces no independently locked verifier, so sigstore may be recorded as provenance but must never be reported as independently verified.",
+    "codex_authenticode_windows": "The locked archive SHA-256 is verified, but no independently sourced exact Authenticode certificate thumbprint and signer identity is pinned in revision 9. Windows Codex is therefore UNSUPPORTED_RUNTIME for a real sealed Codex probe until a human-approved revision adds that identity and command. Fuzzy publisher matching is forbidden; no failed or absent signer condition may be weakened.",
+    "npm_integrity_and_provenance": "Every npm tarball is verified by exact registry dist.integrity SHA-512 over HTTPS. The registry signature keyid SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U and npm provenance attestation may be recorded. Registry integrity and provenance are registry-trust evidence, not independent code signing."
+  },
+  "tools": [
+    {
+      "tool": "node",
+      "version": "v22.23.2",
+      "platform": "windows-x64",
+      "asset": "node-v22.23.2-win-x64.zip",
+      "url": "https://nodejs.org/dist/v22.23.2/node-v22.23.2-win-x64.zip",
+      "expected_sha256": "1177b4137ba5adaa56354ae40f1080c7450e8ae09cecb47da459d1c52ac99f97",
+      "checksum_source": "https://nodejs.org/dist/v22.23.2/SHASUMS256.txt (official)",
+      "signature_rule": "GPG SHASUMS256.txt.asc verified against the pinned Node release-key fingerprints after authorization; failure fails closed and is recorded only in post-execution observations",
+      "integrity_status": "official"
+    },
+    {
+      "tool": "node",
+      "version": "v22.23.2",
+      "platform": "linux-x64",
+      "asset": "node-v22.23.2-linux-x64.tar.xz",
+      "url": "https://nodejs.org/dist/v22.23.2/node-v22.23.2-linux-x64.tar.xz",
+      "expected_sha256": "d60acfe00a2932254bb0ad20e01b0d74397a0875595de719654b214f4b03f307",
+      "checksum_source": "https://nodejs.org/dist/v22.23.2/SHASUMS256.txt (official)",
+      "signature_rule": "GPG SHASUMS256.txt.asc verified against the pinned Node release-key fingerprints after authorization; failure fails closed and is recorded only in post-execution observations",
+      "integrity_status": "official"
+    },
+    {
+      "tool": "chrome-devtools-mcp",
+      "version": "1.7.0",
+      "platform": "platform-neutral (single npm tarball; installed via committed package-lock.json)",
+      "asset": "chrome-devtools-mcp-1.7.0.tgz",
+      "url": "https://registry.npmjs.org/chrome-devtools-mcp/-/chrome-devtools-mcp-1.7.0.tgz",
+      "expected_integrity_sha512": "6xFW7oiUxTxZuHcfyYBkKQtmttjCbfifKZMSEk5CV8H2FucvKweYiJr8CblddYHtYjA4C14K9VAs1r49906RBA==",
+      "checksum_source": "npm registry dist.integrity (official) \u2014 sha512-6xFW7oiU... matches registry JSON for 1.7.0",
+      "lockfile": "package-lock.json (committed, lockfileVersion 3, name hermes-browser-runtime, chrome-devtools-mcp pinned to exactly 1.7.0, digest sha256:f691d5dae8a9a8129cdbe6fcd603e562d60360b843703140b9ff9fbb466d8bb9)",
+      "transitive_integrity": "Committed package-lock.json is the complete transitive-integrity record; its hermes-browser-runtime identity and exact 1.7.0 pin are verified before consumption. At 1.7.0 runtime dependencies are empty (bundled via rollup); peerDependencies @blackwell-systems/gcf and @toon-format/toon remain optional exactly as published \u2014 no peer rewriting.",
+      "signature_rule": "npm registry integrity and provenance recorded per signature_rules.npm_integrity_and_provenance; registry trust, not independent code signing",
+      "integrity_status": "official"
+    },
+    {
+      "tool": "chrome-for-testing",
+      "version": "151.0.7922.77",
+      "platform": "windows-x64",
+      "asset": "chrome-win64.zip",
+      "url": "https://storage.googleapis.com/chrome-for-testing-public/151.0.7922.77/win64/chrome-win64.zip",
+      "expected_sha256": null,
+      "integrity_status": "no_official_checksum",
+      "available_evidence": "pinned immutable version 151.0.7922.77; HTTPS to storage.googleapis.com; GCS x-goog-hash headers (crc32c/md5) informational only \u2014 not a SHA-256 integrity guarantee",
+      "disposition": "Excluded from the sealed-supply-chain hard integrity gate. Project-verified experimental target (decision D5) unless a human-approved CCR replaces it with a verifiable browser source. Not eligible to satisfy any sealed hard gate acceptance. No first-download self-computed hash is ever a frozen identity."
+    },
+    {
+      "tool": "chrome-for-testing",
+      "version": "151.0.7922.77",
+      "platform": "linux-x64",
+      "asset": "chrome-linux64.zip",
+      "url": "https://storage.googleapis.com/chrome-for-testing-public/151.0.7922.77/linux64/chrome-linux64.zip",
+      "expected_sha256": null,
+      "integrity_status": "no_official_checksum",
+      "available_evidence": "pinned immutable version 151.0.7922.77; HTTPS to storage.googleapis.com; GCS x-goog-hash headers (crc32c/md5) informational only \u2014 not a SHA-256 integrity guarantee",
+      "disposition": "Excluded from the sealed-supply-chain hard integrity gate. Project-verified experimental target (decision D5) unless a human-approved CCR replaces it with a verifiable browser source. Not eligible to satisfy any sealed hard gate acceptance. No first-download self-computed hash is ever a frozen identity."
+    },
+    {
+      "tool": "codex-cli",
+      "version": "0.146.0",
+      "platform": "windows-x64",
+      "asset": "codex-package-x86_64-pc-windows-msvc.tar.gz",
+      "url": "https://github.com/openai/codex/releases/download/rust-v0.146.0/codex-package-x86_64-pc-windows-msvc.tar.gz",
+      "expected_sha256": "a945559cc0da3437c022d53e5f601f9e8c95980d717c9aad82997e4582ecd55e",
+      "checksum_source": "codex-package_SHA256SUMS from release rust-v0.146.0 (official) \u2014 https://github.com/openai/codex/releases/download/rust-v0.146.0/codex-package_SHA256SUMS",
+      "signature_rule": "Exact archive SHA-256 is mandatory. No exact independently sourced Authenticode signer identity is pinned in revision 9; real sealed Windows Codex probes are UNSUPPORTED_RUNTIME until a human-approved revision adds one. Fuzzy publisher matching is forbidden.",
+      "integrity_status": "official archive checksum; publisher hard gate unavailable"
+    },
+    {
+      "tool": "codex-cli",
+      "version": "0.146.0",
+      "platform": "linux-x64",
+      "asset": "codex-package-x86_64-unknown-linux-musl.tar.gz",
+      "url": "https://github.com/openai/codex/releases/download/rust-v0.146.0/codex-package-x86_64-unknown-linux-musl.tar.gz",
+      "expected_sha256": "3c89125af1d7c98abec8beb551292ef99daca52e204e5852a9139feae2c467e5",
+      "checksum_source": "codex-package_SHA256SUMS from release rust-v0.146.0 (official)",
+      "signature_rule": "Exact archive SHA-256 is mandatory; sigstore is supplemental provenance only under signature_rules.codex_sigstore_linux",
+      "integrity_status": "official"
+    },
+    {
+      "tool": "opencode-cli-wrapper",
+      "version": "1.18.12",
+      "platform": "platform-neutral wrapper (requires exact platform package below; wrapper alone is not runnable)",
+      "asset": "opencode-ai-1.18.12.tgz",
+      "url": "https://registry.npmjs.org/opencode-ai/-/opencode-ai-1.18.12.tgz",
+      "expected_integrity_sha512": "3pDzNXO9aHzHUzdLySLWPoYmL6hoUUqWtn+HurG9KTWPqerRegsU7GgCtUH5cpaUikgTyzpEtbfE8F0/dToSEg==",
+      "checksum_source": "npm registry dist.integrity (official) \u2014 sha512-3pDzNXO9... matches registry JSON for 1.18.12; signatures keyid SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U",
+      "note": "Wrapper tarball \u2014 optionalDependencies declare the platform CLIs; NOT runnable by itself. Verifiable runnable identities are the platform packages below, each with its own URL and sha512. Release CLI archives have no standalone SHA256SUMS and are NOT lock entries; latest.yml covers only desktop installers.",
+      "signature_rule": "npm registry integrity and provenance recorded per signature_rules.npm_integrity_and_provenance; registry trust only",
+      "integrity_status": "official (npm tarball; wrapper)"
+    },
+    {
+      "tool": "opencode-cli",
+      "version": "1.18.12",
+      "platform": "windows-x64",
+      "asset": "opencode-windows-x64-1.18.12.tgz",
+      "url": "https://registry.npmjs.org/opencode-windows-x64/-/opencode-windows-x64-1.18.12.tgz",
+      "expected_integrity_sha512": "LFAlCVDK/bUqyN2QfapSRnceizd+0VU87wNx1eNFbRJ2KftAlnkkhcZqhQEEsndX4eAhiMm8iTzJi5DbSBN85g==",
+      "checksum_source": "npm registry dist.integrity for opencode-windows-x64@1.18.12 (official); os=[win32] cpu=[x64]",
+      "platform_selection_rule": "On Windows x64 select opencode-windows-x64@1.18.12; on Linux x64 select opencode-linux-x64@1.18.12. Selection by os/cpu fields is static identity in the Custodian pre-execution tool record.",
+      "unpack_rule": "Direct tarball extraction (no npm install/postinstall/npx) with traversal-safe unpack (no absolute/.. /symlink escape); executable bin/opencode.exe; verified with --version",
+      "signature_rule": "npm registry integrity and provenance recorded per signature_rules.npm_integrity_and_provenance; registry trust only",
+      "integrity_status": "official"
+    },
+    {
+      "tool": "opencode-cli",
+      "version": "1.18.12",
+      "platform": "linux-x64",
+      "asset": "opencode-linux-x64-1.18.12.tgz",
+      "url": "https://registry.npmjs.org/opencode-linux-x64/-/opencode-linux-x64-1.18.12.tgz",
+      "expected_integrity_sha512": "lxJvHq9yF9SCMhAJyQs0iS5YYctXCtPtXUXK37cC3IV3ubLWvorhQ6kTphpdbpLtMbO5mbr8eQVNfUH/XLnEzQ==",
+      "checksum_source": "npm registry dist.integrity for opencode-linux-x64@1.18.12 (official); os=[linux] cpu=[x64]",
+      "platform_selection_rule": "On Windows x64 select opencode-windows-x64@1.18.12; on Linux x64 select opencode-linux-x64@1.18.12. Selection by os/cpu fields is static identity in the Custodian pre-execution tool record.",
+      "unpack_rule": "Direct tarball extraction (no npm install/postinstall/npx) with traversal-safe unpack (no absolute/.. /symlink escape); executable bin/opencode; verified with --version",
+      "signature_rule": "npm registry integrity and provenance recorded per signature_rules.npm_integrity_and_provenance; registry trust only",
+      "integrity_status": "official"
+    }
+  ],
+  "authorization_literals": {
+    "schema_version": 1,
+    "custodian_origin": "git-custodian",
+    "object_shape": "flat JSON object; keys exactly the listed fields; additionalProperties false; no wrapper object",
+    "rfc8785_digest": "sha256: + 64 lowercase hex of RFC 8785 canonical UTF-8 bytes of the whole flat object",
+    "tool_lock_digest": "sha256: + 64 lowercase hex of the raw committed tool-lock.json file bytes (not RFC 8785)",
+    "git_sha": "40 lowercase hex",
+    "utc_timestamp": "RFC 3339 UTC"
+  },
+  "selected_tool_lock_entries_type": {
+    "type": "array",
+    "item_required": [
+      "tool",
+      "platform",
+      "asset",
+      "integrity"
+    ],
+    "additionalProperties": false,
+    "integrity": "tools[].expected_sha256 or expected_integrity_sha512, or null when integrity_status is no_official_checksum"
+  },
+  "host_gate_format": {
+    "basename": "host-gate.json",
+    "location": "<custodian-controlled-location>/host-gate.json",
+    "media_type": "application/json",
+    "schema_version": 1,
+    "fields": [
+      "schema_version",
+      "run_binding_digest"
+    ],
+    "additionalProperties": false,
+    "run_binding_digest": "sha256:<64 hex> equal to RFC 8785 digest of the flat run-binding object",
+    "host_must_not_mutate_gate_file": true,
+    "replay_store": "<state-root>/tools/used-host-gates/<run_binding_digest_hex_without_prefix>",
+    "replay_rule": "Before process start Host creates the replay-store file atomically (O_CREAT|O_EXCL or Windows CreateFile CREATE_NEW). If it already exists, reject as replay with DEPENDENCY_UNAVAILABLE. Host never mutates the Custodian gate file.",
+    "acl": "Windows: exact single-ACE DACL for the current user SID with (F); icacls /inheritance:r /grant:r *<sid>:(F); reject Everyone/Users/SYSTEM/Administrators. POSIX: 0o600."
+  },
+  "host_isolation_proof": {
+    "windows": "Admission requires an AppContainer child token with no network capabilities, an explicit capability ACL granting read-only access to the delivered snapshot and read/write access only to the state root, plus a Job Object for tree cancellation. Before any real CLI starts, a probe in that same token must prove: token is AppContainer; a Host-created canary outside both authorized roots cannot be read or written (ACCESS_DENIED); the snapshot cannot be written; the state root can be written; and TCP connection to a Host-reserved non-loopback egress canary fails. Restricted Token or Low integrity alone is insufficient. Job Objects alone are insufficient. Loopback access is admitted only to Host-reserved fixture endpoints required by the selected probe.",
+    "linux": "Admission requires a new user, mount, PID, and network namespace; a non-root mapped uid different from the Host uid; the delivered snapshot bind-mounted read-only; the state root as the only writable bind; and a network namespace containing only loopback routes to Host-reserved fixture endpoints. Before any real CLI starts, a probe in those same namespaces must prove: getuid() is nonzero and differs from Host uid; a Host-created canary outside both authorized roots cannot be read or written (EACCES or EROFS); the snapshot cannot be written; the state root can be written; and a connection to a Host-reserved non-loopback egress canary fails.",
+    "absent": "If every platform-specific identity, filesystem, and network assertion above cannot be demonstrated before process creation, every real-tool runner exits 1 with code UNSUPPORTED_RUNTIME and starts zero child processes. Windows Sandbox or a VM is optional operator-host hardening and is never hosted-CI proof."
+  },
+  "agent_cli_executables": {
+    "extract_roots": {
+      "codex-windows-x64": "<state-root>/tools/codex/windows-x64/",
+      "codex-linux-x64": "<state-root>/tools/codex/linux-x64/",
+      "opencode-windows-x64": "<state-root>/tools/opencode/windows-x64/",
+      "opencode-linux-x64": "<state-root>/tools/opencode/linux-x64/"
+    },
+    "npm_tarball_strip": "If the tarball has a single top-level package/ directory (npm convention), strip that one segment after traversal-safe extract. No other rewrite.",
+    "executables": {
+      "codex-windows-x64": "<state-root>/tools/codex/windows-x64/codex.exe",
+      "codex-linux-x64": "<state-root>/tools/codex/linux-x64/codex",
+      "opencode-windows-x64": "<state-root>/tools/opencode/windows-x64/bin/opencode.exe",
+      "opencode-linux-x64": "<state-root>/tools/opencode/linux-x64/bin/opencode"
+    }
+  },
+  "controlled_e2e_wiring": {
+    "fixture_page": "Host reserves <fixture-port> and serves GET /page with status 200, Content-Type text/html, and exact body <!doctype html><html><head><title>Hermes E2E Fixture</title></head><body><main id=hermes-proof data-proof=hermes-00-06>Hermes browser proof</main></body></html>. Any other GET returns 404.",
+    "mock_provider": "Host reserves <provider-port> and serves an OpenAI-compatible endpoint. POST /v1/chat/completions call 1 returns one assistant tool call named chrome-devtools_navigate_page with arguments {\"url\":\"http://127.0.0.1:<fixture-port>/page\"}. Call 2 returns one assistant tool call named chrome-devtools_evaluate_script with arguments {\"function\":\"() => ({title: document.title, proof: document.querySelector('#hermes-proof')?.dataset.proof, text: document.querySelector('#hermes-proof')?.textContent})\"}. Call 3 returns assistant text exactly HERMES_E2E_OK title=Hermes E2E Fixture proof=hermes-00-06 text=Hermes browser proof. Every response uses model hermes-fixture, temperature 0 semantics, finish_reason tool_calls for calls 1-2 and stop for call 3; any other route or fourth call returns 409.",
+    "mcp": "The generated config names the server chrome-devtools and uses {type:\"local\",command:<locked browser_launch_policy.mcp_argv>,environment:<locked browser_launch_policy.mcp_environment>,enabled:true,timeout:30000}. No extra MCP field, argv item, or environment entry is allowed.",
+    "opencode_config": "Host writes <state-root>/tools/opencode-config/opencode.json outside the snapshot with only: {$schema:\"https://opencode.ai/config.json\",autoupdate:false,share:\"disabled\",provider:{fixture:{npm:\"@ai-sdk/openai-compatible\",name:\"Hermes Fixture\",options:{baseURL:\"http://127.0.0.1:<provider-port>/v1\",apiKey:\"hermes-fixture-key\"},models:{\"hermes-fixture\":{name:\"Hermes Fixture\"}}}},mcp:{chrome-devtools:<the exact mcp object above>},permission:{\"*\":\"deny\",\"chrome-devtools_*\":\"allow\"}}. It sets OPENCODE_CONFIG to that file, OPENCODE_DISABLE_AUTOUPDATE=1, XDG_DATA_HOME=<state-root>/tools/opencode-data, XDG_CONFIG_HOME=<state-root>/tools/opencode-empty-config, and HOME=<state-root>/child-home. Host never writes into the snapshot.",
+    "opencode_argv": [
+      "<selected-locked-opencode-executable>",
+      "run",
+      "--pure",
+      "--format",
+      "json",
+      "--model",
+      "fixture/hermes-fixture",
+      "--agent",
+      "build",
+      "--auto",
+      "--dir",
+      "<integration-candidate-snapshot>",
+      "Use only the chrome-devtools MCP tools. Navigate to the provided loopback fixture page, read its title and #hermes-proof data-proof and text, then report them exactly."
+    ],
+    "success_oracle": "Exit 0 is necessary but insufficient. Host parses every --format json line; requires two completed tool parts in order for chrome-devtools_navigate_page then chrome-devtools_evaluate_script, requires their successful results to contain the exact loopback URL and {title:'Hermes E2E Fixture',proof:'hermes-00-06',text:'Hermes browser proof'}, requires final assistant text exactly HERMES_E2E_OK title=Hermes E2E Fixture proof=hermes-00-06 text=Hermes browser proof, requires exactly three provider calls, and requires zero denied/unexpected tool calls. tools/list success is never EC-00-09 evidence."
+  },
+  "real_probe_wiring": {
+    "common": "Every command validates all seven authorization inputs and the platform isolation proof before start, uses the locked executable below state-root, runs in the delivered snapshot, isolates HOME/config/data under state-root, captures stdout/stderr separately, parses structured output, and enforces timeout and process-tree cancellation externally.",
+    "codex_linux": {
+      "argv": ["<selected-locked-codex-executable>", "exec", "--json", "--ephemeral", "--ignore-user-config", "--sandbox", "read-only", "--model", "hermes-codex-fixture", "-C", "<integration-candidate-snapshot>", "Reply with the single token HERMES_CODEX_PROBE_OK"],
+      "environment": {"CODEX_HOME": "<state-root>/tools/codex-home", "OPENAI_BASE_URL": "http://127.0.0.1:<provider-port>/v1", "OPENAI_API_KEY": "hermes-fixture-key"},
+      "provider_protocol": "Host reserves <provider-port> and accepts exactly POST /v1/responses with Authorization: Bearer hermes-fixture-key and JSON model exactly hermes-codex-fixture; any other route, method, model, or second request returns 409. Success responds 200 Content-Type text/event-stream with exactly: event: response.created + data {\"type\":\"response.created\",\"response\":{\"id\":\"resp-hermes-codex-1\"}}; then event: response.output_item.done + data {\"type\":\"response.output_item.done\",\"item\":{\"type\":\"message\",\"role\":\"assistant\",\"id\":\"msg-hermes-codex-1\",\"content\":[{\"type\":\"output_text\",\"text\":\"HERMES_CODEX_PROBE_OK\"}]}}; then event: response.completed + data {\"type\":\"response.completed\",\"response\":{\"id\":\"resp-hermes-codex-1\",\"usage\":{\"input_tokens\":0,\"input_tokens_details\":null,\"output_tokens\":0,\"output_tokens_details\":null,\"total_tokens\":0}}}; each event is terminated by a blank line and the connection then closes.",
+      "structured_oracle": "Success mode has a 30000 ms external deadline and emits the exact three-event SSE sequence in provider_protocol immediately after the validated request; stdout must be valid Codex --json JSONL containing a terminal success event and final agent text exactly HERMES_CODEX_PROBE_OK, exit 0, one provider request, and zero surviving descendants. Timeout mode sends response.created only, keeps the SSE connection open, and never emits output_item.done/completed; at 1000 ms the Host deadline returns typed timeout, kills the whole process tree, and proves zero survivors. Cancel mode sends response.created only and holds the connection; after the Host observes that event it triggers the cancellation token within 100 ms, returns typed cancelled, kills the whole process tree, and proves zero survivors. No retry or second request is allowed in any mode.",
+      "windows": "UNSUPPORTED_RUNTIME before process creation until an independently locked exact Authenticode signer identity is approved."
+    },
+    "opencode": {
+      "argv": ["<selected-locked-opencode-executable>", "run", "--pure", "--format", "json", "--model", "fixture/hermes-fixture", "--agent", "build", "--auto", "--dir", "<integration-candidate-snapshot>", "Reply with the single token HERMES_OPENCODE_PROBE_OK"],
+      "environment": {"OPENCODE_CONFIG": "<state-root>/tools/opencode-probe-config/opencode.json", "OPENCODE_DISABLE_AUTOUPDATE": "1", "XDG_DATA_HOME": "<state-root>/tools/opencode-probe-data", "XDG_CONFIG_HOME": "<state-root>/tools/opencode-empty-config", "HOME": "<state-root>/child-home"},
+      "structured_oracle": "The probe config contains only the fixture provider/model used by controlled_e2e_wiring, share disabled, autoupdate false, and permission {'*':'deny'}; no MCP server. The Host mock returns HERMES_OPENCODE_PROBE_OK; stdout must be valid --format json events ending in that exact assistant text. Separate withhold and cancellation modes must yield typed timeout and typed cancelled respectively and kill the whole process tree."
+    }
+  },
+  "host_cli_oracles": {
+    "rejection": {
+      "exit_code": 1,
+      "stdout_json": {
+        "ok": false,
+        "code": "DEPENDENCY_UNAVAILABLE"
+      },
+      "codes": {
+        "missing_or_invalid_authorization": "DEPENDENCY_UNAVAILABLE",
+        "replayed_host_gate": "DEPENDENCY_UNAVAILABLE",
+        "isolation_proof_absent": "UNSUPPORTED_RUNTIME",
+        "windows_codex_real_probe": "UNSUPPORTED_RUNTIME"
+      },
+      "child_processes": 0,
+      "not_a_skip": "A pytest skip or selector is never this oracle."
+    },
+    "tools_bootstrap_default": "No subcommand: authorized online provision using locked npm online_argv. Success exit 0 stdout {ok:true,mode:bootstrap}.",
+    "tools_bootstrap_verify": "Subcommand verify: fresh offline_argv cutoff proof only. Success exit 0 stdout {ok:true,mode:verify}.",
+    "tools_bootstrap_selfcheck": "Subcommand selfcheck: digest/path/argv identity only; no fetch. Success exit 0 stdout {ok:true,mode:selfcheck}."
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "planning_base_sha": "9cf24b876cc7422386ed54c277900ff1e3c2c2bf",
+  "candidate_sha": "9cf24b876cc7422386ed54c277900ff1e3c2c2bf",
+  "candidate_tree_digest": "0123456789abcdef0123456789abcdef01234567",
+  "integration_base_sha": "9cf24b876cc7422386ed54c277900ff1e3c2c2bf",
+  "integration_candidate_sha": "9cf24b876cc7422386ed54c277900ff1e3c2c2bf",
+  "integration_candidate_tree_digest": "0123456789abcdef0123456789abcdef01234567",
+  "source_tree_digest": "0123456789abcdef0123456789abcdef01234567",
+  "tool_lock_digest": "sha256:77d4a6705034cd6b0a01860fce2ee1e73bf7a8e8601f9e3778dbfd809483e8c1",
+  "selected_platform": "windows-x64",
+  "selected_tool_lock_entries": [],
+  "custodian_origin": "git-custodian",
+  "version_output": "must-reject"
+}

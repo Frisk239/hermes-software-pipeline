@@ -1,0 +1,941 @@
+{
+  "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
+  "schema_version": 1,
+  "document_revision": 14,
+  "slice_id": "slice-00-06",
+  "phase_id": "phase-00",
+  "status": "READY",
+  "predecessors": [
+    "slice-00-02",
+    "slice-00-03",
+    "slice-00-05"
+  ],
+  "base_sha": "9cf24b876cc7422386ed54c277900ff1e3c2c2bf",
+  "assigned_worktree": "C:\\Users\\a2691\\AppData\\Local\\hermes\\managed-worktrees\\hermes-software-pipeline\\slice-00-06",
+  "operator_path": "From a clean Windows or Linux checkout, the Verification Sandbox Host verifies each exact tool-lock rule only after authorization. Node, chrome-devtools-mcp, locked Codex archives, and runnable OpenCode platform packages are verified by their recorded mechanisms; Chrome for Testing is no_official_checksum and can be used only as an explicitly experimental browser target, never as sealed hard-gate evidence. Ordinary PR CI runs the existing full offline pytest suite and cannot start a real tool: 00-06's real-tool runners are standalone host-runner CLIs that are never pytest-collected and reject before process creation if the Custodian pre-execution record, immutable Custodian run binding, or single-use host gate is absent or invalid. Before any real binary, provisioning, --version, or capability probe, the Git Custodian resolves the exact Candidate, exact Integration Candidate, and bound tree identities; alone materializes a controlled no-.git snapshot from that Integration Candidate; verifies its tree/source-tree digest equals the bound Integration-Candidate tree digest; and delivers it as a Custodian-owned read-only validation handoff to Host while exposing it only as the source tree usable by the Sandbox Agent child. The Custodian then issues the immutable pre-execution record from only tool-lock, selected-platform, Candidate, Integration Candidate, verified source-tree digest, and other locked static inputs; its RFC 8785 identity digest is tool_record_digest; creates the binding that binds Planning Base, Candidate SHA/tree, Integration Base, exact Integration Candidate SHA/tree, that exact source-tree digest, tool-lock digest, tool-record identity digest, Custodian origin, run id, expiry, and nonce; and issues a single-use host gate carrying the binding digest. The separately privileged Sandbox Host may only read, inspect, and validate the snapshot handoff together with record, binding, gate, and all seven inputs before any real process; it has no Git, snapshot materialization, copy, transformation, mutation, or separate-source execution authority. Only then may it provision and verify assets, run version/capability probes, and write bounded/redacted post-execution observations under state-root that reference both digests. Normal CI and Custodian Git activity remain legitimate before snapshot delivery. The controlled E2E uses a local loopback mock provider to drive OpenCode to Chrome DevTools MCP through only the closed locked-CfT argv/environment, with Custodian-delivered source-snapshot Git isolation, cleanup, and four-state capability results. Every spike remains experimental pending Slice 00-07 disposition.",
+  "must_scope": [
+    "This is READY Slice Contract revision 14 at planning Base 9cf24b876cc7422386ed54c277900ff1e3c2c2bf (origin/main after PR #12, 2026-08-12). ADR-0029 and ADR-0030 are accepted (engadr_0029-0030_20260813_01). Revision 14 retains revision 12's pinned Host/Custodian Interfaces and closes the independent revision-13 review findings: it fixes real Codex/OpenCode structured-output, timeout, and cancellation probe commands; exact OpenCode/provider/MCP/browser E2E semantics; the fixture authorization digest chain; and identity/filesystem/network isolation evidence. D2 and D3 are those accepted ADRs. D4 is the two-line E2E. D5 is the three-register evidence model. D6 is the four-state capability matrix. There is no open D1. Independent Standards and Spec READY reviews passed, every downstream audit item is resolved, and the Git Custodian assigned the clean execution worktree at the exact Base.",
+    "Revision-12 closed Interfaces (Executor must implement these, not invent others): (1) pre-execution-tool-record.json and run-binding.json are flat objects with schema_version integer 1, custodian_origin string git-custodian, keys exactly tool-lock lists, additionalProperties false; tool_record_digest and run_binding_digest are sha256: + hex of RFC 8785 of that whole object; tool_lock_digest is sha256: + hex of raw committed tool-lock.json bytes. (2) host-gate.json is exactly {schema_version:1, run_binding_digest} with additionalProperties false; Host never mutates the gate file; replay store is <state-root>/tools/used-host-gates/<digest-hex>; atomic create-new; second use rejects DEPENDENCY_UNAVAILABLE; gate ACL matches 00-05 owner-only DACL/0o600. (3) Snapshot path is dirname(abspath(--tool-record))/integration-candidate-snapshot/ (not an eighth input); child cwd is that path; child HOME is <state-root>/child-home; Host never copies the snapshot. (4) npm argv[0] is tool-lock npm_executable_by_platform for the selected OS/CPU; PATH npm is forbidden. (5) Host isolation proof is the tool-lock host_isolation_proof windows/linux demonstration; absent proof is UNSUPPORTED_RUNTIME before start. (6) Real-runner rejection is exit 1, one JSON object {ok:false,code:...}, zero child processes; missing/invalid/replayed auth uses DEPENDENCY_UNAVAILABLE; missing isolation proof or Windows sealed Codex uses UNSUPPORTED_RUNTIME. (7) tools_bootstrap default/verify/selfcheck match host_cli_oracles. (8) Codex/OpenCode extract roots and executables are tool-lock agent_cli_executables. (9) controlled E2E wiring is tool-lock controlled_e2e_wiring. (10) Committed accept/reject fixtures live in this slice fixtures/ directory and are required test oracles.",
+    "Sealed browser tool runtime (decision D2) uses a committed, versioned tool-lock.json as the identity and closed-execution-policy source without adding Node, FastAPI, or browser-MCP to root dependencies. The adjacent committed package.json and package-lock.json and lock-owned .npmrc are byte-verified against the tool lock (including .npmrc sha256:d61adb1098d59a10d2ec140829cad10d4613c8ba1ddcab0cbd8d56b06a5fa543), then copied unchanged into the declared fresh state-root project/configuration. During controlled online bootstrap the Host runs exactly <selected-locked-npm-executable> ci --ignore-scripts --audit=false --fund=false --update-notifier=false --cache <state-root>/tools/npm-cache --userconfig <state-root>/tools/browser-runtime/npmrc --globalconfig <state-root>/tools/browser-runtime/empty-global-npmrc from its explicit clean state-root environment; after cutoff it proves the exact same argv with <selected-locked-npm-executable> ci --offline in a fresh disposable state-root project. HOME, XDG_CONFIG_HOME, USERPROFILE, APPDATA, LOCALAPPDATA, npm cache/config paths remain under state-root; inherited NPM_CONFIG_*, credentials, registry/proxy/certificate overrides, and project/user/global config are rejected. No rename, synthesis, npm install, npx, latest tag, range, script execution, cache miss, or post-cutoff network access is allowed. Node v22.23.2 is locked by official SHA-256 plus a pinned Node release-key fingerprint set. chrome-devtools-mcp@1.7.0 is locked by its npm SRI sha512 and the committed lockfile; its published optional peers remain optional. Chrome for Testing 151.0.7922.77 has no official checksum, is excluded from every sealed hard-gate claim, and may only be reported as the decision-D5 experimental target until a human-approved CCR supplies a verifiable browser source. The Host selects only the traversal-safe locked-platform CfT executable and constructs exactly the locked MCP argv: --headless, --isolated, --executable-path <selected-locked-cft-executable>, --allowed-url-pattern http://127.0.0.1:<host-reserved-fixture-port>/*, --no-usage-statistics, and --no-performance-crux, with CHROME_DEVTOOLS_MCP_NO_UPDATE_CHECKS=1. Remote attach, channel/profile selection, arbitrary Chrome/MCP arguments or configuration sources, and all unlisted options are rejected. Here --isolated is an MCP-managed temporary profile, not an OS-isolation or OS-egress-denial claim.",
+    "Sealed Codex and OpenCode tool runtime with a fail-closed per-platform gate (decision D3): Codex 0.146.0 uses the exact checked package archives and official SHA-256 values in tool-lock.json. Linux sigstore evidence is supplemental only because this Slice introduces no independently locked verifier. Windows Codex may not be called sealed-publisher-verified: no exact independently sourced Authenticode signer identity is locked, so Windows Codex is UNSUPPORTED_RUNTIME for any real sealed Codex probe until a human-approved contract revision pins that identity; a fuzzy publisher-string match is forbidden. OpenCode 1.18.12 runnable identities are the exact opencode-windows-x64 and opencode-linux-x64 npm tarballs, selected by locked os/cpu fields and verified by their recorded SRI sha512 values with traversal-safe extraction; opencode-ai is only their non-runnable wrapper. OpenCode release archives and latest.yml are research-only non-lock evidence. Any missing required per-asset rule produces BLOCKED_CONTRACT plus CCR; no fallback to wrappers, preinstalled tools, npx, latest, or auto-update is allowed. OPENCODE_DISABLE_AUTOUPDATE=1 is mandatory and Codex update is denied in the sealed runtime.",
+    "Typed Codex Adapter probe (EC-00-08): version and capability detection via codex --version and the codex exec --help flag surface; codex exec --json JSONL event stream (thread, turn, item, and error events), --output-last-message, --output-schema, and stdin prompt via codex exec dash; no-credential failure classification; --sandbox read-only and workspace-write semantics observed; shell_environment_policy.include_only environment allow-listing observed; the dangerous flags --dangerously-bypass-approvals-and-sandbox and --dangerously-bypass-hook-trust are asserted absent from every sanctioned argv; --ephemeral, --ignore-user-config, and --skip-git-repo-check are used in hermetic probes; no built-in timeout exists so external wall-clock enforcement is the Adapter responsibility.",
+    "Typed OpenCode Adapter probe (EC-00-08): version probe via opencode --version; opencode run --pure --format json raw event stream with outcome classification from events (session.status idle, session.error, permission.denied) because exit codes are historically unreliable (issues 2489, 14551, 17854, 17978 recorded in the research report); permission policy injection with explicit denies that wins over a hostile repository opencode.json; --auto semantics observed (auto-approves only what is not explicitly denied); exact --dir snapshot plus --pure and isolated HOME/XDG/config/data so sessions, auth, plugins, and MCP tokens are never inherited; no built-in timeout so external enforcement is required; OPENCODE_DISABLE_AUTOUPDATE=1 fixed.",
+    "Timeout, cancellation, and process-tree cleanup (EC-00-08, EC-00-10): the Adapter enforces wall-time, output-byte, and process-count limits and cancels by killing the whole process tree externally - Windows Job Objects with JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE, assignment before start, and TerminateJobObject, and Linux process groups via start_new_session and os.killpg. A zero-survivor descendant scan after fencing is mandatory because vendor cleanup is known-imperfect (Codex issues 4337, 4726, 5258, and 27758 with 27758 reproduced in 2026-06; opencode signal and exit-code bugs 17978). Negative probes reproduce the orphan scenario and assert zero survivors on both platforms.",
+    "Bounded output and redaction (EC-00-08, XSEC-01): every captured stream is bounded by bytes and stored with Hermes-side redaction using exact canaries plus provider-specific patterns; vendor sanitizers such as opencode --sanitize are not substitutes (known redaction bugs 30709 and 25098); injected secret canaries and fake sensitive values (hostname, username, absolute path, environment value, token) never appear in any child environment, log, event, artifact, screenshot, or the Execution Report.",
+    "Capability-enforcement evidence with four states and a combination regression (EC-00-10, XPLAT-01; decision D6): for every CapabilityProfile field - filesystem read and write roots plus path escape, executables allowlist plus no shell strings, network loopback and egress boundary, secrets environment allow-list plus canary, browser isolated profile plus MCP tool allow and cleanup, resources timeout and output cap and cancel and process tree, side effects Git and ports and child processes and external writes - record a dated four-state verdict per platform: ENFORCED when a violation is actually blocked, OBSERVED_ONLY when behavior is controlled but OS-level enforcement is not provable, UNSUPPORTED_RUNTIME when requesting this hard capability must fail closed, or NOT_APPLICABLE. One e2e-browser combination regression asserts the composed profile does not re-widen permissions. Hard network deny on non-admin Windows is UNSUPPORTED_RUNTIME; a Stage requesting network deny fails closed and never starts an agent with credentials or secrets. Loopback mock-provider E2E is labeled no public-network dependency and not an OS-level egress-block proof. Windows Sandbox or VM may be documented as optional operator-host hardening but is never a hosted-CI guarantee (decision D5).",
+    "OpenCode plus Chrome DevTools MCP isolated E2E (EC-00-09; decision D4): two lines. Line one, required PR CI with fake Adapters, no credentials, and no public network, verifies no-credential structured failure, permission denial, timeout and cancel, process-tree cleanup, output redaction, and real-runner guard rejection with the closed MCP configuration. Line two, the controlled Verification Sandbox, required once and triggered manually or by RC, accepts all seven Host inputs only after the Custodian resolves Candidate/Integration Candidate and tree identities, materializes and verifies a no-.git read-only snapshot whose source-tree digest equals the Integration-Candidate tree digest, issues its static pre-execution tool identity record, binding, and single-use gate, and delivers the snapshot as a read-only validation handoff to Host while exposing it only as the source tree usable by the Sandbox Agent child. Before process creation the Host may only read, inspect, and validate the handoff, all three authorization artifacts, and their matching seven-input digests; it never executes the snapshot as a separate source or performs Git, snapshot materialization, copy, transformation, or mutation. Only then it provisions/verifies assets, performs version/capability probes, and writes separate post-execution observations under state-root. It then uses a local loopback mock provider to drive OpenCode to Chrome DevTools MCP through only the selected locked CfT executable and closed loopback argv to a local fixture page. It asserts loopback-only MCP reachability, no Git authority, no secret canary, MCP usage statistics/CrUX/update controls, temporary MCP profile cleanup, and all child processes exited. This is not a Chrome- or OS-level egress-denial claim. If OpenCode cannot connect to a local mock provider through a supported mechanism, tools/list success is never presented as EC-00-09 evidence; the Executor stops and submits a Contract Change Request recording the real capability gap.",
+    "Hostile-repository, argument-injection, path-escape, and secret-canary negatives (EC-00-10, XSEC-01): fixtures include a hostile repository shipping opencode.json that attempts to widen permissions with a deny canary assertion proving the injected policy wins; the .codex/config.toml trust-gate behavior; git hooks, aliases, core.hooksPath, and LFS-smudge with GIT_CONFIG_NOSYSTEM and GIT_CONFIG_GLOBAL hygiene; .env canaries denied by default; prompt strings attempting shell injection into controlled argv with never a shell string; path escape via dot-dot, absolute paths, symlink, junction, reparse point, case collision, and 8.3 names into and out of authorized roots; secret canaries injected into the host environment that must never reach any child, log, artifact, or report; and network-egress canary URLs that must be unreachable in the observed environment, with the documented two-state verdict: where an OS-level egress block is enforceable the canary is blocked (ENFORCED); where it is not enforceable (non-admin Windows; Linux without root or CAP_SYS_ADMIN) the canary unreachability is recorded as OBSERVED_ONLY and a hard network-deny profile fails closed as UNSUPPORTED_RUNTIME - the canary test never claims OS-level blocking without the blocking demonstration.",
+    "Two-register platform claims and three-register evidence (decision D5): compatibility-targets.md records, dated, vendor documentation, official artifact/SHA evidence, and the project probe matrix; differences are preserved, not collapsed. At this planning revision, official OpenAI documentation describes both native Windows sandbox workflows and WSL2 as an alternate Linux path. That vendor fact is distinct from this project's sealed-probe acceptance: Windows Codex remains UNSUPPORTED_RUNTIME solely because no independently sourced exact Authenticode signer identity is pinned, while OpenCode, Node, and Chrome DevTools MCP have their separately recorded native Windows artifact facts. Project-verified support holds only for the exact artifacts, SHAs, dates, runners, and probe results and no general platform promise is made. The Windows capability table is per item: binary start, version and capability probing, timeout, cancellation, process-tree cleanup, and temporary profile are SUPPORTED only when both-platform probes pass; hard network deny without administrator rights on windows-latest is UNSUPPORTED_RUNTIME.",
+    "00-05/00-06 independence (AC-11): slice-00-05 is merged at 102d08f814b6c0a939662e6c488870310a97c1ee (PR #11) and is part of this READY contract's Base. The append-only post-merge downstream decision audit revisions 1 through 10 record the path/fixture independence proof, corrective planning history, accepted ADRs, revision-12 Interface closure, rejected revision-13 review, and revision-14 READY correction/review/worktree closure. 00-06 spike paths tests/spike/security, capability, e2e, and adversarial-security are disjoint from the merged 00-05 tests/spike directories; shared planning files are edited only serially, and no concurrent shared-file edit is in play.",
+    "Dispositions and 00-07 handover: every spike component (provision harness, adapter probes, capability probes, mock provider, E2E harness, and adversarial fixtures) carries an explicit SPIKE-EXPERIMENTAL marker and a DISPOSITION retain-or-delete record; nothing becomes production foundation without an explicit Slice 00-07 adoption. The research report and compatibility-targets.md record pinned versions and SHAs with evidence sources, three-register platform evidence, the four-state capability matrix, fixed decisions D1-D6, accepted ADR-0029 and ADR-0030, residual risks, and the 00-07 handover inputs (probe command inventory, fixture inventory, capability verdicts, and disposition inventory).",
+    "Documentation: docs/research/00-06-agent-runtime-security-research.md is part of this planning change; docs/development/compatibility-targets.md gains the Codex, OpenCode, Node, Chrome DevTools MCP, and Chrome for Testing pins, the capability matrix, and the dispositions; accepted ADR-0029 and ADR-0030 are recorded at docs/adr/0029-confine-browser-tool-runtime.md and docs/adr/0030-confine-agent-cli-tool-runtime.md (attestation engadr_0029-0030_20260813_01); the historical proposed drafts remain in the slice directory; the slices index is updated.",
+    "PR CI and controlled-real execution are separate, auditable collections. Ordinary PR CI continues to run the existing full offline pytest suite on Windows and Linux; 00-06 adds no workflow. The 00-06 real-tool runners are standalone host-runner CLIs (tools_bootstrap.py, controlled_e2e.py) that are never pytest-collected and cannot be started by a selector alone; every real-runner guard directly invoked with no pre-execution record, no single-use host gate, or no matching immutable run binding returns a stable rejection before process creation, not a skip. The Git Custodian, not a Host or Agent child, resolves Candidate/Integration Candidate and tree identities; materializes and verifies a controlled no-.git snapshot whose source-tree digest equals the Integration-Candidate tree digest; delivers it as a read-only validation handoff to Host while exposing it only as the source tree usable by the Sandbox Agent child; then creates the static immutable pre-execution tool record, Custodian-owned immutable run binding, and single-use host gate in that order. The Sandbox Host only reads, inspects, and validates the delivered handoff plus all three artifacts and seven inputs before a real process, has no Git or snapshot materialization/copy/transformation/mutation/separate-source-execution authority, and writes observations only afterward. A test selector or marker is collection hygiene, never an authorization boundary.",
+    "Three non-overlapping entry points use exact parameters. (1) fake-only-gate runs pytest -m fake_only and asserts that each real-runner guard rejects without starting a tool. (2) tools-bootstrap, tools-cutoff-verify, and tools-selfcheck invoke src/hermes_pipeline/runtime_broker/tools_bootstrap.py with exactly --state-root <STATE_ROOT>, --candidate-sha <CANDIDATE_SHA>, --source-tree-digest <SOURCE_TREE_DIGEST>, --tool-lock <TOOL_LOCK>, --tool-record <TOOL_RECORD>, --host-gate <HOST_GATE>, and --run-binding <RUN_BINDING>. (3) controlled-e2e invokes src/hermes_pipeline/runtime_broker/controlled_e2e.py with the same seven parameters. Before any real binary, provisioning, --version, or capability probe, the Git Custodian resolves the exact Candidate, exact Integration Candidate, and their tree identities; materializes immutable no-.git controlled snapshot from the exact Integration Candidate; verifies the snapshot's source-tree digest exactly equals the Integration-Candidate tree digest; and delivers it as a read-only validation handoff to Host while exposing it only as the source tree usable by the Sandbox Agent child. The Custodian then creates immutable pre-execution-tool-record.json outside the snapshot from only tool-lock, selected-platform, Candidate, Integration Candidate, that verified source-tree digest, and other locked static data. Its RFC 8785 identity digest is tool_record_digest. The Custodian then creates immutable run-binding.json outside the snapshot, binding Planning Base SHA, Candidate SHA/tree digest, Integration Base SHA, exact Integration Candidate SHA/tree digest, the same source-tree digest, tool-lock digest, tool-record identity digest, Custodian origin, run id, issued/expiry timestamps, and one-time nonce, then issues an owner-protected single-use gate carrying the canonical run-binding digest. The Host may only read, inspect, and validate snapshot handoff, record, binding, gate, and all seven inputs; --source-tree-digest must exactly equal the verified Custodian snapshot/Integration-Candidate tree digest. It may not execute the snapshot as a separate source or perform Git, materialize, copy, transform, or mutate it. Only then may it provision/verify assets and run version/capability probes, after which it writes <state-root>/tools/tool-observations.json referencing both digests. The pre-execution record excludes version output, capability-probe result, observed timestamps, asset-verification result, and run-binding digest; observations never rewrite it. Any mismatched, expired, replayed, failed runtime observation, or changed static identity/Candidate/Integration Candidate invalidates authorization: the Custodian must issue a new snapshot/record/binding/gate and the complete real run repeats. Host enforcement requires a lower-privileged child identity or OS sandbox proof; absent that proof, controlled real-tool execution is UNSUPPORTED_RUNTIME and does not start. No 00-06 workflow is added; a dedicated controlled-line workflow remains a CCR.",
+    "EC-00-09 Git-authority isolation uses snapshot-only evidence: the Git Custodian resolves the exact Integration Candidate, materializes a controlled source copy with no .git file or directory, verifies its source-tree digest equals the bound Integration-Candidate tree digest, and delivers it as a read-only validation handoff to Host while exposing it only as source tree usable by the Sandbox Agent child; repository CI and the Git Custodian legitimately use controlled Git fixtures before any Agent child exists. The Sandbox Host may only read, inspect, and validate the delivered snapshot's no-.git condition and Candidate/source-tree digest before launch; it has no Git, snapshot materialization, copy, transformation, mutation, or separate-source execution authority. Agent child cwd, HOME, XDG, and Git-config paths are under state-root; its executable allowlist contains no git or shell bypass. Hostile Git-write fixtures must prove the snapshot has no Git metadata, the real Candidate gitdir and common gitdir digests are unchanged, and no user global Git configuration is touched. A write-protected linked-worktree .git file is not an acceptable isolation mechanism."
+  ],
+  "out_of_scope": [
+    "Production role prompts, quality evaluation, or application-specific E2E",
+    "Any production permission system or Runtime Broker production implementation - 00-06 only probes and records; the Executor never edits accepted ADRs",
+    "Changes to root pyproject.toml, root uv.lock, .python-version, the existing workflows or their checkers, schemas/, contracts/, src/hermes_pipeline/contracts/, accepted ADRs, or planning, review, evidence, and closeout records",
+    "Changes to src/hermes_pipeline/cli/, domain/, controller/, persistence/, stage_executor/, transport/, interaction/, operations/, repository/, delivery/, or artifacts/; only the empty skeleton src/hermes_pipeline/runtime_broker/ may receive disposable probe code with explicit dispositions",
+    "Introducing Node, npm, Chrome, Codex, or OpenCode into the root project or any production runtime dependency set",
+    "Real live-model runs, real provider credentials, real user accounts, real business sites, or public network after the provisioning stage",
+    "Browser or MCP alternatives beyond the decided chrome-devtools-mcp@1.7.0 (Playwright MCP and Puppeteer MCP are out of scope unless a human-approved superseding decision occurs)",
+    "Writing the 00-05 Closeout, recomputing historical content hashes, or revalidating 00-04 or 00-05 records",
+    "Windows Sandbox or VM provisioning in hosted CI (documented optional operator-host hardening only)",
+    "Slice 00-05 or 00-07 behavior; creating any new workflow file (the controlled sandbox line is documented as manual or RC commands with exact argv, keeping the workflow and checker paths closed)"
+  ],
+  "interfaces": [
+    "src/hermes_pipeline/runtime_broker/ (currently an empty skeleton): disposable typed Adapter probe code - subprocess launch with controlled argv, wall-time and byte and process limits, external process-tree kill (Windows Job Objects and Linux process groups), zero-survivor scan, and bounded redacted capture; SPIKE-EXPERIMENTAL plus DISPOSITION required; never presented as production foundation",
+    "tests/spike/security/ (new): typed Codex and OpenCode adapter probes, no-credential failure classification, timeout and cancel and process-tree and redaction tests, and the sealed tool-runtime provision harness",
+    "tests/spike/capability/ (new): per-CapabilityProfile-field four-state probes on both platforms, path-escape and executable and network and secrets and browser and resources and side-effect fixtures, and the e2e-browser combination regression",
+    "tests/spike/e2e/ (new): controlled Verification Sandbox line - local loopback mock provider, OpenCode to Chrome DevTools MCP to headless and isolated Chrome to local fixture page to cleanup; explicitly labeled not an OS-level egress-block proof",
+    "tests/spike/adversarial-security/ (new; name intentionally disjoint from the 00-05 tests/spike/adversarial path): hostile repository, argument injection, path escape, secret canary, network canary, self-update-unreachable, and orphan-process negatives",
+    "State-root tool directory (<state-root>/tools/): sealed Node/Codex/OpenCode/Chrome installs with owner-only access; Browser runtime at <state-root>/tools/browser-runtime/ via committed package-lock.json; provisioned once in the controlled online bootstrap, then the network cutoff applies",
+    "docs/adr/0029-confine-browser-tool-runtime.md and docs/adr/0030-confine-agent-cli-tool-runtime.md: accepted ADR texts for decisions D2 and D3 (attestation engadr_0029-0030_20260813_01); historical proposed drafts remain in this slice directory; the Executor never edits ADRs",
+    "docs/development/compatibility-targets.md: Codex, OpenCode, Node, Chrome DevTools MCP, and Chrome for Testing pins, three-register platform evidence, four-state capability matrix, and dispositions",
+    "The Executor may read every tracked file but may edit only the READY contract's permitted paths in the assigned worktree",
+    "src/hermes_pipeline/runtime_broker/tools_bootstrap.py and src/hermes_pipeline/runtime_broker/controlled_e2e.py: the only standalone real-tool runners. They require exactly --state-root, --candidate-sha, --source-tree-digest, --tool-lock, --tool-record, --host-gate, and --run-binding. Before any real binary, provisioning, version, or probe, the Git Custodian resolves Candidate/Integration Candidate and tree identities; materializes and verifies a no-.git read-only snapshot whose source-tree digest equals the bound Integration-Candidate tree digest; delivers it as a read-only validation handoff to Host while exposing it only as source tree usable by the Sandbox Agent child; creates the static immutable pre-execution tool record outside the child snapshot; computes its RFC 8785 identity digest; creates the immutable binding; and issues the single-use gate carrying that binding digest. The Verification Sandbox Host may only read, inspect, and validate the snapshot handoff plus the three read-only artifacts and all seven inputs before it launches an untrusted Agent child; it cannot execute the snapshot as a separate source or perform Git, snapshot materialization, copy, transformation, or mutation. Only afterward may the Host provision/verify assets and run version/probes, then write <state-root>/tools/tool-observations.json referencing both digests. The pre-execution record excludes runtime observations and is never backfilled. Any static identity, Candidate, Integration Candidate, verified snapshot digest, binding, or runtime-observation failure requires fail closure; static/binding/Integration Candidate changes require a new snapshot/record/binding/gate and complete rerun. Ordinary pytest collection runs the full offline suite and has no direct real-tool entry; the real-tool runners are standalone host-runner CLIs that are never pytest-collected."
+  ],
+  "binding_adrs": [
+    "ADR-0013",
+    "ADR-0015",
+    "ADR-0016",
+    "ADR-0018",
+    "ADR-0020",
+    "ADR-0024",
+    "ADR-0026",
+    "ADR-0029",
+    "ADR-0030"
+  ],
+  "permitted_paths": [
+    "tests/spike/security/",
+    "tests/spike/capability/",
+    "tests/spike/e2e/",
+    "tests/spike/adversarial-security/",
+    "tests/fixtures/security/",
+    "src/hermes_pipeline/runtime_broker/",
+    "docs/development/compatibility-targets.md",
+    "docs/research/00-06-agent-runtime-security-research.md",
+    "src/hermes_pipeline/runtime_broker/tools_bootstrap.py",
+    "src/hermes_pipeline/runtime_broker/controlled_e2e.py"
+  ],
+  "prohibited_actions": [
+    "Introduce Node, npm, Chrome, Codex, or OpenCode into the root project dependencies or any production runtime dependency set; change root pyproject.toml, root uv.lock, or .python-version without a human-approved ADR and Contract Change Request",
+    "Edit accepted ADR-0029 or ADR-0030; treat ADR acceptance as READY or Executor dispatch",
+    "Use npx with a latest tag, a moving dependency download, a system-preinstalled tool version, or any auto-update channel; allow OPENCODE_DISABLE_AUTOUPDATE to be unset or allow the Codex update command to be reachable in the sealed runtime",
+    "Claim a sealed per-tool result when its exact tool-lock rule is not met; never use a fuzzy publisher match, unpinned verifier, wrapper-only identity, preinstalled tool, latest, npx, or auto-update fallback. Windows Codex lacks a pinned independent signer in this revision and must remain UNSUPPORTED_RUNTIME for real sealed probes until an approved contract revision supplies one.",
+    "Rely on vendor cleanup for process-tree termination: external enforcement (Windows Job Objects, Linux process groups) plus a zero-survivor scan is mandatory; never present tools/list success as EC-00-09 evidence when the mock-provider chain cannot run",
+    "Run a real Codex, OpenCode, Chrome, bootstrap, or controlled-E2E runner in required PR CI or from ordinary pytest; use live models, real credentials, real user accounts, real business sites, or public network after controlled bootstrap. A real runner with no pre-execution record, no matching immutable run binding, no single-use host gate, missing seven inputs, invalid Custodian-delivered snapshot validation handoff, or absent host-isolation proof must fail before process creation. Host may only read/inspect/verify its handoff and must never execute the snapshot as a separate source or perform Git, snapshot materialization, copy, transformation, or mutation. Never pass post-execution observations as --tool-record or write/backfill the pre-execution record.",
+    "Launch Chrome except through the lock-selected CfT path and exactly the locked MCP argv/environment; use remote attachment, channel/profile selection, arbitrary Chrome/MCP arguments or configuration sources, --browser-url, --ws-endpoint, --auto-connect, --channel, --user-data-dir, --allow-unrestricted-paths, or --allowUnrestrictedPaths; claim that --isolated is OS isolation or that loopback policy proves OS egress denial; reuse node_modules across platforms",
+    "Execute repository-provided shell strings, or add ambient filesystem, Git, network, secret, or process authority",
+    "Weaken, skip, delete, or mark existing checks to make the Candidate pass",
+    "Present any spike component as production foundation without an explicit disposition or Slice 00-07 adoption",
+    "Modify the existing workflows or their checkers, schemas/, contracts/, accepted ADRs, or planning, review, evidence, and closeout records without a human-approved Contract Change Request",
+    "Claim a capability state of ENFORCED without a blocking demonstration, or silently downgrade a required hard capability instead of failing closed with UNSUPPORTED_RUNTIME",
+    "Write the 00-05 Closeout or recompute content_hash in historical planning, review, evidence, or closeout records",
+    "Commit, push, merge, rebase, reset, clean, stash, alter remotes, Git configuration, hooks, branches, tags, or the user working copy"
+  ],
+  "implications": {
+    "data": [
+      "Sealed tool installs and probe state live under disposable state-root tool directories inside the test environment; no runtime or real Workspace data is created",
+      "Mock-provider transcripts, screenshots, and structured results are bounded disposable evidence artifacts with explicit dispositions"
+    ],
+    "migration": [
+      "No production-state migration occurs; the spike defines no migration surface",
+      "The sealed tool runtimes are disposable and versioned with the spike; no update or rollback machinery is introduced beyond the provision-then-cutoff model"
+    ],
+    "compatibility": [
+      "compatibility-targets.md records the Codex 0.146.0, OpenCode 1.18.12, Node 22 patch, chrome-devtools-mcp@1.7.0, and Chrome for Testing pin (no_official_checksum; excluded from sealed hard gate; experimental target) with dated three-register platform evidence (vendor documentation, official artifact and SHA, project probe matrix) and the four-state capability matrix; official OpenAI documentation describes native Windows sandbox and WSL2 alternate-path capability, while project Windows Codex fail-closure is solely the unpinned independent Authenticode signer gap",
+      "Slice 00-04 integrated at 46798d86a2e48551a3a634e93d1e4dfe5cbf8786 (PR #9) and slice-00-05 merged at 102d08f814b6c0a939662e6c488870310a97c1ee (PR #11); this READY contract binds to 9cf24b876cc7422386ed54c277900ff1e3c2c2bf (PR #12) with independence and r6-r14 planning recorded in downstream audit revisions 1 through 10",
+      "Windows and Linux are both required for every platform-sensitive probe; macOS is not a support target"
+    ],
+    "security": [
+      "Untrusted Agent, repository, browser, provider, and user content never carries ambient authority (XSEC-01); every boundary is probed with deterministic negative fixtures",
+      "The sealed tool runtimes use clean HOME and environment allow-lists with no inherited user config, credentials, or Git authority; injected secret canaries never reach any child, log, artifact, or report",
+      "Process trees are killed externally as a unit (Windows Job Objects and Linux process groups) with a zero-survivor scan; hard network deny without OS-level enforcement fails closed as UNSUPPORTED_RUNTIME and never starts an agent with credentials or secrets"
+    ],
+    "documentation": [
+      "The research report docs/research/00-06-agent-runtime-security-research.md records evidence sources, versions, uncertainties, decisions D1-D6, the platform capability draft table, and open items",
+      "docs/development/compatibility-targets.md records the tool pins and accepted ADR-0029/0030; the slices index points at this planning package; revision-12 fixtures pin authorization JSON shapes"
+    ]
+  },
+  "acceptance_criteria": [
+    {
+      "criterion_id": "AC-01",
+      "trace_ids": [
+        "EC-00-09",
+        "XPLAT-01"
+      ],
+      "observable_result": "The sealed browser runtime is reconstructed from committed adjacent package.json/package-lock.json/.npmrc inputs: the Sandbox Host verifies their raw digests, name, exact chrome-devtools-mcp@1.7.0 pin, and SRI; byte-copies package inputs into a fresh standard state-root project and the verified npmrc only to its declared state-root userconfig. argv[0] is the locked-Node npm executable from tool-lock npm_executable_by_platform; ambient PATH npm is rejected. Controlled bootstrap uses exactly that executable with ci --ignore-scripts --audit=false --fund=false --update-notifier=false and the locked cache/userconfig/globalconfig; cutoff proof uses the same executable with ci --offline in a fresh project. The Host selects only the locked-platform CfT executable and constructs exactly the lock's loopback-only MCP argv/environment. --isolated means temporary MCP profile cleanup only. Node v22.23.2 passes exact SHA-256 and pinned-GPG-key verification. CfT is no_official_checksum and never satisfies a sealed hard gate.",
+      "verification_command_ids": [
+        "tools-bootstrap",
+        "tools-cutoff-verify",
+        "tools-selfcheck",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-02",
+      "trace_ids": [
+        "EC-00-08",
+        "XSEC-01"
+      ],
+      "observable_result": "Codex/OpenCode acquisition follows runnable tool-lock identities: Codex package archives pass exact SHA-256; Linux sigstore is supplemental; Windows Codex real probes are UNSUPPORTED_RUNTIME until an approved revision locks an independently sourced Authenticode signer identity. OpenCode uses exact platform npm packages selected by locked os/cpu fields, their SRI sha512 values, and traversal-safe extraction; wrapper-only and release/latest.yml identities never satisfy the gate. Missing evidence fails closed before a real process starts.",
+      "verification_command_ids": [
+        "tools-bootstrap",
+        "tools-cutoff-verify",
+        "probe-codex",
+        "probe-opencode",
+        "probe-codex-real",
+        "probe-opencode-real",
+        "spike-adversarial-security",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-03",
+      "trace_ids": [
+        "EC-00-08"
+      ],
+      "observable_result": "The typed Codex Adapter probe classifies version and capability detection, codex exec --json JSONL events, --output-last-message, --output-schema, stdin prompt, no-credential failure, and --sandbox and shell_environment_policy.include_only behavior; the dangerous bypass flags are absent from every sanctioned argv. The locked Linux real probe observes deterministic structured output, externally enforced timeout, cancellation, whole-tree cleanup, and zero survivors; the Windows real command returns UNSUPPORTED_RUNTIME before start.",
+      "verification_command_ids": [
+        "probe-codex",
+        "probe-codex-real",
+        "spike-security",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-04",
+      "trace_ids": [
+        "EC-00-08"
+      ],
+      "observable_result": "The typed OpenCode Adapter probe classifies outcomes from opencode run --pure --format json events (session.status idle, session.error, permission.denied) and never from exit codes alone; injected permission policy with explicit denies wins over a hostile repository opencode.json; --auto never overrides an explicit deny; --pure, exact --dir snapshot, and isolated HOME/XDG/config/data hold. The locked real probe observes deterministic structured output, externally enforced timeout, cancellation, whole-tree cleanup, and zero survivors.",
+      "verification_command_ids": [
+        "probe-opencode",
+        "probe-opencode-real",
+        "spike-adversarial-security",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-05",
+      "trace_ids": [
+        "EC-00-08",
+        "EC-00-10"
+      ],
+      "observable_result": "Timeout, cancellation, and process-tree cleanup are externally enforced: wall-time, byte, and process-count limits hold; Windows Job Objects and Linux process groups kill the whole tree; a zero-survivor scan after fencing finds no descendants including the known vendor-orphan scenarios.",
+      "verification_command_ids": [
+        "spike-capability",
+        "spike-adversarial-security",
+        "fake-only-gate",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-06",
+      "trace_ids": [
+        "EC-00-08",
+        "XSEC-01"
+      ],
+      "observable_result": "Output is bounded and redacted Hermes-side: byte caps hold; injected secret canaries and fake sensitive values (hostname, username, absolute path, environment value, token) never appear in any child environment, log, event, artifact, screenshot, or the Execution Report; vendor sanitizers are not relied upon.",
+      "verification_command_ids": [
+        "spike-security",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-07",
+      "trace_ids": [
+        "EC-00-10",
+        "XPLAT-01"
+      ],
+      "observable_result": "Per-CapabilityProfile-field four-state verdicts (ENFORCED, OBSERVED_ONLY, UNSUPPORTED_RUNTIME, NOT_APPLICABLE) are produced on both platforms with dated evidence, plus one e2e-browser combination regression proving no permission re-widening; hard network deny is UNSUPPORTED_RUNTIME on non-admin Windows and on Linux without root or CAP_SYS_ADMIN, because --offline flags and cutoff markers are never evidence of an OS-level egress block; filesystem enforcement by the current user's own ACL is OBSERVED_ONLY by default because an ACL cannot block reads by the same user's own agent processes, and ENFORCED is claimed only when a lower-privileged identity or an OS sandbox demonstrably blocks the violation; a Stage requesting network deny fails closed; loopback E2E is labeled not an OS-level egress-block proof.",
+      "verification_command_ids": [
+        "spike-capability",
+        "spike-e2e",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-08",
+      "trace_ids": [
+        "EC-00-10",
+        "XSEC-01"
+      ],
+      "observable_result": "Negative suite rejects hostile repository configuration, argv injection, path escape, secret inheritance, and Git mutation. Git Custodian alone resolves the Integration Candidate, materializes/verifies its no-.git read-only source snapshot, and delivers it as a read-only validation handoff to Host while exposing it only as the source tree usable by the Sandbox Agent child; Host may only read/inspect/verify delivery identity, no-.git condition, and digest and must not execute the snapshot as a separate source or use Git/materialize/copy/transform/mutate it. Hostile Git-write attempts prove no snapshot metadata, a snapshot source-tree digest equal to the bound Integration-Candidate tree digest, unchanged real Candidate gitdir/common-gitdir digests, and untouched user global config. A linked-worktree .git file protected by ACL or mode is never accepted as evidence. Network verdict wording remains ENFORCED only with OS-level proof; otherwise OBSERVED_ONLY and hard profiles fail closed.",
+      "verification_command_ids": [
+        "spike-adversarial-security",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-09",
+      "trace_ids": [
+        "EC-00-09"
+      ],
+      "observable_result": "A Sandbox Host-only controlled-e2e entry accepts exactly the seven inputs. Snapshot path is dirname(abspath(--tool-record))/integration-candidate-snapshot/. host-gate.json is exactly schema_version 1 plus run_binding_digest; replay uses <state-root>/tools/used-host-gates/<digest-hex> atomic create-new. Record and binding are flat schema_version 1 objects with custodian_origin git-custodian. Isolation proof must pass or the runner exits 1 UNSUPPORTED_RUNTIME before start. Reject missing/invalid/replayed authorization with exit 1 DEPENDENCY_UNAVAILABLE and zero children. Custodian issues snapshot, record, binding, and gate; Host only validates. Child cwd is the snapshot; Host never copies it. Then Host provisions, probes, and writes tool-observations.json with schema_version 1 and typed result envelopes. E2E wiring is mock provider on the reserved loopback port, locked MCP argv, and OpenCode config under state-root outside the snapshot. tools/list is never EC-00-09 evidence. CfT remains experimental/non-sealed.",
+      "verification_command_ids": [
+        "controlled-e2e",
+        "spike-e2e",
+        "fake-only-gate",
+        "offline-pytest"
+      ]
+    },
+    {
+      "criterion_id": "AC-10",
+      "trace_ids": [
+        "EC-00-08",
+        "XPLAT-01",
+        "XEVAL-01"
+      ],
+      "observable_result": "PR CI runs the existing full offline pytest suite on Windows and Linux; 00-06 adds no workflow. Real-tool runners are never pytest-collected. A real-runner guard with missing/invalid/replayed record, gate, or binding exits 1, prints one JSON object {ok:false,code:DEPENDENCY_UNAVAILABLE}, and starts zero child processes. Missing isolation proof exits 1 {ok:false,code:UNSUPPORTED_RUNTIME}. A pytest skip is never this oracle.",
+      "verification_command_ids": [
+        "frozen-sync",
+        "fake-only-gate",
+        "offline-version",
+        "offline-format",
+        "offline-lint",
+        "offline-type",
+        "offline-pytest",
+        "offline-contracts-check",
+        "offline-contracts-drift",
+        "offline-architecture",
+        "offline-docs-check",
+        "offline-docs-negative",
+        "offline-schema-negative",
+        "offline-workflow-policy",
+        "offline-artifact",
+        "diff-check",
+        "changed-paths"
+      ]
+    },
+    {
+      "criterion_id": "AC-11",
+      "trace_ids": [
+        "XPLAT-01"
+      ],
+      "observable_result": "00-05 and 00-06 independence: the contract is bound to 9cf24b876cc7422386ed54c277900ff1e3c2c2bf; append-only downstream-audit.md revisions 1 through 10 record disjoint spike paths, serial shared-file edits, ADR acceptance, r12 Interface pins, rejected r13 review, and r14 READY correction/review/worktree closure; no shared-file concurrent edits.",
+      "verification_command_ids": [
+        "offline-pytest",
+        "changed-paths",
+        "diff-check"
+      ]
+    },
+    {
+      "criterion_id": "AC-12",
+      "trace_ids": [
+        "XOPS-01",
+        "XSEC-01"
+      ],
+      "observable_result": "Every spike component carries an explicit disposition; the research report and compatibility-targets.md record pinned versions, three-register evidence, the four-state matrix, accepted ADR-0029/0030, residual risks, and 00-07 handover inputs; no spike code is presented as production foundation; READY authority comes from this reviewed contract and assigned worktree, not ADR acceptance alone.",
+      "verification_command_ids": [
+        "unit-check",
+        "docs-check"
+      ]
+    }
+  ],
+  "required_tests": [
+    "Sealed browser-runtime tests: committed adjacent package.json/package-lock.json/.npmrc digest/name/exact-pin/SRI checks; byte-preserving standard-project and state-root-npmrc materialization; explicit clean state-root HOME/XDG/profile/config/cache environment with inherited NPM_CONFIG_*, credentials, registry/proxy/certificate overrides, and project/user/global npm config rejected; controlled online exact npm ci --ignore-scripts --audit=false --fund=false --update-notifier=false argv; fresh exact npm ci --offline --ignore-scripts --audit=false --fund=false --update-notifier=false reconstruction after cutoff; Node exact SHA-256 plus pinned-GPG-key verification; no npx/latest/range/script/cache-miss/cross-platform reuse. CfT remains no_official_checksum experimental evidence only.",
+    "Per-asset tool-lock tests: Codex exact archive SHA-256 and OpenCode runnable platform package SRI sha512 plus os/cpu selection and traversal-safe extraction. A wrapper/release archive/latest.yml cannot satisfy a runnable identity. Linux sigstore is supplemental only; Windows Codex must fail closed as UNSUPPORTED_RUNTIME until an approved revision pins an independently sourced Authenticode signer identity.",
+    "Codex adapter probe tests: --json JSONL event stream, --output-last-message, --output-schema, stdin prompt, no-credential failure classification, --sandbox semantics, shell_environment_policy.include_only, dangerous bypass flags absent, external wall-clock enforcement",
+    "OpenCode adapter probe tests: --pure --format json event classification (session.status idle, session.error, permission.denied) not exit codes, injected permission policy with explicit denies winning over hostile opencode.json, --auto not overriding explicit denies, exact --dir snapshot, isolated HOME/XDG/config/data",
+    "Timeout, cancellation, and process-tree tests: external wall-time, byte, and process-count limits; Windows Job Objects and Linux process-group kill; zero-survivor scan after fencing including vendor-orphan repro scenarios",
+    "Redaction and bounded-output tests: byte caps; injected secret canaries and fake sensitive values absent from child environments, logs, events, artifacts, screenshots, and the Execution Report; vendor sanitizers not relied upon",
+    "Capability-field four-state tests: per CapabilityProfile field with blocking demonstrations for ENFORCED states on both platforms; e2e-browser combination regression; network deny fail-closed mapping; loopback E2E labeling",
+    "Adversarial negative tests: hostile opencode.json permission widening with deny canary, .codex/config.toml trust gate, git hooks and aliases and core.hooksPath and LFS with GIT_CONFIG hygiene, .env canaries, argument injection into controlled argv, path escape via dot-dot and absolute and symlink and junction and reparse point and case collision and 8.3, secret canary inheritance, and network-egress canary unreachability",
+    "Controlled Verification Sandbox E2E tests: mock-provider-driven OpenCode to Chrome DevTools MCP only through the selected locked CfT executable and closed Host-built --headless/--isolated/--executable-path/loopback-allowlist/--no-usage-statistics/--no-performance-crux argv plus CHROME_DEVTOOLS_MCP_NO_UPDATE_CHECKS=1; reject remote attach, channel/profile, arbitrary argument, config, and unlisted-override attempts; Custodian-delivered no-.git snapshot as Host read-only validation handoff and only Sandbox Agent child source tree, with Host read/inspect/verify-only and no Git/no-copy/no-separate-source-execution authority, loopback-only MCP reachability, no canary leak, temporary MCP profile cleaned, all children exited; do not claim Chrome or OS egress denial; tools/list never substitutes",
+    "Platform reproducibility tests: identical results on Windows and Linux with LF and UTF-8 output, no timestamps or paths, and PYTHONDONTWRITEBYTECODE=1; the unchanged canonical offline command set passes",
+    "Independence and rebind tests: the contract and append-only downstream decision audit revisions 1, 2, 3, and 4 bind to the post-00-05 origin/main 9cf24b876cc7422386ed54c277900ff1e3c2c2bf with the recorded 00-05/00-06 path and fixture independence proof; a DRAFT or READY bound to a pre-00-05-merge Base fails",
+    "Disposition inventory tests: every spike module and test carries an SPIKE-EXPERIMENTAL marker and a DISPOSITION retain-or-delete record; accepted ADR-0029 and ADR-0030 remain unedited; authorization goldens in slice fixtures/ reject extra fields and runtime fields",
+    "Fake-only collection and guard tests: PR CI runs the full offline pytest suite; fake-only-gate runs pytest -m fake_only on tests/spike/security/test_fake_only_gate.py and asserts each standalone real-runner guard, invoked with no pre-execution record, no host gate, or no run binding, exits 1 with {ok:false,code:DEPENDENCY_UNAVAILABLE} and zero child processes",
+    "Entry-point boundary tests: tools-bootstrap/cutoff/selfcheck and controlled-e2e reject any missing, mismatched, expired, or replayed --state-root, --candidate-sha, --source-tree-digest, --tool-lock, --tool-record, --host-gate, or --run-binding before provisioning or probe creation. Before any real binary, provisioning, version, or probe, the Custodian resolves Candidate/Integration Candidate and tree identities; materializes and verifies a no-.git controlled snapshot whose source-tree digest exactly equals the Integration-Candidate tree digest; and delivers it as a read-only validation handoff to Host while exposing it only as source tree usable by the Sandbox Agent child. The Custodian-issued immutable pre-execution record outside that snapshot must contain only static tool-lock/selected-platform/Candidate/Integration-Candidate/verified-source-tree identity and have an RFC 8785 digest equal to run_binding.tool_record_digest; it must exclude version output, capability-probe result, observed timestamp, asset-verification result, and run-binding digest. The Custodian then issues the run binding and a single-use gate carrying its canonical digest; the Host may only read, inspect, and validate the handoff, all three artifacts, and all seven inputs, and must not execute the snapshot as a separate source or perform Git, snapshot materialization, copy, transformation, or mutation. Only post-execution <state-root>/tools/tool-observations.json may contain asset verification, version/probe, and observed-time results, while referencing both digests and never rewriting the pre-execution record. A changed static identity, binding, or Integration Candidate requires a new snapshot/record/binding/gate plus full rerun; a failed runtime result fails closed. The Sandbox Host proves lower-privilege/OS-sandbox isolation; without that proof, real execution is UNSUPPORTED_RUNTIME.",
+    "Tool-lock identity tests: every provisioned asset matches its exact committed URL, name, and available checksum mechanism; package.json and package-lock.json raw digests match tool-lock.json; browser project materialization uses no unverified rename/synthesis; CfT and any no_official_checksum asset is never claimed sealed or officially verified; npm SRI is recorded as registry trust, not independent code signature.",
+    "Git-authority isolation tests: Git Custodian resolves the exact Integration Candidate, materializes/verifies a controlled source snapshot, delivers it as a read-only validation handoff to Host, and exposes it only as source tree usable by the Sandbox Agent child; it proves the no-.git condition and source-tree digest exactly equal the bound Integration-Candidate tree digest. The Host may only read/inspect/verify the handoff and has no Git, snapshot materialization, copy, transformation, mutation, or separate-source execution authority. Agent child runs under a lower-privileged identity or OS sandbox with HOME/XDG/Git-config under state-root and no git/shell bypass; hostile Git fixtures fail while real Candidate gitdir/common-gitdir digests and user global Git config remain unchanged. Linked-worktree .git ACL/mode protection is explicitly rejected as evidence."
+  ],
+  "demonstration": "On the exact re-bound Candidate, Windows and Linux PR jobs run the full offline pytest suite with no host gate, pre-execution record, run binding, real tool, credential, or public network; the fake-only-gate entry verifies that each real-runner guard rejects before process creation when the pre-execution record, gate, or binding is absent or invalid. A separately controlled Git Custodian resolves the exact Candidate/Integration Candidate and tree identities, materializes/verifies a no-.git read-only source snapshot from the exact Integration Candidate whose source-tree digest equals the bound Integration-Candidate tree digest, delivers it as a read-only validation handoff to Host, and exposes it only as the source tree usable by the Sandbox Agent child. Before any real binary, provisioning, version, or capability probe, the Custodian issues a read-only static pre-execution tool record from tool-lock/selected-platform/Candidate/Integration-Candidate/verified-source-tree data, computes its RFC 8785 digest, creates the immutable binding, and issues the single-use gate carrying the binding digest. The binding records Planning Base, Candidate/tree, Integration Base, Integration Candidate/tree, that exact source-tree digest, tool-lock/tool-record identity digests, origin, run, expiry, and nonce. The Host may only read, inspect, and validate the snapshot handoff, record/binding/gate triple, and seven inputs; it has no Git, snapshot materialization, copy, transformation, mutation, or separate-source execution authority; only then validates sealed assets and runs the E2E, writing separate post-execution observations with both digests plus asset/version/probe/timestamp results. Any static identity, binding, or Integration Candidate change causes a new snapshot/record/binding/gate and full rerun; runtime mismatch/failure fails closed. The E2E records CfT as experimental/non-sealed and drives local mock-provider OpenCode to MCP only through the selected locked CfT executable and closed loopback argv/environment; --isolated means a temporary MCP profile and the E2E makes no Chrome/OS egress-denial claim. Any missing signer identity, authorization proof, source identity, or boundary result fails closed rather than being represented as evidence.",
+  "verification_commands": [
+    {
+      "command_id": "frozen-sync",
+      "argv": [
+        "uv",
+        "sync",
+        "--frozen",
+        "--all-groups",
+        "--offline"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 600000
+    },
+    {
+      "command_id": "unit-check",
+      "argv": [
+        "uv",
+        "run",
+        "pytest",
+        "-m",
+        "fake_only"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 600000
+    },
+    {
+      "command_id": "tools-bootstrap",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "src/hermes_pipeline/runtime_broker/tools_bootstrap.py",
+        "--state-root",
+        "<STATE_ROOT>",
+        "--candidate-sha",
+        "<CANDIDATE_SHA>",
+        "--source-tree-digest",
+        "<SOURCE_TREE_DIGEST>",
+        "--tool-lock",
+        "docs/roadmap/phase-00-foundation/slices/00-06-agent-runtime-security-spikes/tool-lock.json",
+        "--tool-record",
+        "<TOOL_RECORD>",
+        "--host-gate",
+        "<HOST_GATE>",
+        "--run-binding",
+        "<RUN_BINDING>"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 600000
+    },
+    {
+      "command_id": "tools-cutoff-verify",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "src/hermes_pipeline/runtime_broker/tools_bootstrap.py",
+        "verify",
+        "--state-root",
+        "<STATE_ROOT>",
+        "--candidate-sha",
+        "<CANDIDATE_SHA>",
+        "--source-tree-digest",
+        "<SOURCE_TREE_DIGEST>",
+        "--tool-lock",
+        "docs/roadmap/phase-00-foundation/slices/00-06-agent-runtime-security-spikes/tool-lock.json",
+        "--tool-record",
+        "<TOOL_RECORD>",
+        "--host-gate",
+        "<HOST_GATE>",
+        "--run-binding",
+        "<RUN_BINDING>"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 300000
+    },
+    {
+      "command_id": "tools-selfcheck",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "src/hermes_pipeline/runtime_broker/tools_bootstrap.py",
+        "selfcheck",
+        "--state-root",
+        "<STATE_ROOT>",
+        "--candidate-sha",
+        "<CANDIDATE_SHA>",
+        "--source-tree-digest",
+        "<SOURCE_TREE_DIGEST>",
+        "--tool-lock",
+        "docs/roadmap/phase-00-foundation/slices/00-06-agent-runtime-security-spikes/tool-lock.json",
+        "--tool-record",
+        "<TOOL_RECORD>",
+        "--host-gate",
+        "<HOST_GATE>",
+        "--run-binding",
+        "<RUN_BINDING>"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "probe-codex",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pytest",
+        "tests/spike/security/test_codex_adapter_probe.py",
+        "-m",
+        "fake_only"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 300000
+    },
+    {
+      "command_id": "probe-opencode",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pytest",
+        "tests/spike/security/test_opencode_adapter_probe.py",
+        "-m",
+        "fake_only"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 300000
+    },
+    {
+      "command_id": "probe-codex-real",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "src/hermes_pipeline/runtime_broker/tools_bootstrap.py",
+        "probe-codex",
+        "--state-root",
+        "<STATE_ROOT>",
+        "--candidate-sha",
+        "<CANDIDATE_SHA>",
+        "--source-tree-digest",
+        "<SOURCE_TREE_DIGEST>",
+        "--tool-lock",
+        "docs/roadmap/phase-00-foundation/slices/00-06-agent-runtime-security-spikes/tool-lock.json",
+        "--tool-record",
+        "<TOOL_RECORD>",
+        "--host-gate",
+        "<HOST_GATE>",
+        "--run-binding",
+        "<RUN_BINDING>"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 300000
+    },
+    {
+      "command_id": "probe-opencode-real",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "src/hermes_pipeline/runtime_broker/tools_bootstrap.py",
+        "probe-opencode",
+        "--state-root",
+        "<STATE_ROOT>",
+        "--candidate-sha",
+        "<CANDIDATE_SHA>",
+        "--source-tree-digest",
+        "<SOURCE_TREE_DIGEST>",
+        "--tool-lock",
+        "docs/roadmap/phase-00-foundation/slices/00-06-agent-runtime-security-spikes/tool-lock.json",
+        "--tool-record",
+        "<TOOL_RECORD>",
+        "--host-gate",
+        "<HOST_GATE>",
+        "--run-binding",
+        "<RUN_BINDING>"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 300000
+    },
+    {
+      "command_id": "spike-security",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pytest",
+        "tests/spike/security",
+        "-m",
+        "fake_only"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 600000
+    },
+    {
+      "command_id": "spike-capability",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pytest",
+        "tests/spike/capability",
+        "-m",
+        "fake_only"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 600000
+    },
+    {
+      "command_id": "spike-e2e",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pytest",
+        "tests/spike/e2e",
+        "-m",
+        "fake_only"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 600000
+    },
+    {
+      "command_id": "spike-adversarial-security",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pytest",
+        "tests/spike/adversarial-security",
+        "-m",
+        "fake_only"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 600000
+    },
+    {
+      "command_id": "controlled-e2e",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "src/hermes_pipeline/runtime_broker/controlled_e2e.py",
+        "--state-root",
+        "<STATE_ROOT>",
+        "--candidate-sha",
+        "<CANDIDATE_SHA>",
+        "--source-tree-digest",
+        "<SOURCE_TREE_DIGEST>",
+        "--tool-lock",
+        "docs/roadmap/phase-00-foundation/slices/00-06-agent-runtime-security-spikes/tool-lock.json",
+        "--tool-record",
+        "<TOOL_RECORD>",
+        "--host-gate",
+        "<HOST_GATE>",
+        "--run-binding",
+        "<RUN_BINDING>"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 600000
+    },
+    {
+      "command_id": "docs-check",
+      "argv": [
+        "uv",
+        "run",
+        "python",
+        "scripts/check_documentation.py"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-version",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "-m",
+        "hermes_pipeline.cli",
+        "--version"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-contracts-check",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "-m",
+        "hermes_pipeline.cli",
+        "contracts",
+        "check"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-contracts-drift",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "-m",
+        "hermes_pipeline.cli",
+        "contracts",
+        "drift-check"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-architecture",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "-m",
+        "hermes_pipeline.cli",
+        "architecture",
+        "check"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-format",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "ruff",
+        "format",
+        "--check",
+        "."
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-lint",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "ruff",
+        "check",
+        "."
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-type",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pyright"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 180000
+    },
+    {
+      "command_id": "offline-pytest",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pytest"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 600000
+    },
+    {
+      "command_id": "offline-docs-check",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "scripts/check_documentation.py"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-docs-negative",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "scripts/check_documentation.py",
+        "--self-test-negative"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-schema-negative",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "scripts/check_schemas.py",
+        "--self-test-negative"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-workflow-policy",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "scripts/check_documentation.py",
+        "--check-workflows"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    },
+    {
+      "command_id": "offline-artifact",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "python",
+        "scripts/check_repository_artifacts.py"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 30000
+    },
+    {
+      "command_id": "diff-check",
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 30000
+    },
+    {
+      "command_id": "changed-paths",
+      "argv": [
+        "git",
+        "status",
+        "--short"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 30000
+    },
+    {
+      "command_id": "fake-only-gate",
+      "argv": [
+        "uv",
+        "run",
+        "--offline",
+        "pytest",
+        "tests/spike/security/test_fake_only_gate.py",
+        "-m",
+        "fake_only"
+      ],
+      "working_directory": ".",
+      "timeout_ms": 120000
+    }
+  ],
+  "required_evidence": [
+    "Exact Base and re-bound Candidate SHAs, Slice Contract revision, and content hash",
+    "Browser-runtime evidence: raw package.json/package-lock.json/.npmrc digests, byte-preserving standard-project/state-root-npmrc materialization log, exact controlled online no-audit/no-fund/no-update-notifier npm argv and clean state-root environment log, fresh exact offline npm-ci reconstruction log, selected locked CfT executable/path proof, closed MCP argv/environment plus loopback allow-list/rejection records, Node SHA-256 plus pinned-GPG-signature result, and CfT no_official_checksum experimental disposition without Chrome/OS-egress claim.",
+    "Per-asset Codex/OpenCode records: exact archive SHA-256 or platform SRI sha512 as applicable, runnable os/cpu selection, version/capability result, and explicit Windows Codex UNSUPPORTED_RUNTIME result unless a later approved revision supplies a pinned independent signer identity.",
+    "Codex probe outputs: JSONL event transcripts, failure classification, argv records, env allow-list observation, and bounded logs",
+    "OpenCode probe outputs: JSON event transcripts with outcome classification, permission verdicts, data-dir isolation evidence, and bounded logs",
+    "Per-platform tree-kill evidence, zero-survivor scan outputs, and vendor-orphan repro records",
+    "Redaction scan outputs with byte-cap evidence and the canary inventory",
+    "Four-state capability matrix with per-field blocking demonstrations and the e2e-browser combination regression output on both platforms",
+    "Adversarial negative fixture outputs: hostile repository, argument injection, path escape, secret canary, network canary, and self-update-unreachable records",
+    "Controlled Verification Sandbox E2E output: Custodian resolution of Candidate/Integration Candidate/tree identities; Custodian materialization, no-.git verification, read-only validation handoff to Host, and source-tree exposure only for Sandbox Agent child, whose source-tree digest exactly equals the Integration-Candidate tree digest; Custodian-issued read-only pre-execution tool record from static tool-lock/selected-platform/Candidate/Integration-Candidate/verified-source-tree inputs and its RFC 8785 tool_record_digest; immutable run binding showing Planning Base, Candidate/tree, Integration Base, exact Integration Candidate/tree, that source-tree digest, tool-lock/tool-record identity digests, Custodian origin, run id, issued/expiry, and nonce; and single-use host gate carrying the binding digest. Evidence must show all-seven-input Host read/inspect/validation of the handoff plus the three artifacts before any real process, no Host Git/snapshot materialization/copy/transformation/mutation/separate-source execution, separate <state-root>/tools/tool-observations.json referencing both digests with asset verification, version, capability-probe, and observed-time results, and rerun after any static identity change. It also includes lower-privilege or OS-sandbox proof, mock-provider transcript, screenshot or structured result, cleanup evidence, temporary MCP-profile removal, survivor scan, closed MCP loopback argv/environment record, and CfT experimental/non-sealed label.",
+    "CI job URLs bound to the Candidate and the unchanged canonical offline outputs on both platforms",
+    "Changed-path manifest and staged-tree allowlist comparison performed by the Git Custodian",
+    "Post-merge downstream decision audit and independence evidence: append-only downstream-audit.md revisions 1 through 10 with source integration SHA 102d08f814b6c0a939662e6c488870310a97c1ee, Planning Base 9cf24b876cc7422386ed54c277900ff1e3c2c2bf, per-item conclusions, accepted ADR-0029/0030 attestation engadr_0029-0030_20260813_01, revision-12 Interface bindings, rejected revision-13 review, and revision-14 READY correction/review/worktree/hash bindings",
+    "Disposition inventory mapping every spike path to retain-or-delete and the 00-07 handover inputs",
+    "docs/development/compatibility-targets.md entries for the tool pins, three-register evidence, capability matrix, and dispositions",
+    "Accepted ADR-0029 and ADR-0030 records with attestation engadr_0029-0030_20260813_01",
+    "Residual risks and compatibility limitations",
+    "Three-entry evidence: full offline pytest suite passing on both platforms plus fake-only-gate real-runner guard rejections when the record, gate, or binding is absent; Custodian snapshot read-only validation handoff to Host plus exposure only as the source tree usable by the Sandbox Agent child, and Host-only bootstrap/cutoff/selfcheck records with all seven bound inputs and validated immutable pre-execution-tool-record/run-binding/gate/source-tree digests before a real process; post-execution observation records reference both digests; controlled-E2E Integration-Candidate binding verification and offline-only stage evidence.",
+    "Tool-lock compliance evidence: exact per-asset verification output; package.json/package-lock.json/.npmrc digest plus clean state-root materialization/reconstruction records; selected locked CfT executable and closed MCP argv/environment proof; no_official_checksum assets and Windows Codex signer gap recorded as non-sealed/UNSUPPORTED_RUNTIME; Custodian snapshot materialization/no-.git/digest/delivery evidence, complete seven-input pre-execution-record/run-binding/gate evidence, and separate post-execution observations.",
+    "Git snapshot isolation evidence: Git Custodian resolves/materializes/verifies the controlled no-.git source snapshot, delivers it as a read-only validation handoff to Host, and exposes it only as source tree usable by the Sandbox Agent child; its source-tree digest exactly equals the bound Integration-Candidate tree digest; Host only reads/inspects/verifies the handoff and has no Git/snapshot materialization/copy/transformation/mutation/separate-source-execution authority; lower-privilege/OS-sandbox proof; Agent HOME/XDG/Git-config under state-root; no git/shell bypass; real Candidate gitdir/common-gitdir digests unchanged before/after hostile fixtures; no user global Git config touched."
+  ],
+  "risks": [
+    {
+      "risk_id": "R-01",
+      "description": "A required sealed tool identity cannot be verified on a required platform: particularly Windows Codex has no pinned independently sourced Authenticode signer in this revision, and Chrome for Testing has no official checksum.",
+      "impact": "CRITICAL",
+      "mitigation": "Verify exact archive/SRI rules from tool-lock.json. Windows Codex remains UNSUPPORTED_RUNTIME for real sealed probes until a human-approved revision pins an independently sourced signer; CfT remains experimental/non-sealed. Stop with BLOCKED_CONTRACT plus CCR rather than using a fuzzy publisher, TOFU, wrapper-only identity, preinstalled tool, or fallback.",
+      "trigger": "A required static identity cannot be recorded before execution, an exact asset verification cannot complete after authorization, or a runtime observation fails on a required platform."
+    },
+    {
+      "risk_id": "R-02",
+      "description": "A required Agent capability boundary cannot be enforced on Windows or Linux (PHASE.md R-02): for example hard network deny without administrator rights on windows-latest.",
+      "impact": "CRITICAL",
+      "mitigation": "Run hostile fixtures on both systems, record the four-state verdict per capability field with blocking demonstrations (network deny requires an OS-level egress block; filesystem requires a lower-privileged identity or OS sandbox for ENFORCED, otherwise OBSERVED_ONLY), and fail closed for unsupported profiles as UNSUPPORTED_RUNTIME; a Stage requesting network deny never starts an agent with credentials or secrets; --offline and cutoff markers are never presented as OS-level enforcement evidence.",
+      "trigger": "A fixture escapes authorized roots, inherits a canary, or leaves an unfenced process."
+    },
+    {
+      "risk_id": "R-03",
+      "description": "Codex or OpenCode structured or cancellation interfaces are unstable (PHASE.md R-05): opencode exit-code bugs recur, or Codex process-tree cleanup leaves orphans (issues 4337, 4726, 5258, 27758).",
+      "impact": "HIGH",
+      "mitigation": "Classify outcomes from structured JSON events, enforce timeouts and tree kill externally, require a zero-survivor scan after fencing, and document residual vendor behavior with dates.",
+      "trigger": "A structured interface or cancellation behavior cannot be proven stable on a required platform."
+    },
+    {
+      "risk_id": "R-04",
+      "description": "A hostile repository injects configuration (opencode.json permission widening, .codex/config.toml, git hooks, aliases, core.hooksPath, LFS smudge) that widens the agent capability surface.",
+      "impact": "HIGH",
+      "mitigation": "Inject policy that wins over project config (OPENCODE_CONFIG_CONTENT or controlled global config), probe the .codex trust gate, apply GIT_CONFIG_NOSYSTEM and GIT_CONFIG_GLOBAL hygiene, and assert deny canaries in adversarial fixtures.",
+      "trigger": "A hostile repository changes effective permissions or executes repository-provided shell strings."
+    },
+    {
+      "risk_id": "R-05",
+      "description": "Environment inheritance leaks secrets: provider keys, Git credentials, SSH_AUTH_SOCK, or canaries reach a child process, log, artifact, screenshot, or the Execution Report.",
+      "impact": "HIGH",
+      "mitigation": "Start every child from an empty mapping plus the fixture-built allow-list, use clean HOME and isolated data directories, and run redaction assertions with injected secret canaries on both platforms.",
+      "trigger": "A secret canary or forbidden field appears in any captured surface."
+    },
+    {
+      "risk_id": "R-06",
+      "description": "The sealed tool runtime is not reproducible: moving dependencies, npx latest, cross-platform node_modules reuse, or a missing network-cutoff boundary invalidates the offline guarantee.",
+      "impact": "MEDIUM",
+      "mitigation": "Use exact committed package.json/package-lock.json/.npmrc, byte-preserving standard-project/state-root-npmrc materialization, only the lock-defined npm ci --ignore-scripts --audit=false --fund=false --update-notifier=false argv with clean state-root configuration/environment, and its fresh npm ci --offline counterpart after cutoff. Node uses pinned SHA-256 plus GPG fingerprints; chrome-devtools-mcp and OpenCode platform packages use recorded SRI; the Host launches MCP only through the selected locked CfT executable and closed loopback argv/environment; CfT is excluded from sealed hard-gate claims; Windows Codex signer evidence is an explicit unsupported gap, not a claim.",
+      "trigger": "A moving dependency is downloaded, an integrity check fails, or the cutoff is violated."
+    },
+    {
+      "risk_id": "R-07",
+      "description": "The controlled Verification Sandbox E2E cannot connect a local mock provider to OpenCode through a supported mechanism, or tools/list success is misrepresented as EC-00-09 evidence.",
+      "impact": "HIGH",
+      "mitigation": "Require the mock-provider-driven full chain as the EC-00-09 evidence; if it cannot run, stop and submit a Contract Change Request recording the real capability gap.",
+      "trigger": "The mock-provider chain cannot run on a required platform or tools/list substitutes for it."
+    },
+    {
+      "risk_id": "R-08",
+      "description": "The DRAFT or the READY contract binds to a Base that drifts after the post-00-05 re-bind without re-verification, or the recorded 00-05/00-06 path and fixture independence proof becomes stale because 00-06 spike paths collide with a later integration.",
+      "impact": "HIGH",
+      "mitigation": "This READY contract is bound to 9cf24b876cc7422386ed54c277900ff1e3c2c2bf with independence and r6-r14 conclusions in audit revisions 1 through 10; later Base drift requires re-verification and re-binding",
+      "trigger": "The Base drifts after the post-00-05 re-bind without re-verification and re-binding, or independence cannot be proven because a later integration collides with the 00-06 spike paths."
+    },
+    {
+      "risk_id": "R-09",
+      "description": "Windows Sandbox or another isolation mechanism is promised inside hosted CI where it is unavailable (no Hyper-V, licensing), or loopback E2E is presented as an OS-level egress-block proof.",
+      "impact": "MEDIUM",
+      "mitigation": "Document Windows Sandbox or VM as optional operator-host hardening only; label loopback E2E as no public-network dependency and not an OS-level egress-block proof; record hard network deny as UNSUPPORTED_RUNTIME on non-admin Windows.",
+      "trigger": "A claim of OS-level network enforcement is made without a blocking demonstration."
+    },
+    {
+      "risk_id": "R-10",
+      "description": "Spike code is treated as production foundation without a recorded disposition, silently constraining Slice 00-07 or later design.",
+      "impact": "MEDIUM",
+      "mitigation": "Mark every spike component experimental with an explicit retain-or-delete record, require the disposition inventory in the evidence, and never present spike confinement as production Runtime Broker design.",
+      "trigger": "A spike component is presented as production foundation without a disposition or 00-07 adoption."
+    },
+    {
+      "risk_id": "R-11",
+      "description": "Accepted ADR-0029 or ADR-0030 is edited, or READY/Executor dispatch is claimed from ADR acceptance alone.",
+      "impact": "HIGH",
+      "mitigation": "ADR-0029 and ADR-0030 are accepted (engadr_0029-0030_20260813_01). Fresh independent READY review passed and the Git Custodian assigned the exact clean execution worktree; implementation authority remains limited to this revision-14 contract, not ADR acceptance alone.",
+      "trigger": "An accepted ADR is edited or an Executor is dispatched without READY and a Custodian worktree."
+    },
+    {
+      "risk_id": "R-12",
+      "description": "An asset without an official checksum (Chrome for Testing; Codex bare Windows binaries; OpenCode release CLI archives) is presented as officially verified, or a first-download self-computed hash is treated as a frozen identity (TOFU).",
+      "impact": "HIGH",
+      "mitigation": "The committed tool-lock.json fixes every identity before download with the explicit no_official_checksum record and disposition (project-verified experimental target; hard integrity gates require a Contract Change Request); verification output records the integrity_status per asset; no self-computed hash is ever presented as frozen.",
+      "trigger": "A locked asset lacks its official checksum record, a no_official_checksum asset is claimed verified, or a first-download hash substitutes for a committed identity."
+    },
+    {
+      "risk_id": "R-13",
+      "description": "An entry point runs without its full seven-input parameter set or with no valid static pre-execution tool record, immutable run binding, or single-use gate; the Custodian fails to provide Host a read-only validation handoff while exposing the snapshot only as the source tree usable by the Sandbox Agent child; the Host materializes, copies, transforms, mutates, uses Git against, or executes the controlled snapshot as a separate source; a static identity or Integration Candidate changes without a new authorization chain; a runtime observation is treated as authorization; or the three entry points overlap, so a probe runs outside the intended gate or a fake-only PR run starts a real tool.",
+      "impact": "CRITICAL",
+      "mitigation": "The three mutually exclusive entry points are contract-fixed. Host-only bootstrap, cutoff, selfcheck, and controlled E2E each require exactly --state-root, --candidate-sha, --source-tree-digest, --tool-lock, --tool-record, --host-gate, and --run-binding. Before any real process, the Custodian resolves Candidate/Integration Candidate/tree identities; materializes and verifies a no-.git read-only snapshot whose source-tree digest exactly equals the Integration-Candidate tree digest; delivers it as a read-only validation handoff to Host while exposing it only as source tree usable by the Sandbox Agent child; then issues the immutable static pre-execution tool record and its RFC 8785 tool_record_digest, the binding containing Planning Base, Candidate/tree, Integration Base, exact Integration Candidate/tree, that source-tree digest, tool-lock/tool-record identity digests, origin, run, expiry, and nonce, and the gate carrying the binding digest. The Host only reads, inspects, and validates snapshot handoff, all three artifacts, and all seven inputs; it cannot execute the snapshot as a separate source; only then provisions/verifies assets and runs version/probes, with separate observations referencing both digests. Every absent, missing, mismatched, expired, replayed, static-identity-changed, or Integration-Candidate-changed authorization fails before process creation and requires a new snapshot/record/binding/gate and full rerun; every runtime observation mismatch or failed result fails closed. PR CI runs the full offline pytest suite with no real runner authority; 00-06 real-tool runners are standalone host-runner CLIs never pytest-collected and reject before process creation when a record, gate, or binding is absent or invalid.",
+      "trigger": "An entry point is invoked without its full seven inputs or with absent/mismatching pre-execution-record/binding/gate/snapshot identity; the Host performs Git or snapshot materialization/copy/transformation/mutation; an Integration Candidate or static input changes without a new snapshot/record/binding/gate and rerun; observations are backfilled into or passed as the record; a runtime result fails/mismatches without fail closure; or a real-tool probe executes in ordinary PR CI."
+    },
+    {
+      "risk_id": "R-14",
+      "description": "The EC-00-09 no-Git-authority claim rests on a same-user DACL/mode 0555 .git protection that does not block the linked worktree's real gitdir/common gitdir or global config, or on clean-env and argv-denial alone.",
+      "impact": "HIGH",
+      "mitigation": "Fixed mechanism: Git Custodian alone resolves the exact Integration Candidate, materializes a controlled source snapshot containing no .git file or directory, verifies its source-tree digest equals the exact Integration-Candidate tree digest, delivers it as a read-only validation handoff to Host, and exposes it only as source tree usable by the Sandbox Agent child; the Host may only read/inspect/verify the handoff and has no Git, snapshot materialization, copy, transformation, mutation, or separate-source execution authority. The Agent child's working directory, HOME, and XDG/Git config paths are all under the controlled state-root; the executable allowlist contains no git and no shell-string bypass; an optional no-op git stub may provide a fixed failure for any git argv. Before sandbox start, the Host validates the delivered handoff plus matching pre-execution-record/binding/gate digests and the bound Planning Base, Candidate/tree, Integration Base, exact Integration Candidate/tree, source-tree digest, tool-lock/tool-record identity, origin, run/expiry/nonce; it writes observations only after execution. Hostile fixtures (commit, remote add, hook, git config --global) must prove: (1) the controlled source contains no Git metadata, (2) the real Candidate worktree's actual gitdir and common gitdir digests are unchanged, and (3) the test never touches the user's real global Git config.",
+      "trigger": "A hostile Git operation reaches the real gitdir/common gitdir, global config is touched, or the controlled source contains Git metadata."
+    }
+  ],
+  "retry_budget": 3,
+  "stop_conditions": [
+    "A required hard capability cannot be enforced on a required platform and is silently downgraded instead of failing closed as UNSUPPORTED_RUNTIME; a network-deny or filesystem capability is claimed as ENFORCED without a blocking demonstration (network: OS-level egress block; filesystem: lower-privileged identity or OS sandbox; --offline and cutoff markers are never OS-level egress-block evidence; same-user ACL filesystem enforcement is OBSERVED_ONLY by default), or a probe silently skips in ordinary PR CI and still counts as accepted evidence",
+    "Any exact per-asset hard-gate rule cannot be completed: stop with BLOCKED_CONTRACT plus CCR. Windows Codex lacks a pinned independent signer in this revision and must be UNSUPPORTED_RUNTIME for real sealed probes; never use a fuzzy publisher match, unpinned verifier, wrapper-only identity, system-preinstalled version, latest, npx, or auto-update fallback.",
+    "The controlled Verification Sandbox E2E cannot connect a local mock provider to OpenCode through a supported mechanism and tools/list success is presented as EC-00-09 evidence",
+    "A hostile repository changes effective permissions, a shell string is executed from repository content, a path escape reaches the filesystem, a secret canary reaches any captured surface, or a network-egress canary is reachable",
+    "A required platform cannot prove zero-survivor fencing or the canonical offline check set fails on a required platform",
+    "The Base drifts after the post-00-05 re-bind without re-verification and re-binding, or the recorded 00-05/00-06 path and fixture independence proof becomes stale because a later integration collides with the 00-06 spike paths (execution is serial)",
+    "An accepted ADR is edited, or implementation is dispatched without READY review and a Custodian worktree",
+    "Implementation requires paths outside the READY permitted_paths, changes the existing workflows or their checkers, changes schemas, contracts, accepted ADRs, or planning, review, evidence, and closeout records without a human-approved Contract Change Request",
+    "Recomputing content_hash in historical planning, review, evidence, or closeout records becomes necessary",
+    "A spike component is presented as production foundation without a recorded disposition or explicit Slice 00-07 adoption",
+    "An asset without an official checksum is presented as sealed/officially verified; a first-download value substitutes for a committed identity; a standard npm project or locked npmrc is synthesized, renamed, or consumed through inherited configuration; controlled npm argv/environment or fresh offline proof deviates; MCP starts without the selected locked CfT executable and closed loopback argv/environment, permits remote attach/profile/channel/arbitrary overrides, or claims --isolated/loopback proves OS egress denial; a real runner starts outside the Sandbox Host or with no valid read-only Custodian pre-execution tool record, no valid single-use host gate, no matching immutable run binding, or not all seven bound parameters; Custodian has not resolved/materialized/verified a no-.git snapshot whose source-tree digest exactly equals the exact Integration-Candidate tree digest, made it a read-only validation handoff to Host, and exposed it only as the source tree usable by the Sandbox Agent child; Host does more than read/inspect/verify the handoff or performs Git/snapshot materialization/copy/transformation/mutation/separate-source execution; the pre-execution record contains runtime observation or run-binding fields, is rewritten/backfilled, or observations are passed as --tool-record; an Integration Candidate, static identity, source-tree digest, or binding changes without new snapshot/record/binding/gate and full rerun; a runtime observation mismatch or failed verification/version/probe is not failed closed; PR pytest collects a real-tool runner; lower-privilege/OS-sandbox proof is absent; real gitdir/common-gitdir changes; or user global Git config is touched."
+  ],
+  "content_hash": "sha256:104830fee9320f72a6dcde46d288190c9c2fc882f4d7c188910797eeb86551c7"
+}
