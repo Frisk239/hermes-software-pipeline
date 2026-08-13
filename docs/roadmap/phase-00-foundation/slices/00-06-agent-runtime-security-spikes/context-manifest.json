@@ -1,0 +1,399 @@
+{
+  "schema_id": "https://schemas.hermes-pipeline.dev/engineering/context-manifest/v1",
+  "schema_version": 1,
+  "manifest_id": "ctx_slice-00-06_planner_r14",
+  "role": "PLANNER",
+  "slice_id": "slice-00-06",
+  "base_sha": "9cf24b876cc7422386ed54c277900ff1e3c2c2bf",
+  "assembled_at": "2026-08-13T14:00:00.000Z",
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "digest": "sha256:3908e4507cfbaf1a0d6dd80565ad56832272730c58d4e895f0be53e6e444bde1",
+      "purpose": "Repository constitution and rework-ownership policy (Base blob 9cf24b8)"
+    },
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:97960150474d5b0c2b459770f48299f4d897bb30b91f9de5f13d73d027d915b4",
+      "purpose": "Canonical product and domain vocabulary incl. Verification Sandbox and Stage Capability Profile (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/agents/roles/planner-reviewer.md",
+      "digest": "sha256:9fa177281a1b739c42256e6c077416168d62d10e3717565a9e841aa3b85ea823",
+      "purpose": "Binding Codex Planner-Designer-Reviewer role contract incl. post-merge downstream decision audit (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/roadmap/TRACEABILITY.md",
+      "digest": "sha256:cc858ef5387503b2154d59c0dc5ad7aeb934fb69e073d07ab53cf828271f1182",
+      "purpose": "Cross-cutting requirements XSEC-01/XPLAT-01/XEVAL-01 and EC-00-08/09/10 ownership (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/PHASE.md",
+      "digest": "sha256:5acb46cdc68794bf69e5c708fb9813048f3d19170a7502f4f82a0f77de7d8f0d",
+      "purpose": "Approved Phase 00 outcome, invariants, slice map, exit criteria, risk register R-02/R-05, stop conditions (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/phase-plan.json",
+      "digest": "sha256:34035ae526cb363e8b8a009fbea7a0246dd87c33337f1086cf079cfa2d5aea3f",
+      "purpose": "Approved Phase 00 machine plan incl. slice-00-06 ownership of EC-00-08/09/10 (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/README.md",
+      "digest": "sha256:52e9dc5a60992f64522c7379864cfb457322dc2d7e818f61d8a9467e0b00d7fa",
+      "purpose": "Phase 00 slice index for Slice 00-06 READY revision 14"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-01-repository-baseline/CLOSEOUT.md",
+      "digest": "sha256:9d365267fa747208bfef1d9c71b372045eec931fda67a222ac72c15bcb61b72d",
+      "purpose": "Accepted predecessor capability, evidence, and debt (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-02-python-quality-skeleton/CLOSEOUT.md",
+      "digest": "sha256:b09431e39f7c8d17f834af8cf21a9830cad45e4e9ae86547578b8f002e8877ca",
+      "purpose": "Accepted Slice 00-02 closeout; machine predecessor of 00-06 (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-03-contract-toolchain/CLOSEOUT.md",
+      "digest": "sha256:0e24f5bccf258475fb1f587a08249f7568d195f0fe062bd9731d543e5440789b",
+      "purpose": "Accepted Slice 00-03 closeout; machine predecessor of 00-06 (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-03-contract-toolchain/SLICE.md",
+      "digest": "sha256:2bc7277788074bdf196bf6a2fa844c3710eaa23a11110012b17a6f08066440b8",
+      "purpose": "Integrated Slice 00-03 contract-toolchain plan retained as predecessor evidence (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-03-contract-toolchain/slice-contract.json",
+      "digest": "sha256:ecd968bdcfc344230d50e18e88ba389d624eb1781a8f4ae7aa79302f4478a83f",
+      "purpose": "Accepted Slice 00-03 machine contract retained as predecessor evidence (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-03-contract-toolchain/context-manifest.json",
+      "digest": "sha256:3f71a29de810e06ae84b9232a17542d25f66b8d710408a145b1b5689ac67b22d",
+      "purpose": "Accepted Slice 00-03 planning Context Manifest retained as predecessor evidence (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-04-domain-and-persistence-spikes/SLICE.md",
+      "digest": "sha256:8a6e0879ffbf59105b30e3e8e5dc05adb545582b9f058ff47400e8370a4bb63d",
+      "purpose": "Integrated Slice 00-04 domain-and-persistence-spikes plan retained as predecessor evidence (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-04-domain-and-persistence-spikes/slice-contract.json",
+      "digest": "sha256:aaf5943a727d019af5ac5cef254858961f0347af96cacd1a4a0e2ad675b900fb",
+      "purpose": "Integrated Slice 00-04 machine contract retained as predecessor evidence (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-04-domain-and-persistence-spikes/context-manifest.json",
+      "digest": "sha256:e4938029f3eb3660dc6c3a38eec041b0aaaefb37474b5852b062fd30b79439b6",
+      "purpose": "Integrated Slice 00-04 planning Context Manifest retained as predecessor evidence (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-05-hermes-shim-runtime/SLICE.md",
+      "digest": "sha256:65c445359f1a583c34686b92dc5b4564ea7b0a6749d4cb79ccf5d13a1e02b481",
+      "purpose": "Merged Slice 00-05 shim/runtime plan retained as serial predecessor evidence (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-05-hermes-shim-runtime/slice-contract.json",
+      "digest": "sha256:dc5bbd9029e435d56d3e656da35b046d785bf60cc3e0cfaadc2ba934c20e26a8",
+      "purpose": "Merged Slice 00-05 machine contract retained as serial predecessor evidence (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-05-hermes-shim-runtime/context-manifest.json",
+      "digest": "sha256:f87a7a72aba8f48fdfb93b7c92fcb2c048f445e80ffefc50aa00f43b167d1c2e",
+      "purpose": "Merged Slice 00-05 planning Context Manifest retained as serial predecessor evidence (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/research/00-04-domain-persistence-spike-dependency-research.md",
+      "digest": "sha256:dfe20ddda4fc54500fc5c489717fbb7beca093ea548e38260cea3ce4212061d8",
+      "purpose": "Slice 00-04 research precedent for dependency-decision style (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/research/00-05-hermes-shim-runtime-research.md",
+      "digest": "sha256:06b5a8f9f718c6353bf0c759625749dea1269908e0ce5574f8e78d3c86ee32ae",
+      "purpose": "Slice 00-05 research report revision 5 (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/research/00-06-agent-runtime-security-research.md",
+      "digest": "sha256:0544ca628e82fa433331e8892812d965eb184c97677a6bb6e6a5120c6f47a22a",
+      "purpose": "Slice 00-06 governing research report revision 14; rejected r13 findings closed and READY review/worktree assignment complete"
+    },
+    {
+      "path": "docs/security/threat-model-and-trust-boundaries.md",
+      "digest": "sha256:9ca0be39effded97a3fdafdca4d380fd83b3f60bbb7bae601dc42c3a8e045387",
+      "purpose": "Trust boundaries, agent capability matrix, process and command defenses, required security tests (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/design/controller-and-execution-architecture.md",
+      "digest": "sha256:af1d66bdcb13109247d53aace2112680aa037dd8aaa7fd62a22ab0473641daa0",
+      "purpose": "Runtime capability model, Stage Capability Profile, UNSUPPORTED_RUNTIME fail-closed rule (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/design/git-isolation-and-protection.md",
+      "digest": "sha256:3632dde01f589031e3a9f6f30254e235025fc1818bd1f618cadabdb6587ffbc8",
+      "purpose": "Managed worktrees, no Git authority for agents, verification sandbox rules (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/development/ci-and-testing.md",
+      "digest": "sha256:8953023372b964f8edecb5a68158677c3c9712d0d239219261c65782093496bf",
+      "purpose": "CI principles: paid models and external services not used; real agent runs isolated from PR CI (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/development/compatibility-targets.md",
+      "digest": "sha256:46df60b97093a119a91a111d2dcafa71e6b92f695360a608750e890c4d4703d1",
+      "purpose": "Compatibility targets including accepted ADR-0029/0030 00-06 confinement record (planning artifact)"
+    },
+    {
+      "path": "docs/development/phase-and-slice-operating-model.md",
+      "digest": "sha256:d9750df578fbcc0876d3ebc46cf26ae4b837f9969d51110993211921c23d46cb",
+      "purpose": "Slice lifecycle state machine, review verdict rules, and post-merge downstream decision audit rule (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/architecture/data-and-api-contracts.md",
+      "digest": "sha256:bda7ff9a2fdac790a6744d5304df16ea62ebb1fc0d5f71c50724bd63682033b8",
+      "purpose": "Data and API contract conventions (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/architecture/system-and-module-design.md",
+      "digest": "sha256:adabdcdf7b7673106510a45f867ab58fea48d3ebfc6114e74be95bead8fc986c",
+      "purpose": "Module boundaries; Runtime Broker launch/signal/inspect/collect seam (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/design/technology-stack.md",
+      "digest": "sha256:c853026004e759777e457f18200e0b1091987f45cecbd17f8d888ac415861b97",
+      "purpose": "Accepted stack: versioned Codex/OpenCode CLI Adapters; OpenCode plus Chrome DevTools MCP in a clean Verification Sandbox (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/adr/0013-isolate-by-write-and-verification-boundary.md",
+      "digest": "sha256:b9645bd109aac97f775975101d798eb4088adee8b5004ac344cb088a88692939",
+      "purpose": "Binding ADR-0013: write and verification boundary isolation (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/adr/0015-enforce-versioned-stage-capability-profiles.md",
+      "digest": "sha256:39f16245a31518ebadd90253d88cbde4580355ee430c8db80c1c492956e54676",
+      "purpose": "Binding ADR-0015: versioned Stage capability profiles - the 00-06 probe target (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/adr/0016-store-immutable-content-addressed-artifacts.md",
+      "digest": "sha256:f3c7eac1a045e9b623cb69f8439a1e610ff37b15e96e05bfed12b396d6786eda",
+      "purpose": "Binding ADR-0016: immutable content-addressed artifacts (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/adr/0018-separate-planning-and-integration-baselines.md",
+      "digest": "sha256:ea6ba4c1ae3233a02e8929241eff282f88dc83f51984cc60629d460b9e5453e0",
+      "purpose": "Binding ADR-0018: planning and integration baselines; exact Base SHA binding and Integration Candidate identity (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/adr/0020-use-python-312-and-uv-for-managed-runtime.md",
+      "digest": "sha256:02c3403aeaed29563f0f3f3a25bf8e4a872b204cf88b5e5199b32daf00f9ba3e",
+      "purpose": "Binding ADR-0020: Python 3.12 and uv managed runtime; root dependencies stay empty (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/adr/0024-use-pydantic-models-and-json-schema-contracts.md",
+      "digest": "sha256:7e0c6c5b33113d11fe22d647d96d6eea7de9a683979c85b96dbe975e9cd073aa",
+      "purpose": "Binding ADR-0024: Pydantic models and JSON Schema contracts (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/adr/0026-contract-toolchain-development-dependencies.md",
+      "digest": "sha256:b779787e17a7f4090ce15dbab5530980732bd30eaa19c94ccebfb511335ca3de",
+      "purpose": "Binding ADR-0026: contract-toolchain development dependencies incl. rfc8785 (Base blob 9cf24b8)"
+    },
+    {
+      "path": "docs/adr/0029-confine-browser-tool-runtime.md",
+      "digest": "sha256:2c932f9e376d8989580f1c9f75b189cd9cac7424214b32b8c0cd196f1f2f1c25",
+      "purpose": "Accepted ADR-0029: confine Node/npm/chrome-devtools-mcp; Chrome for Testing excluded from sealed claim (attestation engadr_0029-0030_20260813_01)"
+    },
+    {
+      "path": "docs/adr/0030-confine-agent-cli-tool-runtime.md",
+      "digest": "sha256:af24cae0c5f2787f6a4c3b9af52255978a08fa41b3a3a793eb43b5026ddfd424",
+      "purpose": "Accepted ADR-0030: confine Codex/OpenCode; Host is 00-06 test runner not a CONTEXT principal (attestation engadr_0029-0030_20260813_01)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-06-agent-runtime-security-spikes/proposed-adr-0029-sealed-browser-tool-runtime.md",
+      "digest": "sha256:9a5fb8262a7b55e826bc5cd1bca8abdda6f0d1d8f204cbbd872712c9707a9a24",
+      "purpose": "Historical r10 proposed ADR-0029 draft retained after acceptance; authoritative text is docs/adr/0029-confine-browser-tool-runtime.md"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-06-agent-runtime-security-spikes/proposed-adr-0030-sealed-agent-cli-tool-runtime.md",
+      "digest": "sha256:ccdccb1130c5dcb160fc49cccd02e3e8b668484538ebed931b970f227a332e7b",
+      "purpose": "Historical r10 proposed ADR-0030 draft retained after acceptance; authoritative text is docs/adr/0030-confine-agent-cli-tool-runtime.md"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-06-agent-runtime-security-spikes/SLICE.md",
+      "digest": "sha256:af194170c4aa8b60962ff135eb515d3f1ceca3b0023cc21225ce1bd57502217d",
+      "purpose": "Slice 00-06 human-readable READY contract revision 14"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-06-agent-runtime-security-spikes/slice-contract.json",
+      "digest": "sha256:3846f40f445aef291c2b61289408f35ef910dfea6008bab07480aa32583bf5bd",
+      "purpose": "Slice 00-06 machine READY contract revision 14; reviewed scope and assigned worktree; LF-only post-content-hash bytes"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-06-agent-runtime-security-spikes/tool-lock.json",
+      "digest": "sha256:77d4a6705034cd6b0a01860fce2ee1e73bf7a8e8601f9e3778dbfd809483e8c1",
+      "purpose": "Committed READY tool lock revision 14: identities plus authorization/gate/npm/snapshot/isolation/real-probe/E2E CLI oracles"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-06-agent-runtime-security-spikes/package.json",
+      "digest": "sha256:753a18ae9548e51fa57ae7f8e80b2a2208028ad015cb91ceadfe1625bb034a31",
+      "purpose": "Committed standard npm package manifest for the sealed browser tool runtime: hermes-browser-runtime with chrome-devtools-mcp pinned exactly to 1.7.0 (planning artifact, byte-identical carry-over)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-06-agent-runtime-security-spikes/package-lock.json",
+      "digest": "sha256:f691d5dae8a9a8129cdbe6fcd603e562d60360b843703140b9ff9fbb466d8bb9",
+      "purpose": "Committed standard npm lockfile for chrome-devtools-mcp@1.7.0: lockfileVersion 3 and complete transitive-integrity record (planning artifact, byte-identical carry-over)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-06-agent-runtime-security-spikes/.npmrc",
+      "digest": "sha256:d61adb1098d59a10d2ec140829cad10d4613c8ba1ddcab0cbd8d56b06a5fa543",
+      "purpose": "Committed lock-owned npm defaults for audit, fund, and update-notifier disabling; copied only to the declared state-root userconfig and reinforced by the exact controlled argv (planning artifact)"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-06-agent-runtime-security-spikes/fixtures/pre-execution-tool-record.accept.json",
+      "digest": "sha256:94517221657b3132f5c8f668ba38bad67575bc91a753e090bfa2d955514161fa",
+      "purpose": "r12 authorization golden fixture"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-06-agent-runtime-security-spikes/fixtures/pre-execution-tool-record.reject-runtime-field.json",
+      "digest": "sha256:c883ab5dc94cd8afb49a058d53f0a661d31f92f8ecd53da75569cf51043b89dd",
+      "purpose": "r12 authorization golden fixture"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-06-agent-runtime-security-spikes/fixtures/run-binding.accept.json",
+      "digest": "sha256:46ded10f16084aef4d1402b560517a83e910e32a64f156ddee4f11360e4c71a7",
+      "purpose": "r12 authorization golden fixture"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-06-agent-runtime-security-spikes/fixtures/host-gate.accept.json",
+      "digest": "sha256:703c7d158680b0cfb5ff05ed5b6ba491e0164b827a8f8aa8eccd7cfdc721ada4",
+      "purpose": "r12 authorization golden fixture"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-06-agent-runtime-security-spikes/fixtures/host-gate.reject-extra-field.json",
+      "digest": "sha256:d40d1a94aae478db8971786ead6c0db245da88b28980076075074d3e6003f89f",
+      "purpose": "r12 authorization golden fixture"
+    },
+    {
+      "path": "docs/roadmap/phase-00-foundation/slices/00-06-agent-runtime-security-spikes/fixtures/tool-observations.accept.json",
+      "digest": "sha256:9564e47afc36ba20fc6e24d5b15bc5ac41e645ddd300c82174b94c2e09ddc873",
+      "purpose": "r12 authorization golden fixture"
+    }
+  ],
+  "facts": [
+    {
+      "name": "contract_hash",
+      "value": "sha256:104830fee9320f72a6dcde46d288190c9c2fc882f4d7c188910797eeb86551c7",
+      "source": "RFC 8785 canonical JSON of the current slice-contract.json with content_hash omitted"
+    },
+    {
+      "name": "contract_revision",
+      "value": 14,
+      "source": "current slice-contract.json"
+    },
+    {
+      "name": "contract_status",
+      "value": "READY",
+      "source": "current slice-contract.json after independent Standards/Spec review and Git Custodian worktree assignment"
+    },
+    {
+      "name": "planning_base_sha",
+      "value": "9cf24b876cc7422386ed54c277900ff1e3c2c2bf",
+      "source": "planning Base fixed in slice-contract.json and this manifest"
+    },
+    {
+      "name": "required_predecessors",
+      "value": "slice-00-02, slice-00-03, slice-00-05",
+      "source": "current slice-contract.json predecessors"
+    },
+    {
+      "name": "slice_00_05_merged",
+      "value": "00-05 merged at 102d08f814b6c0a939662e6c488870310a97c1ee (PR #11) and is merged beneath this READY Base; append-only downstream audit revisions 1-8 remain historical, revision 9 records the rejected r13 review, and revision 10 records the r14 correction/review/worktree closure",
+      "source": "current contract MUST scope and AC-11"
+    },
+    {
+      "name": "planning_artifact_paths",
+      "value": "docs/adr/0029; docs/adr/0030; research; SLICE; slice-contract; context-manifest; tool-lock; fixtures/; README; downstream-audit (not a manifest input)",
+      "source": "revision 14 READY correction cycle"
+    },
+    {
+      "name": "tool_lock_identity",
+      "value": "tool-lock.json READY revision 14 is the identity and closed-execution-policy source, including authorization_literals, host_gate_format, npm_executable_by_platform, snapshot discovery, host_isolation_proof, host_cli_oracles, agent_cli_executables, real_probe_wiring, and controlled_e2e_wiring.",
+      "source": "tool-lock.json and contract AC-01"
+    },
+    {
+      "name": "node_identity",
+      "value": "Node v22.23.2 Windows x64 and Linux x64 official archives require exact SHA-256 plus the pinned Node release-key fingerprint set.",
+      "source": "tool-lock.json tools and signature_rules.node_gpg"
+    },
+    {
+      "name": "browser_identity_limit",
+      "value": "Chrome DevTools MCP 1.7.0 is locked by committed npm inputs and SRI. Chrome for Testing 151.0.7922.77 is no_official_checksum, experimental/non-sealed, and excluded from hard-gate evidence. The Host selects only the locked-platform CfT path and closed MCP loopback argv/environment; --isolated is temporary MCP profile behavior, not OS egress denial.",
+      "source": "tool-lock.json browser_launch_policy and contract AC-01"
+    },
+    {
+      "name": "codex_windows_status",
+      "value": "Windows Codex is UNSUPPORTED_RUNTIME for a real sealed probe because revision 10 does not pin an independently sourced exact Authenticode signer identity; fuzzy publisher matching is forbidden.",
+      "source": "tool-lock.json signature_rules.codex_authenticode_windows and contract AC-02"
+    },
+    {
+      "name": "windows_vendor_documentation",
+      "value": "At r10 planning time, official OpenAI documentation describes native Windows sandbox workflows and WSL2 as an alternate Linux path. This vendor fact does not override the project's Windows Codex UNSUPPORTED_RUNTIME result, which is solely the unpinned independent Authenticode signer gap.",
+      "source": "r11 research report, accepted ADR-0030, and contract D5 evidence statement"
+    },
+    {
+      "name": "opencode_runnable_identity",
+      "value": "OpenCode 1.18.12 runnable identities are exact opencode-windows-x64 and opencode-linux-x64 npm tarballs, selected by locked OS/CPU and checked by SRI SHA-512.",
+      "source": "tool-lock.json platform entries and contract AC-02"
+    },
+    {
+      "name": "opencode_nonidentity_metadata",
+      "value": "opencode-ai is a non-runnable wrapper. OpenCode release archives and latest.yml are research-only metadata, not lock identities.",
+      "source": "tool-lock.json wrapper entry and research report"
+    },
+    {
+      "name": "execution_lines",
+      "value": "PR CI runs the existing full offline pytest suite on Windows and Linux; 00-06 adds no workflow and its real-tool runners are standalone host-runner CLIs never pytest-collected, rejecting before process creation if the pre-execution record, single-use host gate, or matching immutable run binding is absent or invalid. Before any real process Custodian resolves Candidate/Integration Candidate/tree, materializes/verifies the no-.git snapshot, delivers it as a read-only validation handoff to Host, and exposes it only as source tree usable by the Sandbox Agent child; then issues static record -> binding -> gate. Host may only read/inspect/verify the handoff plus all three and seven inputs, never Git/materialize/copy/transform/mutate/separate-source execute it, then provisions/verifies and writes separate observations. Host-only bootstrap/cutoff/selfcheck and controlled E2E require state root, Candidate SHA, source-tree digest, tool lock, tool record, host gate, and run binding.",
+      "source": "contract interfaces, AC-10, and verification command table"
+    },
+    {
+      "name": "git_authority_isolation",
+      "value": "Real execution requires a Git-Custodian-resolved/materialized/verified controlled source snapshot containing no .git file or directory whose source-tree digest exactly equals the Integration-Candidate tree digest, plus lower-privilege or OS-sandbox proof. Custodian delivers it as a read-only validation handoff to Host and exposes it only as source tree usable by the Sandbox Agent child. Host may only read/inspect/verify the handoff and has no Git, snapshot materialization, copy, transformation, mutation, or separate-source execution authority. Repository CI and the Git Custodian legitimately use controlled Git fixtures before any Agent child exists. Linked-worktree .git ACL/mode protection is rejected.",
+      "source": "contract AC-08, AC-09, required tests, and proposed-adr-0030"
+    },
+    {
+      "name": "network_truthfulness",
+      "value": "Offline dependency resolution and loopback success do not prove OS-level egress denial. Required hard network deny is UNSUPPORTED_RUNTIME unless an OS-level block is demonstrated.",
+      "source": "contract AC-07 and stop conditions"
+    },
+    {
+      "name": "accepted_adrs_0029_0030",
+      "value": "ADR-0029 and ADR-0030 accepted 2026-08-13 attestation engadr_0029-0030_20260813_01. Revision 14 does not reopen them. Slice is READY under its separate reviewed contract and assigned worktree.",
+      "source": "human acceptance; accepted ADR files; contract binding_adrs"
+    },
+    {
+      "name": "executor_adr_edit_allowed",
+      "value": false,
+      "source": "planning operating model and READY contract scope"
+    },
+    {
+      "name": "integration_baseline",
+      "value": "r11 Planning Base and audit-time Integration Base are 9cf24b876cc7422386ed54c277900ff1e3c2c2bf; the final Integration Candidate is determined by the Git Custodian per ADR-0018. Host in accepted ADR-0029/0030 is the privileged 00-06 sealed-tool test runner, not Host Operator.",
+      "source": "ADR-0018, accepted ADR-0030, and downstream decision audit revision 7"
+    },
+    {
+      "name": "downstream_audit",
+      "value": "Revisions 1-8 historical. Revision 9 records r13 REWORK; revision 10 records r14 READY closure; revision 11 synchronizes tool-lock identity; revision 12 closes the Codex Responses interface; revision 13 records final projection/Manifest synchronization. No CCR remains open.",
+      "source": "downstream-audit.md revisions 1 through 13"
+    },
+    {
+      "name": "assigned_execution_worktree",
+      "value": "C:\\Users\\a2691\\AppData\\Local\\hermes\\managed-worktrees\\hermes-software-pipeline\\slice-00-06",
+      "source": "Git Custodian-created clean feature/slice-00-06-agent-runtime-security-spikes worktree at exact Base 9cf24b876cc7422386ed54c277900ff1e3c2c2bf"
+    },
+    {
+      "name": "planning_revision",
+      "value": 14,
+      "source": "revision 14 READY closure and downstream audit revisions 9-10"
+    }
+  ],
+  "content_hash": "sha256:fd654c649066755a6907a606139e9808263bd9fa59b913b8eefc3a324d7e5d2f"
+}

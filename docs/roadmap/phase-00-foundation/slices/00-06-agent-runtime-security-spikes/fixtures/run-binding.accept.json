@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "planning_base_sha": "9cf24b876cc7422386ed54c277900ff1e3c2c2bf",
+  "candidate_sha": "9cf24b876cc7422386ed54c277900ff1e3c2c2bf",
+  "candidate_tree_digest": "0123456789abcdef0123456789abcdef01234567",
+  "integration_base_sha": "9cf24b876cc7422386ed54c277900ff1e3c2c2bf",
+  "integration_candidate_sha": "9cf24b876cc7422386ed54c277900ff1e3c2c2bf",
+  "integration_candidate_tree_digest": "0123456789abcdef0123456789abcdef01234567",
+  "source_tree_digest": "0123456789abcdef0123456789abcdef01234567",
+  "tool_lock_digest": "sha256:77d4a6705034cd6b0a01860fce2ee1e73bf7a8e8601f9e3778dbfd809483e8c1",
+  "tool_record_digest": "sha256:53509131a48c4eb981a7a04d1ab73d6d95864f62310fb3c31bc691739081344e",
+  "custodian_origin": "git-custodian",
+  "run_id": "run_example_0001",
+  "issued_at_utc": "2026-08-13T00:00:00.000Z",
+  "expires_at_utc": "2026-08-13T06:00:00.000Z",
+  "single_use_nonce": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+}
