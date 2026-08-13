@@ -1,7 +1,7 @@
 """Hermes plugin entry for the Hermes Software Pipeline shim (slice-00-05).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: ADOPTED_BY_00-07
 
 This root module is loaded by the Hermes PluginManager as the plugin
 package (``importlib.util.spec_from_file_location`` with the plugin

@@ -1,7 +1,7 @@
 """Owner-only descriptor ACL enforcement (slice-00-05, fixed decision D3).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: KEEP_MARKED_EVIDENCE
 
 Windows: the exact ACE set is **exactly one grant ACE for the current user
 (resolved user SID) with full control ``(F)`` and nothing else**, applied

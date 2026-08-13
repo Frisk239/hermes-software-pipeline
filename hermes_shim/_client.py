@@ -1,7 +1,7 @@
 """Loopback Control Interface client for the Hermes Shim (slice-00-05).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: ADOPTED_BY_00-07
 
 A standard-library HTTP client (``urllib.request``) for the authenticated
 loopback Control Interface (ADR-0022). It discovers the port and bearer

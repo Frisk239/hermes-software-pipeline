@@ -70,3 +70,7 @@ jobs:
         run: uv run --offline python -m hermes_pipeline.cli architecture check
       - name: Repository artifact audit
         run: uv run --offline python scripts/check_repository_artifacts.py
+      - name: SBOM preview
+        run: uv run --offline python scripts/sbom_preview.py
+      - name: Dependency audit
+        run: uv run --offline python scripts/check_dependency_audit.py

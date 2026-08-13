@@ -1,7 +1,7 @@
 """State-root singleton lock (slice-00-05).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: KEEP_MARKED_EVIDENCE
 
 One runtime may claim one state root. Startup acquires an operating-system
 file lock; a second start on the same state root fails closed

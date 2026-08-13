@@ -1,7 +1,7 @@
 """RFC 8785 and raw-byte digests for 00-06 authorization.
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: KEEP_MARKED_EVIDENCE
 """
 
 from __future__ import annotations

@@ -1,7 +1,7 @@
 """Private Controller persistence port and spike records (slice-00-04).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: KEEP_MARKED_EVIDENCE
 
 This port is private to the Controller: Controller code depends only on
 this port and on domain values, and never imports SQLAlchemy, LangGraph,

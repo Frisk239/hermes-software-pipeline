@@ -1,7 +1,7 @@
 """transport module (slice-00-05 spike): fake managed runtime entry.
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: KEEP_MARKED_EVIDENCE
 
 The fake managed runtime spike and its entry (``python -m
 hermes_pipeline.transport``, launched by the Hermes shim with a controlled

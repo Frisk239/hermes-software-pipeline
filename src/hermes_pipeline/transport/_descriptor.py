@@ -1,7 +1,7 @@
 """Runtime descriptor writer and validator (slice-00-05).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: KEEP_MARKED_EVIDENCE
 
 The runtime descriptor records protocol version, PID, start identity,
 creation time, port, token generation, active release, and state-root

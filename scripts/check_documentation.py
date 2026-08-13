@@ -156,6 +156,8 @@ REQUIRED_QUALITY_WORKFLOW_COMMANDS = (
     "uv run --offline python -m hermes_pipeline.cli contracts check",
     "uv run --offline python -m hermes_pipeline.cli architecture check",
     "uv run --offline python scripts/check_repository_artifacts.py",
+    "uv run --offline python scripts/sbom_preview.py",
+    "uv run --offline python scripts/check_dependency_audit.py",
 )
 
 REQUIRED_DOC_NEGATIVE_FIXTURES = frozenset(

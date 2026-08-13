@@ -1,0 +1,370 @@
+{
+  "schema_id": "https://schemas.hermes-pipeline.dev/engineering/execution-report/v1",
+  "schema_version": 1,
+  "report_id": "exec_slice-00-07_attempt1",
+  "slice_id": "slice-00-07",
+  "contract_revision": 2,
+  "attempt": 1,
+  "base_sha": "078411b20283288ab2ec85f081d3ed463fba96e4",
+  "candidate_sha": "d5672acd53df8630b2ac3be8d50c723ee60f9cc2",
+  "context_manifest_hash": "sha256:f2de1f88dc6b4e7089ec209953b5742a7637bc1355319ba5dbce4edbec8cbe40",
+  "changed_paths": [
+    ".github/workflows/hermes-integration.yml",
+    ".github/workflows/python-quality.yml",
+    "README.md",
+    "__init__.py",
+    "docs/development/compatibility-manifest.preview.json",
+    "docs/development/compatibility-targets.md",
+    "docs/roadmap/phase-00-foundation/CLOSEOUT.md",
+    "docs/roadmap/phase-00-foundation/slices/00-07-foundation-integration/_write_execution_report.py",
+    "docs/roadmap/phase-00-foundation/slices/00-07-foundation-integration/evidence/architecture-check.out",
+    "docs/roadmap/phase-00-foundation/slices/00-07-foundation-integration/evidence/changed-paths.out",
+    "docs/roadmap/phase-00-foundation/slices/00-07-foundation-integration/evidence/dependency-audit.out",
+    "docs/roadmap/phase-00-foundation/slices/00-07-foundation-integration/evidence/docs-check.out",
+    "docs/roadmap/phase-00-foundation/slices/00-07-foundation-integration/evidence/frozen-sync.out",
+    "docs/roadmap/phase-00-foundation/slices/00-07-foundation-integration/evidence/hermes-integration.out",
+    "docs/roadmap/phase-00-foundation/slices/00-07-foundation-integration/evidence/offline-contracts-check.out",
+    "docs/roadmap/phase-00-foundation/slices/00-07-foundation-integration/evidence/offline-contracts-drift.out",
+    "docs/roadmap/phase-00-foundation/slices/00-07-foundation-integration/evidence/offline-format.out",
+    "docs/roadmap/phase-00-foundation/slices/00-07-foundation-integration/evidence/offline-lint.out",
+    "docs/roadmap/phase-00-foundation/slices/00-07-foundation-integration/evidence/offline-pytest.out",
+    "docs/roadmap/phase-00-foundation/slices/00-07-foundation-integration/evidence/offline-type.out",
+    "docs/roadmap/phase-00-foundation/slices/00-07-foundation-integration/evidence/sbom-preview.out",
+    "docs/roadmap/phase-00-foundation/slices/00-07-foundation-integration/evidence/workflow-check.out",
+    "docs/roadmap/phase-00-foundation/slices/00-07-foundation-integration/execution-report.json",
+    "docs/roadmap/phase-00-foundation/slices/README.md",
+    "hermes_shim/__init__.py",
+    "hermes_shim/_cli.py",
+    "hermes_shim/_client.py",
+    "hermes_shim/_constants.py",
+    "hermes_shim/_descriptor.py",
+    "hermes_shim/_hook.py",
+    "hermes_shim/_lifecycle.py",
+    "hermes_shim/_provision.py",
+    "hermes_shim/_state.py",
+    "hermes_shim/_tool.py",
+    "plugin.yaml",
+    "scripts/check_dependency_audit.py",
+    "scripts/check_documentation.py",
+    "scripts/fixtures/workflows/positive/.github/workflows/hermes-integration.yml",
+    "scripts/sbom_preview.py",
+    "src/hermes_pipeline/artifacts/__init__.py",
+    "src/hermes_pipeline/artifacts/fake.py",
+    "src/hermes_pipeline/artifacts/ports.py",
+    "src/hermes_pipeline/controller/__init__.py",
+    "src/hermes_pipeline/controller/_command_port.py",
+    "src/hermes_pipeline/controller/_persistence_port.py",
+    "src/hermes_pipeline/controller/fake.py",
+    "src/hermes_pipeline/controller/ports.py",
+    "src/hermes_pipeline/controller/spike_controller.py",
+    "src/hermes_pipeline/delivery/__init__.py",
+    "src/hermes_pipeline/delivery/fake.py",
+    "src/hermes_pipeline/delivery/ports.py",
+    "src/hermes_pipeline/interaction/__init__.py",
+    "src/hermes_pipeline/interaction/fake.py",
+    "src/hermes_pipeline/interaction/ports.py",
+    "src/hermes_pipeline/operations/__init__.py",
+    "src/hermes_pipeline/operations/fake.py",
+    "src/hermes_pipeline/operations/ports.py",
+    "src/hermes_pipeline/persistence/backup.py",
+    "src/hermes_pipeline/persistence/event_chain.py",
+    "src/hermes_pipeline/persistence/in_memory.py",
+    "src/hermes_pipeline/persistence/leases.py",
+    "src/hermes_pipeline/persistence/migration_helpers.py",
+    "src/hermes_pipeline/persistence/migration_spike/alembic.ini",
+    "src/hermes_pipeline/persistence/migration_spike/env.py",
+    "src/hermes_pipeline/persistence/migration_spike/versions/0001_create_spike_table.py",
+    "src/hermes_pipeline/persistence/migration_spike/versions/0002_add_execution_marker.py",
+    "src/hermes_pipeline/persistence/sqlite_spike.py",
+    "src/hermes_pipeline/persistence/sqlite_version_gate.py",
+    "src/hermes_pipeline/repository/__init__.py",
+    "src/hermes_pipeline/repository/fake.py",
+    "src/hermes_pipeline/repository/ports.py",
+    "src/hermes_pipeline/runtime_broker/__init__.py",
+    "src/hermes_pipeline/runtime_broker/_acl.py",
+    "src/hermes_pipeline/runtime_broker/_auth.py",
+    "src/hermes_pipeline/runtime_broker/_capability.py",
+    "src/hermes_pipeline/runtime_broker/_codes.py",
+    "src/hermes_pipeline/runtime_broker/_codex.py",
+    "src/hermes_pipeline/runtime_broker/_digest.py",
+    "src/hermes_pipeline/runtime_broker/_e2e.py",
+    "src/hermes_pipeline/runtime_broker/_host.py",
+    "src/hermes_pipeline/runtime_broker/_identity.py",
+    "src/hermes_pipeline/runtime_broker/_isolation.py",
+    "src/hermes_pipeline/runtime_broker/_observations.py",
+    "src/hermes_pipeline/runtime_broker/_opencode.py",
+    "src/hermes_pipeline/runtime_broker/_policy.py",
+    "src/hermes_pipeline/runtime_broker/_process.py",
+    "src/hermes_pipeline/runtime_broker/_provision.py",
+    "src/hermes_pipeline/runtime_broker/_redaction.py",
+    "src/hermes_pipeline/runtime_broker/_snapshot.py",
+    "src/hermes_pipeline/runtime_broker/controlled_e2e.py",
+    "src/hermes_pipeline/runtime_broker/fake.py",
+    "src/hermes_pipeline/runtime_broker/ports.py",
+    "src/hermes_pipeline/runtime_broker/tools_bootstrap.py",
+    "src/hermes_pipeline/stage_executor/__init__.py",
+    "src/hermes_pipeline/stage_executor/_boundary.py",
+    "src/hermes_pipeline/stage_executor/_graph_spike.py",
+    "src/hermes_pipeline/stage_executor/fake.py",
+    "src/hermes_pipeline/stage_executor/ports.py",
+    "src/hermes_pipeline/transport/__init__.py",
+    "src/hermes_pipeline/transport/__main__.py",
+    "src/hermes_pipeline/transport/_acl.py",
+    "src/hermes_pipeline/transport/_constants.py",
+    "src/hermes_pipeline/transport/_descriptor.py",
+    "src/hermes_pipeline/transport/_identity.py",
+    "src/hermes_pipeline/transport/_lock.py",
+    "src/hermes_pipeline/transport/_main.py",
+    "src/hermes_pipeline/transport/_protocol.py",
+    "src/hermes_pipeline/transport/_receipts.py",
+    "src/hermes_pipeline/transport/_server.py",
+    "src/hermes_pipeline/transport/_state.py",
+    "tests/modules/test_artifacts_port.py",
+    "tests/modules/test_controller_port.py",
+    "tests/modules/test_delivery_port.py",
+    "tests/modules/test_interaction_port.py",
+    "tests/modules/test_operations_port.py",
+    "tests/modules/test_repository_port.py",
+    "tests/modules/test_runtime_broker_port.py",
+    "tests/modules/test_stage_executor_port.py",
+    "tests/spike/test_disposition.py",
+    "tests/test_dependency_audit.py",
+    "tests/test_sbom_preview.py"
+  ],
+  "command_results": [
+    {
+      "command_id": "frozen-sync",
+      "exit_code": 0,
+      "started_at": "2026-08-13T09:14:01Z",
+      "duration_ms": 47,
+      "output_artifact": {
+        "artifact_id": "art_00-07_frozen_sync",
+        "manifest_digest": "sha256:ac3f8fdffcb7db8a1686d1eb786d1abc0d2bd4f298649e4e6696b598d157e4b3",
+        "role": "stdout-frozen-sync"
+      }
+    },
+    {
+      "command_id": "offline-format",
+      "exit_code": 0,
+      "started_at": "2026-08-13T09:14:01Z",
+      "duration_ms": 101,
+      "output_artifact": {
+        "artifact_id": "art_00-07_offline_format",
+        "manifest_digest": "sha256:682477093e7a6a73a46bea4687062a083897103be0f77b4edce577f415398b9a",
+        "role": "stdout-offline-format"
+      }
+    },
+    {
+      "command_id": "offline-lint",
+      "exit_code": 0,
+      "started_at": "2026-08-13T09:14:01Z",
+      "duration_ms": 98,
+      "output_artifact": {
+        "artifact_id": "art_00-07_offline_lint",
+        "manifest_digest": "sha256:86c6a4e03a772515f99191dda4d70020b3b1e0679438b0e0889c9bbb93db0413",
+        "role": "stdout-offline-lint"
+      }
+    },
+    {
+      "command_id": "offline-type",
+      "exit_code": 0,
+      "started_at": "2026-08-13T09:14:01Z",
+      "duration_ms": 6340,
+      "output_artifact": {
+        "artifact_id": "art_00-07_offline_type",
+        "manifest_digest": "sha256:4ce35369c1307dc1a7b12d308a809b99f0ef08ab3aeb243ef50122e70e260de8",
+        "role": "stdout-offline-type"
+      }
+    },
+    {
+      "command_id": "offline-pytest",
+      "exit_code": 0,
+      "started_at": "2026-08-13T09:14:07Z",
+      "duration_ms": 138168,
+      "output_artifact": {
+        "artifact_id": "art_00-07_offline_pytest",
+        "manifest_digest": "sha256:0e2718732ffc93f3a5ea925d24177bb59c8164b532c88575bce6216c864864a5",
+        "role": "stdout-offline-pytest"
+      }
+    },
+    {
+      "command_id": "offline-contracts-check",
+      "exit_code": 0,
+      "started_at": "2026-08-13T09:16:26Z",
+      "duration_ms": 479,
+      "output_artifact": {
+        "artifact_id": "art_00-07_offline_contracts_check",
+        "manifest_digest": "sha256:1425935d655888a1861b7cc14524d6830237620dc37892fa3e9d08a4aef1d172",
+        "role": "stdout-offline-contracts-check"
+      }
+    },
+    {
+      "command_id": "offline-contracts-drift",
+      "exit_code": 0,
+      "started_at": "2026-08-13T09:16:26Z",
+      "duration_ms": 395,
+      "output_artifact": {
+        "artifact_id": "art_00-07_offline_contracts_drift",
+        "manifest_digest": "sha256:f1342f9260c1a4a92f9ffeddaa6060286791cb1422e8e9f901bdfea80db05368",
+        "role": "stdout-offline-contracts-drift"
+      }
+    },
+    {
+      "command_id": "architecture-check",
+      "exit_code": 0,
+      "started_at": "2026-08-13T09:16:26Z",
+      "duration_ms": 233,
+      "output_artifact": {
+        "artifact_id": "art_00-07_architecture_check",
+        "manifest_digest": "sha256:f234de64855a01c71f316764c889033833d0a4b07676218d97d4dbcd259f9340",
+        "role": "stdout-architecture-check"
+      }
+    },
+    {
+      "command_id": "docs-check",
+      "exit_code": 0,
+      "started_at": "2026-08-13T09:16:27Z",
+      "duration_ms": 314,
+      "output_artifact": {
+        "artifact_id": "art_00-07_docs_check",
+        "manifest_digest": "sha256:fe9f6a15409d39688934361ace0ca91adf65a827e23b65cbec16654e3e7ba476",
+        "role": "stdout-docs-check"
+      }
+    },
+    {
+      "command_id": "workflow-check",
+      "exit_code": 0,
+      "started_at": "2026-08-13T09:16:27Z",
+      "duration_ms": 133,
+      "output_artifact": {
+        "artifact_id": "art_00-07_workflow_check",
+        "manifest_digest": "sha256:22aec4190bb57c1d7a3c4425038295106a87d96fdc1c4e57a1c2556d694a48df",
+        "role": "stdout-workflow-check"
+      }
+    },
+    {
+      "command_id": "sbom-preview",
+      "exit_code": 0,
+      "started_at": "2026-08-13T09:16:27Z",
+      "duration_ms": 124,
+      "output_artifact": {
+        "artifact_id": "art_00-07_sbom_preview",
+        "manifest_digest": "sha256:9d789252f80c981dc58b1d5b87a2c10ba3930d33b5ccfdd26a52370a6d2286be",
+        "role": "stdout-sbom-preview"
+      }
+    },
+    {
+      "command_id": "dependency-audit",
+      "exit_code": 0,
+      "started_at": "2026-08-13T09:16:27Z",
+      "duration_ms": 101,
+      "output_artifact": {
+        "artifact_id": "art_00-07_dependency_audit",
+        "manifest_digest": "sha256:b591a2f5a8d1a5bac3b4c8cb3da6aca57e8206f229e425374b19b549b5a32341",
+        "role": "stdout-dependency-audit"
+      }
+    },
+    {
+      "command_id": "hermes-integration",
+      "exit_code": 0,
+      "started_at": "2026-08-13T09:16:27Z",
+      "duration_ms": 19259,
+      "output_artifact": {
+        "artifact_id": "art_00-07_hermes_integration",
+        "manifest_digest": "sha256:6784299a62ddb14ab52e617ffe637bafda57113260b846c80a5959c45a8efae8",
+        "role": "stdout-hermes-integration"
+      }
+    },
+    {
+      "command_id": "changed-paths",
+      "exit_code": 0,
+      "started_at": "2026-08-13T09:16:47Z",
+      "duration_ms": 71,
+      "output_artifact": {
+        "artifact_id": "art_00-07_changed_paths",
+        "manifest_digest": "sha256:896ac310f5209b34812a4e608e4762d6bb64ef8e83537e45f38059b5fae392b7",
+        "role": "stdout-changed-paths"
+      }
+    }
+  ],
+  "artifact_refs": [
+    {
+      "artifact_id": "art_00-07_frozen_sync",
+      "manifest_digest": "sha256:ac3f8fdffcb7db8a1686d1eb786d1abc0d2bd4f298649e4e6696b598d157e4b3",
+      "role": "stdout-frozen-sync"
+    },
+    {
+      "artifact_id": "art_00-07_offline_format",
+      "manifest_digest": "sha256:682477093e7a6a73a46bea4687062a083897103be0f77b4edce577f415398b9a",
+      "role": "stdout-offline-format"
+    },
+    {
+      "artifact_id": "art_00-07_offline_lint",
+      "manifest_digest": "sha256:86c6a4e03a772515f99191dda4d70020b3b1e0679438b0e0889c9bbb93db0413",
+      "role": "stdout-offline-lint"
+    },
+    {
+      "artifact_id": "art_00-07_offline_type",
+      "manifest_digest": "sha256:4ce35369c1307dc1a7b12d308a809b99f0ef08ab3aeb243ef50122e70e260de8",
+      "role": "stdout-offline-type"
+    },
+    {
+      "artifact_id": "art_00-07_offline_pytest",
+      "manifest_digest": "sha256:0e2718732ffc93f3a5ea925d24177bb59c8164b532c88575bce6216c864864a5",
+      "role": "stdout-offline-pytest"
+    },
+    {
+      "artifact_id": "art_00-07_offline_contracts_check",
+      "manifest_digest": "sha256:1425935d655888a1861b7cc14524d6830237620dc37892fa3e9d08a4aef1d172",
+      "role": "stdout-offline-contracts-check"
+    },
+    {
+      "artifact_id": "art_00-07_offline_contracts_drift",
+      "manifest_digest": "sha256:f1342f9260c1a4a92f9ffeddaa6060286791cb1422e8e9f901bdfea80db05368",
+      "role": "stdout-offline-contracts-drift"
+    },
+    {
+      "artifact_id": "art_00-07_architecture_check",
+      "manifest_digest": "sha256:f234de64855a01c71f316764c889033833d0a4b07676218d97d4dbcd259f9340",
+      "role": "stdout-architecture-check"
+    },
+    {
+      "artifact_id": "art_00-07_docs_check",
+      "manifest_digest": "sha256:fe9f6a15409d39688934361ace0ca91adf65a827e23b65cbec16654e3e7ba476",
+      "role": "stdout-docs-check"
+    },
+    {
+      "artifact_id": "art_00-07_workflow_check",
+      "manifest_digest": "sha256:22aec4190bb57c1d7a3c4425038295106a87d96fdc1c4e57a1c2556d694a48df",
+      "role": "stdout-workflow-check"
+    },
+    {
+      "artifact_id": "art_00-07_sbom_preview",
+      "manifest_digest": "sha256:9d789252f80c981dc58b1d5b87a2c10ba3930d33b5ccfdd26a52370a6d2286be",
+      "role": "stdout-sbom-preview"
+    },
+    {
+      "artifact_id": "art_00-07_dependency_audit",
+      "manifest_digest": "sha256:b591a2f5a8d1a5bac3b4c8cb3da6aca57e8206f229e425374b19b549b5a32341",
+      "role": "stdout-dependency-audit"
+    },
+    {
+      "artifact_id": "art_00-07_hermes_integration",
+      "manifest_digest": "sha256:6784299a62ddb14ab52e617ffe637bafda57113260b846c80a5959c45a8efae8",
+      "role": "stdout-hermes-integration"
+    },
+    {
+      "artifact_id": "art_00-07_changed_paths",
+      "manifest_digest": "sha256:896ac310f5209b34812a4e608e4762d6bb64ef8e83537e45f38059b5fae392b7",
+      "role": "stdout-changed-paths"
+    }
+  ],
+  "self_assessment": "READY_FOR_REVIEW",
+  "submitted_at": "2026-08-13T09:16:47Z",
+  "risks": [
+    "UNCOMMITTED: candidate_sha is worktree HEAD d5672ac. No implementation Candidate exists until Git Custodian commits.",
+    "Windows and Linux CI on the Candidate are required after publication.",
+    "Isolation, Chrome for Testing, and Windows sealed Codex remain UNSUPPORTED or experimental."
+  ],
+  "content_hash": "sha256:107263330f035fd42ff37603bb09ca4ce0c0c494667e9ee728f7009be92c7ad1"
+}

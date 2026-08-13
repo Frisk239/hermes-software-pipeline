@@ -1,6 +1,6 @@
 # Hermes plugin manifest for the Hermes Software Pipeline shim (slice-00-05
 # feasibility spike). SPIKE-EXPERIMENTAL marker:
-# DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+# DISPOSITION: ADOPTED_BY_00-07
 #
 # The Hermes-loaded entry stays a thin, standard-library and
 # Hermes-guaranteed shim (ADR-0019): it registers the `pipeline` CLI command

@@ -1,7 +1,7 @@
 """Stage-facing Controller command port (slice-00-04 spike).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: KEEP_MARKED_EVIDENCE
 
 ``ControllerCommandPort`` is the accepted external Controller Interface and
 the only Interface the Stage Executor may call. It retains the accepted

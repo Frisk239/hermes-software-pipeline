@@ -1,7 +1,7 @@
 """Runtime descriptor access for the Hermes Shim (slice-00-05).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: ADOPTED_BY_00-07
 
 The shim reads, validates, and (on stale proof) removes the runtime
 descriptor written by the fake managed runtime. Descriptor shape is pinned

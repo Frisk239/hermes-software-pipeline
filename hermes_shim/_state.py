@@ -1,7 +1,7 @@
 """State-root resolution and layout for the Hermes Shim (slice-00-05).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: ADOPTED_BY_00-07
 
 The lifecycle state root is derived from HERMES_HOME (fixed decision D5):
 ``<HERMES_HOME>/software-pipeline/`` with the accepted child layout

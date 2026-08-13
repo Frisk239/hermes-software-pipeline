@@ -1,7 +1,7 @@
 """Declared high-level tool for the Hermes Shim (slice-00-05).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: ADOPTED_BY_00-07
 
 One minimal declared high-level tool (``pipeline_health``) proves the
 ``ctx.register_tool`` surface; the PluginManager probe asserts exactly one

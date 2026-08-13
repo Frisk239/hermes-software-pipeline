@@ -1,7 +1,7 @@
 """SQLite WAL-reset repair-version gate (slice-00-04, AC-08).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: KEEP_MARKED_EVIDENCE
 
 The exact WAL-reset repair-version predicate is an independent per-platform
 acceptance gate measured via ``sqlite3.sqlite_version``::

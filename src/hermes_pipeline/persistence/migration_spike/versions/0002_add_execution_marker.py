@@ -1,7 +1,7 @@
 """add migration execution marker
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: KEEP_MARKED_EVIDENCE
 
 Revision ID: 0002
 Revises: 0001

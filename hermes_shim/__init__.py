@@ -1,7 +1,7 @@
 """Hermes Software Pipeline shim package (slice-00-05).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: ADOPTED_BY_00-07
 
 Standard-library and Hermes-guaranteed shim loaded inside the Hermes
 process (ADR-0019). It registers the ``pipeline`` CLI command tree, the

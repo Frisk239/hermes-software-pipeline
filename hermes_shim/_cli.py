@@ -1,7 +1,7 @@
 """``hermes pipeline`` CLI command tree for the Hermes Shim (slice-00-05).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: ADOPTED_BY_00-07
 
 Registers exactly one top-level ``pipeline`` CLI command with exactly five
 subcommands (``setup``, ``doctor``, ``start``, ``status``, ``stop``) via

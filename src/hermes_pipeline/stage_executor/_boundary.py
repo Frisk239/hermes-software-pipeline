@@ -1,7 +1,7 @@
 """Stage Executor boundary spike (slice-00-04, AC-02/AC-11).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: KEEP_MARKED_EVIDENCE
 
 The Stage Executor (and the LangGraph graph spike) imports only domain
 values and ``ControllerCommandPort``; it never imports the private

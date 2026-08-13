@@ -1,7 +1,7 @@
 """FastAPI/Uvicorn loopback server facade (slice-00-05, ADR-0028).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: KEEP_MARKED_EVIDENCE
 
 Thin framework adapter over the pure protocol layer in ``_protocol.py``.
 FastAPI/Uvicorn are imported lazily here and exist only inside the

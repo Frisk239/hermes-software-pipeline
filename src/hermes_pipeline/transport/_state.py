@@ -1,7 +1,7 @@
 """State-root identity and write-boundary guard (slice-00-05).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: KEEP_MARKED_EVIDENCE
 
 Mirror of the shim-side state-root identity: a content digest of the
 canonical absolute state-root path, so /v1/version and operator output can

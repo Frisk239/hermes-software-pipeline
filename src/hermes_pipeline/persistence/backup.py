@@ -1,7 +1,7 @@
 """Online backup and restore helper for spike databases (slice-00-04, AC-07).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: KEEP_MARKED_EVIDENCE
 
 Backup and restore go through the Python ``sqlite3.Connection.backup`` API
 only, while readers or writers may be active. The policy rejects the

@@ -1,7 +1,7 @@
 """Managed runtime entry (slice-00-05, launched by the Hermes shim).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: KEEP_MARKED_EVIDENCE
 
 ``python -m hermes_pipeline.transport --state-root <path>`` starts the
 fake managed runtime:

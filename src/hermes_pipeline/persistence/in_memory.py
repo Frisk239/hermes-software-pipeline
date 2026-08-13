@@ -1,7 +1,7 @@
 """Deterministic in-memory Controller persistence Adapter (slice-00-04).
 
 SPIKE-EXPERIMENTAL marker:
-DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+DISPOSITION: KEEP_MARKED_EVIDENCE
 
 The deterministic in-memory Adapter implements the same private port
 contract as the SQLite spike Adapter: a five-record atomic commit (Inbox,
