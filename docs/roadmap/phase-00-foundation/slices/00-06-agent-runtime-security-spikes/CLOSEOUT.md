@@ -37,7 +37,7 @@ Closed: 2026-08-13
 - Chrome for Testing stays `no_official_checksum` and is excluded from sealed hard-gates;
 - Windows sealed Codex stays `UNSUPPORTED_RUNTIME` until an independently sourced Authenticode signer identity is pinned;
 - hard network deny without OS-level enforcement stays `UNSUPPORTED_RUNTIME`;
-- Slice 00-04 and 00-05 still lack committed `CLOSEOUT.md`;
+- 00-04 and 00-05 Closeouts are backfilled in the same documentation Candidate as this file;
 - nothing in `runtime_broker/` is production foundation until Slice 00-07 adopts, rewrites, or deletes it.
 
 ## Next prerequisites
