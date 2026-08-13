@@ -20,6 +20,10 @@ def assert_path_inside(root: Path, candidate: str) -> Path:
     """Reject absolute, dot-dot, symlink/junction, and 8.3 escapes."""
     if not candidate or candidate in DOS_DEVICES:
         raise PolicyError("forbidden path")
+    if candidate.startswith(("/", "\\")):
+        raise PolicyError("absolute path rejected")
+    if len(candidate) >= 2 and candidate[1] == ":":
+        raise PolicyError("absolute path rejected")
     raw = Path(candidate)
     if raw.is_absolute() or raw.drive:
         raise PolicyError("absolute path rejected")
