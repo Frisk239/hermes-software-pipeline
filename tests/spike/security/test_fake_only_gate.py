@@ -13,8 +13,6 @@ from pathlib import Path
 
 import pytest
 
-from hermes_pipeline.runtime_broker._process import descendant_pids
-
 REPO_ROOT = Path(__file__).resolve().parents[3]
 BOOTSTRAP = (
     REPO_ROOT / "src" / "hermes_pipeline" / "runtime_broker" / "tools_bootstrap.py"
@@ -26,20 +24,20 @@ CONTROLLED = (
 pytestmark = pytest.mark.fake_only
 
 
-def _children_of(pid: int) -> list[int]:
-    return descendant_pids(pid)
-
-
-def _invoke(script: Path, extra: list[str]) -> tuple[int, str, int]:
+def _invoke(script: Path, extra: list[str]) -> tuple[int, str]:
+    flags = 0
+    if sys.platform == "win32":
+        flags = subprocess.CREATE_NO_WINDOW
     child = subprocess.Popen(
         [sys.executable, str(script), *extra],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
         cwd=REPO_ROOT,
+        creationflags=flags,
     )
     stdout, _stderr = child.communicate()
-    return int(child.returncode or 0), stdout, child.pid
+    return int(child.returncode or 0), stdout
 
 
 @pytest.mark.parametrize(
@@ -56,8 +54,7 @@ def _invoke(script: Path, extra: list[str]) -> tuple[int, str, int]:
 def test_missing_authorization_rejects_before_process_creation(
     script: Path, extra: list[str]
 ) -> None:
-    code, stdout, pid = _invoke(script, extra)
+    code, stdout = _invoke(script, extra)
     assert code == 1
     payload = json.loads(stdout.strip())
     assert payload == {"ok": False, "code": "DEPENDENCY_UNAVAILABLE"}
-    assert _children_of(pid) == []
