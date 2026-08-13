@@ -2,7 +2,10 @@
 
 These are planning-level Slice definitions. Codex expands only the next dependency-ready Slice into a machine-valid immutable Slice Contract using the exact current Base SHA.
 
-Slice 00-04 was accepted and integrated at `46798d86a2e48551a3a634e93d1e4dfe5cbf8786` (PR #9), and Slice 00-05 was accepted and integrated at `102d08f814b6c0a939662e6c488870310a97c1ee` (PR #11). Slice 00-06 is READY at planning revision 14, bound to Base `9cf24b876cc7422386ed54c277900ff1e3c2c2bf` with a clean assigned execution worktree; its planning package has not yet integrated into `main`.
+Slice 00-04 was accepted and integrated at `46798d86a2e48551a3a634e93d1e4dfe5cbf8786` (PR #9), Slice 00-05 at `102d08f814b6c0a939662e6c488870310a97c1ee` (PR #11), and Slice 00-06 at `078411b20283288ab2ec85f081d3ed463fba96e4` (PR #14). The current draft contract for the next Slice is:
+
+- `00-07-foundation-integration/SLICE.md`;
+- `00-07-foundation-integration/slice-contract.json` (DRAFT revision 1, Base `078411b20283288ab2ec85f081d3ed463fba96e4`).
 
 Every Slice integration triggers the post-merge downstream decision audit defined in `docs/development/phase-and-slice-operating-model.md`. The 00-05 → 00-06 transition predates that rule, so its first append-only audit record is backfilled in `00-06-agent-runtime-security-spikes/downstream-audit.md`. Append-only revision 10 records the r14 READY review and Git Custodian worktree assignment; revisions 11-12 bind the synchronized identities and final Codex Responses interface; revision 13 records the final projection synchronization; no `UPDATED` or `CCR_REQUIRED` item remains open.
 
@@ -99,6 +102,8 @@ Out: production role prompts, quality evaluation, or application-specific E2E.
 Demonstration: a malicious fixture cannot mutate Git, escape authorized roots, inherit a canary secret, or leave a child process alive after fencing.
 
 ## 00-07 Foundation integration
+
+Draft contract: `00-07-foundation-integration/SLICE.md` and `slice-contract.json` (revision 1, status DRAFT). Human decisions D1–D6 are recorded there. Not READY until review and worktree assignment.
 
 Must deliver:
 
