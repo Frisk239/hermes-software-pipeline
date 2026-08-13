@@ -1,29 +1,29 @@
 {
   "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
   "schema_version": 1,
-  "document_revision": 1,
+  "document_revision": 2,
   "slice_id": "slice-00-07",
   "phase_id": "phase-00",
-  "status": "DRAFT",
+  "status": "READY",
   "predecessors": [
     "slice-00-04",
     "slice-00-05",
     "slice-00-06"
   ],
   "base_sha": "078411b20283288ab2ec85f081d3ed463fba96e4",
-  "assigned_worktree": "not-assigned-pending-custodian",
+  "assigned_worktree": "C:\\Users\\a2691\\AppData\\Local\\hermes\\managed-worktrees\\hermes-software-pipeline\\slice-00-07",
   "operator_path": "From a clean Windows or Linux checkout of the Candidate, run the existing frozen offline quality suite plus the new stdlib SBOM preview and dependency-audit commands, then prove hermes pipeline setup|doctor|start|status|stop remain idempotent and a fake Hermes command survives restart. No public network after dependency bootstrap. No new dependency family.",
   "must_scope": [
-    "DRAFT revision 1 at Planning Base 078411b20283288ab2ec85f081d3ed463fba96e4. Human accepted D1-D6 on 2026-08-13: adopt Shim lifecycle in place; keep-mark transport as fake runtime; adopt Controller.submit and add read; keep-mark runtime_broker and 00-06 probes; stdlib offline SBOM preview and lock audit; fixture-only compatibility manifest. No new ADR. READY requires independent review plus a Custodian-assigned clean worktree at this Base.",
-    "Public Interfaces are typing.Protocol objects exported from each Module package. Request and result types are stdlib dataclasses or TypedDicts in that package. Do not add committed JSON Schemas or OpenAPI paths. Each Interface has one deterministic in-memory fake Adapter and one shared contract-test module that runs against the fake.",
-    "Controller Protocol: submit(command) -> CommandReceipt using existing contract types; read(query) -> a deterministic PipelineView dataclass that performs no Project RBAC and returns only fixture fields. Adopt existing ControllerCommandPort.submit mapping. Persistence SQLite/Alembic/lease spikes stay keep-marked and are not re-exported as a public persistence Interface.",
-    "Stage Executor Protocol: start/resume/cancel/inspect. Fake returns stable handles and snapshots with no LangGraph import in the fake. Existing graph spike stays keep-marked.",
-    "Runtime Broker Protocol: launch/signal/inspect/collect. Fake does not launch Codex/OpenCode/Chrome. Existing runtime_broker Host/probes stay keep-marked evidence and must not be presented as this Protocol.",
-    "Artifact Store Protocol: put/open/verify. Fake stores bytes in memory keyed by content hash. Repository Protocol: prepare/create_candidate/verify/cleanup. Fake records requests and returns deterministic manifests without Git mutation. Delivery Protocol: publish/reconcile. Fake records namespaced branch intent and never approves or merges. Interaction Protocol: deliver/ingest. Fake maps a fixed probe event to a ControllerCommand and never accepts an approval. Operations Protocol: health/reconcile/backup/restore. Fake health is used by doctor; backup/restore return unsupported receipts and must not run while a writer is claimed active.",
+    "READY revision 2 at Planning Base 078411b20283288ab2ec85f081d3ed463fba96e4. Human accepted D1-D6 on 2026-08-13. Assigned worktree C:\\Users\\a2691\\AppData\\Local\\hermes\\managed-worktrees\\hermes-software-pipeline\\slice-00-07. No new ADR.",
+    "Exact files (create if missing). Protocols in src/hermes_pipeline/<pkg>/ports.py; fakes in src/hermes_pipeline/<pkg>/fake.py; contract tests in tests/modules/test_<pkg>_port.py. Packages: controller, stage_executor, runtime_broker, artifacts, repository, delivery, interaction, operations. Export Protocols from each package __init__.py. Types are frozen dataclasses in the same ports.py. No new JSON Schema.",
+    "controller/ports.py: ControllerPort.submit(command: ControllerCommand) -> CommandReceipt (reuse existing types and 00-04 failure mapping); ControllerPort.read(query: PipelineQuery) -> PipelineView. PipelineQuery has only pipeline_id: str. PipelineView has pipeline_id: str, revision: int, status: Literal['UNKNOWN']. FakeController stores last submit and returns PipelineView(status='UNKNOWN', revision=0) for unknown ids. No RBAC.",
+    "stage_executor/ports.py: start(execution_input: ExecutionInput) -> ExecutionHandle; resume(resume_input: ResumeInput) -> ExecutionHandle; cancel(cancel_request: ExecutionCancelRequest) -> CancelReceipt; inspect(run_id: str) -> ExecutionSnapshot. Each input dataclass has only run_id: str. Handle/Snapshot/Receipt have run_id plus status Literal['PENDING','CANCELLED','UNSUPPORTED']. Fake has no LangGraph import.",
+    "runtime_broker/ports.py: launch/signal/inspect/collect with RuntimeLaunchRequest(runtime_id: str), RuntimeHandle(runtime_id, status='FAKE'), RuntimeSignalReceipt(ok=False, code='UNSUPPORTED'), RuntimeSnapshot(runtime_id, status='FAKE'), RuntimeOutcome(runtime_id, status='FAKE'). Fake must not import or exec Codex/OpenCode/Chrome. Existing Host/probe modules stay KEEP_MARKED_EVIDENCE and must not implement this Protocol.",
+    "artifacts/ports.py: put(ArtifactPutRequest(payload: bytes)) -> ArtifactRecord(artifact_id: str, digest: str); open(artifact_id: str) -> bytes; verify(artifact_id: str) -> ArtifactVerification(ok: bool). Fake keys memory by sha256 hex. repository/ports.py: prepare/create_candidate/verify/cleanup each take a request with name: str and return a record with ok: bool, action: str; FakeRepository records calls and never calls git. delivery/ports.py: publish/reconcile take name: str and return ok: bool, action: Literal['RECORDED']; FakeDelivery has no approve/merge methods. interaction/ports.py: deliver(text: str) -> InteractionReceipt(ok: bool); ingest(event: str) -> ControllerCommand using one committed fixture command id cmd_00-07-probe; FakeInteraction.ingest rejects any event containing 'approve'. operations/ports.py: health() -> HealthReport(ok: bool, checks: tuple[str, ...]); reconcile/backup/restore take name: str and return status='UNSUPPORTED' when writer_active is True on the fake.",
     "Adopt plugin.yaml, root __init__.py, and hermes_shim/ lifecycle. Change DISPOSITION to ADOPTED_BY_00-07. Do not move commands into src/hermes_pipeline/cli/. Revalidate EC-00-07 and EC-00-11 on this Candidate: PluginManager counts, source-install SHA binding, setup/doctor/start/status/stop idempotency, doctor structured JSON, restart exactly-once fake command. Update README to state the five commands exist as a non-production skeleton.",
     "transport/ and runtime-env/ remain keep-marked. hermes-integration.yml is adopted as the EC-00-07 demonstration workflow. Root pyproject.toml [project].dependencies stays empty. Root uv.lock changes only if a new stdlib-only script requires no lock change.",
-    "Add scripts/sbom_preview.py that reads uv.lock with tomllib and writes a deterministic SPDX-lite or project preview JSON to stdout. Add scripts/check_dependency_audit.py that asserts root runtime dependencies are empty, lock hashes match, and no undeclared runtime import. Both use only the Python standard library and no network. Wire both into python-quality.yml by updating the exact command multiset and scripts/fixtures/workflows fixtures. Do not add actions/upload-artifact or change GITHUB_TOKEN permissions.",
-    "Commit docs/development/compatibility-manifest.preview.json describing package identity, Python/uv pins, upgrade/rollback as operator-manual, and explicit non-application of updates. Do not add a new public Schema.",
+    "scripts/sbom_preview.py prints one JSON object to stdout: {schema:'hermes-sbom-preview/v1', lock_file:'uv.lock', packages:[{name, version, source}, ...]} sorted by name then version. Read uv.lock with tomllib only. scripts/check_dependency_audit.py exit 0 when pyproject [project].dependencies is empty and uv.lock exists; exit 1 with bounded text if a runtime dependency is present. Wire both after Repository artifact audit in python-quality.yml and update scripts/fixtures/workflows exact command multisets. No upload-artifact, no permission change.",
+    "docs/development/compatibility-manifest.preview.json is exactly {schema:'hermes-compat-preview/v1', package:'hermes-pipeline', version:'0.1.0', python:'3.12.13', uv:'0.12.1', update_apply:'manual-only'}. No new Schema.",
     "Write docs/roadmap/phase-00-foundation/CLOSEOUT.md for EC-00-12: delivered capability, evidence SHAs, residual risks, Phase 1 prerequisites. Record D1-D6 and the retain/keep-marked/delete table. Isolation, CfT, and Windows sealed Codex remain UNSUPPORTED or experimental.",
     "counter_spike remains RETAIN_NON_PUBLIC_CANDIDATE. Flip other adopted files from DELETE_UNLESS_ADOPTED_BY_00-07 to ADOPTED_BY_00-07. Leave keep-marked files on DELETE_UNLESS_ADOPTED_BY_PHASE_01 or KEEP_MARKED_EVIDENCE. Do not silently promote keep-marked spikes to production foundation."
   ],
@@ -436,5 +436,5 @@
     "EC-00-07 or EC-00-11 cannot be revalidated on the Candidate",
     "Implementation requires paths outside permitted_paths or a new public Schema"
   ],
-  "content_hash": "sha256:0d759a39b901555ff609b80d075c2bd4318fe6fe58136b285411b6284783718d"
+  "content_hash": "sha256:f2de1f88dc6b4e7089ec209953b5742a7637bc1355319ba5dbce4edbec8cbe40"
 }

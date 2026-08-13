@@ -1,6 +1,6 @@
 # Slice 00-07 — Foundation Integration (DRAFT, revision 1)
 
-Status: **DRAFT**. Human decisions D1–D6 below are accepted in planning chat on 2026-08-13. This package is not READY until an independent review passes and the Git Custodian assigns a clean worktree at Base `078411b20283288ab2ec85f081d3ed463fba96e4`.
+Status: **READY** (revision 2). Human decisions D1–D6 accepted 2026-08-13. Assigned worktree: `C:\Users\a2691\AppData\Local\hermes\managed-worktrees\hermes-software-pipeline\slice-00-07`. Machine contract is authoritative.
 
 - Planning Base: `078411b20283288ab2ec85f081d3ed463fba96e4` (origin/main after PR #14).
 - Predecessors: `slice-00-04`, `slice-00-05`, `slice-00-06`.

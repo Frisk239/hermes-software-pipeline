@@ -5,7 +5,7 @@ These are planning-level Slice definitions. Codex expands only the next dependen
 Slice 00-04 was accepted and integrated at `46798d86a2e48551a3a634e93d1e4dfe5cbf8786` (PR #9), Slice 00-05 at `102d08f814b6c0a939662e6c488870310a97c1ee` (PR #11), and Slice 00-06 at `078411b20283288ab2ec85f081d3ed463fba96e4` (PR #14). The current draft contract for the next Slice is:
 
 - `00-07-foundation-integration/SLICE.md`;
-- `00-07-foundation-integration/slice-contract.json` (DRAFT revision 1, Base `078411b20283288ab2ec85f081d3ed463fba96e4`).
+- `00-07-foundation-integration/slice-contract.json` (READY revision 2, Base `078411b20283288ab2ec85f081d3ed463fba96e4`).
 
 Every Slice integration triggers the post-merge downstream decision audit defined in `docs/development/phase-and-slice-operating-model.md`. The 00-05 → 00-06 transition predates that rule, so its first append-only audit record is backfilled in `00-06-agent-runtime-security-spikes/downstream-audit.md`. Append-only revision 10 records the r14 READY review and Git Custodian worktree assignment; revisions 11-12 bind the synchronized identities and final Codex Responses interface; revision 13 records the final projection synchronization; no `UPDATED` or `CCR_REQUIRED` item remains open.
 
@@ -103,7 +103,7 @@ Demonstration: a malicious fixture cannot mutate Git, escape authorized roots, i
 
 ## 00-07 Foundation integration
 
-Draft contract: `00-07-foundation-integration/SLICE.md` and `slice-contract.json` (revision 1, status DRAFT). Human decisions D1–D6 are recorded there. Not READY until review and worktree assignment.
+READY contract: `00-07-foundation-integration/SLICE.md` and `slice-contract.json` (revision 2). Human decisions D1–D6 are recorded there.
 
 Must deliver:
 
