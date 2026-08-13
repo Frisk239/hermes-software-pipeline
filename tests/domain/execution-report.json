@@ -1,0 +1,101 @@
+{
+  "schema_id": "https://schemas.hermes-pipeline.dev/engineering/execution-report/v1",
+  "schema_version": 1,
+  "report_id": "exec_slice-01-01_attempt1",
+  "slice_id": "slice-01-01",
+  "contract_revision": 2,
+  "attempt": 1,
+  "base_sha": "e778a5246c4bec3f6a54aec2fdb315ab66ca756e",
+  "candidate_sha": "faa319acde733df4a838fbacd08b6068c95782c5",
+  "context_manifest_hash": "sha256:93c1370bc3557aeec4ed8aecc9165cecd6cb382f2b0dfb841f1266df00310377",
+  "changed_paths": [
+    "src/hermes_pipeline/domain/__init__.py",
+    "src/hermes_pipeline/domain/clock.py",
+    "src/hermes_pipeline/domain/errors.py",
+    "src/hermes_pipeline/domain/pipeline.py",
+    "tests/domain/evidence/architecture-check.out",
+    "tests/domain/evidence/domain-tests.out",
+    "tests/domain/evidence/offline-pytest.out",
+    "tests/domain/evidence/offline-type.out",
+    "tests/domain/execution-report.json",
+    "tests/domain/test_pipeline_aggregate.py"
+  ],
+  "command_results": [
+    {
+      "command_id": "domain-tests",
+      "exit_code": 0,
+      "started_at": "2026-08-13T11:56:34Z",
+      "duration_ms": 1253,
+      "output_artifact": {
+        "artifact_id": "art_01-01_domain_tests",
+        "manifest_digest": "sha256:0634bee489bdb0bc706fcd94bcfaaf5ec3e6afdbf7b12b4a3b2c1d598ab28ee5",
+        "role": "stdout-domain-tests"
+      }
+    },
+    {
+      "command_id": "offline-pytest",
+      "exit_code": 0,
+      "started_at": "2026-08-13T11:56:36Z",
+      "duration_ms": 90525,
+      "output_artifact": {
+        "artifact_id": "art_01-01_offline_pytest",
+        "manifest_digest": "sha256:a3fafc224d7e95e5e23206b1439da6a56c5a08ff055ea837026c1249e31515e6",
+        "role": "stdout-offline-pytest"
+      }
+    },
+    {
+      "command_id": "offline-type",
+      "exit_code": 0,
+      "started_at": "2026-08-13T11:58:06Z",
+      "duration_ms": 4360,
+      "output_artifact": {
+        "artifact_id": "art_01-01_offline_type",
+        "manifest_digest": "sha256:c584b21ee012de391dc2799d5455db619d3fefbb192ab07ea4ba83fb0d704c14",
+        "role": "stdout-offline-type"
+      }
+    },
+    {
+      "command_id": "architecture-check",
+      "exit_code": 0,
+      "started_at": "2026-08-13T11:58:11Z",
+      "duration_ms": 218,
+      "output_artifact": {
+        "artifact_id": "art_01-01_architecture_check",
+        "manifest_digest": "sha256:1592c55f7d473098cbf6473bd6fe6f5e6b04444cdcce56c7338e3e7976328e6c",
+        "role": "stdout-architecture-check"
+      }
+    }
+  ],
+  "artifact_refs": [
+    {
+      "artifact_id": "art_01-01_domain_tests",
+      "manifest_digest": "sha256:0634bee489bdb0bc706fcd94bcfaaf5ec3e6afdbf7b12b4a3b2c1d598ab28ee5",
+      "role": "stdout-domain-tests"
+    },
+    {
+      "artifact_id": "art_01-01_offline_pytest",
+      "manifest_digest": "sha256:a3fafc224d7e95e5e23206b1439da6a56c5a08ff055ea837026c1249e31515e6",
+      "role": "stdout-offline-pytest"
+    },
+    {
+      "artifact_id": "art_01-01_offline_type",
+      "manifest_digest": "sha256:c584b21ee012de391dc2799d5455db619d3fefbb192ab07ea4ba83fb0d704c14",
+      "role": "stdout-offline-type"
+    },
+    {
+      "artifact_id": "art_01-01_architecture_check",
+      "manifest_digest": "sha256:1592c55f7d473098cbf6473bd6fe6f5e6b04444cdcce56c7338e3e7976328e6c",
+      "role": "stdout-architecture-check"
+    }
+  ],
+  "self_assessment": "READY_FOR_REVIEW",
+  "submitted_at": "2026-08-13T11:58:37Z",
+  "risks": [
+    "UNCOMMITTED: candidate_sha is worktree HEAD faa319acde733df4a838fbacd08b6068c95782c5. No implementation Candidate exists until Git Custodian commits.",
+    "No generated Context Manifest was present; context_manifest_hash is the READY revision-2 contract content_hash.",
+    "clock.py binds datetime via package re-export so the inherited 00-04 domain import scan stays green.",
+    "New domain modules carry DELETE_UNLESS_ADOPTED_BY_PHASE_01 because the inherited disposition inventory still treats domain/*.py as spike sources.",
+    "Windows local offline suite is green; Linux CI on the Candidate is still required."
+  ],
+  "content_hash": "sha256:3aa5fb9a49688cf8cc1a2a056aa6238eb8eb9ae4cc9e9d141e09b3e950d01048"
+}
