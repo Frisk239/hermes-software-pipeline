@@ -12,8 +12,10 @@ tests/spike/probe/gateway.
 
 from __future__ import annotations
 
+from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
 from hermes_shim._constants import INTAKE_NAMESPACE_PREFIX, PROBE_NAMESPACE_PREFIX
 from hermes_shim._hook import (
     INTAKE_SKIP_REASON,
@@ -113,6 +115,73 @@ def test_probe_still_wins_over_intake_prefix() -> None:
         _event(f"{PROBE_NAMESPACE_PREFIX} {PROBE_JSON}"), None, None
     )
     assert result == {"action": "skip", "reason": SKIP_REASON}
+
+
+def _live_descriptor(_root: Path) -> dict[str, int | str]:
+    del _root
+    return {"port": 9, "token": "t"}
+
+
+def _not_stale(_root: Path) -> bool:
+    del _root
+    return False
+
+
+def _cwd_home() -> Path:
+    return Path(".")
+
+
+def _cwd_state(_home: Path) -> Path:
+    del _home
+    return Path(".")
+
+
+def test_intake_uses_event_sender_not_payload_principal(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, object] = {}
+
+    def _fake_submit(
+        port: int, token: str, command_id: str, payload: dict[str, object]
+    ) -> object:
+        del port, token, command_id
+        captured.update(payload)
+        return None
+
+    monkeypatch.setattr("hermes_shim._client.submit_command", _fake_submit)
+    monkeypatch.setattr("hermes_shim._descriptor.read_descriptor", _live_descriptor)
+    monkeypatch.setattr("hermes_shim._descriptor.is_stale", _not_stale)
+    monkeypatch.setattr("hermes_shim._state.hermes_home", _cwd_home)
+    monkeypatch.setattr("hermes_shim._state.state_root", _cwd_state)
+    event = SimpleNamespace(
+        text=INTAKE_NAMESPACE_PREFIX
+        + '{"text":"need a login page","principal_id":"spoof"}',
+        message_id="m-actor",
+        sender_id="ou_alice",
+    )
+    result = pre_gateway_dispatch(event, None, None)
+    assert result == {"action": "skip", "reason": INTAKE_SKIP_REASON}
+    assert captured.get("principal_id") == "ou_alice"
+
+
+def test_intake_without_sender_skips_submit(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    called = {"n": 0}
+
+    def _fake_submit(*_a: object, **_k: object) -> object:
+        called["n"] += 1
+        return None
+
+    monkeypatch.setattr("hermes_shim._client.submit_command", _fake_submit)
+    monkeypatch.setattr("hermes_shim._descriptor.read_descriptor", _live_descriptor)
+    monkeypatch.setattr("hermes_shim._descriptor.is_stale", _not_stale)
+    text = INTAKE_NAMESPACE_PREFIX + '{"text":"need a login page"}'
+    assert pre_gateway_dispatch(_event(text), None, None) == {
+        "action": "skip",
+        "reason": INTAKE_SKIP_REASON,
+    }
+    assert called["n"] == 0
 
 
 def test_hook_signature_matches_hermes_call_site() -> None:

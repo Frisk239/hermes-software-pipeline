@@ -116,6 +116,9 @@ def _submit_intake_command(event: Any, text: str) -> None:
                 "cmd_hook_"
                 + hashlib.sha256(message_id.encode("utf-8")).hexdigest()[:16]
             )
+        principal = _event_principal(event)
+        if not principal:
+            return
         _client.submit_command(
             int(document["port"]),
             str(document["token"]),
@@ -125,11 +128,25 @@ def _submit_intake_command(event: Any, text: str) -> None:
                 "workspace_id": str(payload.get("workspace_id", "ws_local")),
                 "project_id": str(payload.get("project_id", "prj_local")),
                 "pipeline_id": str(payload.get("pipeline_id", "pl_local")),
-                "principal_id": str(payload.get("principal_id", "operator")),
+                "principal_id": principal,
             },
         )
     except Exception:
         return
+
+
+def _event_principal(event: Any) -> str:
+    for name in ("sender_id", "user_id", "author_id", "principal_id"):
+        value = getattr(event, name, None)
+        if isinstance(value, str) and value:
+            return value
+    source = getattr(event, "source", None)
+    if source is not None:
+        for name in ("user_id", "sender_id", "open_id"):
+            value = getattr(source, name, None)
+            if isinstance(value, str) and value:
+                return value
+    return ""
 
 
 def register(ctx: object) -> None:
