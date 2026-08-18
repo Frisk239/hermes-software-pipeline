@@ -117,6 +117,25 @@ def test_probe_still_wins_over_intake_prefix() -> None:
     assert result == {"action": "skip", "reason": SKIP_REASON}
 
 
+def _live_descriptor(_root: Path) -> dict[str, int | str]:
+    del _root
+    return {"port": 9, "token": "t"}
+
+
+def _not_stale(_root: Path) -> bool:
+    del _root
+    return False
+
+
+def _cwd_home() -> Path:
+    return Path(".")
+
+
+def _cwd_state(_home: Path) -> Path:
+    del _home
+    return Path(".")
+
+
 def test_intake_uses_event_sender_not_payload_principal(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -130,13 +149,10 @@ def test_intake_uses_event_sender_not_payload_principal(
         return None
 
     monkeypatch.setattr("hermes_shim._client.submit_command", _fake_submit)
-    monkeypatch.setattr(
-        "hermes_shim._descriptor.read_descriptor",
-        lambda _root: {"port": 9, "token": "t"},
-    )
-    monkeypatch.setattr("hermes_shim._descriptor.is_stale", lambda _root: False)
-    monkeypatch.setattr("hermes_shim._state.hermes_home", lambda: Path("."))
-    monkeypatch.setattr("hermes_shim._state.state_root", lambda _home: Path("."))
+    monkeypatch.setattr("hermes_shim._descriptor.read_descriptor", _live_descriptor)
+    monkeypatch.setattr("hermes_shim._descriptor.is_stale", _not_stale)
+    monkeypatch.setattr("hermes_shim._state.hermes_home", _cwd_home)
+    monkeypatch.setattr("hermes_shim._state.state_root", _cwd_state)
     event = SimpleNamespace(
         text=INTAKE_NAMESPACE_PREFIX
         + '{"text":"need a login page","principal_id":"spoof"}',
@@ -158,11 +174,8 @@ def test_intake_without_sender_skips_submit(
         return None
 
     monkeypatch.setattr("hermes_shim._client.submit_command", _fake_submit)
-    monkeypatch.setattr(
-        "hermes_shim._descriptor.read_descriptor",
-        lambda _root: {"port": 9, "token": "t"},
-    )
-    monkeypatch.setattr("hermes_shim._descriptor.is_stale", lambda _root: False)
+    monkeypatch.setattr("hermes_shim._descriptor.read_descriptor", _live_descriptor)
+    monkeypatch.setattr("hermes_shim._descriptor.is_stale", _not_stale)
     text = INTAKE_NAMESPACE_PREFIX + '{"text":"need a login page"}'
     assert pre_gateway_dispatch(_event(text), None, None) == {
         "action": "skip",
