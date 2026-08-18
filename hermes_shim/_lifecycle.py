@@ -127,6 +127,14 @@ def doctor_command(home: Path, plugin_dir: Path) -> LifecycleResult:
         _add_check(result, "state-root", "ok", "STATE_ROOT_OK")
     else:
         _add_check(result, "state-root", "error", "STATE_ROOT_INVALID")
+    from ._runtimes import catalog_families, detect_runtime_executables
+
+    detected = detect_runtime_executables()
+    for family in catalog_families():
+        if family in detected:
+            _add_check(result, family, "ok", "AGENT_DETECTED")
+        else:
+            _add_check(result, family, "ok", "AGENT_MISSING")
 
     environment_dir = runtime_environment_dir(root)
     interpreter = interpreter_path(environment_dir)
@@ -191,6 +199,9 @@ def start_command(
         result.ok = False
         result.exit_code = EXIT_FAIL
         return result
+    from ._runtimes import detect_runtime_executables, write_runtime_pins
+
+    write_runtime_pins(root, detect_runtime_executables())
 
     document = read_descriptor(root)
     if document is not None and not is_stale(root):

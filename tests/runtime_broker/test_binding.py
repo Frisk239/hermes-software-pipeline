@@ -25,6 +25,11 @@ def test_resolve_planner_and_executor_bindings() -> None:
     assert table.resolve("executor").model == "gpt-5.6-luna"
 
 
+def test_claude_binding_loads() -> None:
+    table = BindingTable.load({"planner": {"runtime": "claude", "model": "opus"}})
+    assert table.resolve("planner").runtime == "claude"
+
+
 def test_missing_role_fails_closed() -> None:
     table = BindingTable({"planner": AgentBinding("planner", "codex", "gpt-5.6-sol")})
     try:

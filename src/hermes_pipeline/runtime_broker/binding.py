@@ -16,7 +16,10 @@ from hermes_pipeline.runtime_broker.ports import (
 )
 
 StageRole = Literal["planner", "executor", "reviewer", "e2e"]
-RuntimeFamily = Literal["codex", "opencode", "fake"]
+RuntimeFamily = Literal["codex", "opencode", "fake", "claude", "cursor", "kiro", "grok"]
+RUNTIME_FAMILIES = frozenset(
+    {"codex", "opencode", "fake", "claude", "cursor", "kiro", "grok"}
+)
 
 
 class BindingNotFound(Exception):
@@ -59,7 +62,7 @@ class BindingTable:
                 row = cast(dict[str, Any], item)
                 runtime = str(row.get("runtime", ""))
                 model = str(row.get("model", ""))
-                if runtime not in {"codex", "opencode", "fake"} or not model:
+                if runtime not in RUNTIME_FAMILIES or not model:
                     continue
                 table.bind(
                     AgentBinding(
@@ -119,6 +122,7 @@ class BoundRuntimeBroker:
 
 
 __all__ = [
+    "RUNTIME_FAMILIES",
     "AgentBinding",
     "BindingNotFound",
     "BindingTable",

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import shutil
 from pathlib import Path
 from typing import Any, cast
 
@@ -22,20 +21,24 @@ from hermes_pipeline.repository.integration import (
 )
 from hermes_pipeline.repository.worktree import ManagedWorktree
 from hermes_pipeline.runtime_broker.binding import (
+    RUNTIME_FAMILIES,
     AgentBinding,
     BindingTable,
     BoundRuntimeBroker,
+    RuntimeFamily,
 )
 from hermes_pipeline.runtime_broker.codex_adapter import CodexAdapter
 from hermes_pipeline.runtime_broker.fake import FakeRuntimeBroker
 from hermes_pipeline.runtime_broker.opencode_adapter import OpenCodeAdapter
 from hermes_pipeline.runtime_broker.ports import (
+    RuntimeBrokerPort,
     RuntimeHandle,
     RuntimeLaunchRequest,
     RuntimeOutcome,
     RuntimeSignalReceipt,
     RuntimeSnapshot,
 )
+from hermes_pipeline.runtime_broker.process_adapter import ProcessAdapter
 from hermes_pipeline.stage_executor.architecture import (
     ArchitectureGate,
     ArchitectureStage,
@@ -50,7 +53,7 @@ from hermes_pipeline.stage_executor.verify import VerifyFlow
 _RECORDED = "2026-01-01T00:00:00Z"
 _ROLES = {"ADMIN", "CONTRIBUTOR", "VIEWER"}
 _STAGE_ROLES = {"planner", "executor", "reviewer", "e2e"}
-_RUNTIMES = {"codex", "opencode", "fake"}
+_RUNTIMES = RUNTIME_FAMILIES
 
 
 class KernelBridge:
@@ -73,6 +76,7 @@ class KernelBridge:
         self._approvals = self._load_approvals()
         self._approval = SolutionApproval(self._registry)
         self._github = self._load_github()
+        self._runtimes = self._load_runtime_pins()
         self._github_transport: GitHubTransport | None = None
         self._github_token = ""
 
@@ -520,14 +524,38 @@ class KernelBridge:
 
     def _executor_broker(self, worktree: ManagedWorktree) -> BoundRuntimeBroker:
         cwd = str(worktree.root)
-        return BoundRuntimeBroker(
-            self._bindings,
-            {
-                "fake": FakeRuntimeBroker(),
-                "opencode": OpenCodeAdapter(shutil.which("opencode"), cwd=cwd),
-                "codex": CodexAdapter(shutil.which("codex"), cwd=cwd),
-            },
-        )
+        adapters: dict[RuntimeFamily, RuntimeBrokerPort] = {
+            "fake": FakeRuntimeBroker(),
+            "opencode": OpenCodeAdapter(self._pinned_exe("opencode"), cwd=cwd),
+            "codex": CodexAdapter(self._pinned_exe("codex"), cwd=cwd),
+        }
+        for family in ("claude", "cursor", "kiro", "grok"):
+            adapters[family] = ProcessAdapter(self._pinned_exe(family), cwd=cwd)
+        return BoundRuntimeBroker(self._bindings, adapters)
+
+    def _pinned_exe(self, family: str) -> str | None:
+        path = self._runtimes.get(family, "")
+        if path and Path(path).is_file():
+            return path
+        return None
+
+    def _load_runtime_pins(self) -> dict[str, str]:
+        path = self._dir / "runtimes.json"
+        if not path.is_file():
+            return {}
+        try:
+            document = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return {}
+        if not isinstance(document, dict):
+            return {}
+        loaded: dict[str, str] = {}
+        typed = cast(dict[str, Any], document)
+        for family in ("opencode", "codex", "claude", "cursor", "kiro", "grok"):
+            raw = str(typed.get(family, ""))
+            if raw and Path(raw).is_file():
+                loaded[family] = raw
+        return loaded
 
     def _load_dev(self) -> dict[str, dict[str, str]]:
         path = self._dir / "development.json"
