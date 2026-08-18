@@ -7,16 +7,47 @@ DISPOSITION: ADOPTED_BY_00-07
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
+
+
+def resolve_gh(
+    *,
+    which: Callable[[str], str | None] = shutil.which,
+    extra: tuple[Path, ...] | None = None,
+) -> str:
+    found = which("gh")
+    if found:
+        return found
+    homes = extra if extra is not None else _default_gh_homes()
+    for candidate in homes:
+        if candidate.is_file():
+            return str(candidate)
+    return ""
+
+
+def _default_gh_homes() -> tuple[Path, ...]:
+    program = os.environ.get("PROGRAMFILES", r"C:\Program Files")
+    program_x86 = os.environ.get("PROGRAMFILES(X86)", r"C:\Program Files (x86)")
+    local = os.environ.get("LOCALAPPDATA", "")
+    return (
+        Path(program) / "GitHub CLI" / "gh.exe",
+        Path(program_x86) / "GitHub CLI" / "gh.exe",
+        Path(local) / "GitHub CLI" / "gh.exe",
+    )
 
 
 def gh_available(runner: Any = None) -> bool:
-    if runner is None and shutil.which("gh") is None:
-        return False
-    run = runner or _run
+    if runner is None:
+        if not resolve_gh():
+            return False
+        run = _run
+    else:
+        run = runner
     code, _out, _err = run(["gh", "auth", "status"])
     return code == 0
 
@@ -50,6 +81,39 @@ def publish_with_gh(
         "branch": branch,
         "head_sha": head,
     }
+
+
+def write_published(root: Path, pipeline_id: str, published: dict[str, str]) -> None:
+    path = root / "descriptor" / "published.json"
+    existing = _read_json_object(path)
+    existing[pipeline_id] = {
+        key: published[key]
+        for key in ("pr_number", "pr_url", "branch", "head_sha")
+        if key in published
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(existing, sort_keys=True), encoding="utf-8")
+
+
+def load_published(root: Path, pipeline_id: str) -> dict[str, str]:
+    document = _read_json_object(root / "descriptor" / "published.json")
+    row = document.get(pipeline_id)
+    if not isinstance(row, dict):
+        return {}
+    typed = cast(dict[str, Any], row)
+    return {str(key): str(value) for key, value in typed.items()}
+
+
+def _read_json_object(path: Path) -> dict[str, Any]:
+    if not path.is_file():
+        return {}
+    try:
+        document = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    if not isinstance(document, dict):
+        return {}
+    return cast(dict[str, Any], document)
 
 
 def worktree_files(root: Path, pipeline_id: str) -> dict[str, str]:
@@ -190,9 +254,15 @@ def _gh_api(
 
 
 def _run(argv: list[str], stdin: str = "") -> tuple[int, str, str]:
+    command = list(argv)
+    if command and command[0] == "gh":
+        exe = resolve_gh()
+        if not exe:
+            return 1, "", ""
+        command[0] = exe
     try:
         proc = subprocess.run(
-            argv,
+            command,
             input=stdin,
             capture_output=True,
             text=True,
@@ -206,4 +276,11 @@ def _run(argv: list[str], stdin: str = "") -> tuple[int, str, str]:
     return proc.returncode, proc.stdout, proc.stderr
 
 
-__all__ = ["gh_available", "publish_with_gh", "worktree_files"]
+__all__ = [
+    "gh_available",
+    "load_published",
+    "publish_with_gh",
+    "resolve_gh",
+    "worktree_files",
+    "write_published",
+]
