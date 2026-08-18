@@ -1,6 +1,6 @@
 """Deterministic fake Stage on the real Executor / Broker / CAS ports.
 
-DISPOSITION: ADOPTED_BY_02-03
+DISPOSITION: ADOPTED_BY_00-07
 """
 
 from __future__ import annotations
