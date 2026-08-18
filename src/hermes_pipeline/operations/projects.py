@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Literal
+from typing import Any, Literal, cast
 
 from hermes_pipeline.contracts.definitions import FixedV1Integer, UtcTimestampRef
 from hermes_pipeline.contracts.runtime import (
@@ -47,6 +47,51 @@ class ProjectRegistry:
         if not self.exists(project_id):
             return None
         return self._members.get((project_id, principal_id))
+
+    def dump(self) -> dict[str, Any]:
+        return {
+            "projects": [
+                {"project_id": item.project_id, "name": item.name}
+                for item in self._projects.values()
+            ],
+            "members": [
+                {
+                    "project_id": project_id,
+                    "principal_id": principal_id,
+                    "role": role,
+                }
+                for (project_id, principal_id), role in self._members.items()
+            ],
+        }
+
+    @classmethod
+    def load(cls, document: dict[str, Any]) -> ProjectRegistry:
+        registry = cls()
+        projects = document.get("projects", [])
+        if isinstance(projects, list):
+            for raw in cast(list[object], projects):
+                if not isinstance(raw, dict):
+                    continue
+                row = cast(dict[str, Any], raw)
+                project_id = str(row.get("project_id", ""))
+                name = str(row.get("name", ""))
+                if project_id:
+                    registry.register(project_id, name)
+        members = document.get("members", [])
+        if isinstance(members, list):
+            for raw in cast(list[object], members):
+                if not isinstance(raw, dict):
+                    continue
+                row = cast(dict[str, Any], raw)
+                role = str(row.get("role", ""))
+                if role not in {"ADMIN", "CONTRIBUTOR", "VIEWER"}:
+                    continue
+                registry.admit(
+                    str(row.get("project_id", "")),
+                    str(row.get("principal_id", "")),
+                    cast(ProjectRole, role),
+                )
+        return registry
 
 
 class RequirementIntake:

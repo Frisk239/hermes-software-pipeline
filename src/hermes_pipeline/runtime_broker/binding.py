@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Literal, cast
+from typing import Any, Literal, cast
 
 from hermes_pipeline.runtime_broker.ports import (
     RuntimeBrokerPort,
@@ -39,6 +39,34 @@ class BindingTable:
         if binding is None:
             raise BindingNotFound(role)
         return binding
+
+    def bind(self, binding: AgentBinding) -> None:
+        self._bindings[binding.role] = binding
+
+    def dump(self) -> dict[str, Any]:
+        return {
+            role: {"runtime": item.runtime, "model": item.model}
+            for role, item in self._bindings.items()
+        }
+
+    @classmethod
+    def load(cls, document: dict[str, Any]) -> BindingTable:
+        table = cls({})
+        for role, item in document.items():
+            if role not in {"planner", "executor", "reviewer", "e2e"}:
+                continue
+            if isinstance(item, dict):
+                row = cast(dict[str, Any], item)
+                runtime = str(row.get("runtime", ""))
+                model = str(row.get("model", ""))
+                if runtime not in {"codex", "opencode", "fake"} or not model:
+                    continue
+                table.bind(
+                    AgentBinding(
+                        cast(StageRole, role), cast(RuntimeFamily, runtime), model
+                    )
+                )
+        return table
 
 
 class BoundRuntimeBroker:

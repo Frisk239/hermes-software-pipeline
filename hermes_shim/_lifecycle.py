@@ -496,7 +496,64 @@ def read_pipeline_command(
     return result
 
 
+def admin_command(
+    home: Path,
+    *,
+    register: bool,
+    admit: bool,
+    bind: bool,
+    project_id: str,
+    name: str,
+    principal_id: str,
+    member_role: str,
+    role: str,
+    runtime: str,
+    model: str,
+) -> LifecycleResult:
+    result = LifecycleResult(command="admin")
+    payload: dict[str, str] = {}
+    if register:
+        payload = {"op": "register", "project_id": project_id, "name": name}
+    elif admit:
+        payload = {
+            "op": "admit",
+            "project_id": project_id,
+            "principal_id": principal_id,
+            "role": member_role,
+        }
+    elif bind:
+        payload = {"op": "bind", "role": role, "runtime": runtime, "model": model}
+    else:
+        payload = {"op": "bindings"}
+    root = state_root(home)
+    document = read_descriptor(root)
+    if document is None or is_stale(root):
+        _add_check(result, "runtime", "error", "RUNTIME_UNAVAILABLE")
+        result.ok = False
+        result.exit_code = EXIT_FAIL
+        return result
+    try:
+        reply = _client.submit_command(
+            int(document["port"]),
+            str(document["token"]),
+            "cmd_admin",
+            payload,
+        )
+    except _client.RuntimeUnavailableError:
+        _add_check(result, "runtime", "error", "RUNTIME_UNAVAILABLE")
+        result.ok = False
+        result.exit_code = EXIT_FAIL
+        return result
+    body = reply.body or {}
+    receipt = body.get("receipt") if isinstance(body.get("receipt"), dict) else body
+    result.ok = bool(reply.ok and receipt.get("ok", True))
+    result.exit_code = EXIT_OK if result.ok else EXIT_FAIL
+    result.detail = {key: str(value) for key, value in receipt.items()}
+    return result
+
+
 __all__ = [
+    "admin_command",
     "doctor_command",
     "read_pipeline_command",
     "setup_command",
