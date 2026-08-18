@@ -66,7 +66,7 @@ class GitHubDelivery:
             if status >= 300:
                 return DeliveryRecord(ok=False, action="RECORDED", branch=branch)
             if isinstance(payload, list) and payload:
-                payload = payload[0]
+                payload = cast(object, payload[0])
         if status >= 300 or not isinstance(payload, dict):
             return DeliveryRecord(ok=False, action="RECORDED", branch=branch)
         document = cast(dict[str, Any], payload)
