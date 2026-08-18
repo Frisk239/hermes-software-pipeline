@@ -6,9 +6,15 @@ import inspect
 
 from hermes_pipeline.contracts.definitions import FixedV1Integer, UtcTimestampRef
 from hermes_pipeline.contracts.runtime import Actor, CommandReceipt, ControllerCommand
-from hermes_pipeline.controller import ControllerPort, FakeController, PipelineQuery
+from hermes_pipeline.controller import (
+    ControllerPort,
+    FakeController,
+    KernelController,
+    PipelineQuery,
+)
 from hermes_pipeline.controller.fake import FakeController as FakeControllerImpl
 from hermes_pipeline.controller.ports import ControllerPort as ControllerPortType
+from hermes_pipeline.persistence.kernel_memory import MemoryKernelStore
 
 
 def _command(*, pipeline_id: str = "pl_probe") -> ControllerCommand:
@@ -54,7 +60,7 @@ def test_read_unknown_id_returns_fixture_fields_only() -> None:
     view = FakeController().read(PipelineQuery(pipeline_id="pl_unknown"))
     assert view.pipeline_id == "pl_unknown"
     assert view.revision == 0
-    assert view.status == "UNKNOWN"
+    assert view.status == "UNCONFIRMED"
     assert set(view.__dataclass_fields__) == {"pipeline_id", "revision", "status"}
 
 
@@ -63,3 +69,46 @@ def test_read_has_no_rbac_parameters() -> None:
     assert list(parameters) == ["self", "query"]
     assert "actor" not in parameters
     assert "role" not in parameters
+
+
+def test_fake_confirm_then_read_is_open() -> None:
+    fake = FakeController()
+    command = _command()
+    command = command.model_copy(
+        update={"command_type": "CONFIRM_REQUIREMENT", "payload": {"text": "need it"}}
+    )
+    assert fake.submit(command).status == "ACCEPTED"
+    view = fake.read(
+        PipelineQuery(
+            pipeline_id=command.pipeline_id, workspace_id=command.workspace_id
+        )
+    )
+    assert view.status == "OPEN"
+    assert view.revision == 1
+    assert fake.read(PipelineQuery(pipeline_id=command.pipeline_id)).status == (
+        "UNCONFIRMED"
+    )
+
+
+def test_kernel_is_a_controller_port_and_read_follows_submit() -> None:
+    store = MemoryKernelStore()
+    try:
+        controller = KernelController(store, recorded_at="2026-01-01T00:00:00Z")
+        assert isinstance(controller, ControllerPort)
+        command = _command()
+        command = command.model_copy(
+            update={
+                "command_type": "CONFIRM_REQUIREMENT",
+                "payload": {"text": "need it"},
+            }
+        )
+        assert controller.submit(command).status == "ACCEPTED"
+        view = controller.read(
+            PipelineQuery(
+                pipeline_id=command.pipeline_id, workspace_id=command.workspace_id
+            )
+        )
+        assert view.status == "OPEN"
+        assert view.revision == 1
+    finally:
+        store.close()

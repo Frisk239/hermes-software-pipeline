@@ -1,7 +1,7 @@
 {
   "schema_id": "https://schemas.hermes-pipeline.dev/engineering/slice-contract/v1",
   "schema_version": 1,
-  "document_revision": 1,
+  "document_revision": 2,
   "slice_id": "slice-01-02",
   "phase_id": "phase-01",
   "status": "READY",
@@ -12,16 +12,16 @@
   "assigned_worktree": "C:\\Users\\a2691\\AppData\\Local\\hermes\\managed-worktrees\\hermes-software-pipeline\\slice-01-02",
   "operator_path": "From a clean checkout run frozen offline pytest including tests/controller. Use a temp SQLite file. No network after install.",
   "must_scope": [
-    "READY revision 1 at Base cdf0872078151af8b4f84319c4a30c196bdbc8e3. Rewrite 00-04 transaction semantics onto domain.apply. Assigned worktree C:\\Users\\a2691\\AppData\\Local\\hermes\\managed-worktrees\\hermes-software-pipeline\\slice-01-02.",
-    "Create src/hermes_pipeline/controller/kernel.py class KernelController implementing ControllerPort. Constructor takes a KernelStore and injectable clock/id only if needed for CommandReceipt.recorded_at (use a passed recorded_at: str defaulting to a fixed test clock, never datetime.now in production path without injection). submit(command: ControllerCommand) -> CommandReceipt. read(query) always returns PipelineView(pipeline_id=query.pipeline_id, revision=0, status='UNKNOWN').",
-    "KernelStore in src/hermes_pipeline/persistence/kernel_store.py uses sqlite3 only. Schema: inbox(command_id PRIMARY KEY, payload_hash TEXT NOT NULL, receipt_json TEXT NOT NULL); events(event_id INTEGER PRIMARY KEY AUTOINCREMENT, pipeline_id TEXT NOT NULL, event_type TEXT NOT NULL, payload_json TEXT NOT NULL); pipelines(pipeline_id PRIMARY KEY, status TEXT NOT NULL, revision INTEGER NOT NULL, text TEXT NOT NULL). submit opens one BEGIN IMMEDIATE transaction covering inbox+events+pipelines or rolls back completely.",
+    "READY revision 2. Exactly once by (workspace_id, command_id). Full ControllerCommand RFC 8785 fingerprint via content_hash/canonical_json. Different fingerprint is a security conflict. Do not copy PR #22.",
+    "controller/transaction_store.py: ControllerTransactionStore Protocol, records, PersistenceError. controller/kernel.py: KernelController(store, recorded_at=...). read stays UNKNOWN revision 0. Never datetime.now.",
+    "persistence/kernel_memory.py and persistence/kernel_sqlite.py implement the same port. SQLite uses SQLAlchemy Core, WAL, single writer, explicit BEGIN, Alembic initial revision for inbox/events/pipelines snapshot. No root runtime dependencies.",
     "CONFIRM_REQUIREMENT requires payload key text (str). REJECT_REQUIREMENT requires payload key reason (str). Missing/wrong type or unknown command_type -> REJECTED VALIDATION_ERROR message unsupported command, no durable write.",
-    "Load pipelines row or UNCONFIRMED revision 0 empty text. Call domain.apply. EMPTY_REQUIREMENT -> REJECTED VALIDATION_ERROR empty requirement. INVALID_TRANSITION -> REJECTED VALIDATION_ERROR invalid transition. ACCEPTED writes inbox, one event, updated pipelines row, returns ACCEPTED receipt with observed_revision = new revision and one event_id.",
-    "If inbox already has command_id: compare payload_hash of RFC 8785 canonical JSON of command.payload; equal -> return stored receipt (status DEDUPLICATED if originally accepted, or the stored status); unequal -> CONFLICT CONFLICT command identity conflict. If command.expected_revision != current pipelines.revision (missing row counts as 0) -> CONFLICT CONFLICT expected revision conflict before apply.",
-    "sqlite3.IntegrityError or OperationalError including disk full -> REJECTED INTERNAL_ERROR persistence unavailable retryable=true and no leftover partial rows (rollback).",
-    "Restart test: submit accept, close store, new KernelStore same path, resubmit same command_id and payload, receipt matches and events table has one row.",
-    "Do not import CounterSpike, spike_controller, or sqlite_spike from kernel.py or kernel_store.py. Leave those files KEEP_MARKED_EVIDENCE.",
-    "Tests in tests/controller/test_kernel_submit.py cover accept confirm, reject, empty, invalid, identity conflict, revision conflict, restart dedup, persistence unavailable (PRAGMA max_page_count or monkeypatch). Export KernelController from controller/__init__.py."
+    "Load pipelines row or UNCONFIRMED revision 0 empty text. Call domain.apply. EMPTY_REQUIREMENT -> REJECTED VALIDATION_ERROR empty requirement. INVALID_TRANSITION -> REJECTED VALIDATION_ERROR invalid transition. ACCEPTED writes inbox, one event, updated pipelines snapshot, returns ACCEPTED receipt with observed_revision = new revision and one evt_ event_id.",
+    "Inbox PK is (workspace_id, command_id) storing full-command fingerprint and receipt_json. Same pair + same fingerprint -> original stored receipt (do not rewrite to DEDUPLICATED). Same pair + different fingerprint -> CONFLICT CONFLICT command identity conflict. expected_revision != current pipelines.revision (missing row = 0) -> CONFLICT CONFLICT expected revision conflict before apply, no Event.",
+    "Persistence failure including SQLITE_FULL -> REJECTED INTERNAL_ERROR persistence unavailable retryable=true and no leftover partial rows. Adapter translates driver errors to PersistenceError; receipts never carry SQL or paths.",
+    "Restart: close store, new SqliteKernelStore same path, same (workspace_id, command_id) + same full fingerprint returns the stored receipt; events stay one row. Cross-workspace same command_id both ACCEPTED.",
+    "Do not import counter_spike, spike_controller, sqlite_spike, or _persistence_port. Leave 00-04 files KEEP_MARKED_EVIDENCE. Do not change domain/pipeline.py semantics.",
+    "Tests in tests/controller/test_kernel_submit.py run the same suite on memory and SQLite. Export KernelController from controller/__init__.py."
   ],
   "out_of_scope": [
     "Projection rebuild and real ControllerPort.read fields",
@@ -31,7 +31,9 @@
   ],
   "interfaces": [
     "controller/kernel.py: KernelController.submit/read",
-    "persistence/kernel_store.py: sqlite3 KernelStore"
+    "controller/transaction_store.py: ControllerTransactionStore",
+    "persistence/kernel_memory.py: MemoryKernelStore",
+    "persistence/kernel_sqlite.py: SqliteKernelStore"
   ],
   "binding_adrs": [
     "ADR-0014",
@@ -40,12 +42,14 @@
   ],
   "permitted_paths": [
     "src/hermes_pipeline/controller/",
-    "src/hermes_pipeline/persistence/kernel_store.py",
+    "src/hermes_pipeline/persistence/kernel_memory.py",
+    "src/hermes_pipeline/persistence/kernel_sqlite.py",
+    "src/hermes_pipeline/persistence/kernel_migrations/",
     "tests/controller/",
-    "docs/roadmap/phase-01-controller-kernel/slices/README.md"
+    "docs/roadmap/phase-01-controller-kernel/slices/"
   ],
   "prohibited_actions": [
-    "Import spike_controller or CounterSpike into the kernel",
+    "Import spike_controller, CounterSpike, sqlite_spike, or _persistence_port into the kernel",
     "Use datetime.now without injection",
     "Write Outbox or projection tables",
     "Add root runtime dependencies",
@@ -85,7 +89,7 @@
       "trace_ids": [
         "EC-01-02"
       ],
-      "observable_result": "Restart plus same command_id returns the stored receipt and does not add a second event.",
+      "observable_result": "Restart plus same (workspace_id, command_id) and full-command fingerprint returns the stored receipt unchanged and does not add a second event.",
       "verification_command_ids": [
         "kernel-tests"
       ]
@@ -118,8 +122,11 @@
     "Unsupported command type",
     "Identity conflict",
     "Revision conflict",
-    "Restart dedup",
-    "Persistence unavailable rollback"
+    "Same-identity replay returns stored receipt",
+    "Restart replay on a new SQLite store instance",
+    "Cross-workspace same command_id",
+    "Persistence unavailable rollback",
+    "Shared contract tests on memory and SQLite"
   ],
   "demonstration": "Submit a confirm, kill the store, reopen, resubmit: one event, same receipt.",
   "verification_commands": [
@@ -175,7 +182,7 @@
   ],
   "retry_budget": 2,
   "stop_conditions": [
-    "Atomic inbox+event+pipelines cannot be done with sqlite3",
+    "Atomic inbox+event+pipelines cannot be done behind ControllerTransactionStore",
     "A new dependency family is required"
   ],
   "content_hash": "sha256:af22de409506750c69066c45df6e4b4c55e23d1de59d057842bb05cdf012a4bf"
