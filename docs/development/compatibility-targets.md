@@ -224,6 +224,9 @@ root `uv.lock` is untouched; Hermes never imports those dependencies.
 | FastAPI | `0.141.1` | Loopback Control Interface framework (ADR-0022), loopback-only |
 | Uvicorn | `0.52.1` | ASGI server, bound to `127.0.0.1` only |
 | `hermes-pipeline` | `0.1.0` (path source, editable false) | Runtime entry `python -m hermes_pipeline.transport`; no `PYTHONPATH` |
+| pydantic | `>=2,<3` | Kernel contracts inside the Managed Runtime only (ADR-0033) |
+| jsonschema | `>=4,<5` | Kernel contracts inside the Managed Runtime only (ADR-0033) |
+| rfc8785 | `0.1.4` | Canonical hashing inside the Managed Runtime only (ADR-0033) |
 
 ### Fixed spike decisions (research report §5)
 

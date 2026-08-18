@@ -19,6 +19,9 @@ dependencies = [
     "fastapi>=0.115,<1",
     "uvicorn>=0.30,<1",
     "hermes-pipeline==0.1.0",
+    "pydantic>=2,<3",
+    "jsonschema>=4,<5",
+    "rfc8785==0.1.4",
 ]
 
 [tool.uv.sources]
