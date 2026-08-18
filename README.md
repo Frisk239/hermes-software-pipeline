@@ -98,12 +98,7 @@ Line endings are normalized to LF by the [.gitattributes](.gitattributes) policy
 
 ## Development model
 
-Development proceeds one approved Engineering Slice at a time:
-
-1. Codex plans and reviews against accepted ADRs and the current exact Base SHA.
-2. An independent Executor implements one immutable Slice Contract.
-3. A trusted Git Custodian validates scope and creates the Candidate.
-4. Review binds its verdict to the exact Candidate and Evidence Bundle.
+Default mode is Slice Owner (ADR-0031): one human-authorized session may plan, implement, and self-check a single cut. The Codex / Executor / Git Custodian split is optional.
 
 The Roadmap is not an implementation work order. No Agent may implement a future Phase directly from Roadmap bullets.
 

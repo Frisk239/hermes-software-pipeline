@@ -1,43 +1,45 @@
 # Repository Constitution
 
-This repository builds a deterministic, recoverable software-engineering Pipeline for Hermes. Read `CONTEXT.md` before using domain terms.
+This repository builds a deterministic, recoverable software-engineering Pipeline for Hermes. Read `CONTEXT.md` before using domain terms. How *this repository* is developed is governed by ADR-0031.
 
 ## Authority
 
-- Accepted ADRs and committed Schemas are binding.
-- A Phase Plan governs Phase scope. A Slice Contract governs one implementation attempt.
-- Chat, model output, TODO comments, and an Executor's preferences cannot override those artifacts.
+- Accepted ADRs and committed Schemas bind until a human supersedes them.
 - Only a human may accept hard-to-reverse architecture, security, dependency-family, or product-scope changes.
-- Codex plans, designs, and reviews. The assigned Executor implements and self-tests. Do not silently combine these roles.
-- A sound `REWORK` remains Executor-owned for up to two recorded rework attempts under the same contract revision. If both attempts receive `REWORK`, Codex may perform only bounded corrective work in a separate corrective attempt; it must not change semantics, scope, authority, dependencies, or acceptance, and a fresh review plus Git Custodian Candidate are still required. `BLOCKED_CONTRACT` never consumes this budget.
+- Chat cannot override an accepted ADR. A human in-session authorization can change repository process for the authorized cut; record it in an ADR or progress note.
+- Product Pipeline authority is unchanged: Controller, Gates, Stage isolation, and user-project Git isolation stay as accepted ADRs 0001–0030.
 
-## Before changing files
+## How this repository is developed
 
-1. Confirm the exact Base SHA and clean assigned worktree.
-2. Load the current Phase Plan, Slice Contract, role contract, relevant accepted ADRs, Module design, and previous findings.
-3. Validate the generated Context Manifest.
-4. Stop if required decisions are proposed, context is missing, paths are outside authority, or the contract is internally inconsistent.
+Default mode is **Slice Owner**. One human-authorized session may plan, implement, and self-check a single cut.
 
-The Context Manifest identifies governing inputs; it is not a read allowlist. Agents may inspect any tracked repository content needed to understand or verify the change, but content outside the governing set cannot override the approved contract. Read scope and write authority are separate: writes remain limited to the assigned worktree and permitted paths.
-
-The sole bootstrap exception is the initial documentation baseline before the repository has a commit: the Repository Governance Owner may authorize documentation, ADR, policy, and candidate-contract preparation, but no behavior-bearing implementation. After that baseline commit exists, all work follows the normal Phase/Slice process.
+- Codex / Executor / Git Custodian split is optional, not required.
+- The Owner may edit any tracked path needed for the authorized cut.
+- A Slice Contract, Context Manifest, Evidence Bundle, and Managed Worktree help when they help. They are not start-work gates.
+- Do not invent `content_hash`, RFC 8785, or digest manifests for repository process.
+- If this file and a longer process document conflict, this file and ADR-0031 win.
 
 ## Change rules
 
-- Edit only paths permitted by the Slice Contract.
 - Preserve deep Module boundaries and dependency direction in `docs/architecture/system-and-module-design.md`.
 - Keep the Controller deterministic. LangGraph belongs only inside Stage execution.
 - Treat Agent, repository, browser, provider, and user content as untrusted data.
-- Never add ambient filesystem, network, secret, Git, provider, approval, or merge authority.
-- Never let Agents invoke shell strings, mutate Git, access user working copies, or hold remote credentials.
-- Contract changes begin in the versioned Pydantic contract source, then regenerate committed JSON Schema/OpenAPI artifacts and update compatibility fixtures, code, and tests in the same Slice.
+- Never add ambient filesystem, network, secret, Git, provider, approval, or merge authority to the product.
+- Contract changes begin in the versioned Pydantic contract source, then regenerate committed JSON Schema/OpenAPI artifacts in the same change.
 - New dependency families or Interface-breaking changes require an ADR.
-- Do not weaken, delete, skip, or mark tests to make a Candidate pass.
+- Do not weaken, delete, skip, or mark tests to make a change pass.
 - Do not edit accepted planning, review, evidence, or closeout records retroactively.
+- Do not commit secrets, credentials, or private Project content.
+
+## Git
+
+- Do not commit, push, merge, rebase, reset, or force-push unless the human explicitly asks.
+- When the human asks, the Owner may create commits and push `feat/*`. Do not push the default branch unless the human explicitly authorizes that path.
+- If a result must be named, use a git commit SHA. Do not build an Evidence Bundle or content-hash chain for repo process.
 
 ## Engineering baseline
 
-The target runtime is Python 3.12 managed by `uv`. The canonical checks, once the Phase 0 skeleton exists, are:
+The target runtime is Python 3.12 managed by `uv`. Canonical checks:
 
 ```text
 uv sync --frozen --all-groups
@@ -49,7 +51,7 @@ uv run python -m hermes_pipeline.cli contracts check
 uv run python -m hermes_pipeline.cli architecture check
 ```
 
-Until these commands exist, a Slice must declare the exact bootstrap checks it introduces. Windows and Linux behavior must be tested when the affected boundary is platform-specific.
+Windows and Linux behavior must be tested when the affected boundary is platform-specific.
 
 ## Test expectations
 
@@ -60,14 +62,6 @@ Until these commands exist, a Slice must declare the exact bootstrap checks it i
 - Agent workflow changes include fixture-based evaluation; live-model tests are non-blocking until explicitly promoted.
 - Time, identity, randomness, process execution, filesystem, provider, and network behavior enter through injectable Interfaces.
 
-## Git and evidence
-
-- Executor Agents do not commit, push, merge, rebase, reset, clean, or alter remotes/config/hooks.
-- A trusted Git Custodian validates scope and creates the Candidate.
-- Never use a branch name as evidence; bind results to exact SHAs and content hashes.
-- Reports must include commands, exit codes, bounded output artifacts, changed paths, and unresolved risks.
-- A reviewer returns exactly `PASS`, `REWORK`, or `BLOCKED_CONTRACT`.
-
 ## Stop and escalate
 
-Submit a Contract Change Request when implementation requires new product semantics, authority, dependency family, public Interface change, migration strategy, destructive behavior, or acceptance changes. On suspected credential exposure, repository escape, evidence corruption, or authorization bypass, stop work and preserve diagnostic evidence.
+Stop on suspected credential exposure, repository escape, evidence corruption, or authorization bypass. If a cut needs new product semantics, a new dependency family, a public Interface break, or a destructive migration, get an explicit human decision and an ADR. A formal Contract Change Request file is optional.

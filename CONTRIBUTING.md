@@ -12,7 +12,7 @@ Read:
 - the owning architecture, security, operations, and development documents;
 - the approved Phase Plan and current Slice Contract once they exist.
 
-Open a discussion before preparing changes that alter product scope, architecture, security boundaries, dependency families, public Interfaces, migrations, destructive behavior, licensing, or governance. Such changes require human approval and usually an ADR or Contract Change Request.
+Open a discussion before preparing changes that alter product scope, architecture, security boundaries, dependency families, public Interfaces, migrations, destructive behavior, licensing, or governance. Such changes require human approval and usually an ADR. A formal Contract Change Request file is optional (ADR-0031).
 
 ## Change discipline
 
@@ -22,8 +22,8 @@ Open a discussion before preparing changes that alter product scope, architectur
 - Do not independently edit generated contract artifacts.
 - Add deterministic tests at the lowest boundary that proves the behavior.
 - Update normative documentation, fixtures, compatibility notes, and runbooks with the behavior they govern.
-- After a Slice integrates, complete the post-merge downstream decision audit (see `docs/development/phase-and-slice-operating-model.md`) and record each conclusion (`UPDATED`, `NO_CHANGE`, `CCR_REQUIRED`) before affected downstream artifacts reach `READY`.
-- "Update the ADR" is an obligation only when an audit concludes `UPDATED` — it is not a mandate to mechanically revise every ADR after every integration.
+- After a change integrates, update any later plan that the integration actually invalidates. A formal post-merge audit document is optional (ADR-0031).
+- Do not mechanically revise every ADR after every integration.
 - Never weaken, skip, delete, or mark tests merely to make a Candidate pass.
 - Never include credentials, raw model transcripts, private Project content, or sensitive evidence.
 
@@ -58,20 +58,11 @@ python scripts/check_repository_artifacts.py
 
 ## Pull requests
 
-A pull request must state:
-
-- the problem and observable result;
-- the governing Slice Contract or approved maintenance authority;
-- affected Interfaces, ADRs, Schemas, migrations, and security boundaries;
-- exact verification commands and results;
-- changed paths and generated artifacts;
-- residual risks, deferred work, and rollback approach.
-
-Review binds to exact Git object identities. A branch name, chat summary, screenshot, or mutable file path is not sufficient evidence.
+A pull request should state the problem, the observable result, and how it was checked. A Slice Contract, content hash, Evidence Bundle, and command-by-command transcript are optional.
 
 ## Commit and remote authority
 
-Agent Executors do not commit, push, merge, rebase, reset, clean, modify hooks/remotes/config, or hold Git/provider credentials. The trusted Git Custodian and protected GitHub workflow own Candidate creation and remote delivery.
+Coding agents do not invent Git mutations. They commit or push `feat/*` only when the human explicitly asks, and they do not push the default branch unless the human authorizes that path (ADR-0031).
 
 ## License
 
