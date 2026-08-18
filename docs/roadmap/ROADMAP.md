@@ -1,8 +1,8 @@
 # Engineering Roadmap
 
-This roadmap defines capability order for building the Hermes Software Pipeline. It is not an execution plan. At the start of each Phase, Codex must inspect the accepted repository state, design the complete Slice dependency graph for that Phase, and submit the Phase Plan for human approval.
+This roadmap defines capability order for building the Hermes Software Pipeline. It is not an execution plan. At the start of each Phase, inspect the accepted repository state, design the Slice dependency graph for that Phase, and get human approval for material scope.
 
-Only the next ready Slice is expanded into an immutable execution contract. Candidate Slices below may be combined, split, reordered, or removed by that Phase Plan, but its exit capability may not be weakened silently.
+Candidate Slices below may be combined, split, reordered, or removed by that Phase Plan, but its exit capability may not be weakened silently.
 
 ## Phase 0 — Engineering foundation and technology lock
 
@@ -104,10 +104,8 @@ Candidate Slices:
 
 ## Global ordering rules
 
-- Codex owns Phase planning, Slice design, acceptance criteria, and review.
-- Independent Executor Agents implement only one approved Slice Contract at a time.
-- A failed Codex review returns to the same Slice; a broken contract returns to Codex planning.
-- Every accepted Slice leaves mandatory checks green and is independently reviewable and revertible.
+- Default development mode is Slice Owner (ADR-0031). The planner / Executor split is optional.
+- Every accepted cut leaves the checks that prove its path green and is independently reviewable and revertible.
 - Real external Adapters follow deterministic fakes and contract tests.
 - Security, migration, recovery, documentation, and evaluation work are delivered with the behavior they govern rather than postponed to a final cleanup Phase.
-- The next Phase cannot begin until Codex writes and accepts the current Phase Closeout and the human approves any material scope or technology changes.
+- The next Phase cannot begin until the current Phase Closeout exists and the human approves any material scope or technology changes.
