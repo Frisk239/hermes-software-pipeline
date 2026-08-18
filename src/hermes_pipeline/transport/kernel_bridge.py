@@ -14,6 +14,10 @@ from hermes_pipeline.delivery.ports import DeliveryRecord, DeliveryRequest
 from hermes_pipeline.operations.projects import ProjectRegistry, RequirementIntake
 from hermes_pipeline.persistence.kernel_memory import MemoryKernelStore
 from hermes_pipeline.runtime_broker.binding import AgentBinding, BindingTable
+from hermes_pipeline.stage_executor.architecture import (
+    ArchitectureGate,
+    ArchitectureStage,
+)
 from hermes_pipeline.stage_executor.prd import PrdGate, PrdStage
 
 _RECORDED = "2026-01-01T00:00:00Z"
@@ -36,6 +40,7 @@ class KernelBridge:
         )
         self._delivery = self._load_delivery()
         self._prd = self._load_prd()
+        self._arch = self._load_arch()
 
     def process(self, command_id: str, payload: dict[str, Any]) -> dict[str, Any]:
         op = payload.get("op")
@@ -119,6 +124,9 @@ class KernelBridge:
             planning = self._prd.get(pipeline_id)
             if planning is not None:
                 result.update(planning)
+            design = self._arch.get(pipeline_id)
+            if design is not None:
+                result.update(design)
             return result
         text = payload.get("text")
         if isinstance(text, str):
@@ -139,6 +147,7 @@ class KernelBridge:
             )
             if receipt.status == "ACCEPTED":
                 self._advance_prd(pipeline_id, workspace_id, project_id)
+                self._advance_architecture(pipeline_id, workspace_id)
             return receipt.model_dump(mode="json")
         return self._inner.process(command_id, payload)
 
@@ -223,6 +232,35 @@ class KernelBridge:
         }
         self._save_prd()
 
+    def _advance_architecture(self, pipeline_id: str, workspace_id: str) -> None:
+        if pipeline_id in self._arch:
+            return
+        planning = self._prd.get(pipeline_id)
+        if planning is None or planning.get("prd_gate") != "PASS":
+            return
+        prd_id = planning.get("prd_id", "")
+        artifacts = LocalCasArtifacts(self._dir.parent / "cas")
+        result = ArchitectureStage(self._bindings, artifacts).run(
+            prd_artifact_id=prd_id
+        )
+        gate = (
+            ArchitectureGate(self._controller, artifacts)
+            .evaluate(
+                pipeline_id=pipeline_id,
+                workspace_id=workspace_id,
+                prd_artifact_id=prd_id,
+                result=result,
+            )
+            .status
+        )
+        self._arch[pipeline_id] = {
+            "design_id": result.design_id or "",
+            "testplan_id": result.testplan_id or "",
+            "arch_status": result.status,
+            "arch_gate": gate,
+        }
+        self._save_arch()
+
     def _load_prd(self) -> dict[str, dict[str, str]]:
         path = self._dir / "prd.json"
         if not path.is_file():
@@ -249,6 +287,36 @@ class KernelBridge:
     def _save_prd(self) -> None:
         (self._dir / "prd.json").write_text(
             json.dumps(self._prd, sort_keys=True),
+            encoding="utf-8",
+        )
+
+    def _load_arch(self) -> dict[str, dict[str, str]]:
+        path = self._dir / "architecture.json"
+        if not path.is_file():
+            return {}
+        try:
+            document = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return {}
+        if not isinstance(document, dict):
+            return {}
+        loaded: dict[str, dict[str, str]] = {}
+        typed = cast(dict[str, Any], document)
+        for raw_key, item in typed.items():
+            if not isinstance(item, dict):
+                continue
+            row = cast(dict[str, Any], item)
+            loaded[str(raw_key)] = {
+                "design_id": str(row.get("design_id", "")),
+                "testplan_id": str(row.get("testplan_id", "")),
+                "arch_status": str(row.get("arch_status", "")),
+                "arch_gate": str(row.get("arch_gate", "")),
+            }
+        return loaded
+
+    def _save_arch(self) -> None:
+        (self._dir / "architecture.json").write_text(
+            json.dumps(self._arch, sort_keys=True),
             encoding="utf-8",
         )
 
