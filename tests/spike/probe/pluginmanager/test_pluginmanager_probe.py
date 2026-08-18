@@ -49,7 +49,16 @@ subparsers = [a for a in parser._actions if isinstance(a, argparse._SubParsersAc
 assert len(subparsers) == 1
 choices = set(subparsers[0].choices)
 expected = {
-"setup", "doctor", "start", "status", "stop", "submit", "read", "admin", "deliver", "approve"
+"setup",
+"doctor",
+"start",
+"status",
+"stop",
+"submit",
+"read",
+"admin",
+"deliver",
+"approve",
 }
 assert choices == expected, choices
 print("PLUGINMANAGER_PROBE_OK tools=1 hooks=1 commands=1 subcommands=10")
