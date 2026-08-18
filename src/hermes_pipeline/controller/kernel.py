@@ -21,6 +21,10 @@ from hermes_pipeline.controller.transaction_store import (
     ControllerTransactionStore,
     EventWrite,
     InboxRecord,
+    LeaseError,
+    LeaseRecord,
+    OutboxNotFound,
+    OutboxRecord,
     PersistenceError,
     PipelineSnapshot,
 )
@@ -166,6 +170,7 @@ class KernelController:
                 pipeline_id=command.pipeline_id,
                 event_type=event_type,
                 payload_json=payload_json,
+                pipeline_revision=result.state.revision,
             ),
             pipeline=PipelineSnapshot(
                 workspace_id=command.workspace_id,
@@ -173,6 +178,12 @@ class KernelController:
                 status=result.state.status,
                 revision=result.state.revision,
                 text=result.state.text,
+            ),
+            outbox=OutboxRecord(
+                workspace_id=command.workspace_id,
+                command_id=command.command_id,
+                effect_type=event_type,
+                payload_json=payload_json,
             ),
         )
         try:
@@ -182,7 +193,150 @@ class KernelController:
         return receipt
 
     def read(self, query: PipelineQuery) -> PipelineView:
-        return PipelineView(pipeline_id=query.pipeline_id, revision=0, status="UNKNOWN")
+        if not query.workspace_id:
+            return PipelineView(
+                pipeline_id=query.pipeline_id, revision=0, status="UNCONFIRMED"
+            )
+        snapshot = self._store.load_pipeline(query.workspace_id, query.pipeline_id)
+        return self._view_from_snapshot(query.pipeline_id, snapshot)
+
+    def replay(self, workspace_id: str, command_id: str) -> OutboxRecord:
+        record = self._store.find_outbox(workspace_id, command_id)
+        if record is None:
+            raise OutboxNotFound("outbox not found")
+        if record.delivery_receipt_json:
+            return record
+        receipt_json = canonical_json(
+            {
+                "workspace_id": workspace_id,
+                "command_id": command_id,
+                "delivered_at": self._recorded_at,
+            }
+        )
+        self._store.record_outbox_delivery(workspace_id, command_id, receipt_json)
+        delivered = self._store.find_outbox(workspace_id, command_id)
+        if delivered is None or not delivered.delivery_receipt_json:
+            raise PersistenceError("persistence unavailable")
+        return delivered
+
+    def acquire_lease(
+        self,
+        workspace_id: str,
+        pipeline_id: str,
+        holder: str,
+        now: int,
+        ttl_seconds: int = 60,
+    ) -> LeaseRecord:
+        current = self._store.load_lease(workspace_id, pipeline_id)
+        generation = 1 if current is None else current.generation + 1
+        record = LeaseRecord(
+            workspace_id=workspace_id,
+            pipeline_id=pipeline_id,
+            attempt_id=f"att_{workspace_id}_{pipeline_id}_{generation}",
+            run_id=f"run_{workspace_id}_{pipeline_id}_{generation}",
+            holder=holder,
+            generation=generation,
+            expires_at=now + ttl_seconds,
+        )
+        self._store.save_lease(record)
+        return record
+
+    def heartbeat_lease(
+        self,
+        workspace_id: str,
+        pipeline_id: str,
+        holder: str,
+        generation: int,
+        now: int,
+        ttl_seconds: int = 60,
+    ) -> LeaseRecord:
+        current = self._store.load_lease(workspace_id, pipeline_id)
+        if (
+            current is None
+            or current.holder != holder
+            or current.generation != generation
+            or now > current.expires_at
+        ):
+            raise LeaseError("lease heartbeat rejected")
+        renewed = LeaseRecord(
+            workspace_id=current.workspace_id,
+            pipeline_id=current.pipeline_id,
+            attempt_id=current.attempt_id,
+            run_id=current.run_id,
+            holder=current.holder,
+            generation=current.generation,
+            expires_at=now + ttl_seconds,
+        )
+        self._store.save_lease(renewed)
+        return renewed
+
+    def submit_with_lease(
+        self,
+        command: ControllerCommand,
+        holder: str,
+        generation: int,
+        now: int,
+    ) -> CommandReceipt:
+        try:
+            current = self._lease_is_current(
+                command.workspace_id,
+                command.pipeline_id,
+                holder,
+                generation,
+                now,
+            )
+        except PersistenceError:
+            return self._unavailable(command)
+        if not current:
+            return self._receipt(
+                command,
+                status="CONFLICT",
+                observed_revision=self._safe_revision(command),
+                error=CommandError(
+                    code="LEASE_STALE",
+                    message="lease stale",
+                    retryable=False,
+                ),
+            )
+        return self.submit(command)
+
+    def rebuild(self, query: PipelineQuery) -> PipelineView:
+        if not query.workspace_id:
+            return PipelineView(
+                pipeline_id=query.pipeline_id, revision=0, status="UNCONFIRMED"
+            )
+        self._store.rebuild_pipeline(query.workspace_id, query.pipeline_id)
+        return self.read(query)
+
+    def _view_from_snapshot(
+        self, pipeline_id: str, snapshot: PipelineSnapshot | None
+    ) -> PipelineView:
+        if snapshot is None:
+            return PipelineView(
+                pipeline_id=pipeline_id, revision=0, status="UNCONFIRMED"
+            )
+        status = snapshot.status
+        if status == "UNCONFIRMED" or status == "OPEN" or status == "REJECTED":
+            return PipelineView(
+                pipeline_id=pipeline_id, revision=snapshot.revision, status=status
+            )
+        return PipelineView(pipeline_id=pipeline_id, revision=0, status="UNCONFIRMED")
+
+    def _lease_is_current(
+        self,
+        workspace_id: str,
+        pipeline_id: str,
+        holder: str,
+        generation: int,
+        now: int,
+    ) -> bool:
+        current = self._store.load_lease(workspace_id, pipeline_id)
+        return (
+            current is not None
+            and current.holder == holder
+            and current.generation == generation
+            and now <= current.expires_at
+        )
 
     def _safe_revision(self, command: ControllerCommand) -> int:
         try:

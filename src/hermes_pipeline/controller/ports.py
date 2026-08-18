@@ -14,13 +14,14 @@ from hermes_pipeline.contracts.runtime import CommandReceipt, ControllerCommand
 @dataclass(frozen=True)
 class PipelineQuery:
     pipeline_id: str
+    workspace_id: str = ""
 
 
 @dataclass(frozen=True)
 class PipelineView:
     pipeline_id: str
     revision: int
-    status: Literal["UNKNOWN"]
+    status: Literal["UNCONFIRMED", "OPEN", "REJECTED"]
 
 
 @runtime_checkable

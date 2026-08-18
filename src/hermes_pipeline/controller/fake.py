@@ -19,9 +19,33 @@ _RECORDED_AT = UtcTimestampRef("2026-01-01T00:00:00Z")
 class FakeController:
     def __init__(self) -> None:
         self.last_submit: ControllerCommand | None = None
+        self._views: dict[tuple[str, str], PipelineView] = {}
 
     def submit(self, command: ControllerCommand) -> CommandReceipt:
         self.last_submit = command
+        key = (command.workspace_id, command.pipeline_id)
+        current = self._views.get(
+            key,
+            PipelineView(
+                pipeline_id=command.pipeline_id, revision=0, status="UNCONFIRMED"
+            ),
+        )
+        if command.command_type == "CONFIRM_REQUIREMENT":
+            text = command.payload.get("text")
+            if type(text) is str and text.strip():
+                self._views[key] = PipelineView(
+                    pipeline_id=command.pipeline_id,
+                    revision=current.revision + 1,
+                    status="OPEN",
+                )
+        elif command.command_type == "REJECT_REQUIREMENT":
+            reason = command.payload.get("reason")
+            if type(reason) is str and reason.strip():
+                self._views[key] = PipelineView(
+                    pipeline_id=command.pipeline_id,
+                    revision=current.revision + 1,
+                    status="REJECTED",
+                )
         return CommandReceipt(
             schema_id="https://schemas.hermes-pipeline.dev/runtime/command-receipt/v1",
             schema_version=FixedV1Integer(1),
@@ -36,7 +60,16 @@ class FakeController:
         )
 
     def read(self, query: PipelineQuery) -> PipelineView:
-        return PipelineView(pipeline_id=query.pipeline_id, revision=0, status="UNKNOWN")
+        if not query.workspace_id:
+            return PipelineView(
+                pipeline_id=query.pipeline_id, revision=0, status="UNCONFIRMED"
+            )
+        return self._views.get(
+            (query.workspace_id, query.pipeline_id),
+            PipelineView(
+                pipeline_id=query.pipeline_id, revision=0, status="UNCONFIRMED"
+            ),
+        )
 
 
 __all__ = ["FakeController"]

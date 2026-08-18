@@ -32,6 +32,7 @@ _FORBIDDEN = frozenset(
         "spike_controller",
         "sqlite_spike",
         "_persistence_port",
+        "leases",
     }
 )
 _RECORDED_AT = "2026-01-01T00:00:00Z"
@@ -107,7 +108,7 @@ def test_accept_confirm_persists_inbox_event_and_open_pipeline(
     assert len(receipt.event_ids) == 1
     assert _EVENT_ID.match(receipt.event_ids[0])
     assert receipt.error.message == ""
-    assert store.counts() == StoreCounts(inbox=1, events=1, pipelines=1)
+    assert store.counts() == StoreCounts(inbox=1, events=1, pipelines=1, outbox=1)
     snapshot = store.load_pipeline("ws_01-02", "pl_01-02")
     assert snapshot is not None
     assert snapshot.status == "OPEN"
@@ -142,7 +143,7 @@ def test_empty_requirement_is_rejected_without_durable_write(
     assert receipt.error.code == "VALIDATION_ERROR"
     assert receipt.error.message == "empty requirement"
     assert receipt.error.retryable is False
-    assert store.counts() == StoreCounts(inbox=0, events=0, pipelines=0)
+    assert store.counts() == StoreCounts(inbox=0, events=0, pipelines=0, outbox=0)
 
 
 def test_invalid_transition_is_rejected_without_second_event(
@@ -161,7 +162,7 @@ def test_invalid_transition_is_rejected_without_second_event(
     assert second.status == "REJECTED"
     assert second.error.code == "VALIDATION_ERROR"
     assert second.error.message == "invalid transition"
-    assert store.counts() == StoreCounts(inbox=1, events=1, pipelines=1)
+    assert store.counts() == StoreCounts(inbox=1, events=1, pipelines=1, outbox=1)
 
 
 def test_unsupported_command_type_is_rejected_without_write(
@@ -173,7 +174,7 @@ def test_unsupported_command_type_is_rejected_without_write(
     assert receipt.status == "REJECTED"
     assert receipt.error.code == "VALIDATION_ERROR"
     assert receipt.error.message == "unsupported command"
-    assert store.counts() == StoreCounts(inbox=0, events=0, pipelines=0)
+    assert store.counts() == StoreCounts(inbox=0, events=0, pipelines=0, outbox=0)
 
 
 def test_missing_or_wrong_payload_type_is_unsupported(
@@ -194,7 +195,7 @@ def test_missing_or_wrong_payload_type_is_unsupported(
     assert missing.error.message == "unsupported command"
     assert wrong.error.message == "unsupported command"
     assert reject_missing.error.message == "unsupported command"
-    assert store.counts() == StoreCounts(inbox=0, events=0, pipelines=0)
+    assert store.counts() == StoreCounts(inbox=0, events=0, pipelines=0, outbox=0)
 
 
 def test_identity_conflict_same_id_different_payload(
@@ -207,7 +208,7 @@ def test_identity_conflict_same_id_different_payload(
     assert conflict.status == "CONFLICT"
     assert conflict.error.code == "CONFLICT"
     assert conflict.error.message == "command identity conflict"
-    assert store.counts() == StoreCounts(inbox=1, events=1, pipelines=1)
+    assert store.counts() == StoreCounts(inbox=1, events=1, pipelines=1, outbox=1)
 
 
 def test_identity_conflict_same_id_different_command_field(
@@ -220,7 +221,7 @@ def test_identity_conflict_same_id_different_command_field(
     assert conflict.status == "CONFLICT"
     assert conflict.error.code == "CONFLICT"
     assert conflict.error.message == "command identity conflict"
-    assert store.counts() == StoreCounts(inbox=1, events=1, pipelines=1)
+    assert store.counts() == StoreCounts(inbox=1, events=1, pipelines=1, outbox=1)
 
 
 def test_revision_conflict_before_apply(
@@ -239,7 +240,7 @@ def test_revision_conflict_before_apply(
     assert conflict.status == "CONFLICT"
     assert conflict.error.code == "CONFLICT"
     assert conflict.error.message == "expected revision conflict"
-    assert store.counts() == StoreCounts(inbox=1, events=1, pipelines=1)
+    assert store.counts() == StoreCounts(inbox=1, events=1, pipelines=1, outbox=1)
 
 
 def test_same_identity_returns_stored_receipt_not_deduplicated(
@@ -250,7 +251,7 @@ def test_same_identity_returns_stored_receipt_not_deduplicated(
     second = controller.submit(_command())
     assert second == first
     assert second.status == "ACCEPTED"
-    assert store.counts() == StoreCounts(inbox=1, events=1, pipelines=1)
+    assert store.counts() == StoreCounts(inbox=1, events=1, pipelines=1, outbox=1)
 
 
 def test_restart_duplicate_returns_stored_receipt(tmp_path: Path) -> None:
@@ -266,7 +267,7 @@ def test_restart_duplicate_returns_stored_receipt(tmp_path: Path) -> None:
         replayed = KernelController(store2, recorded_at=_RECORDED_AT).submit(_command())
         assert replayed == first
         assert replayed.status == "ACCEPTED"
-        assert store2.counts() == StoreCounts(inbox=1, events=1, pipelines=1)
+        assert store2.counts() == StoreCounts(inbox=1, events=1, pipelines=1, outbox=1)
     finally:
         store2.close()
 
@@ -283,7 +284,7 @@ def test_cross_workspace_same_command_id_both_accepted(
     )
     assert first.status == "ACCEPTED"
     assert second.status == "ACCEPTED"
-    assert store.counts() == StoreCounts(inbox=2, events=2, pipelines=2)
+    assert store.counts() == StoreCounts(inbox=2, events=2, pipelines=2, outbox=2)
 
 
 def test_persistence_unavailable_rolls_back(
@@ -299,14 +300,14 @@ def test_persistence_unavailable_rolls_back(
     assert "sql" not in receipt.error.message.lower()
     assert "\\" not in receipt.error.message
     assert "/" not in receipt.error.message
-    assert store.counts() == StoreCounts(inbox=0, events=0, pipelines=0)
+    assert store.counts() == StoreCounts(inbox=0, events=0, pipelines=0, outbox=0)
 
 
-def test_read_returns_unknown_fixture(store: ControllerTransactionStore) -> None:
+def test_read_returns_unconfirmed_fixture(store: ControllerTransactionStore) -> None:
     view = _controller(store).read(PipelineQuery(pipeline_id="pl_01-02"))
     assert view.pipeline_id == "pl_01-02"
     assert view.revision == 0
-    assert view.status == "UNKNOWN"
+    assert view.status == "UNCONFIRMED"
 
 
 def test_kernel_import_boundary() -> None:
