@@ -11,12 +11,18 @@ from hermes_pipeline.contracts.runtime import Actor
 from hermes_pipeline.controller import KernelController
 from hermes_pipeline.delivery.fake import FakeDelivery
 from hermes_pipeline.delivery.ports import DeliveryRecord, DeliveryRequest
+from hermes_pipeline.operations.baseline import SolutionApproval
 from hermes_pipeline.operations.projects import ProjectRegistry, RequirementIntake
 from hermes_pipeline.persistence.kernel_memory import MemoryKernelStore
+from hermes_pipeline.repository.worktree import ManagedWorktree
 from hermes_pipeline.runtime_broker.binding import AgentBinding, BindingTable
 from hermes_pipeline.stage_executor.architecture import (
     ArchitectureGate,
     ArchitectureStage,
+)
+from hermes_pipeline.stage_executor.development import (
+    CandidateGate,
+    DevelopmentStage,
 )
 from hermes_pipeline.stage_executor.prd import PrdGate, PrdStage
 
@@ -41,6 +47,8 @@ class KernelBridge:
         self._delivery = self._load_delivery()
         self._prd = self._load_prd()
         self._arch = self._load_arch()
+        self._dev = self._load_dev()
+        self._approval = SolutionApproval(self._registry)
 
     def process(self, command_id: str, payload: dict[str, Any]) -> dict[str, Any]:
         op = payload.get("op")
@@ -127,20 +135,24 @@ class KernelBridge:
             design = self._arch.get(pipeline_id)
             if design is not None:
                 result.update(design)
+            developed = self._dev.get(pipeline_id)
+            if developed is not None:
+                result.update(developed)
             return result
         text = payload.get("text")
         if isinstance(text, str):
             workspace_id = str(payload.get("workspace_id", "ws_local"))
             project_id = str(payload.get("project_id", "prj_local"))
             pipeline_id = str(payload.get("pipeline_id", "pl_local"))
+            principal = str(payload.get("principal_id", "operator"))
             receipt = self._intake.confirm(
                 workspace_id=workspace_id,
                 project_id=project_id,
                 pipeline_id=pipeline_id,
                 actor=Actor(
-                    principal_id=str(payload.get("principal_id", "operator")),
+                    principal_id=principal,
                     provider="CLI",
-                    provider_actor_id=str(payload.get("principal_id", "operator")),
+                    provider_actor_id=principal,
                 ),
                 text=text,
                 command_id=command_id,
@@ -148,6 +160,7 @@ class KernelBridge:
             if receipt.status == "ACCEPTED":
                 self._advance_prd(pipeline_id, workspace_id, project_id)
                 self._advance_architecture(pipeline_id, workspace_id)
+                self._advance_development(pipeline_id, project_id, principal)
             return receipt.model_dump(mode="json")
         return self._inner.process(command_id, payload)
 
@@ -317,6 +330,105 @@ class KernelBridge:
     def _save_arch(self) -> None:
         (self._dir / "architecture.json").write_text(
             json.dumps(self._arch, sort_keys=True),
+            encoding="utf-8",
+        )
+
+    def _advance_development(
+        self, pipeline_id: str, project_id: str, principal_id: str
+    ) -> None:
+        if pipeline_id in self._dev:
+            return
+        planning = self._prd.get(pipeline_id)
+        design = self._arch.get(pipeline_id)
+        if (
+            planning is None
+            or design is None
+            or planning.get("prd_gate") != "PASS"
+            or design.get("arch_gate") != "PASS"
+        ):
+            return
+        prd_id = planning.get("prd_id", "")
+        design_id = design.get("design_id", "")
+        testplan_id = design.get("testplan_id", "")
+        try:
+            self._approval.designate(pipeline_id, project_id, principal_id)
+            self._approval.approve(
+                pipeline_id=pipeline_id,
+                project_id=project_id,
+                actor_id=principal_id,
+                prd_id=prd_id,
+                design_id=design_id,
+                testplan_id=testplan_id,
+            )
+        except PermissionError:
+            self._dev[pipeline_id] = {
+                "impl_id": "",
+                "candidate_sha": "",
+                "candidate_path": "",
+                "dev_status": "DENIED",
+                "candidate_gate": "FAIL",
+            }
+            self._save_dev()
+            return
+        artifacts = LocalCasArtifacts(self._dir.parent / "cas")
+        worktree = ManagedWorktree(self._dir.parent / "worktrees" / pipeline_id)
+        result = DevelopmentStage(
+            self._bindings, self._approval, artifacts, worktree
+        ).run(
+            pipeline_id=pipeline_id,
+            prd_id=prd_id,
+            design_id=design_id,
+            testplan_id=testplan_id,
+        )
+        gate = (
+            CandidateGate(self._approval, artifacts)
+            .evaluate(
+                pipeline_id=pipeline_id,
+                prd_id=prd_id,
+                design_id=design_id,
+                testplan_id=testplan_id,
+                result=result,
+            )
+            .status
+        )
+        candidate = result.candidate
+        self._dev[pipeline_id] = {
+            "impl_id": result.artifact_id or "",
+            "candidate_sha": candidate.sha if candidate is not None else "",
+            "candidate_path": candidate.relative_path if candidate is not None else "",
+            "dev_status": result.status,
+            "candidate_gate": gate,
+        }
+        self._save_dev()
+
+    def _load_dev(self) -> dict[str, dict[str, str]]:
+        path = self._dir / "development.json"
+        if not path.is_file():
+            return {}
+        try:
+            document = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return {}
+        if not isinstance(document, dict):
+            return {}
+        loaded: dict[str, dict[str, str]] = {}
+        typed = cast(dict[str, Any], document)
+        for raw_key, item in typed.items():
+            if not isinstance(item, dict):
+                continue
+            row = cast(dict[str, Any], item)
+            loaded[str(raw_key)] = {
+                "impl_id": str(row.get("impl_id", "")),
+                "candidate_sha": str(row.get("candidate_sha", "")),
+                "candidate_path": str(row.get("candidate_path", "")),
+                "dev_status": str(row.get("dev_status", "")),
+                "candidate_gate": str(row.get("candidate_gate", "")),
+            }
+        return loaded
+
+    def _save_dev(self) -> None:
+        (self._dir / "development.json").write_text(
+            json.dumps(self._dev, sort_keys=True),
             encoding="utf-8",
         )
 
