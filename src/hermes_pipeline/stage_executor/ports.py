@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal, Protocol, runtime_checkable
 
-StageStatus = Literal["PENDING", "CANCELLED", "UNSUPPORTED"]
+StageStatus = Literal["PENDING", "CANCELLED", "UNSUPPORTED", "COMPLETED", "DENIED"]
 
 
 @dataclass(frozen=True)
