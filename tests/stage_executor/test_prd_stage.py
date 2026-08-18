@@ -129,6 +129,19 @@ def test_bound_planner_stdout_becomes_prd(tmp_path: Path) -> None:
     assert planner.prompts == ["Write a PRD"]
 
 
+def test_bound_planner_file_becomes_prd_when_stdout_empty(tmp_path: Path) -> None:
+    artifacts = LocalCasArtifacts(tmp_path / "cas")
+    folder = tmp_path / "plans"
+    folder.mkdir()
+    (folder / "PRD.md").write_text("file prd", encoding="utf-8")
+    result = PrdStage(
+        _planner("opencode", "grok-4.6"), artifacts, _TextPlanner(""), folder
+    ).run("pl_demo", "ws_demo", "prj_demo")
+    assert result.status == "COMPLETED"
+    assert result.artifact_id is not None
+    assert artifacts.open(result.artifact_id) == b"file prd"
+
+
 def test_missing_planner_binding_is_fail_closed(tmp_path: Path) -> None:
     artifacts = LocalCasArtifacts(tmp_path)
     result = PrdStage(BindingTable({}), artifacts).run("pl_demo", "ws_demo", "prj_demo")

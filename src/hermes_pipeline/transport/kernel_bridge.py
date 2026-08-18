@@ -359,10 +359,12 @@ class KernelBridge:
         if pipeline_id in self._prd:
             return
         artifacts = LocalCasArtifacts(self._dir.parent / "cas")
+        folder = self._plans_dir(pipeline_id)
         result = PrdStage(
             self._bindings,
             artifacts,
-            planner=self._planner_broker(pipeline_id),
+            planner=self._runtime_broker(str(folder)),
+            folder=folder,
         ).run(
             pipeline_id,
             workspace_id,
@@ -397,10 +399,12 @@ class KernelBridge:
             return
         prd_id = planning.get("prd_id", "")
         artifacts = LocalCasArtifacts(self._dir.parent / "cas")
+        folder = self._plans_dir(pipeline_id)
         result = ArchitectureStage(
             self._bindings,
             artifacts,
-            planner=self._planner_broker(pipeline_id),
+            planner=self._runtime_broker(str(folder)),
+            folder=folder,
         ).run(
             prd_artifact_id=prd_id,
             pipeline_id=pipeline_id,
@@ -563,10 +567,10 @@ class KernelBridge:
         }
         self._save_dev()
 
-    def _planner_broker(self, pipeline_id: str) -> BoundRuntimeBroker:
+    def _plans_dir(self, pipeline_id: str) -> Path:
         folder = self._dir.parent / "plans" / pipeline_id
         folder.mkdir(parents=True, exist_ok=True)
-        return self._runtime_broker(str(folder))
+        return folder
 
     def _executor_broker(self, worktree: ManagedWorktree) -> BoundRuntimeBroker:
         return self._runtime_broker(str(worktree.root))
