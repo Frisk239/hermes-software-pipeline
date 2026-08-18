@@ -68,6 +68,7 @@ OWNERSHIP_MARKER_FILENAME = "OWNERSHIP"
 # lookalike identifier such as ``hermes_pipeline_fake_probe_evil`` does not
 # match the namespace. No other /card or plain event is intercepted.
 PROBE_NAMESPACE_PREFIX = "/card hermes_pipeline_fake_probe "
+INTAKE_NAMESPACE_PREFIX = "/card hermes_pipeline "
 
 # Stable typed error codes (data-and-api-contracts.md).
 CODE_VALIDATION_ERROR = "VALIDATION_ERROR"
