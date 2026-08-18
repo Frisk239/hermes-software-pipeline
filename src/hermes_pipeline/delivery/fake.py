@@ -9,10 +9,15 @@ from typing import Any, cast
 
 from hermes_pipeline.delivery.ports import DeliveryRecord, DeliveryRequest
 
+_CHECKS = frozenset({"pending", "success", "failure"})
+_REVIEWS = frozenset({"pending", "approved", "changes_requested"})
+_QUEUES = frozenset({"idle", "queued", "blocked"})
+
 
 class FakeDelivery:
     def __init__(self) -> None:
         self._records: dict[str, DeliveryRecord] = {}
+        self._events: set[str] = set()
         self._next_pr = 1
 
     def publish(self, request: DeliveryRequest) -> DeliveryRecord:
@@ -21,6 +26,7 @@ class FakeDelivery:
         if existing is not None:
             if existing.head_sha == request.name:
                 return existing
+            self._forget_events(key)
             updated = DeliveryRecord(
                 ok=True,
                 action="RECORDED",
@@ -42,10 +48,31 @@ class FakeDelivery:
         return record
 
     def reconcile(self, request: DeliveryRequest) -> DeliveryRecord:
-        stored = self._records.get(_pipeline_key(request))
-        if stored is not None:
+        key = _pipeline_key(request)
+        stored = self._records.get(key)
+        if stored is None:
+            if request.name:
+                stored = self.publish(request)
+            else:
+                return DeliveryRecord(ok=False, action="RECORDED")
+        if not request.event_id:
             return stored
-        return self.publish(request)
+        token = f"{key}:{request.event_id}"
+        if token in self._events:
+            return stored
+        self._events.add(token)
+        updated = DeliveryRecord(
+            ok=True,
+            action="RECORDED",
+            branch=stored.branch,
+            pr_number=stored.pr_number,
+            head_sha=stored.head_sha,
+            check_status=_pick(request.check_status, _CHECKS, stored.check_status),
+            review_status=_pick(request.review_status, _REVIEWS, stored.review_status),
+            queue_status=_pick(request.queue_status, _QUEUES, stored.queue_status),
+        )
+        self._records[key] = updated
+        return updated
 
     def lookup(self, pipeline_id: str) -> DeliveryRecord | None:
         return self._records.get(pipeline_id)
@@ -53,6 +80,7 @@ class FakeDelivery:
     def dump(self) -> dict[str, Any]:
         return {
             "next_pr": self._next_pr,
+            "events": sorted(self._events),
             "records": {
                 key: {
                     "ok": record.ok,
@@ -60,6 +88,9 @@ class FakeDelivery:
                     "branch": record.branch,
                     "pr_number": record.pr_number,
                     "head_sha": record.head_sha,
+                    "check_status": record.check_status,
+                    "review_status": record.review_status,
+                    "queue_status": record.queue_status,
                 }
                 for key, record in self._records.items()
             },
@@ -71,6 +102,9 @@ class FakeDelivery:
         next_pr = document.get("next_pr")
         if isinstance(next_pr, int) and next_pr >= 1:
             fake._next_pr = next_pr
+        events = document.get("events")
+        if isinstance(events, list):
+            fake._events = {str(item) for item in cast(list[object], events)}
         records = document.get("records")
         if not isinstance(records, dict):
             return fake
@@ -85,8 +119,15 @@ class FakeDelivery:
                 branch=str(row.get("branch", "")),
                 pr_number=int(row.get("pr_number", 0) or 0),
                 head_sha=str(row.get("head_sha", "")),
+                check_status=str(row.get("check_status", "")),
+                review_status=str(row.get("review_status", "")),
+                queue_status=str(row.get("queue_status", "")),
             )
         return fake
+
+    def _forget_events(self, key: str) -> None:
+        prefix = f"{key}:"
+        self._events = {item for item in self._events if not item.startswith(prefix)}
 
 
 def _pipeline_key(request: DeliveryRequest) -> str:
@@ -97,6 +138,12 @@ def _branch_name(request: DeliveryRequest) -> str:
     project = request.project_id or "prj_local"
     pipeline = request.pipeline_id or "pl_local"
     return f"hermes/{project}/{pipeline}"
+
+
+def _pick(value: str, allowed: frozenset[str], current: str) -> str:
+    if value in allowed:
+        return value
+    return current
 
 
 __all__ = ["FakeDelivery"]

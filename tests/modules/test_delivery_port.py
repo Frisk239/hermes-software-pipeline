@@ -54,6 +54,57 @@ def test_same_sha_is_idempotent_and_new_sha_updates_same_pr() -> None:
     assert other.pr_number != first.pr_number
 
 
+def test_observe_is_deduped_and_new_sha_resets_checks() -> None:
+    fake = FakeDelivery()
+    request = DeliveryRequest(name="a" * 64, project_id="prj_a", pipeline_id="pl_a")
+    fake.publish(request)
+    first = fake.reconcile(
+        DeliveryRequest(
+            name="a" * 64,
+            project_id="prj_a",
+            pipeline_id="pl_a",
+            event_id="evt_check_1",
+            check_status="success",
+            review_status="approved",
+            queue_status="queued",
+        )
+    )
+    dup = fake.reconcile(
+        DeliveryRequest(
+            name="a" * 64,
+            project_id="prj_a",
+            pipeline_id="pl_a",
+            event_id="evt_check_1",
+            check_status="failure",
+            review_status="changes_requested",
+            queue_status="blocked",
+        )
+    )
+    assert first.check_status == "success"
+    assert first.review_status == "approved"
+    assert first.queue_status == "queued"
+    assert dup == first
+    reset = fake.publish(
+        DeliveryRequest(name="b" * 64, project_id="prj_a", pipeline_id="pl_a")
+    )
+    assert reset.check_status == ""
+    assert reset.review_status == ""
+    assert reset.queue_status == ""
+
+
+def test_observe_without_pr_is_not_ok() -> None:
+    fake = FakeDelivery()
+    missed = fake.reconcile(
+        DeliveryRequest(
+            name="",
+            pipeline_id="pl_missing",
+            event_id="evt_1",
+            check_status="success",
+        )
+    )
+    assert missed.ok is False
+
+
 def test_fake_never_calls_git_or_github() -> None:
     tree = ast.parse(FAKE_PATH.read_text(encoding="utf-8"))
     imported: set[str] = set()

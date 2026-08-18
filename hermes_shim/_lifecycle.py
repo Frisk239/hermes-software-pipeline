@@ -494,7 +494,15 @@ def read_pipeline_command(
         "status": str(view.get("status", "")),
         "revision": str(view.get("revision", "")),
     }
-    for key in ("branch", "pr_number", "head_sha", "action"):
+    for key in (
+        "branch",
+        "pr_number",
+        "head_sha",
+        "action",
+        "check_status",
+        "review_status",
+        "queue_status",
+    ):
         if key in view:
             result.detail[key] = str(view[key])
     return result
@@ -506,6 +514,10 @@ def deliver_command(
     sha: str,
     project_id: str,
     pipeline_id: str,
+    event_id: str = "",
+    check_status: str = "",
+    review_status: str = "",
+    queue_status: str = "",
 ) -> LifecycleResult:
     result = LifecycleResult(command="deliver")
     root = state_root(home)
@@ -525,6 +537,10 @@ def deliver_command(
                 "sha": sha,
                 "project_id": project_id,
                 "pipeline_id": pipeline_id,
+                "event_id": event_id,
+                "check_status": check_status,
+                "review_status": review_status,
+                "queue_status": queue_status,
             },
         )
     except _client.RuntimeUnavailableError:
