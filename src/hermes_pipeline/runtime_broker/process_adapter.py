@@ -23,6 +23,7 @@ _TIMEOUT_S = 10.0
 class _Run:
     status: RuntimeStatus
     detail: str = ""
+    final_text: str = ""
 
 
 class ProcessAdapter:
@@ -58,7 +59,9 @@ class ProcessAdapter:
             return RuntimeHandle(runtime_id=runtime_id, status="FAILED")
         status: RuntimeStatus = "COMPLETED" if completed.returncode == 0 else "FAILED"
         self._runs[runtime_id] = _Run(
-            status=status, detail="ok" if status == "COMPLETED" else "error"
+            status=status,
+            detail="ok" if status == "COMPLETED" else "error",
+            final_text=(completed.stdout or "").strip(),
         )
         return RuntimeHandle(runtime_id=runtime_id, status=status)
 
@@ -80,7 +83,10 @@ class ProcessAdapter:
         if run is None:
             return RuntimeOutcome(runtime_id=runtime_id, status="UNSUPPORTED")
         return RuntimeOutcome(
-            runtime_id=runtime_id, status=run.status, detail=run.detail
+            runtime_id=runtime_id,
+            status=run.status,
+            detail=run.detail,
+            final_text=run.final_text,
         )
 
     def _build_argv(self, request: RuntimeLaunchRequest) -> list[str]:

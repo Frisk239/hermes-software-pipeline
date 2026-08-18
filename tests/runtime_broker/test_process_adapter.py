@@ -12,6 +12,7 @@ import sys
 from pathlib import Path
 
 Path("argv.json").write_text(json.dumps(sys.argv), encoding="utf-8")
+print("planner-prd")
 """
 
 
@@ -42,3 +43,4 @@ def test_prompt_is_passed_as_print_flag(tmp_path: Path) -> None:
     assert recorded[recorded.index("-p") + 1] == "Implement a login page"
     assert "-p" in adapter.last_argv
     assert "Implement a login page" in adapter.last_argv
+    assert adapter.collect("rt-p").final_text == "planner-prd"

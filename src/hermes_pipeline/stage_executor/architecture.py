@@ -11,6 +11,7 @@ from typing import Literal
 from hermes_pipeline.artifacts.ports import ArtifactPutRequest, ArtifactsPort
 from hermes_pipeline.controller.ports import ControllerPort, PipelineQuery
 from hermes_pipeline.runtime_broker.binding import BindingNotFound, BindingTable
+from hermes_pipeline.runtime_broker.ports import RuntimeBrokerPort, RuntimeLaunchRequest
 
 ARCH_BYTES = b"hermes-pipeline-architecture-v1\n"
 TESTPLAN_BYTES = b"hermes-pipeline-testplan-v1\n"
@@ -33,31 +34,69 @@ class ArchitectureGateVerdict:
 
 
 class ArchitectureStage:
-    def __init__(self, bindings: BindingTable, artifacts: ArtifactsPort) -> None:
+    def __init__(
+        self,
+        bindings: BindingTable,
+        artifacts: ArtifactsPort,
+        planner: RuntimeBrokerPort | None = None,
+    ) -> None:
         self._bindings = bindings
         self._artifacts = artifacts
+        self._planner = planner
 
     def run(
         self,
         *,
         prd_artifact_id: str,
         question: str | None = None,
+        pipeline_id: str = "",
+        prompt: str = "",
     ) -> ArchitectureResult:
         try:
-            self._bindings.resolve("planner")
+            binding = self._bindings.resolve("planner")
         except BindingNotFound:
             return ArchitectureResult(status="DENIED")
         if not self._artifacts.verify(prd_artifact_id).ok:
             return ArchitectureResult(status="DENIED")
         if question:
             return ArchitectureResult(status="QUESTION", question=question)
-        design = self._artifacts.put(ArtifactPutRequest(payload=ARCH_BYTES))
-        testplan = self._artifacts.put(ArtifactPutRequest(payload=TESTPLAN_BYTES))
+        if binding.runtime == "fake":
+            design_body = ARCH_BYTES
+            testplan_body = TESTPLAN_BYTES
+        else:
+            harvested = self._run_bound_planner(pipeline_id, binding.model, prompt)
+            if harvested is None:
+                return ArchitectureResult(status="DENIED")
+            design_body = harvested
+            testplan_body = harvested
+        design = self._artifacts.put(ArtifactPutRequest(payload=design_body))
+        testplan = self._artifacts.put(ArtifactPutRequest(payload=testplan_body))
         return ArchitectureResult(
             status="COMPLETED",
             design_id=design.artifact_id,
             testplan_id=testplan.artifact_id,
         )
+
+    def _run_bound_planner(
+        self, pipeline_id: str, model: str, prompt: str
+    ) -> bytes | None:
+        if self._planner is None:
+            return None
+        runtime_id = f"arch-{pipeline_id or 'local'}"
+        handle = self._planner.launch(
+            RuntimeLaunchRequest(
+                runtime_id=runtime_id,
+                role="planner",
+                model=model,
+                prompt=prompt,
+            )
+        )
+        if handle.status != "COMPLETED":
+            return None
+        text = self._planner.collect(runtime_id).final_text.strip()
+        if not text:
+            return None
+        return text.encode("utf-8")
 
 
 class ArchitectureGate:

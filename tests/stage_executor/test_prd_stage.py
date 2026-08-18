@@ -13,6 +13,13 @@ from hermes_pipeline.runtime_broker.binding import (
     BindingTable,
     RuntimeFamily,
 )
+from hermes_pipeline.runtime_broker.ports import (
+    RuntimeHandle,
+    RuntimeLaunchRequest,
+    RuntimeOutcome,
+    RuntimeSignalReceipt,
+    RuntimeSnapshot,
+)
 from hermes_pipeline.stage_executor.prd import PRD_BYTES, PrdGate, PrdStage
 
 _RECORDED = "2026-01-01T00:00:00Z"
@@ -78,14 +85,48 @@ def test_open_pipeline_writes_prd_and_gate_passes(tmp_path: Path) -> None:
     assert intake.read("pl_demo", "ws_demo").status == "OPEN"
 
 
-def test_opencode_planner_binding_writes_same_prd(tmp_path: Path) -> None:
+class _TextPlanner:
+    def __init__(self, text: str) -> None:
+        self.text = text
+        self.prompts: list[str] = []
+
+    def launch(self, request: RuntimeLaunchRequest) -> RuntimeHandle:
+        self.prompts.append(request.prompt)
+        return RuntimeHandle(runtime_id=request.runtime_id, status="COMPLETED")
+
+    def signal(self, runtime_id: str) -> RuntimeSignalReceipt:
+        del runtime_id
+        return RuntimeSignalReceipt(ok=False, code="UNSUPPORTED")
+
+    def inspect(self, runtime_id: str) -> RuntimeSnapshot:
+        return RuntimeSnapshot(runtime_id=runtime_id, status="COMPLETED")
+
+    def collect(self, runtime_id: str) -> RuntimeOutcome:
+        return RuntimeOutcome(
+            runtime_id=runtime_id, status="COMPLETED", final_text=self.text
+        )
+
+
+def test_opencode_planner_without_broker_is_denied(tmp_path: Path) -> None:
     artifacts = LocalCasArtifacts(tmp_path)
     result = PrdStage(_planner("opencode", "grok-4.6"), artifacts).run(
         "pl_demo", "ws_demo", "prj_demo"
     )
+    assert result.status == "DENIED"
+    assert result.artifact_id is None
+    assert _cas_ids(tmp_path) == []
+
+
+def test_bound_planner_stdout_becomes_prd(tmp_path: Path) -> None:
+    artifacts = LocalCasArtifacts(tmp_path)
+    planner = _TextPlanner("real prd body")
+    result = PrdStage(_planner("opencode", "grok-4.6"), artifacts, planner).run(
+        "pl_demo", "ws_demo", "prj_demo", prompt="Write a PRD"
+    )
     assert result.status == "COMPLETED"
     assert result.artifact_id is not None
-    assert artifacts.open(result.artifact_id) == PRD_BYTES
+    assert artifacts.open(result.artifact_id) == b"real prd body"
+    assert planner.prompts == ["Write a PRD"]
 
 
 def test_missing_planner_binding_is_fail_closed(tmp_path: Path) -> None:

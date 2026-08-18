@@ -8,6 +8,13 @@ from hermes_pipeline.controller import KernelController
 from hermes_pipeline.operations.projects import ProjectRegistry, RequirementIntake
 from hermes_pipeline.persistence.kernel_memory import MemoryKernelStore
 from hermes_pipeline.runtime_broker.binding import AgentBinding, BindingTable
+from hermes_pipeline.runtime_broker.ports import (
+    RuntimeHandle,
+    RuntimeLaunchRequest,
+    RuntimeOutcome,
+    RuntimeSignalReceipt,
+    RuntimeSnapshot,
+)
 from hermes_pipeline.stage_executor.architecture import (
     ARCH_BYTES,
     TESTPLAN_BYTES,
@@ -86,6 +93,41 @@ def test_requirement_question_does_not_rewrite_prd(tmp_path: Path) -> None:
         result=result,
     )
     assert verdict.status == "FAIL"
+
+
+class _TextPlanner:
+    def __init__(self, text: str) -> None:
+        self.text = text
+
+    def launch(self, request: RuntimeLaunchRequest) -> RuntimeHandle:
+        return RuntimeHandle(runtime_id=request.runtime_id, status="COMPLETED")
+
+    def signal(self, runtime_id: str) -> RuntimeSignalReceipt:
+        del runtime_id
+        return RuntimeSignalReceipt(ok=False, code="UNSUPPORTED")
+
+    def inspect(self, runtime_id: str) -> RuntimeSnapshot:
+        return RuntimeSnapshot(runtime_id=runtime_id, status="COMPLETED")
+
+    def collect(self, runtime_id: str) -> RuntimeOutcome:
+        return RuntimeOutcome(
+            runtime_id=runtime_id, status="COMPLETED", final_text=self.text
+        )
+
+
+def test_bound_planner_stdout_becomes_design(tmp_path: Path) -> None:
+    _controller, artifacts, prd_id = _open_with_prd(tmp_path)
+    bindings = BindingTable(
+        {"planner": AgentBinding("planner", "opencode", "grok-4.6")}
+    )
+    result = ArchitectureStage(bindings, artifacts, _TextPlanner("real design")).run(
+        prd_artifact_id=prd_id, pipeline_id="pl_demo", prompt="Write architecture"
+    )
+    assert result.status == "COMPLETED"
+    assert result.design_id is not None
+    assert result.testplan_id is not None
+    assert artifacts.open(result.design_id) == b"real design"
+    assert artifacts.open(result.testplan_id) == b"real design"
 
 
 def test_missing_prd_or_binding_is_denied(tmp_path: Path) -> None:
