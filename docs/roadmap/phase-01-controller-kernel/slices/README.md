@@ -1,6 +1,6 @@
 # Phase 01 Slice Design
 
-These are planning-level Slice definitions. Codex expands only the next dependency-ready Slice into a machine-valid immutable Slice Contract using the exact current Base SHA.
+These are planning-level Slice definitions. Expand the next dependency-ready cut from the current default-branch SHA. A machine-valid immutable Slice Contract is optional under ADR-0031.
 
 Slice 01-01 was accepted and integrated at `cdf0872078151af8b4f84319c4a30c196bdbc8e3` (PR #20). The current contract is:
 

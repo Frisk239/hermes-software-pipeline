@@ -205,21 +205,25 @@ A maintainer planning horizon that delivers one coherent, integrated repository 
 _Avoid_: Pipeline, Stage, release, sprint
 
 **Engineering Slice**:
-One independently reviewable and revertible repository change governed by an immutable Slice Contract and accepted through a fixed Candidate and Evidence Bundle.
+One independently reviewable and revertible repository change that delivers a demoable path or a decisive feasibility result.
 _Avoid_: Stage, ticket, layer task, model session
 
-**Codex Planner-Designer-Reviewer**:
-The engineering role that designs Phase and Slice scope, defines Interfaces and acceptance contracts, and independently reviews Executor results without implementing rejected rework in the review turn.
-_Avoid_: Executor Agent, Pipeline Controller, Prod Main
+**Slice Owner**:
+The default engineering role (ADR-0031): a human-authorized session that may plan, implement, and self-check one cut.
+_Avoid_: Pipeline Controller, Prod Main, product Stage Agent
+
+**Planner-Designer-Reviewer**:
+Optional formal-track role that designs Phase and Slice scope and independently reviews Executor results without implementing rejected rework in the review turn.
+_Avoid_: Slice Owner, Pipeline Controller, Prod Main
 
 **Executor Agent**:
-The independent engineering role that implements and self-verifies one approved Slice Contract without changing its design, scope, acceptance criteria, or review result.
-_Avoid_: Codex Planner-Designer-Reviewer, Development Stage, Git Custodian
+Optional formal-track role that implements and self-verifies one approved Slice Contract without changing its design, scope, acceptance criteria, or review result.
+_Avoid_: Slice Owner, Development Stage
 
 **Slice Contract**:
-The immutable, machine-validated work order binding one Engineering Slice to its Base SHA, scope, Interfaces, authority, acceptance criteria, tests, and required evidence.
+On the optional formal track, the machine-validated work order binding one Engineering Slice to its Base SHA, scope, Interfaces, authority, acceptance criteria, tests, and required evidence. Owner-mode cuts may use a short human-authorized Must/Out list instead.
 _Avoid_: Prompt, Phase Plan, PRD, chat request
 
 **Review Verdict**:
-The Codex review result bound to one Slice Contract, Candidate, and Evidence Bundle: `PASS`, `REWORK`, or `BLOCKED_CONTRACT`.
+Optional formal-track review result bound to one Slice Contract, Candidate, and Evidence Bundle: `PASS`, `REWORK`, or `BLOCKED_CONTRACT`.
 _Avoid_: Merge Approval, Gate, Agent summary

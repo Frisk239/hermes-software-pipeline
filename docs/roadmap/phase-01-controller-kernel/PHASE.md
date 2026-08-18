@@ -32,7 +32,7 @@ A fake Pipeline Command is accepted or rejected deterministically, survives proc
 | `slice-01-05` Lease and fencing | Attempt/Run/lease/heartbeat; stale generation cannot advance | `01-02` | `EC-01-05` |
 | `slice-01-06` Crash demonstration | pause/cancel/cleanup + fault injection; Phase Closeout | `01-04`, `01-05` | `EC-01-06` |
 
-Default WIP is one executing Slice.
+WIP is limited by collision risk, not a one-Slice rule (ADR-0031).
 
 ## Exit criteria
 

@@ -94,7 +94,7 @@ An Evidence Bundle is accepted only if:
 
 ## Engineering harness contracts
 
-Engineering schemas under `schemas/engineering/` govern development of this repository and are not runtime Pipeline records.
+Engineering schemas under `schemas/engineering/` describe the optional formal track for developing this repository and are not runtime Pipeline records. Owner-mode cuts (ADR-0031) are not required to emit them, and they do not need `content_hash`, RFC 8785, Context Manifest digests, or Evidence Bundles. Those hash rules still apply to product Artifact Manifests and to formal-track engineering documents that choose to use these schemas.
 
 ### Phase Plan
 

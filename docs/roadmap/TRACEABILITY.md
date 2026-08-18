@@ -53,14 +53,8 @@ This document prevents Roadmap capabilities, Phase outcomes, Slice acceptance cr
 
 ## Slice traceability rules
 
-Every Slice Contract must:
+Owner-mode cuts do not need a machine Slice Contract, content hash, or evidence-role matrix. Name the path and how you proved it.
 
-1. reference at least one `CAP-*`, `X*-*`, Phase exit, ADR, or explicitly approved maintenance requirement in each acceptance criterion;
-2. bind every acceptance criterion to one or more verification command identities;
-3. state required tests and the exact path-level demonstration;
-4. record data, migration, compatibility, security, and documentation implications, including an explicit `none` with rationale when not applicable;
-5. name the evidence roles proving each criterion;
-6. carry forward unresolved predecessor findings and Phase risks;
-7. stop for a Contract Change Request when implementation reveals an unapproved requirement or changes an observable result.
+When a machine Slice Contract is used on the optional formal track, keep each acceptance criterion traceable to a capability or ADR and to a check that can be re-run.
 
 Phase Closeout must show that every Phase exit criterion has accepted evidence and that no capability requirement was silently deferred. A deliberate deferral names the destination Phase/Slice and receives human approval when it changes the approved outcome.

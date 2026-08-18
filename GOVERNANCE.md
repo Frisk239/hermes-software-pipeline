@@ -20,7 +20,7 @@ Human repository administration uses GitHub's normal authenticated user interfac
 
 ## Decision process
 
-Hard-to-reverse architecture, security, dependency-family, licensing, governance, and product-scope changes require an accepted ADR or an equivalent recorded governance decision. Routine implementation decisions remain within an approved Phase Plan and Slice Contract.
+Hard-to-reverse architecture, security, dependency-family, licensing, governance, and product-scope changes require an accepted ADR or an equivalent recorded governance decision. Routine implementation may proceed under human-authorized Slice Owner mode (ADR-0031).
 
 Changes to governance must be reviewed by the current Repository Governance Owner and recorded in this file. If the owner is unavailable, repository-host ownership and applicable organizational policy determine recovery; the software runtime cannot appoint a replacement.
 

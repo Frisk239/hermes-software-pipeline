@@ -28,7 +28,7 @@
 - `docs/development/coding-and-test-standard.md`;
 - `docs/development/ci-and-testing.md`;
 - `docs/development/compatibility-targets.md`;
-- `docs/agents/roles/`;
+- `docs/agents/roles/` (default: `slice-owner.md`; planner/executor optional);
 - `docs/roadmap/ROADMAP.md`;
 - `docs/roadmap/TRACEABILITY.md`;
 - `docs/roadmap/phase-00-foundation/`.
@@ -56,4 +56,4 @@
 - `docs/design/design-review-roadmap.md` records review history and known gaps.
 - ignored `reference/` clones are local research inputs and are never build dependencies.
 
-When documents disagree, accepted ADRs and committed Schemas take precedence, followed by normative architecture/security documents, the approved Phase Plan, and then the immutable Slice Contract. Pydantic authoring sources and their generated Schema/OpenAPI projections must be identical by construction; any drift blocks dispatch rather than creating a new authority tier. A conflict must be resolved in the documents; an Agent cannot choose silently.
+When documents disagree, accepted ADRs and committed Schemas take precedence. For how this repository is developed, ADR-0031 and `AGENTS.md` win over longer process documents. Product architecture and security documents still bind product behavior. Pydantic authoring sources and their generated Schema/OpenAPI projections must be identical by construction. A conflict must be resolved in the documents; an Agent cannot choose silently.
