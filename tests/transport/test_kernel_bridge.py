@@ -95,6 +95,10 @@ def test_submit_with_planner_records_prd(tmp_path: Path) -> None:
     assert view["prd_status"] == "COMPLETED"
     assert view["prd_gate"] == "PASS"
     assert str(view["prd_id"]).startswith("art_")
+    assert view["arch_status"] == "COMPLETED"
+    assert view["arch_gate"] == "PASS"
+    assert str(view["design_id"]).startswith("art_")
+    assert str(view["testplan_id"]).startswith("art_")
     second = KernelBridge(tmp_path, _Inner())
     again = second.process(
         "cmd_read_2",
@@ -102,6 +106,8 @@ def test_submit_with_planner_records_prd(tmp_path: Path) -> None:
     )
     assert again["prd_id"] == view["prd_id"]
     assert again["prd_status"] == "COMPLETED"
+    assert again["design_id"] == view["design_id"]
+    assert again["arch_status"] == "COMPLETED"
 
 
 def test_bindings_persist(tmp_path: Path) -> None:
