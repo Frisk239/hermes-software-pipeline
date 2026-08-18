@@ -9,7 +9,7 @@ from typing import Any, cast
 from hermes_pipeline.contracts.runtime import Actor
 from hermes_pipeline.controller import KernelController
 from hermes_pipeline.delivery.fake import FakeDelivery
-from hermes_pipeline.delivery.ports import DeliveryRequest
+from hermes_pipeline.delivery.ports import DeliveryRecord, DeliveryRequest
 from hermes_pipeline.operations.projects import ProjectRegistry, RequirementIntake
 from hermes_pipeline.persistence.kernel_memory import MemoryKernelStore
 from hermes_pipeline.runtime_broker.binding import AgentBinding, BindingTable
@@ -71,23 +71,36 @@ class KernelBridge:
             return {"ok": True, "bindings": self._bindings.dump()}
         if op == "deliver":
             sha = str(payload.get("sha") or payload.get("name") or "")
-            if not sha:
+            event_id = str(payload.get("event_id", ""))
+            project_id = str(payload.get("project_id", "prj_local"))
+            pipeline_id = str(payload.get("pipeline_id", "pl_local"))
+            if not sha and not event_id:
                 return {"ok": False, "error": "missing sha"}
-            record = self._delivery.publish(
-                DeliveryRequest(
-                    name=sha,
-                    project_id=str(payload.get("project_id", "prj_local")),
-                    pipeline_id=str(payload.get("pipeline_id", "pl_local")),
+            published: DeliveryRecord | None = None
+            if sha:
+                published = self._delivery.publish(
+                    DeliveryRequest(
+                        name=sha,
+                        project_id=project_id,
+                        pipeline_id=pipeline_id,
+                    )
                 )
-            )
+            if event_id:
+                published = self._delivery.reconcile(
+                    DeliveryRequest(
+                        name=sha,
+                        project_id=project_id,
+                        pipeline_id=pipeline_id,
+                        event_id=event_id,
+                        check_status=str(payload.get("check_status", "")),
+                        review_status=str(payload.get("review_status", "")),
+                        queue_status=str(payload.get("queue_status", "")),
+                    )
+                )
+            if published is None:
+                return {"ok": False, "error": "missing sha"}
             self._save_delivery()
-            return {
-                "ok": record.ok,
-                "action": record.action,
-                "branch": record.branch,
-                "pr_number": record.pr_number,
-                "head_sha": record.head_sha,
-            }
+            return _record_view(published)
         if op == "read":
             workspace_id = str(payload.get("workspace_id", ""))
             pipeline_id = str(payload.get("pipeline_id", ""))
@@ -99,10 +112,7 @@ class KernelBridge:
                 "status": view.status,
             }
             if stored is not None:
-                result["branch"] = stored.branch
-                result["pr_number"] = stored.pr_number
-                result["head_sha"] = stored.head_sha
-                result["action"] = stored.action
+                result.update(_record_view(stored))
             return result
         text = payload.get("text")
         if isinstance(text, str):
@@ -174,6 +184,19 @@ class KernelBridge:
             json.dumps(self._delivery.dump(), sort_keys=True),
             encoding="utf-8",
         )
+
+
+def _record_view(record: DeliveryRecord) -> dict[str, Any]:
+    return {
+        "ok": record.ok,
+        "action": record.action,
+        "branch": record.branch,
+        "pr_number": record.pr_number,
+        "head_sha": record.head_sha,
+        "check_status": record.check_status,
+        "review_status": record.review_status,
+        "queue_status": record.queue_status,
+    }
 
 
 __all__ = ["KernelBridge"]

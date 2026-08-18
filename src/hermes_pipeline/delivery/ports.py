@@ -14,6 +14,10 @@ class DeliveryRequest:
     name: str
     project_id: str = ""
     pipeline_id: str = ""
+    event_id: str = ""
+    check_status: str = ""
+    review_status: str = ""
+    queue_status: str = ""
 
 
 @dataclass(frozen=True)
@@ -23,6 +27,9 @@ class DeliveryRecord:
     branch: str = ""
     pr_number: int = 0
     head_sha: str = ""
+    check_status: str = ""
+    review_status: str = ""
+    queue_status: str = ""
 
 
 @runtime_checkable

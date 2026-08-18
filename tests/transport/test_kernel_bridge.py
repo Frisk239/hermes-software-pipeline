@@ -109,6 +109,48 @@ def test_deliver_persists_and_read_shows_pr(tmp_path: Path) -> None:
     assert view["head_sha"] == "c" * 64
 
 
+def test_observe_events_persist_and_dedupe(tmp_path: Path) -> None:
+    first = KernelBridge(tmp_path, _Inner())
+    first.process(
+        "cmd_deliver",
+        {
+            "op": "deliver",
+            "sha": "c" * 64,
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+        },
+    )
+    seen = first.process(
+        "cmd_obs",
+        {
+            "op": "deliver",
+            "pipeline_id": "pl_cli",
+            "event_id": "evt_1",
+            "check_status": "success",
+            "review_status": "approved",
+            "queue_status": "queued",
+        },
+    )
+    assert seen["check_status"] == "success"
+    first.process(
+        "cmd_dup",
+        {
+            "op": "deliver",
+            "pipeline_id": "pl_cli",
+            "event_id": "evt_1",
+            "check_status": "failure",
+        },
+    )
+    second = KernelBridge(tmp_path, _Inner())
+    view = second.process(
+        "cmd_read_view",
+        {"op": "read", "workspace_id": "ws_cli", "pipeline_id": "pl_cli"},
+    )
+    assert view["check_status"] == "success"
+    assert view["review_status"] == "approved"
+    assert view["queue_status"] == "queued"
+
+
 def test_legacy_payload_delegates(tmp_path: Path) -> None:
     bridge = KernelBridge(tmp_path, _Inner())
     reply = bridge.process("cmd_legacy", {"delta": 1})
