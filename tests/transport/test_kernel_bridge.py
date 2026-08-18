@@ -75,6 +75,40 @@ def test_bindings_persist(tmp_path: Path) -> None:
     assert listed["bindings"]["planner"]["model"] == "grok-4.6"
 
 
+def test_deliver_persists_and_read_shows_pr(tmp_path: Path) -> None:
+    first = KernelBridge(tmp_path, _Inner())
+    recorded = first.process(
+        "cmd_deliver",
+        {
+            "op": "deliver",
+            "sha": "c" * 64,
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+        },
+    )
+    assert recorded["ok"] is True
+    assert recorded["branch"] == "hermes/prj_cli/pl_cli"
+    assert recorded["pr_number"] == 1
+    assert recorded["head_sha"] == "c" * 64
+    again = first.process(
+        "cmd_deliver",
+        {
+            "op": "deliver",
+            "sha": "c" * 64,
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+        },
+    )
+    assert again["pr_number"] == 1
+    second = KernelBridge(tmp_path, _Inner())
+    view = second.process(
+        "cmd_read_view",
+        {"op": "read", "workspace_id": "ws_cli", "pipeline_id": "pl_cli"},
+    )
+    assert view["branch"] == "hermes/prj_cli/pl_cli"
+    assert view["head_sha"] == "c" * 64
+
+
 def test_legacy_payload_delegates(tmp_path: Path) -> None:
     bridge = KernelBridge(tmp_path, _Inner())
     reply = bridge.process("cmd_legacy", {"delta": 1})

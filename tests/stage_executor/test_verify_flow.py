@@ -93,6 +93,9 @@ def test_pass_delivers_and_cleans_sandbox(tmp_path: Path) -> None:
     result = flow.run(integration)
     assert result.status == "READY"
     assert result.delivered is True
+    assert result.delivery is not None
+    assert result.delivery.branch == "hermes/prj_local/pl_local"
+    assert result.delivery.head_sha == integration.sha
     assert result.e2e_id is not None
     assert result.acceptance_id is not None
     assert artifacts.open(result.e2e_id) == E2E_BYTES
