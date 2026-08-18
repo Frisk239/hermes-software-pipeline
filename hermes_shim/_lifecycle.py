@@ -612,7 +612,38 @@ def approve_command(
     result.ok = bool(reply.ok and receipt.get("ok", True))
     result.exit_code = EXIT_OK if result.ok else EXIT_FAIL
     result.detail = {key: str(value) for key, value in receipt.items()}
+    if result.ok:
+        result.detail.update(_host_github_publish(root, project_id, pipeline_id))
     return result
+
+
+def _host_github_publish(
+    root: Path, project_id: str, pipeline_id: str
+) -> dict[str, str]:
+    from ._github import publish_with_gh, worktree_files
+
+    path = root / "descriptor" / "github.json"
+    if not path.is_file():
+        return {}
+    try:
+        document = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    if not isinstance(document, dict):
+        return {}
+    repo = str(document.get("repo", ""))
+    base = str(document.get("base", "main"))
+    files = worktree_files(root, pipeline_id)
+    if not repo or not files:
+        return {}
+    return publish_with_gh(
+        repo=repo,
+        project_id=project_id,
+        pipeline_id=pipeline_id,
+        sha="approved",
+        files=files,
+        base=base,
+    )
 
 
 def admin_command(
