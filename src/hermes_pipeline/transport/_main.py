@@ -200,9 +200,13 @@ def _build_state(
 ) -> ServerState:
     inner = ReceiptStore(root)
     inner.open()
-    from hermes_pipeline.transport.kernel_bridge import KernelBridge
+    store: object = inner
+    try:
+        from hermes_pipeline.transport.kernel_bridge import KernelBridge
 
-    store = KernelBridge(root, inner)
+        store = KernelBridge(root, inner)
+    except Exception:
+        store = inner
     if os.environ.get(SPIKE_CRASH_AFTER_PERSIST) == "1":
         original_process = store.process
 
