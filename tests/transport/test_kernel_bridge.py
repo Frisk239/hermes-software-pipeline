@@ -108,7 +108,8 @@ def test_submit_with_planner_records_prd(tmp_path: Path) -> None:
     assert again["prd_status"] == "COMPLETED"
     assert again["design_id"] == view["design_id"]
     assert again["arch_status"] == "COMPLETED"
-    assert view["dev_status"] == "DENIED"
+    assert view["approval_status"] == "PENDING"
+    assert "dev_status" not in view
 
 
 def test_submit_with_executor_records_candidate(tmp_path: Path) -> None:
@@ -145,6 +146,24 @@ def test_submit_with_executor_records_candidate(tmp_path: Path) -> None:
         "cmd_read_view",
         {"op": "read", "workspace_id": "ws_cli", "pipeline_id": "pl_cli"},
     )
+    assert view["approval_status"] == "PENDING"
+    assert "candidate_sha" not in view
+    approved = first.process(
+        "cmd_ok",
+        {
+            "op": "approve",
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+            "principal_id": "operator",
+        },
+    )
+    assert approved["ok"] is True
+    view = first.process(
+        "cmd_read_after",
+        {"op": "read", "workspace_id": "ws_cli", "pipeline_id": "pl_cli"},
+    )
+    assert view["approval_status"] == "APPROVED"
+    assert view["approver_id"] == "operator"
     assert view["dev_status"] == "COMPLETED"
     assert view["candidate_gate"] == "PASS"
     assert len(str(view["candidate_sha"])) == 64
@@ -185,6 +204,15 @@ def test_submit_with_verify_bindings_delivers(tmp_path: Path) -> None:
         {
             "text": "need a login page",
             "workspace_id": "ws_cli",
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+            "principal_id": "operator",
+        },
+    )
+    first.process(
+        "cmd_ok",
+        {
+            "op": "approve",
             "project_id": "prj_cli",
             "pipeline_id": "pl_cli",
             "principal_id": "operator",

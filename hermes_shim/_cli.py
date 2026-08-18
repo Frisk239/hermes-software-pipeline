@@ -18,6 +18,7 @@ from pathlib import Path
 
 from ._lifecycle import (
     admin_command,
+    approve_command,
     deliver_command,
     doctor_command,
     read_pipeline_command,
@@ -39,6 +40,7 @@ SUBCOMMANDS = (
     "read",
     "admin",
     "deliver",
+    "approve",
 )
 
 SUBCOMMAND_HELP = {
@@ -51,6 +53,7 @@ SUBCOMMAND_HELP = {
     "read": "read one pipeline fixture view",
     "admin": "register a project, admit a member, or bind a stage role",
     "deliver": "record a namespaced PR, or a check/review/queue event",
+    "approve": "approve the solution baseline before development",
 }
 
 
@@ -93,6 +96,10 @@ def build_pipeline_parser(parser: argparse.ArgumentParser) -> None:
             sub.add_argument("--check", default="")
             sub.add_argument("--review", default="")
             sub.add_argument("--queue", default="")
+        if name == "approve":
+            sub.add_argument("--project-id", default="prj_local")
+            sub.add_argument("--pipeline-id", default="pl_local")
+            sub.add_argument("--principal-id", default="operator")
         sub.set_defaults(pipeline_handler=name)
     # The top-level fallback handler prints usage as bounded JSON.
     parser.set_defaults(pipeline_handler="__root__")
@@ -159,6 +166,13 @@ def _run_handler(name: str, _args: argparse.Namespace) -> int:
                 check_status=str(_args.check),
                 review_status=str(_args.review),
                 queue_status=str(_args.queue),
+            )
+        elif name == "approve":
+            result = approve_command(
+                home,
+                project_id=str(_args.project_id),
+                pipeline_id=str(_args.pipeline_id),
+                principal_id=str(_args.principal_id),
             )
         else:
             result = {"command": "pipeline", "ok": False, "error": "no subcommand"}

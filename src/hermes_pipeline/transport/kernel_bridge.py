@@ -61,6 +61,7 @@ class KernelBridge:
         self._arch = self._load_arch()
         self._dev = self._load_dev()
         self._verify = self._load_verify()
+        self._approvals = self._load_approvals()
         self._approval = SolutionApproval(self._registry)
 
     def process(self, command_id: str, payload: dict[str, Any]) -> dict[str, Any]:
@@ -154,6 +155,10 @@ class KernelBridge:
             verified = self._verify.get(pipeline_id)
             if verified is not None:
                 result.update(verified)
+            decision = self._approvals.get(pipeline_id)
+            if decision is not None:
+                result["approval_status"] = decision.get("approval_status", "")
+                result["approver_id"] = decision.get("approver_id", "")
             return result
         text = payload.get("text")
         if isinstance(text, str):
@@ -175,10 +180,10 @@ class KernelBridge:
             )
             if receipt.status == "ACCEPTED":
                 self._advance_prd(pipeline_id, workspace_id, project_id)
-                self._advance_architecture(pipeline_id, workspace_id)
-                self._advance_development(pipeline_id, project_id, principal)
-                self._advance_verify(pipeline_id, project_id)
+                self._advance_architecture(pipeline_id, workspace_id, project_id)
             return receipt.model_dump(mode="json")
+        if op == "approve":
+            return self._approve_baseline(payload)
         return self._inner.process(command_id, payload)
 
     def _load_registry(self) -> ProjectRegistry:
@@ -262,7 +267,9 @@ class KernelBridge:
         }
         self._save_prd()
 
-    def _advance_architecture(self, pipeline_id: str, workspace_id: str) -> None:
+    def _advance_architecture(
+        self, pipeline_id: str, workspace_id: str, project_id: str
+    ) -> None:
         if pipeline_id in self._arch:
             return
         planning = self._prd.get(pipeline_id)
@@ -290,6 +297,13 @@ class KernelBridge:
             "arch_gate": gate,
         }
         self._save_arch()
+        if gate == "PASS" and pipeline_id not in self._approvals:
+            self._approvals[pipeline_id] = {
+                "approval_status": "PENDING",
+                "approver_id": "",
+                "project_id": project_id,
+            }
+            self._save_approvals()
 
     def _load_prd(self) -> dict[str, dict[str, str]]:
         path = self._dir / "prd.json"
@@ -503,6 +517,76 @@ class KernelBridge:
     def _save_verify(self) -> None:
         (self._dir / "verify.json").write_text(
             json.dumps(self._verify, sort_keys=True),
+            encoding="utf-8",
+        )
+
+    def _approve_baseline(self, payload: dict[str, Any]) -> dict[str, Any]:
+        pipeline_id = str(payload.get("pipeline_id", "pl_local"))
+        project_id = str(payload.get("project_id", "prj_local"))
+        principal = str(payload.get("principal_id", "operator"))
+        planning = self._prd.get(pipeline_id)
+        design = self._arch.get(pipeline_id)
+        if (
+            planning is None
+            or design is None
+            or planning.get("prd_gate") != "PASS"
+            or design.get("arch_gate") != "PASS"
+        ):
+            return {"ok": False, "error": "baseline not ready"}
+        if self._registry.role_of(project_id, principal) is None:
+            return {"ok": False, "error": "not a project member"}
+        try:
+            self._approval.designate(pipeline_id, project_id, principal)
+            self._approval.approve(
+                pipeline_id=pipeline_id,
+                project_id=project_id,
+                actor_id=principal,
+                prd_id=planning.get("prd_id", ""),
+                design_id=design.get("design_id", ""),
+                testplan_id=design.get("testplan_id", ""),
+            )
+        except PermissionError:
+            return {"ok": False, "error": "approval denied"}
+        self._approvals[pipeline_id] = {
+            "approval_status": "APPROVED",
+            "approver_id": principal,
+            "project_id": project_id,
+        }
+        self._save_approvals()
+        self._advance_development(pipeline_id, project_id, principal)
+        self._advance_verify(pipeline_id, project_id)
+        return {
+            "ok": True,
+            "approval_status": "APPROVED",
+            "approver_id": principal,
+        }
+
+    def _load_approvals(self) -> dict[str, dict[str, str]]:
+        path = self._dir / "approvals.json"
+        if not path.is_file():
+            return {}
+        try:
+            document = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return {}
+        if not isinstance(document, dict):
+            return {}
+        loaded: dict[str, dict[str, str]] = {}
+        typed = cast(dict[str, Any], document)
+        for raw_key, item in typed.items():
+            if not isinstance(item, dict):
+                continue
+            row = cast(dict[str, Any], item)
+            loaded[str(raw_key)] = {
+                "approval_status": str(row.get("approval_status", "")),
+                "approver_id": str(row.get("approver_id", "")),
+                "project_id": str(row.get("project_id", "")),
+            }
+        return loaded
+
+    def _save_approvals(self) -> None:
+        (self._dir / "approvals.json").write_text(
+            json.dumps(self._approvals, sort_keys=True),
             encoding="utf-8",
         )
 
