@@ -4,8 +4,10 @@ These are planning-level Slice definitions. Expand the next dependency-ready cut
 
 Slice 01-01 was accepted and integrated at `cdf0872078151af8b4f84319c4a30c196bdbc8e3` (PR #20). The current contract is:
 
-- `01-02-durable-transaction/SLICE.md`;
-- `01-02-durable-transaction/slice-contract.json` (READY revision 1, Base `cdf0872`).
+- `01-02-durable-transaction/SLICE.md` (READY revision 2);
+- `01-02-durable-transaction/slice-contract.json`.
+
+PR #22 implemented the wrong 01-02 contract (stdlib sqlite3, Inbox by `command_id` only) and was reverted.
 
 ## 01-01 Domain kernel
 
@@ -13,7 +15,7 @@ Must: frozen fake-Pipeline aggregate (`UNCONFIRMED` / `OPEN` / `REJECTED`), type
 
 ## 01-02 Durable transaction
 
-Must: rewrite 00-04 Inbox/Event/revision atomicity onto the 01-01 aggregate; crash/restart/dedup/conflict. Out: Outbox, projections, leases.
+Must: rewrite Inbox/Event/revision atomicity onto the 01-01 aggregate behind `ControllerTransactionStore`; exactly once by `(workspace_id, command_id)` with a full-command RFC 8785 fingerprint; SQLAlchemy Core + Alembic SQLite adapter and in-memory fake share one contract. Out: Outbox, projections, leases.
 
 ## 01-03 Projection and read
 
