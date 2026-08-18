@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import subprocess
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -29,6 +30,7 @@ class ProcessAdapter:
         self._executable = executable
         self._cwd = cwd
         self._runs: dict[str, _Run] = {}
+        self.last_argv: list[str] = []
 
     def launch(self, request: RuntimeLaunchRequest) -> RuntimeHandle:
         runtime_id = request.runtime_id
@@ -36,9 +38,8 @@ class ProcessAdapter:
         if raw is None or not Path(raw).is_file():
             self._runs[runtime_id] = _Run(status="UNSUPPORTED", detail="error")
             return RuntimeHandle(runtime_id=runtime_id, status="UNSUPPORTED")
-        argv = [raw]
-        if request.model:
-            argv.extend(["--model", request.model])
+        argv = self._build_argv(request)
+        self.last_argv = list(argv)
         try:
             completed = subprocess.run(
                 argv,
@@ -81,6 +82,18 @@ class ProcessAdapter:
         return RuntimeOutcome(
             runtime_id=runtime_id, status=run.status, detail=run.detail
         )
+
+    def _build_argv(self, request: RuntimeLaunchRequest) -> list[str]:
+        raw = self._executable
+        if raw is None:
+            return []
+        prefix = [sys.executable, raw] if raw.lower().endswith(".py") else [raw]
+        argv = list(prefix)
+        if request.model:
+            argv.extend(["--model", request.model])
+        if request.prompt:
+            argv.extend(["-p", request.prompt])
+        return argv
 
 
 __all__ = ["ProcessAdapter"]
