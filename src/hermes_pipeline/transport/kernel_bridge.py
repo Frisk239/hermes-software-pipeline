@@ -77,6 +77,7 @@ class KernelBridge:
         self._approval = SolutionApproval(self._registry)
         self._github = self._load_github()
         self._runtimes = self._load_runtime_pins()
+        self._requirements = self._load_requirements()
         self._github_transport: GitHubTransport | None = None
         self._github_token = ""
 
@@ -197,6 +198,9 @@ class KernelBridge:
                 result["approver_id"] = decision.get("approver_id", "")
             if self._github:
                 result["github_repo"] = self._github.get("repo", "")
+            need = self._requirements.get(pipeline_id)
+            if need:
+                result["requirement_text"] = need
             return result
         text = payload.get("text")
         if isinstance(text, str):
@@ -217,6 +221,8 @@ class KernelBridge:
                 command_id=command_id,
             )
             if receipt.status == "ACCEPTED":
+                self._requirements[pipeline_id] = text
+                self._save_requirements()
                 self._advance_prd(pipeline_id, workspace_id, project_id)
                 self._advance_architecture(pipeline_id, workspace_id, project_id)
             return receipt.model_dump(mode="json")
@@ -502,10 +508,7 @@ class KernelBridge:
             prd_id=prd_id,
             design_id=design_id,
             testplan_id=testplan_id,
-            prompt=(
-                f"Implement the approved solution in this directory. "
-                f"prd={prd_id} design={design_id} testplan={testplan_id}"
-            ),
+            prompt=self._implement_prompt(pipeline_id, prd_id, design_id, testplan_id),
         )
         gate = (
             CandidateGate(self._approval, artifacts)
@@ -538,6 +541,43 @@ class KernelBridge:
         for family in ("claude", "cursor", "kiro", "grok"):
             adapters[family] = ProcessAdapter(self._pinned_exe(family), cwd=cwd)
         return BoundRuntimeBroker(self._bindings, adapters)
+
+    def _implement_prompt(
+        self, pipeline_id: str, prd_id: str, design_id: str, testplan_id: str
+    ) -> str:
+        need = self._requirements.get(pipeline_id, "").strip()
+        if need:
+            return (
+                f"Implement this requirement in this directory:\n{need}\n"
+                f"prd={prd_id} design={design_id} testplan={testplan_id}"
+            )
+        return (
+            f"Implement the approved solution in this directory. "
+            f"prd={prd_id} design={design_id} testplan={testplan_id}"
+        )
+
+    def _load_requirements(self) -> dict[str, str]:
+        path = self._dir / "requirements.json"
+        if not path.is_file():
+            return {}
+        try:
+            document = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return {}
+        if not isinstance(document, dict):
+            return {}
+        loaded: dict[str, str] = {}
+        typed = cast(dict[str, Any], document)
+        for raw_key, item in typed.items():
+            if isinstance(item, str):
+                loaded[str(raw_key)] = item
+        return loaded
+
+    def _save_requirements(self) -> None:
+        (self._dir / "requirements.json").write_text(
+            json.dumps(self._requirements, sort_keys=True),
+            encoding="utf-8",
+        )
 
     def _pinned_exe(self, family: str) -> str | None:
         path = self._runtimes.get(family, "")

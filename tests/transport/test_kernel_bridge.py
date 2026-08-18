@@ -91,6 +91,7 @@ def test_submit_with_planner_records_prd(tmp_path: Path) -> None:
         "cmd_read_view",
         {"op": "read", "workspace_id": "ws_cli", "pipeline_id": "pl_cli"},
     )
+    assert view["requirement_text"] == "need a login page"
     assert view["status"] == "OPEN"
     assert view["prd_status"] == "COMPLETED"
     assert view["prd_gate"] == "PASS"

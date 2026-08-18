@@ -532,6 +532,7 @@ def read_pipeline_command(
         "acceptance_id",
         "approval_status",
         "approver_id",
+        "requirement_text",
     ):
         if key in view:
             result.detail[key] = str(view[key])
