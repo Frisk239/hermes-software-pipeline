@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 from pathlib import Path
 from typing import Any, cast
 
@@ -25,7 +26,9 @@ from hermes_pipeline.runtime_broker.binding import (
     BindingTable,
     BoundRuntimeBroker,
 )
+from hermes_pipeline.runtime_broker.codex_adapter import CodexAdapter
 from hermes_pipeline.runtime_broker.fake import FakeRuntimeBroker
+from hermes_pipeline.runtime_broker.opencode_adapter import OpenCodeAdapter
 from hermes_pipeline.runtime_broker.ports import (
     RuntimeHandle,
     RuntimeLaunchRequest,
@@ -487,7 +490,7 @@ class KernelBridge:
             self._approval,
             artifacts,
             worktree,
-            executor=BoundRuntimeBroker(self._bindings, {"fake": FakeRuntimeBroker()}),
+            executor=self._executor_broker(worktree),
         ).run(
             pipeline_id=pipeline_id,
             prd_id=prd_id,
@@ -514,6 +517,17 @@ class KernelBridge:
             "candidate_gate": gate,
         }
         self._save_dev()
+
+    def _executor_broker(self, worktree: ManagedWorktree) -> BoundRuntimeBroker:
+        cwd = str(worktree.root)
+        return BoundRuntimeBroker(
+            self._bindings,
+            {
+                "fake": FakeRuntimeBroker(),
+                "opencode": OpenCodeAdapter(shutil.which("opencode"), cwd=cwd),
+                "codex": CodexAdapter(shutil.which("codex"), cwd=cwd),
+            },
+        )
 
     def _load_dev(self) -> dict[str, dict[str, str]]:
         path = self._dir / "development.json"

@@ -71,3 +71,17 @@ def test_unbound_role_is_unsupported() -> None:
     broker = BoundRuntimeBroker(BindingTable({}), {"fake": FakeRuntimeBroker()})
     handle = broker.launch(RuntimeLaunchRequest(runtime_id="rt-x", role="planner"))
     assert handle.status == "UNSUPPORTED"
+
+
+def test_real_opencode_name_is_not_blocked(tmp_path: Path) -> None:
+    exe = tmp_path / "opencode"
+    exe.write_text("print('ok')\n", encoding="utf-8")
+    adapter = OpenCodeAdapter(executable=str(exe), cwd=str(tmp_path))
+    handle = adapter.launch(RuntimeLaunchRequest(runtime_id="rt-real", role="executor"))
+    assert handle.status != "UNSUPPORTED"
+
+
+def test_missing_opencode_binary_is_unsupported() -> None:
+    adapter = OpenCodeAdapter(executable=None)
+    handle = adapter.launch(RuntimeLaunchRequest(runtime_id="rt-miss", role="executor"))
+    assert handle.status == "UNSUPPORTED"

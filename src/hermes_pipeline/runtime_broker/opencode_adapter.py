@@ -16,7 +16,6 @@ from hermes_pipeline.runtime_broker.ports import (
     RuntimeStatus,
 )
 
-_REAL_NAMES = frozenset({"opencode", "opencode.exe"})
 _TIMEOUT_S = 10.0
 
 
@@ -45,14 +44,18 @@ class OpenCodeAdapter:
         try:
             completed = subprocess.run(
                 argv,
+                cwd=self._cwd,
                 capture_output=True,
                 text=True,
                 timeout=_TIMEOUT_S,
                 check=False,
             )
-        except subprocess.TimeoutExpired:
+        except (OSError, subprocess.TimeoutExpired) as exc:
             self.spawned = True
-            self._runs[runtime_id] = _Run(status="FAILED", detail="timeout")
+            detail = (
+                "timeout" if isinstance(exc, subprocess.TimeoutExpired) else "error"
+            )
+            self._runs[runtime_id] = _Run(status="FAILED", detail=detail)
             return RuntimeHandle(runtime_id=runtime_id, status="FAILED")
         self.spawned = True
         text = (completed.stdout or "").strip()
@@ -88,10 +91,7 @@ class OpenCodeAdapter:
         raw = self._executable
         if raw is None:
             return False
-        path = Path(raw)
-        if not path.is_file():
-            return False
-        return path.name.lower() not in _REAL_NAMES
+        return Path(raw).is_file()
 
     def _build_argv(self, model: str) -> list[str]:
         executable = self._executable
