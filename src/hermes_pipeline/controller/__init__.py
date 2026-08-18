@@ -7,7 +7,6 @@ concrete filesystem Adapters.
 """
 
 from hermes_pipeline.controller.fake import FakeController
-from hermes_pipeline.controller.kernel import KernelController
 from hermes_pipeline.controller.ports import (
     ControllerPort,
     PipelineQuery,
@@ -17,7 +16,6 @@ from hermes_pipeline.controller.ports import (
 __all__ = [
     "ControllerPort",
     "FakeController",
-    "KernelController",
     "PipelineQuery",
     "PipelineView",
 ]
