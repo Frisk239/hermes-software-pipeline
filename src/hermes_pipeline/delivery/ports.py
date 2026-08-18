@@ -12,12 +12,17 @@ from typing import Literal, Protocol, runtime_checkable
 @dataclass(frozen=True)
 class DeliveryRequest:
     name: str
+    project_id: str = ""
+    pipeline_id: str = ""
 
 
 @dataclass(frozen=True)
 class DeliveryRecord:
     ok: bool
     action: Literal["RECORDED"]
+    branch: str = ""
+    pr_number: int = 0
+    head_sha: str = ""
 
 
 @runtime_checkable

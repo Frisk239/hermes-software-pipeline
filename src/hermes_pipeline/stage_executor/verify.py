@@ -9,7 +9,11 @@ from dataclasses import dataclass
 from typing import Literal
 
 from hermes_pipeline.artifacts.ports import ArtifactPutRequest, ArtifactsPort
-from hermes_pipeline.delivery.ports import DeliveryPort, DeliveryRequest
+from hermes_pipeline.delivery.ports import (
+    DeliveryPort,
+    DeliveryRecord,
+    DeliveryRequest,
+)
 from hermes_pipeline.repository.integration import (
     IntegrationCandidate,
     VerificationSandbox,
@@ -29,6 +33,7 @@ class VerifyResult:
     e2e_id: str | None = None
     acceptance_id: str | None = None
     delivered: bool = False
+    delivery: DeliveryRecord | None = None
 
 
 class VerifyFlow:
@@ -40,6 +45,8 @@ class VerifyFlow:
         reviewer_runtime: RuntimeBrokerPort,
         delivery: DeliveryPort,
         sandbox: VerificationSandbox,
+        project_id: str = "prj_local",
+        pipeline_id: str = "pl_local",
     ) -> None:
         self._bindings = bindings
         self._artifacts = artifacts
@@ -47,6 +54,8 @@ class VerifyFlow:
         self._reviewer = reviewer_runtime
         self._delivery = delivery
         self._sandbox = sandbox
+        self._project_id = project_id
+        self._pipeline_id = pipeline_id
         self._passed_sha: str | None = None
 
     def run(self, integration: IntegrationCandidate) -> VerifyResult:
@@ -72,13 +81,20 @@ class VerifyFlow:
             if accept.status != "COMPLETED":
                 return VerifyResult(status="REWORK", e2e_id=e2e_art.artifact_id)
             acc_art = self._artifacts.put(ArtifactPutRequest(payload=ACCEPT_BYTES))
-            published = self._delivery.publish(DeliveryRequest(name=integration.sha))
+            published = self._delivery.publish(
+                DeliveryRequest(
+                    name=integration.sha,
+                    project_id=self._project_id,
+                    pipeline_id=self._pipeline_id,
+                )
+            )
             self._passed_sha = integration.sha
             return VerifyResult(
                 status="READY",
                 e2e_id=e2e_art.artifact_id,
                 acceptance_id=acc_art.artifact_id,
                 delivered=published.ok,
+                delivery=published,
             )
         finally:
             self._sandbox.cleanup()

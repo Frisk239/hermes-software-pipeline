@@ -8,6 +8,8 @@ from typing import Any, cast
 
 from hermes_pipeline.contracts.runtime import Actor
 from hermes_pipeline.controller import KernelController
+from hermes_pipeline.delivery.fake import FakeDelivery
+from hermes_pipeline.delivery.ports import DeliveryRequest
 from hermes_pipeline.operations.projects import ProjectRegistry, RequirementIntake
 from hermes_pipeline.persistence.kernel_memory import MemoryKernelStore
 from hermes_pipeline.runtime_broker.binding import AgentBinding, BindingTable
@@ -30,6 +32,7 @@ class KernelBridge:
         self._intake = RequirementIntake(
             self._registry, self._controller, recorded_at=_RECORDED
         )
+        self._delivery = self._load_delivery()
 
     def process(self, command_id: str, payload: dict[str, Any]) -> dict[str, Any]:
         op = payload.get("op")
@@ -66,15 +69,41 @@ class KernelBridge:
             return {"ok": True, "role": stage, "runtime": runtime, "model": model}
         if op == "bindings":
             return {"ok": True, "bindings": self._bindings.dump()}
+        if op == "deliver":
+            sha = str(payload.get("sha") or payload.get("name") or "")
+            if not sha:
+                return {"ok": False, "error": "missing sha"}
+            record = self._delivery.publish(
+                DeliveryRequest(
+                    name=sha,
+                    project_id=str(payload.get("project_id", "prj_local")),
+                    pipeline_id=str(payload.get("pipeline_id", "pl_local")),
+                )
+            )
+            self._save_delivery()
+            return {
+                "ok": record.ok,
+                "action": record.action,
+                "branch": record.branch,
+                "pr_number": record.pr_number,
+                "head_sha": record.head_sha,
+            }
         if op == "read":
             workspace_id = str(payload.get("workspace_id", ""))
             pipeline_id = str(payload.get("pipeline_id", ""))
             view = self._intake.read(pipeline_id, workspace_id)
-            return {
+            stored = self._delivery.lookup(pipeline_id)
+            result: dict[str, Any] = {
                 "pipeline_id": view.pipeline_id,
                 "revision": view.revision,
                 "status": view.status,
             }
+            if stored is not None:
+                result["branch"] = stored.branch
+                result["pr_number"] = stored.pr_number
+                result["head_sha"] = stored.head_sha
+                result["action"] = stored.action
+            return result
         text = payload.get("text")
         if isinstance(text, str):
             receipt = self._intake.confirm(
@@ -125,6 +154,24 @@ class KernelBridge:
     def _save_bindings(self) -> None:
         (self._dir / "bindings.json").write_text(
             json.dumps(self._bindings.dump(), sort_keys=True),
+            encoding="utf-8",
+        )
+
+    def _load_delivery(self) -> FakeDelivery:
+        path = self._dir / "delivery.json"
+        if not path.is_file():
+            return FakeDelivery()
+        try:
+            document = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return FakeDelivery()
+        if isinstance(document, dict):
+            return FakeDelivery.load(cast(dict[str, Any], document))
+        return FakeDelivery()
+
+    def _save_delivery(self) -> None:
+        (self._dir / "delivery.json").write_text(
+            json.dumps(self._delivery.dump(), sort_keys=True),
             encoding="utf-8",
         )
 

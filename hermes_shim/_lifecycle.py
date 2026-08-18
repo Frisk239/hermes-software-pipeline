@@ -487,12 +487,56 @@ def read_pipeline_command(
     result.ok = reply.ok
     result.exit_code = EXIT_OK if reply.ok else EXIT_FAIL
     body = reply.body or {}
-    view = body.get("receipt") if isinstance(body.get("receipt"), dict) else body
+    raw_view = body.get("receipt") if isinstance(body.get("receipt"), dict) else body
+    view = raw_view if isinstance(raw_view, dict) else {}
     result.detail = {
         "pipeline_id": str(view.get("pipeline_id", pipeline_id)),
         "status": str(view.get("status", "")),
         "revision": str(view.get("revision", "")),
     }
+    for key in ("branch", "pr_number", "head_sha", "action"):
+        if key in view:
+            result.detail[key] = str(view[key])
+    return result
+
+
+def deliver_command(
+    home: Path,
+    *,
+    sha: str,
+    project_id: str,
+    pipeline_id: str,
+) -> LifecycleResult:
+    result = LifecycleResult(command="deliver")
+    root = state_root(home)
+    document = read_descriptor(root)
+    if document is None or is_stale(root):
+        _add_check(result, "runtime", "error", "RUNTIME_UNAVAILABLE")
+        result.ok = False
+        result.exit_code = EXIT_FAIL
+        return result
+    try:
+        reply = _client.submit_command(
+            int(document["port"]),
+            str(document["token"]),
+            "cmd_deliver",
+            {
+                "op": "deliver",
+                "sha": sha,
+                "project_id": project_id,
+                "pipeline_id": pipeline_id,
+            },
+        )
+    except _client.RuntimeUnavailableError:
+        _add_check(result, "runtime", "error", "RUNTIME_UNAVAILABLE")
+        result.ok = False
+        result.exit_code = EXIT_FAIL
+        return result
+    body = reply.body or {}
+    receipt = body.get("receipt") if isinstance(body.get("receipt"), dict) else body
+    result.ok = bool(reply.ok and receipt.get("ok", True))
+    result.exit_code = EXIT_OK if result.ok else EXIT_FAIL
+    result.detail = {key: str(value) for key, value in receipt.items()}
     return result
 
 
@@ -554,6 +598,7 @@ def admin_command(
 
 __all__ = [
     "admin_command",
+    "deliver_command",
     "doctor_command",
     "read_pipeline_command",
     "setup_command",
