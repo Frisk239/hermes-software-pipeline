@@ -499,6 +499,8 @@ def read_pipeline_command(
         "pr_number",
         "head_sha",
         "action",
+        "pr_url",
+        "github_repo",
         "check_status",
         "review_status",
         "queue_status",
@@ -626,10 +628,13 @@ def admin_command(
     role: str,
     runtime: str,
     model: str,
+    github_repo: str = "",
 ) -> LifecycleResult:
     result = LifecycleResult(command="admin")
     payload: dict[str, str] = {}
-    if register:
+    if github_repo:
+        payload = {"op": "github", "repo": github_repo}
+    elif register:
         payload = {"op": "register", "project_id": project_id, "name": name}
     elif admit:
         payload = {

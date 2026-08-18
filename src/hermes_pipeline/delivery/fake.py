@@ -33,6 +33,7 @@ class FakeDelivery:
                 branch=existing.branch,
                 pr_number=existing.pr_number,
                 head_sha=request.name,
+                pr_url=existing.pr_url,
             )
             self._records[key] = updated
             return updated
@@ -70,12 +71,16 @@ class FakeDelivery:
             check_status=_pick(request.check_status, _CHECKS, stored.check_status),
             review_status=_pick(request.review_status, _REVIEWS, stored.review_status),
             queue_status=_pick(request.queue_status, _QUEUES, stored.queue_status),
+            pr_url=stored.pr_url,
         )
         self._records[key] = updated
         return updated
 
     def lookup(self, pipeline_id: str) -> DeliveryRecord | None:
         return self._records.get(pipeline_id)
+
+    def remember(self, pipeline_id: str, record: DeliveryRecord) -> None:
+        self._records[pipeline_id] = record
 
     def dump(self) -> dict[str, Any]:
         return {
@@ -91,6 +96,7 @@ class FakeDelivery:
                     "check_status": record.check_status,
                     "review_status": record.review_status,
                     "queue_status": record.queue_status,
+                    "pr_url": record.pr_url,
                 }
                 for key, record in self._records.items()
             },
@@ -122,6 +128,7 @@ class FakeDelivery:
                 check_status=str(row.get("check_status", "")),
                 review_status=str(row.get("review_status", "")),
                 queue_status=str(row.get("queue_status", "")),
+                pr_url=str(row.get("pr_url", "")),
             )
         return fake
 

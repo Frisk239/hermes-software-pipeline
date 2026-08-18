@@ -30,6 +30,7 @@ class DeliveryRecord:
     check_status: str = ""
     review_status: str = ""
     queue_status: str = ""
+    pr_url: str = ""
 
 
 @runtime_checkable
