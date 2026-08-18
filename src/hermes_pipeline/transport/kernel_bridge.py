@@ -359,8 +359,15 @@ class KernelBridge:
         if pipeline_id in self._prd:
             return
         artifacts = LocalCasArtifacts(self._dir.parent / "cas")
-        result = PrdStage(self._bindings, artifacts).run(
-            pipeline_id, workspace_id, project_id
+        result = PrdStage(
+            self._bindings,
+            artifacts,
+            planner=self._planner_broker(pipeline_id),
+        ).run(
+            pipeline_id,
+            workspace_id,
+            project_id,
+            prompt=self._prd_prompt(pipeline_id),
         )
         gate = "FAIL"
         if result.status == "COMPLETED":
@@ -390,8 +397,14 @@ class KernelBridge:
             return
         prd_id = planning.get("prd_id", "")
         artifacts = LocalCasArtifacts(self._dir.parent / "cas")
-        result = ArchitectureStage(self._bindings, artifacts).run(
-            prd_artifact_id=prd_id
+        result = ArchitectureStage(
+            self._bindings,
+            artifacts,
+            planner=self._planner_broker(pipeline_id),
+        ).run(
+            prd_artifact_id=prd_id,
+            pipeline_id=pipeline_id,
+            prompt=self._architecture_prompt(pipeline_id, prd_id),
         )
         gate = (
             ArchitectureGate(self._controller, artifacts)
@@ -550,8 +563,15 @@ class KernelBridge:
         }
         self._save_dev()
 
+    def _planner_broker(self, pipeline_id: str) -> BoundRuntimeBroker:
+        folder = self._dir.parent / "plans" / pipeline_id
+        folder.mkdir(parents=True, exist_ok=True)
+        return self._runtime_broker(str(folder))
+
     def _executor_broker(self, worktree: ManagedWorktree) -> BoundRuntimeBroker:
-        cwd = str(worktree.root)
+        return self._runtime_broker(str(worktree.root))
+
+    def _runtime_broker(self, cwd: str) -> BoundRuntimeBroker:
         adapters: dict[RuntimeFamily, RuntimeBrokerPort] = {
             "fake": FakeRuntimeBroker(),
             "opencode": OpenCodeAdapter(self._pinned_exe("opencode"), cwd=cwd),
@@ -560,6 +580,16 @@ class KernelBridge:
         for family in ("claude", "cursor", "kiro", "grok"):
             adapters[family] = ProcessAdapter(self._pinned_exe(family), cwd=cwd)
         return BoundRuntimeBroker(self._bindings, adapters)
+
+    def _prd_prompt(self, pipeline_id: str) -> str:
+        need = self._requirements.get(pipeline_id, "").strip()
+        if need:
+            return f"Write a PRD for this requirement:\n{need}"
+        return "Write a PRD for the submitted requirement."
+
+    def _architecture_prompt(self, pipeline_id: str, prd_id: str) -> str:
+        need = self._requirements.get(pipeline_id, "").strip()
+        return f"Write architecture and a test plan for prd={prd_id}\n{need}".strip()
 
     def _implement_prompt(
         self, pipeline_id: str, prd_id: str, design_id: str, testplan_id: str

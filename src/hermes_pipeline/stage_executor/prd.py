@@ -11,6 +11,7 @@ from typing import Literal
 from hermes_pipeline.artifacts.ports import ArtifactPutRequest, ArtifactsPort
 from hermes_pipeline.controller.ports import ControllerPort, PipelineQuery
 from hermes_pipeline.runtime_broker.binding import BindingNotFound, BindingTable
+from hermes_pipeline.runtime_broker.ports import RuntimeBrokerPort, RuntimeLaunchRequest
 
 PRD_BYTES = b"hermes-pipeline-prd-v1\n"
 
@@ -30,20 +31,58 @@ class PrdGateVerdict:
 
 
 class PrdStage:
-    def __init__(self, bindings: BindingTable, artifacts: ArtifactsPort) -> None:
+    def __init__(
+        self,
+        bindings: BindingTable,
+        artifacts: ArtifactsPort,
+        planner: RuntimeBrokerPort | None = None,
+    ) -> None:
         self._bindings = bindings
         self._artifacts = artifacts
+        self._planner = planner
 
     def run(
-        self, pipeline_id: str, workspace_id: str, project_id: str
+        self,
+        pipeline_id: str,
+        workspace_id: str,
+        project_id: str,
+        prompt: str = "",
     ) -> PrdStageResult:
-        del pipeline_id, workspace_id, project_id
+        del workspace_id, project_id
         try:
-            self._bindings.resolve("planner")
+            binding = self._bindings.resolve("planner")
         except BindingNotFound:
             return PrdStageResult(status="DENIED")
-        record = self._artifacts.put(ArtifactPutRequest(payload=PRD_BYTES))
+        if binding.runtime == "fake":
+            body = PRD_BYTES
+        else:
+            harvested = self._run_bound_planner(pipeline_id, binding.model, prompt)
+            if harvested is None:
+                return PrdStageResult(status="DENIED")
+            body = harvested
+        record = self._artifacts.put(ArtifactPutRequest(payload=body))
         return PrdStageResult(status="COMPLETED", artifact_id=record.artifact_id)
+
+    def _run_bound_planner(
+        self, pipeline_id: str, model: str, prompt: str
+    ) -> bytes | None:
+        if self._planner is None:
+            return None
+        runtime_id = f"prd-{pipeline_id}"
+        handle = self._planner.launch(
+            RuntimeLaunchRequest(
+                runtime_id=runtime_id,
+                role="planner",
+                model=model,
+                prompt=prompt,
+            )
+        )
+        if handle.status != "COMPLETED":
+            return None
+        text = self._planner.collect(runtime_id).final_text.strip()
+        if not text:
+            return None
+        return text.encode("utf-8")
 
 
 class PrdGate:
