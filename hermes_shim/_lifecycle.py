@@ -502,6 +502,9 @@ def read_pipeline_command(
         "check_status",
         "review_status",
         "queue_status",
+        "prd_id",
+        "prd_status",
+        "prd_gate",
     ):
         if key in view:
             result.detail[key] = str(view[key])

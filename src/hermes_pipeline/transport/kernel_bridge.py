@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 from typing import Any, cast
 
+from hermes_pipeline.artifacts.local_cas import LocalCasArtifacts
 from hermes_pipeline.contracts.runtime import Actor
 from hermes_pipeline.controller import KernelController
 from hermes_pipeline.delivery.fake import FakeDelivery
@@ -13,6 +14,7 @@ from hermes_pipeline.delivery.ports import DeliveryRecord, DeliveryRequest
 from hermes_pipeline.operations.projects import ProjectRegistry, RequirementIntake
 from hermes_pipeline.persistence.kernel_memory import MemoryKernelStore
 from hermes_pipeline.runtime_broker.binding import AgentBinding, BindingTable
+from hermes_pipeline.stage_executor.prd import PrdGate, PrdStage
 
 _RECORDED = "2026-01-01T00:00:00Z"
 _ROLES = {"ADMIN", "CONTRIBUTOR", "VIEWER"}
@@ -33,6 +35,7 @@ class KernelBridge:
             self._registry, self._controller, recorded_at=_RECORDED
         )
         self._delivery = self._load_delivery()
+        self._prd = self._load_prd()
 
     def process(self, command_id: str, payload: dict[str, Any]) -> dict[str, Any]:
         op = payload.get("op")
@@ -113,13 +116,19 @@ class KernelBridge:
             }
             if stored is not None:
                 result.update(_record_view(stored))
+            planning = self._prd.get(pipeline_id)
+            if planning is not None:
+                result.update(planning)
             return result
         text = payload.get("text")
         if isinstance(text, str):
+            workspace_id = str(payload.get("workspace_id", "ws_local"))
+            project_id = str(payload.get("project_id", "prj_local"))
+            pipeline_id = str(payload.get("pipeline_id", "pl_local"))
             receipt = self._intake.confirm(
-                workspace_id=str(payload.get("workspace_id", "ws_local")),
-                project_id=str(payload.get("project_id", "prj_local")),
-                pipeline_id=str(payload.get("pipeline_id", "pl_local")),
+                workspace_id=workspace_id,
+                project_id=project_id,
+                pipeline_id=pipeline_id,
                 actor=Actor(
                     principal_id=str(payload.get("principal_id", "operator")),
                     provider="CLI",
@@ -128,6 +137,8 @@ class KernelBridge:
                 text=text,
                 command_id=command_id,
             )
+            if receipt.status == "ACCEPTED":
+                self._advance_prd(pipeline_id, workspace_id, project_id)
             return receipt.model_dump(mode="json")
         return self._inner.process(command_id, payload)
 
@@ -182,6 +193,62 @@ class KernelBridge:
     def _save_delivery(self) -> None:
         (self._dir / "delivery.json").write_text(
             json.dumps(self._delivery.dump(), sort_keys=True),
+            encoding="utf-8",
+        )
+
+    def _advance_prd(
+        self, pipeline_id: str, workspace_id: str, project_id: str
+    ) -> None:
+        if pipeline_id in self._prd:
+            return
+        artifacts = LocalCasArtifacts(self._dir.parent / "cas")
+        result = PrdStage(self._bindings, artifacts).run(
+            pipeline_id, workspace_id, project_id
+        )
+        gate = "FAIL"
+        if result.status == "COMPLETED":
+            gate = (
+                PrdGate(self._controller, artifacts)
+                .evaluate(
+                    pipeline_id=pipeline_id,
+                    workspace_id=workspace_id,
+                    artifact_id=result.artifact_id,
+                )
+                .status
+            )
+        self._prd[pipeline_id] = {
+            "prd_id": result.artifact_id or "",
+            "prd_status": result.status,
+            "prd_gate": gate,
+        }
+        self._save_prd()
+
+    def _load_prd(self) -> dict[str, dict[str, str]]:
+        path = self._dir / "prd.json"
+        if not path.is_file():
+            return {}
+        try:
+            document = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return {}
+        if not isinstance(document, dict):
+            return {}
+        loaded: dict[str, dict[str, str]] = {}
+        typed = cast(dict[str, Any], document)
+        for raw_key, item in typed.items():
+            if not isinstance(item, dict):
+                continue
+            row = cast(dict[str, Any], item)
+            loaded[str(raw_key)] = {
+                "prd_id": str(row.get("prd_id", "")),
+                "prd_status": str(row.get("prd_status", "")),
+                "prd_gate": str(row.get("prd_gate", "")),
+            }
+        return loaded
+
+    def _save_prd(self) -> None:
+        (self._dir / "prd.json").write_text(
+            json.dumps(self._prd, sort_keys=True),
             encoding="utf-8",
         )
 
