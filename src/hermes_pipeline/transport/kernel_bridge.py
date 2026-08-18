@@ -10,6 +10,7 @@ from hermes_pipeline.artifacts.local_cas import LocalCasArtifacts
 from hermes_pipeline.contracts.runtime import Actor
 from hermes_pipeline.controller import KernelController
 from hermes_pipeline.delivery.fake import FakeDelivery
+from hermes_pipeline.delivery.github import GitHubDelivery, GitHubTransport
 from hermes_pipeline.delivery.ports import DeliveryRecord, DeliveryRequest
 from hermes_pipeline.operations.baseline import SolutionApproval
 from hermes_pipeline.operations.projects import ProjectRegistry, RequirementIntake
@@ -63,6 +64,13 @@ class KernelBridge:
         self._verify = self._load_verify()
         self._approvals = self._load_approvals()
         self._approval = SolutionApproval(self._registry)
+        self._github = self._load_github()
+        self._github_transport: GitHubTransport | None = None
+        self._github_token = ""
+
+    def enable_github(self, token: str, transport: GitHubTransport) -> None:
+        self._github_token = token
+        self._github_transport = transport
 
     def process(self, command_id: str, payload: dict[str, Any]) -> dict[str, Any]:
         op = payload.get("op")
@@ -99,6 +107,13 @@ class KernelBridge:
             return {"ok": True, "role": stage, "runtime": runtime, "model": model}
         if op == "bindings":
             return {"ok": True, "bindings": self._bindings.dump()}
+        if op == "github":
+            repo = str(payload.get("repo", ""))
+            if repo.count("/") != 1 or not all(repo.split("/")):
+                return {"ok": False, "error": "invalid repo"}
+            self._github = {"repo": repo, "base": str(payload.get("base", "main"))}
+            self._save_github()
+            return {"ok": True, "repo": repo}
         if op == "deliver":
             sha = str(payload.get("sha") or payload.get("name") or "")
             event_id = str(payload.get("event_id", ""))
@@ -129,6 +144,13 @@ class KernelBridge:
                 )
             if published is None:
                 return {"ok": False, "error": "missing sha"}
+            if sha:
+                published = self._mirror_github(
+                    published,
+                    DeliveryRequest(
+                        name=sha, project_id=project_id, pipeline_id=pipeline_id
+                    ),
+                )
             self._save_delivery()
             return _record_view(published)
         if op == "read":
@@ -159,6 +181,8 @@ class KernelBridge:
             if decision is not None:
                 result["approval_status"] = decision.get("approval_status", "")
                 result["approver_id"] = decision.get("approver_id", "")
+            if self._github:
+                result["github_repo"] = self._github.get("repo", "")
             return result
         text = payload.get("text")
         if isinstance(text, str):
@@ -237,6 +261,56 @@ class KernelBridge:
     def _save_delivery(self) -> None:
         (self._dir / "delivery.json").write_text(
             json.dumps(self._delivery.dump(), sort_keys=True),
+            encoding="utf-8",
+        )
+
+    def _mirror_github(
+        self, record: DeliveryRecord, request: DeliveryRequest
+    ) -> DeliveryRecord:
+        if not self._github or self._github_transport is None or not self._github_token:
+            return record
+        remote = GitHubDelivery(
+            self._github.get("repo", ""),
+            self._github_token,
+            self._github_transport,
+            self._github.get("base", "main"),
+        ).publish(request)
+        if not remote.ok:
+            return record
+        merged = DeliveryRecord(
+            ok=True,
+            action="RECORDED",
+            branch=remote.branch or record.branch,
+            pr_number=remote.pr_number or record.pr_number,
+            head_sha=record.head_sha,
+            check_status=record.check_status,
+            review_status=record.review_status,
+            queue_status=record.queue_status,
+            pr_url=remote.pr_url,
+        )
+        key = request.pipeline_id or request.name
+        self._delivery.remember(key, merged)
+        return merged
+
+    def _load_github(self) -> dict[str, str]:
+        path = self._dir / "github.json"
+        if not path.is_file():
+            return {}
+        try:
+            document = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return {}
+        if not isinstance(document, dict):
+            return {}
+        row = cast(dict[str, Any], document)
+        repo = str(row.get("repo", ""))
+        if repo.count("/") != 1:
+            return {}
+        return {"repo": repo, "base": str(row.get("base", "main"))}
+
+    def _save_github(self) -> None:
+        (self._dir / "github.json").write_text(
+            json.dumps(self._github, sort_keys=True),
             encoding="utf-8",
         )
 
@@ -483,6 +557,14 @@ class KernelBridge:
             project_id=project_id,
             pipeline_id=pipeline_id,
         ).run(build_integration_candidate(sha, "0" * 64))
+        stored = self._delivery.lookup(pipeline_id)
+        if stored is not None:
+            self._mirror_github(
+                stored,
+                DeliveryRequest(
+                    name=sha, project_id=project_id, pipeline_id=pipeline_id
+                ),
+            )
         self._save_delivery()
         self._verify[pipeline_id] = {
             "verify_status": result.status,
@@ -616,6 +698,7 @@ def _record_view(record: DeliveryRecord) -> dict[str, Any]:
         "check_status": record.check_status,
         "review_status": record.review_status,
         "queue_status": record.queue_status,
+        "pr_url": record.pr_url,
     }
 
 

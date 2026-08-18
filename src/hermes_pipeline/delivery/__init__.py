@@ -7,6 +7,7 @@ approve or merge methods.
 """
 
 from hermes_pipeline.delivery.fake import FakeDelivery
+from hermes_pipeline.delivery.github import GitHubDelivery
 from hermes_pipeline.delivery.ports import DeliveryPort, DeliveryRecord, DeliveryRequest
 
 __all__ = [
@@ -14,4 +15,5 @@ __all__ = [
     "DeliveryRecord",
     "DeliveryRequest",
     "FakeDelivery",
+    "GitHubDelivery",
 ]

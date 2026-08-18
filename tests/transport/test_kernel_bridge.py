@@ -328,6 +328,45 @@ def test_observe_events_persist_and_dedupe(tmp_path: Path) -> None:
     assert view["queue_status"] == "queued"
 
 
+def test_github_repo_persists_and_mirrors_pr(tmp_path: Path) -> None:
+    first = KernelBridge(tmp_path, _Inner())
+    bound = first.process("cmd_gh", {"op": "github", "repo": "acme/app"})
+    assert bound["ok"] is True
+
+    def _transport(
+        method: str,
+        path: str,
+        headers: dict[str, str],
+        body: dict[str, object],
+    ) -> tuple[int, object]:
+        del method, path, headers, body
+        return 201, {
+            "number": 9,
+            "html_url": "https://github.com/acme/app/pull/9",
+        }
+
+    first.enable_github("tok_secret", _transport)
+    recorded = first.process(
+        "cmd_deliver",
+        {
+            "op": "deliver",
+            "sha": "c" * 64,
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+        },
+    )
+    assert recorded["pr_number"] == 9
+    assert recorded["pr_url"] == "https://github.com/acme/app/pull/9"
+    assert "tok_secret" not in str(recorded)
+    second = KernelBridge(tmp_path, _Inner())
+    view = second.process(
+        "cmd_read_view",
+        {"op": "read", "workspace_id": "ws_cli", "pipeline_id": "pl_cli"},
+    )
+    assert view["github_repo"] == "acme/app"
+    assert view["pr_url"] == "https://github.com/acme/app/pull/9"
+
+
 def test_legacy_payload_delegates(tmp_path: Path) -> None:
     bridge = KernelBridge(tmp_path, _Inner())
     reply = bridge.process("cmd_legacy", {"delta": 1})
