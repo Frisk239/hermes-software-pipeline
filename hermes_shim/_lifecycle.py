@@ -514,6 +514,9 @@ def read_pipeline_command(
         "candidate_path",
         "dev_status",
         "candidate_gate",
+        "verify_status",
+        "e2e_id",
+        "acceptance_id",
     ):
         if key in view:
             result.detail[key] = str(view[key])

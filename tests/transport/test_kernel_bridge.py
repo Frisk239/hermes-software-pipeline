@@ -155,6 +155,56 @@ def test_submit_with_executor_records_candidate(tmp_path: Path) -> None:
         {"op": "read", "workspace_id": "ws_cli", "pipeline_id": "pl_cli"},
     )
     assert again["candidate_sha"] == view["candidate_sha"]
+    assert view["verify_status"] == "DENIED"
+
+
+def test_submit_with_verify_bindings_delivers(tmp_path: Path) -> None:
+    first = KernelBridge(tmp_path, _Inner())
+    first.process("cmd_reg", {"op": "register", "project_id": "prj_cli", "name": "Cli"})
+    first.process(
+        "cmd_adm",
+        {
+            "op": "admit",
+            "project_id": "prj_cli",
+            "principal_id": "operator",
+            "role": "CONTRIBUTOR",
+        },
+    )
+    for role, model in (
+        ("planner", "fake-prd"),
+        ("executor", "fake-dev"),
+        ("e2e", "fake-e2e"),
+        ("reviewer", "fake-acc"),
+    ):
+        first.process(
+            f"cmd_bind_{role}",
+            {"op": "bind", "role": role, "runtime": "fake", "model": model},
+        )
+    first.process(
+        "cmd_all",
+        {
+            "text": "need a login page",
+            "workspace_id": "ws_cli",
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+            "principal_id": "operator",
+        },
+    )
+    view = first.process(
+        "cmd_read_view",
+        {"op": "read", "workspace_id": "ws_cli", "pipeline_id": "pl_cli"},
+    )
+    assert view["verify_status"] == "READY"
+    assert view["branch"] == "hermes/prj_cli/pl_cli"
+    assert view["action"] == "RECORDED"
+    assert len(str(view["head_sha"])) == 64
+    second = KernelBridge(tmp_path, _Inner())
+    again = second.process(
+        "cmd_read_2",
+        {"op": "read", "workspace_id": "ws_cli", "pipeline_id": "pl_cli"},
+    )
+    assert again["verify_status"] == "READY"
+    assert again["branch"] == "hermes/prj_cli/pl_cli"
 
 
 def test_bindings_persist(tmp_path: Path) -> None:
