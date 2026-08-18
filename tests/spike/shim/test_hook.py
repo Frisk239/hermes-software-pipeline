@@ -14,8 +14,9 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
-from hermes_shim._constants import PROBE_NAMESPACE_PREFIX
+from hermes_shim._constants import INTAKE_NAMESPACE_PREFIX, PROBE_NAMESPACE_PREFIX
 from hermes_shim._hook import (
+    INTAKE_SKIP_REASON,
     SKIP_REASON,
     pre_gateway_dispatch,
 )
@@ -93,6 +94,25 @@ def test_probe_lookalike_identifier_passes_through() -> None:
     such as ``hermes_pipeline_fake_probe_evil`` is not a probe event."""
     lookalike = "/card hermes_pipeline_fake_probe_evil {}"
     assert pre_gateway_dispatch(_event(lookalike), None, None) is None
+
+
+def test_intake_card_is_skipped() -> None:
+    text = INTAKE_NAMESPACE_PREFIX + '{"text":"need a login page"}'
+    result = pre_gateway_dispatch(_event(text), None, None)
+    assert result == {"action": "skip", "reason": INTAKE_SKIP_REASON}
+
+
+def test_intake_skipped_when_runtime_unreachable() -> None:
+    text = INTAKE_NAMESPACE_PREFIX + '{"text":"need a login page"}'
+    result = pre_gateway_dispatch(_event(text), gateway=object(), session_store=None)
+    assert result == {"action": "skip", "reason": INTAKE_SKIP_REASON}
+
+
+def test_probe_still_wins_over_intake_prefix() -> None:
+    result = pre_gateway_dispatch(
+        _event(f"{PROBE_NAMESPACE_PREFIX} {PROBE_JSON}"), None, None
+    )
+    assert result == {"action": "skip", "reason": SKIP_REASON}
 
 
 def test_hook_signature_matches_hermes_call_site() -> None:
