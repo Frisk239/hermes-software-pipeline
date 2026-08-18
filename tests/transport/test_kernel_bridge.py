@@ -58,6 +58,13 @@ def test_register_admit_submit_read(tmp_path: Path) -> None:
     assert view["status"] == "OPEN"
     assert view["prd_status"] == "DENIED"
     assert view["prd_id"] == ""
+    restarted = KernelBridge(tmp_path, _Inner())
+    again = restarted.process(
+        "cmd_read_after",
+        {"op": "read", "workspace_id": "ws_cli", "pipeline_id": "pl_cli"},
+    )
+    assert again["status"] == "OPEN"
+    assert again["revision"] == "1" or again["revision"] == 1
 
 
 def test_submit_with_planner_records_prd(tmp_path: Path) -> None:

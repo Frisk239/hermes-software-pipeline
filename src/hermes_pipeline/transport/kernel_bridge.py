@@ -61,7 +61,7 @@ class KernelBridge:
         self._inner = inner
         self._dir = state_root / "descriptor"
         self._dir.mkdir(parents=True, exist_ok=True)
-        self._store = MemoryKernelStore()
+        self._store = self._load_kernel()
         self._controller = KernelController(self._store, recorded_at=_RECORDED)
         self._registry = self._load_registry()
         self._bindings = self._load_bindings()
@@ -225,6 +225,7 @@ class KernelBridge:
                 self._save_requirements()
                 self._advance_prd(pipeline_id, workspace_id, project_id)
                 self._advance_architecture(pipeline_id, workspace_id, project_id)
+            self._save_kernel()
             return receipt.model_dump(mode="json")
         if op == "approve":
             return self._approve_baseline(payload)
@@ -311,6 +312,24 @@ class KernelBridge:
         key = request.pipeline_id or request.name
         self._delivery.remember(key, merged)
         return merged
+
+    def _load_kernel(self) -> MemoryKernelStore:
+        path = self._dir / "kernel.json"
+        if not path.is_file():
+            return MemoryKernelStore()
+        try:
+            document = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return MemoryKernelStore()
+        if isinstance(document, dict):
+            return MemoryKernelStore.load(cast(dict[str, Any], document))
+        return MemoryKernelStore()
+
+    def _save_kernel(self) -> None:
+        (self._dir / "kernel.json").write_text(
+            json.dumps(self._store.dump(), sort_keys=True),
+            encoding="utf-8",
+        )
 
     def _load_github(self) -> dict[str, str]:
         path = self._dir / "github.json"

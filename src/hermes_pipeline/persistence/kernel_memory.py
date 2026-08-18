@@ -6,7 +6,8 @@ DISPOSITION: DELETE_UNLESS_ADOPTED_BY_PHASE_01
 
 from __future__ import annotations
 
-from dataclasses import replace
+from dataclasses import asdict, replace
+from typing import Any, cast
 
 from hermes_pipeline.controller.transaction_store import (
     AcceptedWrite,
@@ -153,8 +154,82 @@ class MemoryKernelStore:
             outbox=len(self._outbox),
         )
 
+    def dump(self) -> dict[str, Any]:
+        return {
+            "inbox": [asdict(item) for item in self._inbox.values()],
+            "events": [asdict(item) for item in self._events],
+            "pipelines": [asdict(item) for item in self._pipelines.values()],
+            "outbox": [asdict(item) for item in self._outbox.values()],
+            "leases": [asdict(item) for item in self._leases.values()],
+        }
+
+    @classmethod
+    def load(cls, document: dict[str, Any]) -> MemoryKernelStore:
+        store = cls()
+        for item in _rows(document.get("inbox")):
+            record = InboxRecord(
+                workspace_id=str(item.get("workspace_id", "")),
+                command_id=str(item.get("command_id", "")),
+                command_fingerprint=str(item.get("command_fingerprint", "")),
+                receipt_json=str(item.get("receipt_json", "")),
+            )
+            store._inbox[(record.workspace_id, record.command_id)] = record
+        for item in _rows(document.get("events")):
+            store._events.append(
+                EventWrite(
+                    event_id=str(item.get("event_id", "")),
+                    workspace_id=str(item.get("workspace_id", "")),
+                    pipeline_id=str(item.get("pipeline_id", "")),
+                    event_type=str(item.get("event_type", "")),
+                    payload_json=str(item.get("payload_json", "")),
+                    pipeline_revision=int(item.get("pipeline_revision", 0) or 0),
+                )
+            )
+        for item in _rows(document.get("pipelines")):
+            snap = PipelineSnapshot(
+                workspace_id=str(item.get("workspace_id", "")),
+                pipeline_id=str(item.get("pipeline_id", "")),
+                status=str(item.get("status", "")),
+                revision=int(item.get("revision", 0) or 0),
+                text=str(item.get("text", "")),
+            )
+            store._pipelines[(snap.workspace_id, snap.pipeline_id)] = snap
+        for item in _rows(document.get("outbox")):
+            receipt = item.get("delivery_receipt_json")
+            record = OutboxRecord(
+                workspace_id=str(item.get("workspace_id", "")),
+                command_id=str(item.get("command_id", "")),
+                effect_type=str(item.get("effect_type", "")),
+                payload_json=str(item.get("payload_json", "")),
+                delivery_receipt_json=str(receipt) if receipt is not None else None,
+            )
+            store._outbox[(record.workspace_id, record.command_id)] = record
+        for item in _rows(document.get("leases")):
+            record = LeaseRecord(
+                workspace_id=str(item.get("workspace_id", "")),
+                pipeline_id=str(item.get("pipeline_id", "")),
+                attempt_id=str(item.get("attempt_id", "")),
+                run_id=str(item.get("run_id", "")),
+                holder=str(item.get("holder", "")),
+                generation=max(1, int(item.get("generation", 1) or 1)),
+                expires_at=int(item.get("expires_at", 0) or 0),
+            )
+            store._leases[(record.workspace_id, record.pipeline_id)] = record
+        return store
+
     def close(self) -> None:
         return
+
+
+def _rows(value: object) -> list[dict[str, Any]]:
+    if not isinstance(value, list):
+        return []
+    rows: list[dict[str, Any]] = []
+    typed = cast(list[object], value)
+    for item in typed:
+        if isinstance(item, dict):
+            rows.append(cast(dict[str, Any], item))
+    return rows
 
 
 __all__ = ["MemoryKernelStore"]
