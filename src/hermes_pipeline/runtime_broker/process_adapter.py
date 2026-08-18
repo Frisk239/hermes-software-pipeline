@@ -43,9 +43,10 @@ class ProcessAdapter:
             completed = subprocess.run(
                 argv,
                 cwd=self._cwd,
+                input=request.prompt or None,
                 capture_output=True,
                 text=True,
-                timeout=_TIMEOUT_S,
+                timeout=_TIMEOUT_S if not request.prompt else 120.0,
                 check=False,
             )
         except (OSError, subprocess.TimeoutExpired) as exc:
