@@ -119,6 +119,8 @@ class KernelBridge:
             return {"ok": True, "role": stage, "runtime": runtime, "model": model}
         if op == "bindings":
             return {"ok": True, "bindings": self._bindings.dump()}
+        if op == "runtimes":
+            return {"ok": True, "runtimes": sorted(self._runtimes)}
         if op == "github":
             repo = str(payload.get("repo", ""))
             if repo.count("/") != 1 or not all(repo.split("/")):
@@ -500,6 +502,10 @@ class KernelBridge:
             prd_id=prd_id,
             design_id=design_id,
             testplan_id=testplan_id,
+            prompt=(
+                f"Implement the approved solution in this directory. "
+                f"prd={prd_id} design={design_id} testplan={testplan_id}"
+            ),
         )
         gate = (
             CandidateGate(self._approval, artifacts)

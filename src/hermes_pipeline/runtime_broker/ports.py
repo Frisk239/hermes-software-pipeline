@@ -16,6 +16,7 @@ class RuntimeLaunchRequest:
     runtime_id: str
     role: str = ""
     model: str = ""
+    prompt: str = ""
 
 
 @dataclass(frozen=True)

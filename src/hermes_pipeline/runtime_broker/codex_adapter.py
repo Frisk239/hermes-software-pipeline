@@ -58,7 +58,8 @@ class CodexAdapter:
         if not self._may_launch():
             self._runs[runtime_id] = _Run(status="UNSUPPORTED", detail="error")
             return RuntimeHandle(runtime_id=runtime_id, status="UNSUPPORTED")
-        argv = self._build_argv(request.model)
+        prompt = request.prompt or self._prompt
+        argv = self._build_argv(request.model, prompt)
         self.last_argv = list(argv)
         try:
             completed = subprocess.run(
@@ -124,7 +125,7 @@ class CodexAdapter:
             ).allowed
         return True
 
-    def _build_argv(self, model: str = "") -> list[str]:
+    def _build_argv(self, model: str = "", prompt: str = "") -> list[str]:
         executable = self._executable
         if executable is None:
             return []
@@ -144,7 +145,7 @@ class CodexAdapter:
         ]
         if model:
             argv.extend(["--model", model])
-        argv.append(self._prompt)
+        argv.append(prompt or self._prompt)
         return [item for item in argv if item != _DANGEROUS]
 
 

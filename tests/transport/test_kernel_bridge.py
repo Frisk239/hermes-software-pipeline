@@ -367,6 +367,23 @@ def test_github_repo_persists_and_mirrors_pr(tmp_path: Path) -> None:
     assert view["pr_url"] == "https://github.com/acme/app/pull/9"
 
 
+def test_runtimes_lists_pin_names_only(tmp_path: Path) -> None:
+    import json
+
+    exe = tmp_path / "claude"
+    exe.write_text("x", encoding="utf-8")
+    (tmp_path / "descriptor").mkdir(parents=True)
+    (tmp_path / "descriptor" / "runtimes.json").write_text(
+        json.dumps({"claude": str(exe)}),
+        encoding="utf-8",
+    )
+    bridge = KernelBridge(tmp_path, _Inner())
+    listed = bridge.process("cmd_rt", {"op": "runtimes"})
+    assert listed["ok"] is True
+    assert listed["runtimes"] == ["claude"]
+    assert "C:" not in str(listed["runtimes"])
+
+
 def test_legacy_payload_delegates(tmp_path: Path) -> None:
     bridge = KernelBridge(tmp_path, _Inner())
     reply = bridge.process("cmd_legacy", {"delta": 1})

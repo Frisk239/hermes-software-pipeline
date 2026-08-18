@@ -671,10 +671,13 @@ def admin_command(
     runtime: str,
     model: str,
     github_repo: str = "",
+    runtimes: bool = False,
 ) -> LifecycleResult:
     result = LifecycleResult(command="admin")
     payload: dict[str, str] = {}
-    if github_repo:
+    if runtimes:
+        payload = {"op": "runtimes"}
+    elif github_repo:
         payload = {"op": "github", "repo": github_repo}
     elif register:
         payload = {"op": "register", "project_id": project_id, "name": name}

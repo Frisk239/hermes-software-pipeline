@@ -89,6 +89,7 @@ def build_pipeline_parser(parser: argparse.ArgumentParser) -> None:
             sub.add_argument("--runtime", default="")
             sub.add_argument("--model", default="")
             sub.add_argument("--github-repo", default="")
+            sub.add_argument("--runtimes", action="store_true")
         if name == "deliver":
             sub.add_argument("--sha", default="")
             sub.add_argument("--project-id", default="prj_local")
@@ -157,6 +158,7 @@ def _run_handler(name: str, _args: argparse.Namespace) -> int:
                 runtime=str(_args.runtime),
                 model=str(_args.model),
                 github_repo=str(_args.github_repo),
+                runtimes=bool(_args.runtimes),
             )
         elif name == "deliver":
             result = deliver_command(

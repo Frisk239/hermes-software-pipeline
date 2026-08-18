@@ -62,6 +62,7 @@ class DevelopmentStage:
         testplan_id: str,
         payload: bytes = IMPL_BYTES,
         relative_path: str = IMPL_NAME,
+        prompt: str = "",
     ) -> DevelopmentResult:
         try:
             binding = self._bindings.resolve("executor")
@@ -81,7 +82,7 @@ class DevelopmentStage:
                 return DevelopmentResult(status="DENIED")
             body = payload
         else:
-            harvested = self._run_bound_executor(pipeline_id, binding.model)
+            harvested = self._run_bound_executor(pipeline_id, binding.model, prompt)
             if harvested is None:
                 return DevelopmentResult(status="DENIED")
             written, body = harvested
@@ -97,7 +98,7 @@ class DevelopmentStage:
         )
 
     def _run_bound_executor(
-        self, pipeline_id: str, model: str
+        self, pipeline_id: str, model: str, prompt: str
     ) -> tuple[Path, bytes] | None:
         if self._executor is None:
             return None
@@ -106,6 +107,7 @@ class DevelopmentStage:
                 runtime_id=f"dev-{pipeline_id}",
                 role="executor",
                 model=model,
+                prompt=prompt,
             )
         )
         if handle.status != "COMPLETED":
