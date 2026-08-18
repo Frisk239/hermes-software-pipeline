@@ -100,7 +100,7 @@ def test_pipeline_parser_has_exactly_five_subcommands() -> None:
     assert len(subparsers) == 1
     choices = cast(dict[str, Any], cast(Any, subparsers[0]).choices)
     assert set(choices) == set(SUBCOMMANDS)
-    assert len(choices) == 7
+    assert len(choices) == 8
 
 
 def test_plugin_yaml_no_requires_env() -> None:

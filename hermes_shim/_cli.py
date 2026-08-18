@@ -17,6 +17,7 @@ import argparse
 from pathlib import Path
 
 from ._lifecycle import (
+    admin_command,
     doctor_command,
     read_pipeline_command,
     setup_command,
@@ -27,7 +28,16 @@ from ._lifecycle import (
 )
 from ._state import hermes_home
 
-SUBCOMMANDS = ("setup", "doctor", "start", "status", "stop", "submit", "read")
+SUBCOMMANDS = (
+    "setup",
+    "doctor",
+    "start",
+    "status",
+    "stop",
+    "submit",
+    "read",
+    "admin",
+)
 
 SUBCOMMAND_HELP = {
     "setup": "create the lifecycle state-root layout (idempotent)",
@@ -37,6 +47,7 @@ SUBCOMMAND_HELP = {
     "stop": "stop the fake managed runtime (no-op when not running)",
     "submit": "confirm a requirement through the running kernel",
     "read": "read one pipeline fixture view",
+    "admin": "register a project, admit a member, or bind a stage role",
 }
 
 
@@ -60,6 +71,17 @@ def build_pipeline_parser(parser: argparse.ArgumentParser) -> None:
         if name == "read":
             sub.add_argument("--workspace-id", default="ws_local")
             sub.add_argument("--pipeline-id", default="pl_local")
+        if name == "admin":
+            sub.add_argument("--register", action="store_true")
+            sub.add_argument("--admit", action="store_true")
+            sub.add_argument("--bind", action="store_true")
+            sub.add_argument("--project-id", default="")
+            sub.add_argument("--name", default="")
+            sub.add_argument("--principal-id", default="")
+            sub.add_argument("--member-role", default="")
+            sub.add_argument("--role", default="")
+            sub.add_argument("--runtime", default="")
+            sub.add_argument("--model", default="")
         sub.set_defaults(pipeline_handler=name)
     # The top-level fallback handler prints usage as bounded JSON.
     parser.set_defaults(pipeline_handler="__root__")
@@ -101,6 +123,20 @@ def _run_handler(name: str, _args: argparse.Namespace) -> int:
                 home,
                 workspace_id=str(_args.workspace_id),
                 pipeline_id=str(_args.pipeline_id),
+            )
+        elif name == "admin":
+            result = admin_command(
+                home,
+                register=bool(_args.register),
+                admit=bool(_args.admit),
+                bind=bool(_args.bind),
+                project_id=str(_args.project_id),
+                name=str(_args.name),
+                principal_id=str(_args.principal_id),
+                member_role=str(_args.member_role),
+                role=str(_args.role),
+                runtime=str(_args.runtime),
+                model=str(_args.model),
             )
         else:
             result = {"command": "pipeline", "ok": False, "error": "no subcommand"}
