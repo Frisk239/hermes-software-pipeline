@@ -14,8 +14,19 @@ from hermes_pipeline.delivery.ports import DeliveryRecord, DeliveryRequest
 from hermes_pipeline.operations.baseline import SolutionApproval
 from hermes_pipeline.operations.projects import ProjectRegistry, RequirementIntake
 from hermes_pipeline.persistence.kernel_memory import MemoryKernelStore
+from hermes_pipeline.repository.integration import (
+    VerificationSandbox,
+    build_integration_candidate,
+)
 from hermes_pipeline.repository.worktree import ManagedWorktree
 from hermes_pipeline.runtime_broker.binding import AgentBinding, BindingTable
+from hermes_pipeline.runtime_broker.ports import (
+    RuntimeHandle,
+    RuntimeLaunchRequest,
+    RuntimeOutcome,
+    RuntimeSignalReceipt,
+    RuntimeSnapshot,
+)
 from hermes_pipeline.stage_executor.architecture import (
     ArchitectureGate,
     ArchitectureStage,
@@ -25,6 +36,7 @@ from hermes_pipeline.stage_executor.development import (
     DevelopmentStage,
 )
 from hermes_pipeline.stage_executor.prd import PrdGate, PrdStage
+from hermes_pipeline.stage_executor.verify import VerifyFlow
 
 _RECORDED = "2026-01-01T00:00:00Z"
 _ROLES = {"ADMIN", "CONTRIBUTOR", "VIEWER"}
@@ -48,6 +60,7 @@ class KernelBridge:
         self._prd = self._load_prd()
         self._arch = self._load_arch()
         self._dev = self._load_dev()
+        self._verify = self._load_verify()
         self._approval = SolutionApproval(self._registry)
 
     def process(self, command_id: str, payload: dict[str, Any]) -> dict[str, Any]:
@@ -138,6 +151,9 @@ class KernelBridge:
             developed = self._dev.get(pipeline_id)
             if developed is not None:
                 result.update(developed)
+            verified = self._verify.get(pipeline_id)
+            if verified is not None:
+                result.update(verified)
             return result
         text = payload.get("text")
         if isinstance(text, str):
@@ -161,6 +177,7 @@ class KernelBridge:
                 self._advance_prd(pipeline_id, workspace_id, project_id)
                 self._advance_architecture(pipeline_id, workspace_id)
                 self._advance_development(pipeline_id, project_id, principal)
+                self._advance_verify(pipeline_id, project_id)
             return receipt.model_dump(mode="json")
         return self._inner.process(command_id, payload)
 
@@ -431,6 +448,78 @@ class KernelBridge:
             json.dumps(self._dev, sort_keys=True),
             encoding="utf-8",
         )
+
+    def _advance_verify(self, pipeline_id: str, project_id: str) -> None:
+        if pipeline_id in self._verify:
+            return
+        developed = self._dev.get(pipeline_id)
+        if developed is None or developed.get("candidate_gate") != "PASS":
+            return
+        sha = developed.get("candidate_sha", "")
+        artifacts = LocalCasArtifacts(self._dir.parent / "cas")
+        sandbox = VerificationSandbox(self._dir.parent / "sandbox" / pipeline_id)
+        passing = _PassingRuntime()
+        result = VerifyFlow(
+            self._bindings,
+            artifacts,
+            passing,
+            passing,
+            self._delivery,
+            sandbox,
+            project_id=project_id,
+            pipeline_id=pipeline_id,
+        ).run(build_integration_candidate(sha, "0" * 64))
+        self._save_delivery()
+        self._verify[pipeline_id] = {
+            "verify_status": result.status,
+            "e2e_id": result.e2e_id or "",
+            "acceptance_id": result.acceptance_id or "",
+        }
+        self._save_verify()
+
+    def _load_verify(self) -> dict[str, dict[str, str]]:
+        path = self._dir / "verify.json"
+        if not path.is_file():
+            return {}
+        try:
+            document = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return {}
+        if not isinstance(document, dict):
+            return {}
+        loaded: dict[str, dict[str, str]] = {}
+        typed = cast(dict[str, Any], document)
+        for raw_key, item in typed.items():
+            if not isinstance(item, dict):
+                continue
+            row = cast(dict[str, Any], item)
+            loaded[str(raw_key)] = {
+                "verify_status": str(row.get("verify_status", "")),
+                "e2e_id": str(row.get("e2e_id", "")),
+                "acceptance_id": str(row.get("acceptance_id", "")),
+            }
+        return loaded
+
+    def _save_verify(self) -> None:
+        (self._dir / "verify.json").write_text(
+            json.dumps(self._verify, sort_keys=True),
+            encoding="utf-8",
+        )
+
+
+class _PassingRuntime:
+    def launch(self, request: RuntimeLaunchRequest) -> RuntimeHandle:
+        return RuntimeHandle(runtime_id=request.runtime_id, status="COMPLETED")
+
+    def signal(self, runtime_id: str) -> RuntimeSignalReceipt:
+        del runtime_id
+        return RuntimeSignalReceipt(ok=True, code="CANCELLED")
+
+    def inspect(self, runtime_id: str) -> RuntimeSnapshot:
+        return RuntimeSnapshot(runtime_id=runtime_id, status="COMPLETED")
+
+    def collect(self, runtime_id: str) -> RuntimeOutcome:
+        return RuntimeOutcome(runtime_id=runtime_id, status="COMPLETED")
 
 
 def _record_view(record: DeliveryRecord) -> dict[str, Any]:
