@@ -56,6 +56,52 @@ def test_register_admit_submit_read(tmp_path: Path) -> None:
         {"op": "read", "workspace_id": "ws_cli", "pipeline_id": "pl_cli"},
     )
     assert view["status"] == "OPEN"
+    assert view["prd_status"] == "DENIED"
+    assert view["prd_id"] == ""
+
+
+def test_submit_with_planner_records_prd(tmp_path: Path) -> None:
+    first = KernelBridge(tmp_path, _Inner())
+    first.process("cmd_reg", {"op": "register", "project_id": "prj_cli", "name": "Cli"})
+    first.process(
+        "cmd_adm",
+        {
+            "op": "admit",
+            "project_id": "prj_cli",
+            "principal_id": "operator",
+            "role": "CONTRIBUTOR",
+        },
+    )
+    first.process(
+        "cmd_bind",
+        {"op": "bind", "role": "planner", "runtime": "fake", "model": "fake-prd"},
+    )
+    receipt = first.process(
+        "cmd_prd",
+        {
+            "text": "need a login page",
+            "workspace_id": "ws_cli",
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+            "principal_id": "operator",
+        },
+    )
+    assert receipt["status"] == "ACCEPTED"
+    view = first.process(
+        "cmd_read_view",
+        {"op": "read", "workspace_id": "ws_cli", "pipeline_id": "pl_cli"},
+    )
+    assert view["status"] == "OPEN"
+    assert view["prd_status"] == "COMPLETED"
+    assert view["prd_gate"] == "PASS"
+    assert str(view["prd_id"]).startswith("art_")
+    second = KernelBridge(tmp_path, _Inner())
+    again = second.process(
+        "cmd_read_2",
+        {"op": "read", "workspace_id": "ws_cli", "pipeline_id": "pl_cli"},
+    )
+    assert again["prd_id"] == view["prd_id"]
+    assert again["prd_status"] == "COMPLETED"
 
 
 def test_bindings_persist(tmp_path: Path) -> None:
