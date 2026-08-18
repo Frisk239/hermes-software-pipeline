@@ -7,6 +7,13 @@ from hermes_pipeline.operations.baseline import SolutionApproval
 from hermes_pipeline.operations.projects import ProjectRegistry
 from hermes_pipeline.repository.worktree import SECRET_CANARY, ManagedWorktree
 from hermes_pipeline.runtime_broker.binding import AgentBinding, BindingTable
+from hermes_pipeline.runtime_broker.ports import (
+    RuntimeHandle,
+    RuntimeLaunchRequest,
+    RuntimeOutcome,
+    RuntimeSignalReceipt,
+    RuntimeSnapshot,
+)
 from hermes_pipeline.stage_executor.development import (
     IMPL_BYTES,
     CandidateGate,
@@ -90,6 +97,82 @@ def test_stale_baseline_or_missing_executor_is_denied(tmp_path: Path) -> None:
         ).status
         == "DENIED"
     )
+
+
+class _WritingExecutor:
+    def __init__(self, worktree: ManagedWorktree) -> None:
+        self._worktree = worktree
+
+    def launch(self, request: RuntimeLaunchRequest) -> RuntimeHandle:
+        del request
+        self._worktree.write("src/real.py", b"print('from-executor')\n")
+        return RuntimeHandle(runtime_id="dev", status="COMPLETED")
+
+    def signal(self, runtime_id: str) -> RuntimeSignalReceipt:
+        del runtime_id
+        return RuntimeSignalReceipt(ok=True, code="CANCELLED")
+
+    def inspect(self, runtime_id: str) -> RuntimeSnapshot:
+        return RuntimeSnapshot(runtime_id=runtime_id, status="COMPLETED")
+
+    def collect(self, runtime_id: str) -> RuntimeOutcome:
+        return RuntimeOutcome(runtime_id=runtime_id, status="COMPLETED")
+
+
+class _FailingExecutor(_WritingExecutor):
+    def launch(self, request: RuntimeLaunchRequest) -> RuntimeHandle:
+        del request
+        return RuntimeHandle(runtime_id="dev", status="FAILED")
+
+
+def test_bound_executor_must_write_worktree(tmp_path: Path) -> None:
+    _built, approval, artifacts = _stage(tmp_path)
+    del _built
+    worktree = ManagedWorktree(tmp_path / "wt-real")
+    bindings = BindingTable(
+        {"executor": AgentBinding("executor", "opencode", "grok-4.6")}
+    )
+    real = DevelopmentStage(
+        bindings,
+        approval,
+        artifacts,
+        worktree,
+        executor=_WritingExecutor(worktree),
+    )
+    result = real.run(
+        pipeline_id="pl_demo",
+        prd_id="art_prd",
+        design_id="art_design",
+        testplan_id="art_test",
+    )
+    assert result.status == "COMPLETED"
+    assert result.candidate is not None
+    assert result.candidate.relative_path == "src/real.py"
+    assert artifacts.open(result.artifact_id or "") == b"print('from-executor')\n"
+    assert not (tmp_path / "wt-real" / "src" / "app.py").exists()
+
+
+def test_bound_executor_failure_is_denied_without_fixture(tmp_path: Path) -> None:
+    _built, approval, artifacts = _stage(tmp_path)
+    del _built
+    worktree = ManagedWorktree(tmp_path / "wt-fail")
+    bindings = BindingTable(
+        {"executor": AgentBinding("executor", "opencode", "grok-4.6")}
+    )
+    denied = DevelopmentStage(
+        bindings,
+        approval,
+        artifacts,
+        worktree,
+        executor=_FailingExecutor(worktree),
+    ).run(
+        pipeline_id="pl_demo",
+        prd_id="art_prd",
+        design_id="art_design",
+        testplan_id="art_test",
+    )
+    assert denied.status == "DENIED"
+    assert list(worktree.files()) == []
 
 
 def test_secret_or_escape_is_denied(tmp_path: Path) -> None:

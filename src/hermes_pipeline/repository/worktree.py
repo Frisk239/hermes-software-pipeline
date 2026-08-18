@@ -34,6 +34,9 @@ class ManagedWorktree:
         target.write_bytes(payload)
         return target
 
+    def files(self) -> list[Path]:
+        return [path for path in sorted(self._root.rglob("*")) if path.is_file()]
+
     def candidate_sha(self) -> str:
         digest = hashlib.sha256()
         for path in sorted(self._root.rglob("*")):

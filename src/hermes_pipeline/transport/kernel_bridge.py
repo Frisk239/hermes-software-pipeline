@@ -20,7 +20,12 @@ from hermes_pipeline.repository.integration import (
     build_integration_candidate,
 )
 from hermes_pipeline.repository.worktree import ManagedWorktree
-from hermes_pipeline.runtime_broker.binding import AgentBinding, BindingTable
+from hermes_pipeline.runtime_broker.binding import (
+    AgentBinding,
+    BindingTable,
+    BoundRuntimeBroker,
+)
+from hermes_pipeline.runtime_broker.fake import FakeRuntimeBroker
 from hermes_pipeline.runtime_broker.ports import (
     RuntimeHandle,
     RuntimeLaunchRequest,
@@ -478,7 +483,11 @@ class KernelBridge:
         artifacts = LocalCasArtifacts(self._dir.parent / "cas")
         worktree = ManagedWorktree(self._dir.parent / "worktrees" / pipeline_id)
         result = DevelopmentStage(
-            self._bindings, self._approval, artifacts, worktree
+            self._bindings,
+            self._approval,
+            artifacts,
+            worktree,
+            executor=BoundRuntimeBroker(self._bindings, {"fake": FakeRuntimeBroker()}),
         ).run(
             pipeline_id=pipeline_id,
             prd_id=prd_id,
