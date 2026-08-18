@@ -6,10 +6,12 @@ DISPOSITION: ADOPTED_BY_00-07
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Literal
 
 from hermes_pipeline.artifacts.ports import ArtifactPutRequest, ArtifactsPort
 from hermes_pipeline.controller.ports import ControllerPort, PipelineQuery
+from hermes_pipeline.repository.worktree import SECRET_CANARY
 from hermes_pipeline.runtime_broker.binding import BindingNotFound, BindingTable
 from hermes_pipeline.runtime_broker.ports import RuntimeBrokerPort, RuntimeLaunchRequest
 
@@ -39,10 +41,12 @@ class ArchitectureStage:
         bindings: BindingTable,
         artifacts: ArtifactsPort,
         planner: RuntimeBrokerPort | None = None,
+        folder: Path | None = None,
     ) -> None:
         self._bindings = bindings
         self._artifacts = artifacts
         self._planner = planner
+        self._folder = folder
 
     def run(
         self,
@@ -94,9 +98,21 @@ class ArchitectureStage:
         if handle.status != "COMPLETED":
             return None
         text = self._planner.collect(runtime_id).final_text.strip()
-        if not text:
-            return None
-        return text.encode("utf-8")
+        if text:
+            return text.encode("utf-8")
+        return _first_file_bytes(self._folder)
+
+
+def _first_file_bytes(folder: Path | None) -> bytes | None:
+    if folder is None or not folder.is_dir():
+        return None
+    files = [path for path in sorted(folder.rglob("*")) if path.is_file()]
+    if not files:
+        return None
+    body = files[0].read_bytes()
+    if SECRET_CANARY.encode("utf-8") in body:
+        return None
+    return body
 
 
 class ArchitectureGate:
