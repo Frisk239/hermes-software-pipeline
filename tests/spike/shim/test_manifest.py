@@ -7,7 +7,7 @@ Dev-side evidence for the Hermes plugin contract: ``plugin.yaml`` carries
 name ``hermes-software-pipeline``, version matching package metadata,
 ``kind: standalone``, ``manifest_version`` at most 1, and no
 ``requires_env``; the root entry and ``hermes_shim`` register exactly one
-top-level ``pipeline`` CLI command with exactly five subcommands, exactly
+top-level ``pipeline`` CLI command with lifecycle plus submit/read, exactly
 one ``pre_gateway_dispatch`` hook, and exactly one declared tool. The real
 Hermes PluginManager probe (tests/spike/probe/pluginmanager) provides the
 load evidence; these tests pin the surface deterministically.
@@ -100,7 +100,7 @@ def test_pipeline_parser_has_exactly_five_subcommands() -> None:
     assert len(subparsers) == 1
     choices = cast(dict[str, Any], cast(Any, subparsers[0]).choices)
     assert set(choices) == set(SUBCOMMANDS)
-    assert len(choices) == 5
+    assert len(choices) == 7
 
 
 def test_plugin_yaml_no_requires_env() -> None:

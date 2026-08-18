@@ -409,10 +409,99 @@ def _wait_for_ready(root: Path, budget_seconds: int) -> bool:
     return False
 
 
+def submit_requirement_command(
+    home: Path,
+    *,
+    text: str,
+    command_id: str,
+    workspace_id: str,
+    project_id: str,
+    pipeline_id: str,
+    principal_id: str,
+) -> LifecycleResult:
+    result = LifecycleResult(command="submit")
+    root = state_root(home)
+    document = read_descriptor(root)
+    if document is None or is_stale(root):
+        _add_check(result, "runtime", "error", "RUNTIME_UNAVAILABLE")
+        result.ok = False
+        result.exit_code = EXIT_FAIL
+        return result
+    try:
+        reply = _client.submit_command(
+            int(document["port"]),
+            str(document["token"]),
+            command_id,
+            {
+                "text": text,
+                "workspace_id": workspace_id,
+                "project_id": project_id,
+                "pipeline_id": pipeline_id,
+                "principal_id": principal_id,
+            },
+        )
+    except _client.RuntimeUnavailableError:
+        _add_check(result, "runtime", "error", "RUNTIME_UNAVAILABLE")
+        result.ok = False
+        result.exit_code = EXIT_FAIL
+        return result
+    result.ok = reply.ok
+    result.exit_code = EXIT_OK if reply.ok else EXIT_FAIL
+    result.detail = {"status": (reply.body or {}).get("status", reply.code or "")}
+    if reply.body and "receipt" in reply.body:
+        receipt = reply.body["receipt"]
+        if isinstance(receipt, dict):
+            result.detail = {"status": str(receipt.get("status", ""))}
+    elif reply.body and "status" in reply.body:
+        result.detail = {"status": str(reply.body.get("status", ""))}
+    return result
+
+
+def read_pipeline_command(
+    home: Path, *, workspace_id: str, pipeline_id: str
+) -> LifecycleResult:
+    result = LifecycleResult(command="read")
+    root = state_root(home)
+    document = read_descriptor(root)
+    if document is None or is_stale(root):
+        _add_check(result, "runtime", "error", "RUNTIME_UNAVAILABLE")
+        result.ok = False
+        result.exit_code = EXIT_FAIL
+        return result
+    try:
+        reply = _client.submit_command(
+            int(document["port"]),
+            str(document["token"]),
+            "cmd_read_view",
+            {
+                "op": "read",
+                "workspace_id": workspace_id,
+                "pipeline_id": pipeline_id,
+            },
+        )
+    except _client.RuntimeUnavailableError:
+        _add_check(result, "runtime", "error", "RUNTIME_UNAVAILABLE")
+        result.ok = False
+        result.exit_code = EXIT_FAIL
+        return result
+    result.ok = reply.ok
+    result.exit_code = EXIT_OK if reply.ok else EXIT_FAIL
+    body = reply.body or {}
+    view = body.get("receipt") if isinstance(body.get("receipt"), dict) else body
+    result.detail = {
+        "pipeline_id": str(view.get("pipeline_id", pipeline_id)),
+        "status": str(view.get("status", "")),
+        "revision": str(view.get("revision", "")),
+    }
+    return result
+
+
 __all__ = [
     "doctor_command",
+    "read_pipeline_command",
     "setup_command",
     "start_command",
     "status_command",
     "stop_command",
+    "submit_requirement_command",
 ]

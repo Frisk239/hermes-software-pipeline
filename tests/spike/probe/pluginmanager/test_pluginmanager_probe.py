@@ -8,7 +8,7 @@ A subprocess running the Hermes environment Python with an isolated
 ``get_plugin_manager().discover_and_load()`` and asserts: ``loaded.enabled
 is True``, ``loaded.error is None``, exactly one tool, exactly one
 ``pre_gateway_dispatch`` hook, exactly one top-level ``pipeline`` CLI
-command, and exactly five ``pipeline`` subcommands. A deliberately broken
+command, and the pipeline subcommands. A deliberately broken
 plugin fixture asserts ``loaded.error`` is set and Hermes keeps running
 (fail-safe load). ``hermes plugins list`` is never used as load evidence.
 """
@@ -48,8 +48,10 @@ cmd["setup_fn"](parser)
 subparsers = [a for a in parser._actions if isinstance(a, argparse._SubParsersAction)]
 assert len(subparsers) == 1
 choices = set(subparsers[0].choices)
-assert choices == {"setup", "doctor", "start", "status", "stop"}, choices
-print("PLUGINMANAGER_PROBE_OK tools=1 hooks=1 commands=1 subcommands=5")
+    assert choices == {
+        "setup", "doctor", "start", "status", "stop", "submit", "read"
+    }, choices
+    print("PLUGINMANAGER_PROBE_OK tools=1 hooks=1 commands=1 subcommands=7")
 """
 
 BROKEN_PLUGIN_PROBE = r"""
