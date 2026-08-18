@@ -8,7 +8,14 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from hermes_shim._github import gh_available, publish_with_gh, worktree_files
+from hermes_shim._github import (
+    gh_available,
+    load_published,
+    publish_with_gh,
+    resolve_gh,
+    worktree_files,
+    write_published,
+)
 
 
 def test_worktree_files_reads_relative_paths(tmp_path: Path) -> None:
@@ -71,6 +78,35 @@ def test_publish_with_fake_gh_opens_pr() -> None:
     assert result["pr_number"] == "3"
     assert result["branch"] == "hermes/prj_a/pl_a"
     assert any("gh auth status" in item for item in calls)
+
+
+def test_resolve_gh_uses_well_known_path(tmp_path: Path) -> None:
+    exe = tmp_path / "GitHub CLI" / "gh.exe"
+    exe.parent.mkdir()
+    exe.write_text("x", encoding="utf-8")
+    found = resolve_gh(which=lambda _name: None, extra=(exe,))
+    assert found == str(exe)
+
+
+def test_resolve_gh_prefers_which() -> None:
+    found = resolve_gh(which=lambda _name: r"C:\tools\gh.exe", extra=())
+    assert found == r"C:\tools\gh.exe"
+
+
+def test_write_and_load_published(tmp_path: Path) -> None:
+    write_published(
+        tmp_path,
+        "pl_a",
+        {
+            "pr_number": "2",
+            "pr_url": "https://github.com/o/r/pull/2",
+            "branch": "hermes/prj_a/pl_a",
+        },
+    )
+    loaded = load_published(tmp_path, "pl_a")
+    assert loaded["pr_url"] == "https://github.com/o/r/pull/2"
+    assert loaded["pr_number"] == "2"
+    assert load_published(tmp_path, "missing") == {}
 
 
 def test_gh_available_false_when_auth_fails() -> None:

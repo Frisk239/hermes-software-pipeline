@@ -536,6 +536,9 @@ def read_pipeline_command(
     ):
         if key in view:
             result.detail[key] = str(view[key])
+    from ._github import load_published
+
+    result.detail.update(load_published(root, pipeline_id))
     return result
 
 
@@ -632,7 +635,7 @@ def approve_command(
 def _host_github_publish(
     root: Path, project_id: str, pipeline_id: str
 ) -> dict[str, str]:
-    from ._github import publish_with_gh, worktree_files
+    from ._github import publish_with_gh, worktree_files, write_published
 
     path = root / "descriptor" / "github.json"
     if not path.is_file():
@@ -648,7 +651,7 @@ def _host_github_publish(
     files = worktree_files(root, pipeline_id)
     if not repo or not files:
         return {}
-    return publish_with_gh(
+    published = publish_with_gh(
         repo=repo,
         project_id=project_id,
         pipeline_id=pipeline_id,
@@ -656,6 +659,9 @@ def _host_github_publish(
         files=files,
         base=base,
     )
+    if published:
+        write_published(root, pipeline_id, published)
+    return published
 
 
 def admin_command(
