@@ -56,9 +56,7 @@ class OpenCodeAdapter:
             return RuntimeHandle(runtime_id=runtime_id, status="FAILED")
         self.spawned = True
         text = (completed.stdout or "").strip()
-        self._runs[runtime_id] = _Run(
-            status="COMPLETED", detail="ok", final_text=text
-        )
+        self._runs[runtime_id] = _Run(status="COMPLETED", detail="ok", final_text=text)
         return RuntimeHandle(runtime_id=runtime_id, status="COMPLETED")
 
     def signal(self, runtime_id: str) -> RuntimeSignalReceipt:

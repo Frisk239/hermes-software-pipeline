@@ -21,16 +21,12 @@ def test_resolve_planner_and_executor_bindings() -> None:
             "executor": AgentBinding("executor", "codex", "gpt-5.6-luna"),
         }
     )
-    assert table.resolve("planner") == AgentBinding(
-        "planner", "opencode", "grok-4.6"
-    )
+    assert table.resolve("planner") == AgentBinding("planner", "opencode", "grok-4.6")
     assert table.resolve("executor").model == "gpt-5.6-luna"
 
 
 def test_missing_role_fails_closed() -> None:
-    table = BindingTable(
-        {"planner": AgentBinding("planner", "codex", "gpt-5.6-sol")}
-    )
+    table = BindingTable({"planner": AgentBinding("planner", "codex", "gpt-5.6-sol")})
     try:
         table.resolve("executor")
     except BindingNotFound:
@@ -41,9 +37,7 @@ def test_missing_role_fails_closed() -> None:
 def test_bound_broker_routes_planner_to_opencode_model(tmp_path: Path) -> None:
     script = tmp_path / "fake_opencode.py"
     script.write_text("print('ok')\n", encoding="utf-8")
-    table = BindingTable(
-        {"planner": AgentBinding("planner", "opencode", "grok-4.6")}
-    )
+    table = BindingTable({"planner": AgentBinding("planner", "opencode", "grok-4.6")})
     opencode = OpenCodeAdapter(executable=str(script))
     broker = BoundRuntimeBroker(
         table, {"opencode": opencode, "fake": FakeRuntimeBroker()}
