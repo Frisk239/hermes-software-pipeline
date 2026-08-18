@@ -48,10 +48,8 @@ cmd["setup_fn"](parser)
 subparsers = [a for a in parser._actions if isinstance(a, argparse._SubParsersAction)]
 assert len(subparsers) == 1
 choices = set(subparsers[0].choices)
-    assert choices == {
-        "setup", "doctor", "start", "status", "stop", "submit", "read"
-    }, choices
-    print("PLUGINMANAGER_PROBE_OK tools=1 hooks=1 commands=1 subcommands=7")
+assert choices == {"setup", "doctor", "start", "status", "stop", "submit", "read"}, choices
+print("PLUGINMANAGER_PROBE_OK tools=1 hooks=1 commands=1 subcommands=7")
 """
 
 BROKEN_PLUGIN_PROBE = r"""
