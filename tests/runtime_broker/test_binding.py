@@ -1,0 +1,73 @@
+from __future__ import annotations
+
+from pathlib import Path
+
+from hermes_pipeline.runtime_broker.binding import (
+    AgentBinding,
+    BindingNotFound,
+    BindingTable,
+    BoundRuntimeBroker,
+)
+from hermes_pipeline.runtime_broker.codex_adapter import CodexAdapter
+from hermes_pipeline.runtime_broker.fake import FakeRuntimeBroker
+from hermes_pipeline.runtime_broker.opencode_adapter import OpenCodeAdapter
+from hermes_pipeline.runtime_broker.ports import RuntimeLaunchRequest
+
+
+def test_resolve_planner_and_executor_bindings() -> None:
+    table = BindingTable(
+        {
+            "planner": AgentBinding("planner", "opencode", "grok-4.6"),
+            "executor": AgentBinding("executor", "codex", "gpt-5.6-luna"),
+        }
+    )
+    assert table.resolve("planner") == AgentBinding("planner", "opencode", "grok-4.6")
+    assert table.resolve("executor").model == "gpt-5.6-luna"
+
+
+def test_missing_role_fails_closed() -> None:
+    table = BindingTable({"planner": AgentBinding("planner", "codex", "gpt-5.6-sol")})
+    try:
+        table.resolve("executor")
+    except BindingNotFound:
+        return
+    raise AssertionError("expected BindingNotFound")
+
+
+def test_bound_broker_routes_planner_to_opencode_model(tmp_path: Path) -> None:
+    script = tmp_path / "fake_opencode.py"
+    script.write_text("print('ok')\n", encoding="utf-8")
+    table = BindingTable({"planner": AgentBinding("planner", "opencode", "grok-4.6")})
+    opencode = OpenCodeAdapter(executable=str(script))
+    broker = BoundRuntimeBroker(
+        table, {"opencode": opencode, "fake": FakeRuntimeBroker()}
+    )
+    handle = broker.launch(RuntimeLaunchRequest(runtime_id="rt-p", role="planner"))
+    assert handle.status == "COMPLETED"
+    assert "--model" in opencode.last_argv
+    assert "grok-4.6" in opencode.last_argv
+
+
+def test_bound_broker_routes_executor_to_codex_model(tmp_path: Path) -> None:
+    script = tmp_path / "fake_codex.py"
+    script.write_text(
+        "import json\n"
+        "print(json.dumps({'type':'turn.completed','status':'completed',"
+        "'text':'done'}))\n",
+        encoding="utf-8",
+    )
+    table = BindingTable(
+        {"executor": AgentBinding("executor", "codex", "gpt-5.6-luna")}
+    )
+    codex = CodexAdapter(executable=str(script))
+    broker = BoundRuntimeBroker(table, {"codex": codex})
+    handle = broker.launch(RuntimeLaunchRequest(runtime_id="rt-e", role="executor"))
+    assert handle.status == "COMPLETED"
+    assert "--model" in codex.last_argv
+    assert "gpt-5.6-luna" in codex.last_argv
+
+
+def test_unbound_role_is_unsupported() -> None:
+    broker = BoundRuntimeBroker(BindingTable({}), {"fake": FakeRuntimeBroker()})
+    handle = broker.launch(RuntimeLaunchRequest(runtime_id="rt-x", role="planner"))
+    assert handle.status == "UNSUPPORTED"

@@ -68,6 +68,10 @@ _Avoid_: Pipeline owner, administrator, Prod Main
 A bounded unit of Pipeline responsibility executed with its own role contract, context, attempt history, and required result.
 _Avoid_: Task, session, step
 
+**Agent Binding**:
+The configured pair of runtime family (Codex, OpenCode, or fake) and model identifier used for one Stage role. Stage duties stay fixed; the binding may change only between Execution Runs.
+_Avoid_: Stage name, Agent prompt, Codex Stage
+
 **Stage Attempt**:
 A semantic effort to produce one reviewable Stage result. Reviewer feedback, invalid output, changed semantic input, or verified failure creates a new Attempt.
 _Avoid_: Process retry, model call, Execution Run
