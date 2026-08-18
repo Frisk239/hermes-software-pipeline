@@ -1,3 +1,9 @@
+"""Host gh publish helpers (slice 05-14).
+
+SPIKE-EXPERIMENTAL marker:
+DISPOSITION: DELETE_UNLESS_ADOPTED_BY_00-07
+"""
+
 from __future__ import annotations
 
 from pathlib import Path

@@ -1,4 +1,8 @@
-"""Host-side GitHub publish via the ``gh`` CLI. No token, no pipeline import."""
+"""Host-side GitHub publish via the ``gh`` CLI. No token, no pipeline import.
+
+SPIKE-EXPERIMENTAL marker:
+DISPOSITION: ADOPTED_BY_00-07
+"""
 
 from __future__ import annotations
 
