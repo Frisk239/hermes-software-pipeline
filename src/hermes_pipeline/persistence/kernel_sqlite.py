@@ -420,6 +420,35 @@ class SqliteKernelStore:
             return
         _raise_captured(failure)
 
+    def delete_lease(self, workspace_id: str, pipeline_id: str) -> None:
+        if not workspace_id:
+            return
+        failure: PersistenceError | None = None
+        try:
+            with self._engine.begin() as conn:
+                conn.execute(
+                    delete(_LEASES).where(
+                        _LEASES.c.workspace_id == workspace_id,
+                        _LEASES.c.pipeline_id == pipeline_id,
+                    )
+                )
+        except Exception as exc:
+            failure = self._translate(exc)
+        else:
+            return
+        _raise_captured(failure)
+
+    def delete_expired_leases(self, now: int) -> None:
+        failure: PersistenceError | None = None
+        try:
+            with self._engine.begin() as conn:
+                conn.execute(delete(_LEASES).where(_LEASES.c.expires_at < now))
+        except Exception as exc:
+            failure = self._translate(exc)
+        else:
+            return
+        _raise_captured(failure)
+
     def counts(self) -> StoreCounts:
         failure: PersistenceError | None = None
         try:

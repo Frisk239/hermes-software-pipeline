@@ -1,4 +1,4 @@
-"""Private Controller transaction store port (slices 01-02 through 01-05).
+"""Private Controller transaction store port (slices 01-02 through 01-06).
 
 SPIKE-EXPERIMENTAL marker:
 DISPOSITION: DELETE_UNLESS_ADOPTED_BY_PHASE_01
@@ -148,6 +148,10 @@ class ControllerTransactionStore(Protocol):
     def load_lease(self, workspace_id: str, pipeline_id: str) -> LeaseRecord | None: ...
 
     def save_lease(self, record: LeaseRecord) -> None: ...
+
+    def delete_lease(self, workspace_id: str, pipeline_id: str) -> None: ...
+
+    def delete_expired_leases(self, now: int) -> None: ...
 
     def counts(self) -> StoreCounts: ...
 

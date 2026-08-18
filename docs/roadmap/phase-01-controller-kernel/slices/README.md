@@ -2,9 +2,9 @@
 
 These are planning-level Slice definitions. Expand the next dependency-ready cut from the current default-branch SHA. A machine-valid immutable Slice Contract is optional under ADR-0031.
 
-Slice 01-01 was accepted and integrated at `cdf0872078151af8b4f84319c4a30c196bdbc8e3` (PR #20). Slice 01-02 durable transaction is on `feat/slice-01-02-durable-transaction` (`d755080`). Slices 01-03 and 01-04 are on this branch. The current cut is:
+Slice 01-01 was accepted and integrated at `cdf0872078151af8b4f84319c4a30c196bdbc8e3` (PR #20). Slice 01-02 durable transaction is on `feat/slice-01-02-durable-transaction` (`d755080`). Slices 01-03 through 01-05 are on `feat/slice-01-03-projection` (`b6a5291`). The current cut is:
 
-- `01-05-lease-and-fencing/SLICE.md`.
+- `01-06-crash-demonstration/SLICE.md` on `feat/slice-01-06-crash-demo`.
 
 PR #22 implemented the wrong 01-02 contract (stdlib sqlite3, Inbox by `command_id` only) and was reverted.
 

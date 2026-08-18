@@ -1,4 +1,4 @@
-"""In-memory ControllerTransactionStore adapter (slices 01-02 through 01-05).
+"""In-memory ControllerTransactionStore adapter (slices 01-02 through 01-06).
 
 SPIKE-EXPERIMENTAL marker:
 DISPOSITION: DELETE_UNLESS_ADOPTED_BY_PHASE_01
@@ -132,6 +132,18 @@ class MemoryKernelStore:
         if not record.workspace_id:
             return
         self._leases[(record.workspace_id, record.pipeline_id)] = record
+
+    def delete_lease(self, workspace_id: str, pipeline_id: str) -> None:
+        if not workspace_id:
+            return
+        self._leases.pop((workspace_id, pipeline_id), None)
+
+    def delete_expired_leases(self, now: int) -> None:
+        self._leases = {
+            key: record
+            for key, record in self._leases.items()
+            if record.expires_at >= now
+        }
 
     def counts(self) -> StoreCounts:
         return StoreCounts(

@@ -66,8 +66,17 @@ class KernelController:
     def __init__(self, store: ControllerTransactionStore, *, recorded_at: str) -> None:
         self._store = store
         self._recorded_at = recorded_at
+        self._paused = False
+
+    def pause(self) -> None:
+        self._paused = True
+
+    def resume(self) -> None:
+        self._paused = False
 
     def submit(self, command: ControllerCommand) -> CommandReceipt:
+        if self._paused:
+            return self._paused_receipt(command)
         fingerprint = content_hash(command.model_dump(mode="json"))
         try:
             existing = self._store.find_inbox(command.workspace_id, command.command_id)
@@ -277,6 +286,8 @@ class KernelController:
         generation: int,
         now: int,
     ) -> CommandReceipt:
+        if self._paused:
+            return self._paused_receipt(command)
         try:
             current = self._lease_is_current(
                 command.workspace_id,
@@ -299,6 +310,14 @@ class KernelController:
                 ),
             )
         return self.submit(command)
+
+    def cancel(self, workspace_id: str, pipeline_id: str) -> None:
+        if not workspace_id:
+            raise LeaseError("empty workspace")
+        self._store.delete_lease(workspace_id, pipeline_id)
+
+    def cleanup(self, now: int) -> None:
+        self._store.delete_expired_leases(now)
 
     def rebuild(self, query: PipelineQuery) -> PipelineView:
         if not query.workspace_id:
@@ -358,6 +377,18 @@ class KernelController:
                 status=status, revision=snapshot.revision, text=snapshot.text
             )
         return None
+
+    def _paused_receipt(self, command: ControllerCommand) -> CommandReceipt:
+        return self._receipt(
+            command,
+            status="REJECTED",
+            observed_revision=self._safe_revision(command),
+            error=CommandError(
+                code="POLICY_REJECTED",
+                message="controller paused",
+                retryable=False,
+            ),
+        )
 
     def _unavailable(self, command: ControllerCommand) -> CommandReceipt:
         return self._receipt(
