@@ -811,13 +811,13 @@ class KernelBridge:
                 candidate_sha=sha,
             ).run(build_integration_candidate(sha, "0" * 64))
         except Exception:
+            prior = self._verify.get(pipeline_id, {})
             self._verify[pipeline_id] = {
-                "verify_status": "REWORK",
+                "verify_status": "INFRA",
                 "e2e_id": "",
                 "acceptance_id": "",
-                "verify_attempts": str(
-                    self._verify.get(pipeline_id, {}).get("verify_attempts", "0")
-                ),
+                "verify_attempts": str(prior.get("verify_attempts", "0")),
+                "infra_attempts": str(prior.get("infra_attempts", "0")),
             }
             self._save_verify()
             return
@@ -855,6 +855,7 @@ class KernelBridge:
                 "e2e_id": str(row.get("e2e_id", "")),
                 "acceptance_id": str(row.get("acceptance_id", "")),
                 "verify_attempts": str(row.get("verify_attempts", "0")),
+                "infra_attempts": str(row.get("infra_attempts", "0")),
             }
         return loaded
 
@@ -875,13 +876,18 @@ class KernelBridge:
         verified = self._verify.get(pipeline_id, {})
         developed = self._dev.get(pipeline_id, {})
         rework = verified.get("verify_status") == "REWORK"
+        infra = verified.get("verify_status") == "INFRA"
         failed_dev = developed.get("candidate_gate") == "FAIL"
-        if not rework and not failed_dev:
+        if not rework and not failed_dev and not infra:
             return {"ok": False, "error": "not rework"}
         used = int(
             verified.get("verify_attempts") or developed.get("rework_attempts") or 0
         )
-        if used >= 1:
+        infra_used = int(verified.get("infra_attempts") or 0)
+        if infra:
+            if infra_used >= 3:
+                return {"ok": False, "error": "retry exhausted"}
+        elif used >= 1:
             return {"ok": False, "error": "retry exhausted"}
         if self._registry.role_of(project_id, principal) is None:
             return {"ok": False, "error": "not a project member"}
@@ -892,7 +898,14 @@ class KernelBridge:
         self._advance_verify(pipeline_id, project_id)
         row = self._verify.get(pipeline_id, {})
         if row:
-            row["verify_attempts"] = "1"
+            if infra:
+                if row.get("verify_status") == "INFRA":
+                    row["infra_attempts"] = str(infra_used + 1)
+                else:
+                    row["infra_attempts"] = str(infra_used)
+                row["verify_attempts"] = str(used)
+            else:
+                row["verify_attempts"] = "1"
             self._verify[pipeline_id] = row
             self._save_verify()
         else:
@@ -906,7 +919,7 @@ class KernelBridge:
         return {
             "ok": status == "READY" and gate != "FAIL",
             "verify_status": status,
-            "verify_attempts": "1",
+            "verify_attempts": row.get("verify_attempts", "1"),
             "candidate_gate": gate,
             "feedback": self._feedback.get(pipeline_id, ""),
         }
@@ -948,7 +961,7 @@ class KernelBridge:
         verify_status = self._verify.get(pipeline_id, {}).get("verify_status", "")
         gate = self._dev.get(pipeline_id, {}).get("candidate_gate", "")
         return {
-            "ok": verify_status != "REWORK" and gate != "FAIL",
+            "ok": verify_status not in {"REWORK", "INFRA"} and gate != "FAIL",
             "approval_status": "APPROVED",
             "approver_id": principal,
             "verify_status": verify_status,
