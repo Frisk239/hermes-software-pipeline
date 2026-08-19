@@ -51,6 +51,13 @@ class VerificationSandbox:
         if self._root.exists():
             shutil.rmtree(self._root, ignore_errors=True)
 
+    def write(self, relative: str, text: str) -> None:
+        target = (self._root / relative).resolve()
+        if not str(target).startswith(str(self._root)):
+            raise ValueError("path escape")
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(text, encoding="utf-8")
+
     def exists(self) -> bool:
         return self._root.exists()
 

@@ -68,6 +68,14 @@ def test_bound_broker_forwards_prompt(tmp_path: Path) -> None:
     assert opencode.last_argv[-1] == "Write a PRD"
 
 
+def test_opencode_nonzero_exit_is_failed(tmp_path: Path) -> None:
+    script = tmp_path / "fake_opencode.py"
+    script.write_text("raise SystemExit(1)\n", encoding="utf-8")
+    adapter = OpenCodeAdapter(executable=str(script), cwd=str(tmp_path))
+    handle = adapter.launch(RuntimeLaunchRequest(runtime_id="rt-fail"))
+    assert handle.status == "FAILED"
+
+
 def test_opencode_passes_prompt_as_run_message(tmp_path: Path) -> None:
     script = tmp_path / "fake_opencode.py"
     script.write_text("print('ok')\n", encoding="utf-8")

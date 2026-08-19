@@ -21,6 +21,7 @@ from hermes_pipeline.runtime_broker.ports import (
 CodexOutcome = Literal["ok", "no_credential", "error", "timeout", "cancelled"]
 _DANGEROUS = "--dangerously-bypass-approvals-and-sandbox"
 _TIMEOUT_S = 10.0
+_PROMPT_TIMEOUT_S = 120.0
 
 
 @dataclass
@@ -67,7 +68,7 @@ class CodexAdapter:
                 cwd=self._cwd,
                 capture_output=True,
                 text=True,
-                timeout=_TIMEOUT_S,
+                timeout=_PROMPT_TIMEOUT_S if prompt else _TIMEOUT_S,
                 check=False,
             )
         except (OSError, subprocess.TimeoutExpired) as exc:
