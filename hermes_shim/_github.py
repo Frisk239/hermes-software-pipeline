@@ -122,9 +122,15 @@ def worktree_files(root: Path, pipeline_id: str) -> dict[str, str]:
         return {}
     files: dict[str, str] = {}
     for path in sorted(folder.rglob("*")):
-        if path.is_file():
-            rel = path.relative_to(folder).as_posix()
+        if not path.is_file():
+            continue
+        rel = path.relative_to(folder).as_posix()
+        if not rel.startswith("src/"):
+            continue
+        try:
             files[rel] = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
     return files
 
 

@@ -26,6 +26,16 @@ def test_worktree_files_reads_relative_paths(tmp_path: Path) -> None:
     assert files == {"src/app.py": "print(1)\n"}
 
 
+def test_worktree_files_skips_non_src_and_undecodable(tmp_path: Path) -> None:
+    root = tmp_path / "worktrees" / "pl_a"
+    (root / "src").mkdir(parents=True)
+    (root / "PRD.md").write_text("plan\n", encoding="utf-8")
+    (root / "src" / "app.py").write_text("print(1)\n", encoding="utf-8")
+    (root / "src" / "blob.bin").write_bytes(b"\xff\xfe")
+    files = worktree_files(tmp_path, "pl_a")
+    assert files == {"src/app.py": "print(1)\n"}
+
+
 def test_publish_without_gh_is_empty() -> None:
     def _runner(argv: list[str], stdin: str = "") -> tuple[int, str, str]:
         del argv, stdin

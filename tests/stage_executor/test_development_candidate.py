@@ -205,6 +205,34 @@ def test_bound_executor_failure_is_denied_without_fixture(tmp_path: Path) -> Non
     assert list(worktree.files()) == []
 
 
+def test_bound_executor_timeout_still_harvests_src(tmp_path: Path) -> None:
+    _built, approval, artifacts = _stage(tmp_path)
+    del _built
+    worktree = ManagedWorktree(tmp_path / "wt-timeout")
+
+    class _TimeoutWriter(_WritingExecutor):
+        def launch(self, request: RuntimeLaunchRequest) -> RuntimeHandle:
+            del request
+            self._worktree.write("src/app.py", b"print('parking-login')\n")
+            return RuntimeHandle(runtime_id="dev", status="FAILED")
+
+    result = DevelopmentStage(
+        BindingTable({"executor": AgentBinding("executor", "opencode", "grok-4.6")}),
+        approval,
+        artifacts,
+        worktree,
+        executor=_TimeoutWriter(worktree),
+    ).run(
+        pipeline_id="pl_demo",
+        prd_id="art_prd",
+        design_id="art_design",
+        testplan_id="art_test",
+    )
+    assert result.status == "COMPLETED"
+    assert result.candidate is not None
+    assert result.candidate.relative_path == "src/app.py"
+
+
 def test_secret_or_escape_is_denied(tmp_path: Path) -> None:
     stage, _approval, _artifacts = _stage(tmp_path)
     secret = stage.run(

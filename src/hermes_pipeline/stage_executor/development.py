@@ -103,7 +103,7 @@ class DevelopmentStage:
     ) -> tuple[Path, bytes] | None:
         if self._executor is None:
             return None
-        handle = self._executor.launch(
+        self._executor.launch(
             RuntimeLaunchRequest(
                 runtime_id=f"dev-{pipeline_id}",
                 role="executor",
@@ -111,8 +111,6 @@ class DevelopmentStage:
                 prompt=prompt,
             )
         )
-        if handle.status != "COMPLETED":
-            return None
         written = pick_implementation(self._worktree.files(), self._worktree.root)
         if written is None:
             return None
