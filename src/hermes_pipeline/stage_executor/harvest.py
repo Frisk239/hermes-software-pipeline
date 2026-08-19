@@ -31,7 +31,7 @@ def named_file_bytes(folder: Path | None, names: tuple[str, ...]) -> bytes | Non
 
 
 def pick_implementation(files: list[Path], root: Path) -> Path | None:
-    ranked: list[Path] = []
+    src: list[Path] = []
     for path in files:
         if not path.is_file():
             continue
@@ -40,14 +40,10 @@ def pick_implementation(files: list[Path], root: Path) -> Path | None:
             continue
         if rel == "src/app.py":
             return path
-        ranked.append(path)
-    src = [
-        path for path in ranked if path.relative_to(root).as_posix().startswith("src/")
-    ]
+        if rel.startswith("src/"):
+            src.append(path)
     if src:
         return sorted(src)[0]
-    if ranked:
-        return sorted(ranked)[0]
     return None
 
 
