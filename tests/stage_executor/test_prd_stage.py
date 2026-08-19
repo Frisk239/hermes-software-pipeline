@@ -117,15 +117,15 @@ def test_opencode_planner_without_broker_is_denied(tmp_path: Path) -> None:
     assert _cas_ids(tmp_path) == []
 
 
-def test_bound_planner_stdout_becomes_prd(tmp_path: Path) -> None:
+def test_bound_planner_stdout_without_named_file_is_denied(tmp_path: Path) -> None:
     artifacts = LocalCasArtifacts(tmp_path)
     planner = _TextPlanner("real prd body")
     result = PrdStage(_planner("opencode", "grok-4.6"), artifacts, planner).run(
         "pl_demo", "ws_demo", "prj_demo", prompt="Write a PRD"
     )
-    assert result.status == "COMPLETED"
-    assert result.artifact_id is not None
-    assert artifacts.open(result.artifact_id) == b"real prd body"
+    assert result.status == "DENIED"
+    assert result.artifact_id is None
+    assert _cas_ids(tmp_path) == []
     assert planner.prompts == ["Write a PRD"]
 
 

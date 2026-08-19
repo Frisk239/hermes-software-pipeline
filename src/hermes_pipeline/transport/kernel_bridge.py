@@ -45,6 +45,12 @@ from hermes_pipeline.stage_executor.architecture import (
     ArchitectureGate,
     ArchitectureStage,
 )
+from hermes_pipeline.stage_executor.contracts import (
+    ARCHITECTURE_CONTRACT,
+    DEVELOPMENT_CONTRACT,
+    PRD_CONTRACT,
+    fence,
+)
 from hermes_pipeline.stage_executor.development import (
     CandidateGate,
     DevelopmentStage,
@@ -84,6 +90,7 @@ class KernelBridge:
         self._github = self._load_github()
         self._runtimes = self._load_runtime_pins()
         self._requirements = self._load_requirements()
+        self._feedback = self._load_feedback()
         self._github_transport: GitHubTransport | None = None
         self._github_token = ""
 
@@ -213,6 +220,9 @@ class KernelBridge:
             need = self._requirements.get(pipeline_id)
             if need:
                 result["requirement_text"] = need
+            note = self._feedback.get(pipeline_id, "")
+            if note:
+                result["feedback"] = note
             return result
         text = payload.get("text")
         if isinstance(text, str):
@@ -585,8 +595,12 @@ class KernelBridge:
             prd_id=prd_id,
             design_id=design_id,
             testplan_id=testplan_id,
-            prompt=self._implement_prompt(prd_id, design_id, testplan_id),
+            prompt=self._implement_prompt(pipeline_id, prd_id, design_id, testplan_id),
         )
+        if result.feedback:
+            self._set_feedback(pipeline_id, result.feedback)
+        elif result.status == "COMPLETED":
+            self._clear_feedback(pipeline_id)
         gate = (
             CandidateGate(self._approval, artifacts)
             .evaluate(
@@ -642,12 +656,51 @@ class KernelBridge:
         del pipeline_id
         return architecture_prompt(self._artifact_text(prd_id))
 
-    def _implement_prompt(self, prd_id: str, design_id: str, testplan_id: str) -> str:
+    def _implement_prompt(
+        self, pipeline_id: str, prd_id: str, design_id: str, testplan_id: str
+    ) -> str:
         return implement_prompt(
             self._artifact_text(prd_id),
             self._artifact_text(design_id),
             self._artifact_text(testplan_id),
+            self._feedback.get(pipeline_id, ""),
         )
+
+    def _load_feedback(self) -> dict[str, str]:
+        path = self._dir / "feedback.json"
+        if not path.is_file():
+            return {}
+        try:
+            document = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return {}
+        if not isinstance(document, dict):
+            return {}
+        loaded: dict[str, str] = {}
+        typed = cast(dict[str, Any], document)
+        for key, value in typed.items():
+            if isinstance(value, str) and value.strip():
+                loaded[str(key)] = value
+        return loaded
+
+    def _save_feedback(self) -> None:
+        (self._dir / "feedback.json").write_text(
+            json.dumps(self._feedback, sort_keys=True),
+            encoding="utf-8",
+        )
+
+    def _set_feedback(self, pipeline_id: str, note: str) -> None:
+        text = note.strip()
+        if not text:
+            return
+        self._feedback[pipeline_id] = text
+        self._save_feedback()
+
+    def _clear_feedback(self, pipeline_id: str) -> None:
+        if pipeline_id not in self._feedback:
+            return
+        self._feedback.pop(pipeline_id, None)
+        self._save_feedback()
 
     def _artifact_text(self, artifact_id: str) -> str:
         if not artifact_id:
@@ -781,6 +834,10 @@ class KernelBridge:
                 self._verify.get(pipeline_id, {}).get("verify_attempts", "0")
             ),
         }
+        if result.status == "REWORK" and result.feedback:
+            self._set_feedback(pipeline_id, result.feedback)
+        elif result.status == "READY":
+            self._clear_feedback(pipeline_id)
         self._save_verify()
 
     def _coerce_verify(self, document: dict[str, Any]) -> dict[str, dict[str, str]]:
@@ -833,6 +890,7 @@ class KernelBridge:
             "ok": status == "READY",
             "verify_status": status,
             "verify_attempts": "1",
+            "feedback": self._feedback.get(pipeline_id, ""),
         }
 
     def _approve_baseline(self, payload: dict[str, Any]) -> dict[str, Any]:
@@ -870,11 +928,14 @@ class KernelBridge:
         self._advance_development(pipeline_id, project_id, principal)
         self._advance_verify(pipeline_id, project_id)
         verify_status = self._verify.get(pipeline_id, {}).get("verify_status", "")
+        gate = self._dev.get(pipeline_id, {}).get("candidate_gate", "")
         return {
-            "ok": verify_status != "REWORK",
+            "ok": verify_status != "REWORK" and gate != "FAIL",
             "approval_status": "APPROVED",
             "approver_id": principal,
             "verify_status": verify_status,
+            "candidate_gate": gate,
+            "feedback": self._feedback.get(pipeline_id, ""),
         }
 
     def _coerce_approvals(self, document: dict[str, Any]) -> dict[str, dict[str, str]]:
@@ -935,29 +996,27 @@ def _record_view(record: DeliveryRecord) -> dict[str, Any]:
 
 
 def prd_prompt(need: str) -> str:
-    duty = "Write a PRD and save it as PRD.md. Do not write implementation code."
-    text = need.strip()
-    if text:
-        return f"{duty}\n{text}"
-    return duty
+    return f"{PRD_CONTRACT}\n{fence('NEED', need)}"
 
 
 def architecture_prompt(prd_text: str) -> str:
-    return (
-        "Write ARCHITECTURE.md and TESTPLAN.md for this approved PRD. "
-        "Do not write or rewrite PRD.md.\n"
-        f"{prd_text}"
-    )
+    return f"{ARCHITECTURE_CONTRACT}\n{fence('PRD', prd_text)}"
 
 
-def implement_prompt(prd_text: str, design_text: str, testplan_text: str) -> str:
-    return (
-        "Implement the approved solution. Write product code under src/. "
-        "Do not write or rewrite PRD.md, ARCHITECTURE.md, or TESTPLAN.md.\n"
-        f"PRD:\n{prd_text}\n"
-        f"DESIGN:\n{design_text}\n"
-        f"TESTPLAN:\n{testplan_text}"
-    )
+def implement_prompt(
+    prd_text: str, design_text: str, testplan_text: str, feedback: str = ""
+) -> str:
+    parts = [
+        DEVELOPMENT_CONTRACT,
+        fence("PRD", prd_text),
+        fence("DESIGN", design_text),
+        fence("TESTPLAN", testplan_text),
+    ]
+    note = feedback.strip()
+    if note:
+        parts.append("FEEDBACK FROM LAST GATE. Fix these issues, then self-test.")
+        parts.append(fence("FEEDBACK", note))
+    return "\n".join(parts)
 
 
 __all__ = ["KernelBridge", "architecture_prompt", "implement_prompt", "prd_prompt"]

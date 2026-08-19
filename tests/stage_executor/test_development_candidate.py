@@ -233,6 +233,113 @@ def test_bound_executor_timeout_still_harvests_src(tmp_path: Path) -> None:
     assert result.candidate.relative_path == "src/app.py"
 
 
+def test_failing_self_test_is_denied_with_feedback(tmp_path: Path) -> None:
+    _built, approval, artifacts = _stage(tmp_path)
+    del _built
+    worktree = ManagedWorktree(tmp_path / "wt-self-fail")
+
+    class _BadApp(_WritingExecutor):
+        def launch(self, request: RuntimeLaunchRequest) -> RuntimeHandle:
+            del request
+            self._worktree.write("src/app.py", b"raise SystemExit(1)\n")
+            return RuntimeHandle(runtime_id="dev", status="COMPLETED")
+
+    denied = DevelopmentStage(
+        BindingTable({"executor": AgentBinding("executor", "opencode", "grok-4.6")}),
+        approval,
+        artifacts,
+        worktree,
+        executor=_BadApp(worktree),
+    ).run(
+        pipeline_id="pl_demo",
+        prd_id="art_prd",
+        design_id="art_design",
+        testplan_id="art_test",
+    )
+    assert denied.status == "DENIED"
+    assert denied.feedback
+    assert (
+        CandidateGate(approval, artifacts)
+        .evaluate(
+            pipeline_id="pl_demo",
+            prd_id="art_prd",
+            design_id="art_design",
+            testplan_id="art_test",
+            result=denied,
+        )
+        .status
+        == "FAIL"
+    )
+
+
+def test_self_test_fail_relaunches_with_feedback(tmp_path: Path) -> None:
+    _built, approval, artifacts = _stage(tmp_path)
+    del _built
+    worktree = ManagedWorktree(tmp_path / "wt-self-fix")
+
+    class _FixOnFeedback(_WritingExecutor):
+        def __init__(self, tree: ManagedWorktree) -> None:
+            super().__init__(tree)
+            self.prompts: list[str] = []
+
+        def launch(self, request: RuntimeLaunchRequest) -> RuntimeHandle:
+            self.prompts.append(request.prompt)
+            if "FEEDBACK FROM LAST GATE" in request.prompt:
+                self._worktree.write("src/app.py", b"print('login-ok')\n")
+            else:
+                self._worktree.write("src/app.py", b"raise SystemExit(1)\n")
+            return RuntimeHandle(runtime_id="dev", status="COMPLETED")
+
+    executor = _FixOnFeedback(worktree)
+    result = DevelopmentStage(
+        BindingTable({"executor": AgentBinding("executor", "opencode", "grok-4.6")}),
+        approval,
+        artifacts,
+        worktree,
+        executor=executor,
+    ).run(
+        pipeline_id="pl_demo",
+        prd_id="art_prd",
+        design_id="art_design",
+        testplan_id="art_test",
+        prompt="Implement the approved solution.",
+    )
+    assert result.status == "COMPLETED"
+    assert len(executor.prompts) == 2
+    assert "FEEDBACK FROM LAST GATE" in executor.prompts[1]
+
+
+def test_failing_pytest_is_denied_with_feedback(tmp_path: Path) -> None:
+    _built, approval, artifacts = _stage(tmp_path)
+    del _built
+    worktree = ManagedWorktree(tmp_path / "wt-pytest")
+
+    class _BadTests(_WritingExecutor):
+        def launch(self, request: RuntimeLaunchRequest) -> RuntimeHandle:
+            del request
+            self._worktree.write("src/app.py", b"print('ok')\n")
+            self._worktree.write(
+                "tests/test_app.py",
+                b"def test_fail() -> None:\n    assert False\n",
+            )
+            return RuntimeHandle(runtime_id="dev", status="COMPLETED")
+
+    denied = DevelopmentStage(
+        BindingTable({"executor": AgentBinding("executor", "opencode", "grok-4.6")}),
+        approval,
+        artifacts,
+        worktree,
+        executor=_BadTests(worktree),
+    ).run(
+        pipeline_id="pl_demo",
+        prd_id="art_prd",
+        design_id="art_design",
+        testplan_id="art_test",
+    )
+    assert denied.status == "DENIED"
+    assert "assert" in denied.feedback.lower() or "fail" in denied.feedback.lower()
+
+
 def test_secret_or_escape_is_denied(tmp_path: Path) -> None:
     stage, _approval, _artifacts = _stage(tmp_path)
     secret = stage.run(

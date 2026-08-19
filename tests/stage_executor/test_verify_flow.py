@@ -223,6 +223,7 @@ def test_real_e2e_script_failure_is_rework(tmp_path: Path) -> None:
     result = flow.run(build_integration_candidate("c" * 64, "b" * 64))
     assert result.status == "REWORK"
     assert result.delivered is False
+    assert result.feedback
     assert sandbox.exists() is False
 
 
@@ -247,6 +248,7 @@ def test_real_e2e_pytest_failure_is_rework(tmp_path: Path) -> None:
     )
     result = flow.run(build_integration_candidate("c" * 64, "b" * 64))
     assert result.status == "REWORK"
+    assert result.feedback
     assert sandbox.exists() is False
 
 

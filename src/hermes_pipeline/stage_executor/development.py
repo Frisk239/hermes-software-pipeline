@@ -19,6 +19,7 @@ from hermes_pipeline.repository.worktree import (
 from hermes_pipeline.runtime_broker.binding import BindingNotFound, BindingTable
 from hermes_pipeline.runtime_broker.ports import RuntimeBrokerPort, RuntimeLaunchRequest
 from hermes_pipeline.stage_executor.harvest import pick_implementation
+from hermes_pipeline.stage_executor.self_test import FEEDBACK_MARK, run_self_test
 
 IMPL_NAME = "src/app.py"
 IMPL_BYTES = b"print('login-page')\n"
@@ -32,6 +33,7 @@ class DevelopmentResult:
     status: DevelopmentStatus
     artifact_id: str | None = None
     candidate: CandidateRecord | None = None
+    feedback: str = ""
 
 
 @dataclass(frozen=True)
@@ -87,6 +89,22 @@ class DevelopmentStage:
             if harvested is None:
                 return DevelopmentResult(status="DENIED")
             written, body = harvested
+            ok, note = run_self_test(self._worktree.root)
+            if not ok and FEEDBACK_MARK not in prompt:
+                second = self._run_bound_executor(
+                    pipeline_id,
+                    binding.model,
+                    (
+                        f"{prompt}\n{FEEDBACK_MARK}. "
+                        f"Fix these issues, then self-test.\n{note}"
+                    ),
+                )
+                if second is None:
+                    return DevelopmentResult(status="DENIED", feedback=note)
+                written, body = second
+                ok, note = run_self_test(self._worktree.root)
+            if not ok:
+                return DevelopmentResult(status="DENIED", feedback=note)
         record = self._artifacts.put(ArtifactPutRequest(payload=body))
         candidate = CandidateRecord(
             sha=self._worktree.candidate_sha(),
