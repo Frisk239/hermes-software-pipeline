@@ -12,6 +12,7 @@ import signal
 import subprocess
 import sys
 import threading
+import time
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import IO
@@ -23,6 +24,7 @@ if sys.platform == "win32":
     _KERNEL32 = ctypes.WinDLL("kernel32", use_last_error=True)
     _JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE = 0x00002000
     _JobObjectExtendedLimitInformation = 9
+    _JobObjectBasicProcessIdList = 3
     _CREATE_SUSPENDED = 0x00000004
     _TH32CS_SNAPPROCESS = 0x00000002
     _PROCESS_ALL_ACCESS = 0x1F0FFF
@@ -59,6 +61,13 @@ if sys.platform == "win32":
             ("JobMemoryLimit", ctypes.c_size_t),
             ("PeakProcessMemoryUsed", ctypes.c_size_t),
             ("PeakJobMemoryUsed", ctypes.c_size_t),
+        ]
+
+    class _JOBOBJECT_BASIC_PROCESS_ID_LIST(ctypes.Structure):
+        _fields_ = [
+            ("NumberOfAssignedProcesses", wintypes.DWORD),
+            ("NumberOfProcessIdsInList", wintypes.DWORD),
+            ("ProcessIdList", ctypes.c_size_t * 64),
         ]
 
     class _PROCESSENTRY32W(ctypes.Structure):
@@ -103,6 +112,13 @@ if sys.platform == "win32":
         wintypes.HANDLE,
         ctypes.POINTER(_PROCESSENTRY32W),
     ]
+    _KERNEL32.QueryInformationJobObject.argtypes = [
+        wintypes.HANDLE,
+        ctypes.c_int,
+        wintypes.LPVOID,
+        wintypes.DWORD,
+        ctypes.POINTER(wintypes.DWORD),
+    ]
 
     def _windows_job() -> int:
         handle = _KERNEL32.CreateJobObjectW(None, None)
@@ -120,6 +136,21 @@ if sys.platform == "win32":
             _KERNEL32.CloseHandle(handle)
             raise OSError("SetInformationJobObject failed")
         return int(handle)
+
+    def _job_pids(job: int) -> list[int]:
+        info = _JOBOBJECT_BASIC_PROCESS_ID_LIST()
+        returned = wintypes.DWORD(0)
+        ok = _KERNEL32.QueryInformationJobObject(
+            job,
+            _JobObjectBasicProcessIdList,
+            ctypes.byref(info),
+            ctypes.sizeof(info),
+            ctypes.byref(returned),
+        )
+        if not ok:
+            return []
+        count = min(int(info.NumberOfProcessIdsInList), 64)
+        return [int(info.ProcessIdList[index]) for index in range(count)]
 
     def _run_fenced_windows(
         argv: Sequence[str],
@@ -179,7 +210,11 @@ if sys.platform == "win32":
                     timed_out = True
                     _KERNEL32.TerminateJobObject(job, 1)
                     stdout, stderr = child.communicate(timeout=5)
-            survivors = zero_survivors(child.pid)
+            survivors = tuple(pid for pid in _job_pids(job) if _pid_alive(pid))
+            deadline = time.monotonic() + 0.5
+            while survivors and time.monotonic() < deadline:
+                time.sleep(0.05)
+                survivors = tuple(pid for pid in _job_pids(job) if _pid_alive(pid))
             return BoundedResult(
                 returncode=int(child.returncode or 1),
                 stdout=stdout[:output_bytes],
