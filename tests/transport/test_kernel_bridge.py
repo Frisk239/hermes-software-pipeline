@@ -380,6 +380,70 @@ def test_retry_once_after_rework(tmp_path: Path) -> None:
     assert again["error"] == "not rework"
 
 
+def test_corrupt_verify_json_is_fail_closed(tmp_path: Path) -> None:
+    first = KernelBridge(tmp_path, _Inner())
+    first.process("cmd_reg", {"op": "register", "project_id": "prj_cli", "name": "Cli"})
+    (tmp_path / "descriptor" / "verify.json").write_text("not-json", encoding="utf-8")
+    second = KernelBridge(tmp_path, _Inner())
+    view = second.process(
+        "cmd_read_view",
+        {"op": "read", "workspace_id": "ws_cli", "pipeline_id": "pl_cli"},
+    )
+    assert view["ok"] is False
+    assert view["error"] == "corrupt state"
+
+
+def test_stages_bundle_restores_verify_if_sidecar_missing(tmp_path: Path) -> None:
+    first = KernelBridge(tmp_path, _Inner())
+    first.process("cmd_reg", {"op": "register", "project_id": "prj_cli", "name": "Cli"})
+    first.process(
+        "cmd_adm",
+        {
+            "op": "admit",
+            "project_id": "prj_cli",
+            "principal_id": "operator",
+            "role": "CONTRIBUTOR",
+        },
+    )
+    for role, model in (
+        ("planner", "fake-prd"),
+        ("executor", "fake-dev"),
+        ("e2e", "fake-e2e"),
+        ("reviewer", "fake-acc"),
+    ):
+        first.process(
+            f"cmd_bind_{role}",
+            {"op": "bind", "role": role, "runtime": "fake", "model": model},
+        )
+    first.process(
+        "cmd_all",
+        {
+            "text": "need a login page",
+            "workspace_id": "ws_cli",
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+            "principal_id": "operator",
+        },
+    )
+    first.process(
+        "cmd_ok",
+        {
+            "op": "approve",
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+            "principal_id": "operator",
+        },
+    )
+    (tmp_path / "descriptor" / "verify.json").unlink()
+    second = KernelBridge(tmp_path, _Inner())
+    view = second.process(
+        "cmd_read_2",
+        {"op": "read", "workspace_id": "ws_cli", "pipeline_id": "pl_cli"},
+    )
+    assert view["verify_status"] == "READY"
+    assert view["approval_status"] == "APPROVED"
+
+
 def test_bindings_persist(tmp_path: Path) -> None:
     first = KernelBridge(tmp_path, _Inner())
     bound = first.process(
