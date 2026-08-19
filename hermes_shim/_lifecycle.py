@@ -627,7 +627,7 @@ def approve_command(
     result.ok = bool(reply.ok and receipt.get("ok", True))
     result.exit_code = EXIT_OK if result.ok else EXIT_FAIL
     result.detail = {key: str(value) for key, value in receipt.items()}
-    if result.ok:
+    if result.ok and result.detail.get("verify_status") == "READY":
         result.detail.update(_host_github_publish(root, project_id, pipeline_id))
     return result
 

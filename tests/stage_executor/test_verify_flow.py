@@ -54,8 +54,17 @@ class _Failing(_Completing):
 def _bindings() -> BindingTable:
     return BindingTable(
         {
+            "e2e": AgentBinding("e2e", "fake", "fake-e2e"),
+            "reviewer": AgentBinding("reviewer", "fake", "fake-acc"),
+        }
+    )
+
+
+def _real_e2e_bindings() -> BindingTable:
+    return BindingTable(
+        {
             "e2e": AgentBinding("e2e", "opencode", "grok-4.6"),
-            "reviewer": AgentBinding("reviewer", "fake", "fake-accept"),
+            "reviewer": AgentBinding("reviewer", "fake", "fake-acc"),
         }
     )
 
@@ -66,6 +75,7 @@ def _flow(
     e2e: RuntimeBrokerPort | None = None,
     reviewer: RuntimeBrokerPort | None = None,
     candidate_root: Path | None = None,
+    bindings: BindingTable | None = None,
 ) -> tuple[VerifyFlow, VerificationSandbox, LocalCasArtifacts]:
     artifacts = LocalCasArtifacts(tmp_path / "cas")
     sandbox = VerificationSandbox(tmp_path / "sandbox")
@@ -78,7 +88,7 @@ def _flow(
         mcp=_FakeMcp(),
     )
     flow = VerifyFlow(
-        _bindings(),
+        bindings if bindings is not None else _bindings(),
         artifacts,
         chrome if e2e is None else e2e,
         _Completing() if reviewer is None else reviewer,
@@ -132,7 +142,12 @@ def test_real_e2e_runs_candidate_script(tmp_path: Path) -> None:
     work = tmp_path / "wt"
     (work / "src").mkdir(parents=True)
     (work / "src" / "app.py").write_text("print('2+3=5')\n", encoding="utf-8")
-    flow, sandbox, artifacts = _flow(tmp_path, e2e=_Failing(), candidate_root=work)
+    flow, sandbox, artifacts = _flow(
+        tmp_path,
+        e2e=_Failing(),
+        candidate_root=work,
+        bindings=_real_e2e_bindings(),
+    )
     result = flow.run(build_integration_candidate("c" * 64, "b" * 64))
     assert result.status == "READY"
     assert result.e2e_id is not None
@@ -144,10 +159,36 @@ def test_real_e2e_script_failure_is_rework(tmp_path: Path) -> None:
     work = tmp_path / "wt"
     (work / "src").mkdir(parents=True)
     (work / "src" / "app.py").write_text("raise SystemExit(1)\n", encoding="utf-8")
-    flow, sandbox, _artifacts = _flow(tmp_path, candidate_root=work)
+    flow, sandbox, _artifacts = _flow(
+        tmp_path, candidate_root=work, bindings=_real_e2e_bindings()
+    )
     result = flow.run(build_integration_candidate("c" * 64, "b" * 64))
     assert result.status == "REWORK"
     assert result.delivered is False
+    assert sandbox.exists() is False
+
+
+def test_real_e2e_without_candidate_is_rework(tmp_path: Path) -> None:
+    flow, sandbox, _artifacts = _flow(tmp_path, bindings=_real_e2e_bindings())
+    result = flow.run(build_integration_candidate("c" * 64, "b" * 64))
+    assert result.status == "REWORK"
+    assert result.delivered is False
+    assert sandbox.exists() is False
+
+
+def test_real_e2e_pytest_failure_is_rework(tmp_path: Path) -> None:
+    work = tmp_path / "wt"
+    (work / "src").mkdir(parents=True)
+    (work / "tests").mkdir()
+    (work / "src" / "app.py").write_text("print('ok')\n", encoding="utf-8")
+    (work / "tests" / "test_app.py").write_text(
+        "def test_fail() -> None:\n    assert False\n", encoding="utf-8"
+    )
+    flow, sandbox, _artifacts = _flow(
+        tmp_path, candidate_root=work, bindings=_real_e2e_bindings()
+    )
+    result = flow.run(build_integration_candidate("c" * 64, "b" * 64))
+    assert result.status == "REWORK"
     assert sandbox.exists() is False
 
 

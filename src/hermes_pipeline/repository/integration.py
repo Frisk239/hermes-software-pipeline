@@ -42,9 +42,10 @@ class VerificationSandbox:
         return self._root
 
     def stage_tree(self, source: Path) -> None:
-        src = source / "src"
-        if src.is_dir():
-            shutil.copytree(src, self._root / "src", dirs_exist_ok=True)
+        for name in ("src", "tests"):
+            src = source / name
+            if src.is_dir():
+                shutil.copytree(src, self._root / name, dirs_exist_ok=True)
 
     def cleanup(self) -> None:
         if self._root.exists():
