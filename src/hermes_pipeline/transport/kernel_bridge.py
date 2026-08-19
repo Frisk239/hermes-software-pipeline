@@ -770,6 +770,7 @@ class KernelBridge:
                 "candidate_path": str(row.get("candidate_path", "")),
                 "dev_status": str(row.get("dev_status", "")),
                 "candidate_gate": str(row.get("candidate_gate", "")),
+                "rework_attempts": str(row.get("rework_attempts", "0")),
             }
         return loaded
 
@@ -872,9 +873,14 @@ class KernelBridge:
         project_id = str(payload.get("project_id", "prj_local"))
         principal = str(payload.get("principal_id", "operator"))
         verified = self._verify.get(pipeline_id, {})
-        if verified.get("verify_status") != "REWORK":
+        developed = self._dev.get(pipeline_id, {})
+        rework = verified.get("verify_status") == "REWORK"
+        failed_dev = developed.get("candidate_gate") == "FAIL"
+        if not rework and not failed_dev:
             return {"ok": False, "error": "not rework"}
-        used = int(verified.get("verify_attempts", "0") or 0)
+        used = int(
+            verified.get("verify_attempts") or developed.get("rework_attempts") or 0
+        )
         if used >= 1:
             return {"ok": False, "error": "retry exhausted"}
         if self._registry.role_of(project_id, principal) is None:
@@ -885,14 +891,23 @@ class KernelBridge:
         self._advance_development(pipeline_id, project_id, principal)
         self._advance_verify(pipeline_id, project_id)
         row = self._verify.get(pipeline_id, {})
-        row["verify_attempts"] = "1"
-        self._verify[pipeline_id] = row
-        self._save_verify()
+        if row:
+            row["verify_attempts"] = "1"
+            self._verify[pipeline_id] = row
+            self._save_verify()
+        else:
+            leftover = self._dev.get(pipeline_id, {})
+            leftover["rework_attempts"] = "1"
+            self._dev[pipeline_id] = leftover
+            self._save_dev()
+            row = leftover
         status = row.get("verify_status", "")
+        gate = self._dev.get(pipeline_id, {}).get("candidate_gate", "")
         return {
-            "ok": status == "READY",
+            "ok": status == "READY" and gate != "FAIL",
             "verify_status": status,
             "verify_attempts": "1",
+            "candidate_gate": gate,
             "feedback": self._feedback.get(pipeline_id, ""),
         }
 
