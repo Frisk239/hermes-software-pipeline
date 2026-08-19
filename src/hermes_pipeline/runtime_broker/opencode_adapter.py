@@ -39,13 +39,12 @@ class OpenCodeAdapter:
         if not self._may_launch():
             self._runs[runtime_id] = _Run(status="UNSUPPORTED", detail="error")
             return RuntimeHandle(runtime_id=runtime_id, status="UNSUPPORTED")
-        argv = self._build_argv(request.model)
+        argv = self._build_argv(request.model, request.prompt)
         self.last_argv = list(argv)
         try:
             completed = subprocess.run(
                 argv,
                 cwd=self._cwd,
-                input=request.prompt or None,
                 capture_output=True,
                 text=True,
                 timeout=_TIMEOUT_S if not request.prompt else 120.0,
@@ -94,7 +93,7 @@ class OpenCodeAdapter:
             return False
         return Path(raw).is_file()
 
-    def _build_argv(self, model: str) -> list[str]:
+    def _build_argv(self, model: str, prompt: str) -> list[str]:
         executable = self._executable
         if executable is None:
             return []
@@ -103,9 +102,11 @@ class OpenCodeAdapter:
             if executable.lower().endswith(".py")
             else [executable]
         )
-        argv = [*prefix, "run"]
+        argv = [*prefix, "run", "--auto"]
         if model:
             argv.extend(["--model", model])
+        if prompt:
+            argv.append(prompt)
         return argv
 
 

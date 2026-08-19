@@ -53,6 +53,24 @@ def test_bound_broker_routes_planner_to_opencode_model(tmp_path: Path) -> None:
     assert "grok-4.6" in opencode.last_argv
 
 
+def test_opencode_passes_prompt_as_run_message(tmp_path: Path) -> None:
+    script = tmp_path / "fake_opencode.py"
+    script.write_text("print('ok')\n", encoding="utf-8")
+    adapter = OpenCodeAdapter(executable=str(script), cwd=str(tmp_path))
+    handle = adapter.launch(
+        RuntimeLaunchRequest(
+            runtime_id="rt-msg",
+            role="planner",
+            model="opencode-go/deepseek-v4-flash",
+            prompt="Write a PRD",
+        )
+    )
+    assert handle.status == "COMPLETED"
+    assert "--auto" in adapter.last_argv
+    assert adapter.last_argv[-1] == "Write a PRD"
+    assert "input" not in " ".join(adapter.last_argv)
+
+
 def test_bound_broker_routes_executor_to_codex_model(tmp_path: Path) -> None:
     script = tmp_path / "fake_codex.py"
     script.write_text(
