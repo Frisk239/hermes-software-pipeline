@@ -167,26 +167,12 @@ class VerifyFlow:
                 )
                 return "passed"
             return "none"
-        try:
-            completed = subprocess.run(
-                [sys.executable, str(app)],
-                cwd=str(self._sandbox.root / "src"),
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-                timeout=20,
-                check=False,
-            )
-        except subprocess.TimeoutExpired:
-            return "timeout"
-        chunks.append((completed.stdout or "") + (completed.stderr or ""))
+        status, text = _run_app(app, self._sandbox.root / "src")
+        chunks.append(text)
         (self._sandbox.root / "SCRIPT_OUT").write_text(
             "\n".join(chunks), encoding="utf-8"
         )
-        if completed.returncode != 0:
-            return "failed"
-        return "passed"
+        return status
 
     def _e2e_prompt(self) -> str:
         return (
@@ -199,6 +185,41 @@ class VerifyFlow:
             "Review the candidate in this directory. "
             "Write REVIEW.md with only PASS or FAIL. Do not rewrite source."
         )
+
+
+def _run_app(app: Path, cwd: Path) -> tuple[str, str]:
+    checked = _run_python([str(app), "--check"], cwd)
+    if checked[0] == 0:
+        return "passed", checked[1]
+    if checked[0] is None:
+        return "timeout", checked[1]
+    lowered = checked[1].lower()
+    if checked[0] == 2 or "unrecognized" in lowered or "invalid" in lowered:
+        bare = _run_python([str(app)], cwd)
+        if bare[0] == 0:
+            return "passed", bare[1]
+        if bare[0] is None:
+            return "timeout", bare[1]
+        return "failed", bare[1]
+    return "failed", checked[1]
+
+
+def _run_python(argv: list[str], cwd: Path) -> tuple[int | None, str]:
+    try:
+        completed = subprocess.run(
+            [sys.executable, *argv],
+            cwd=str(cwd),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=20,
+            check=False,
+        )
+    except subprocess.TimeoutExpired:
+        return None, "timeout"
+    text = (completed.stdout or "") + (completed.stderr or "")
+    return completed.returncode, text
 
 
 def _run_pytest(root: Path) -> tuple[int | None, str]:

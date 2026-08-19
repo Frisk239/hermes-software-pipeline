@@ -528,6 +528,7 @@ def read_pipeline_command(
         "dev_status",
         "candidate_gate",
         "verify_status",
+        "verify_attempts",
         "e2e_id",
         "acceptance_id",
         "approval_status",
@@ -612,6 +613,48 @@ def approve_command(
             "cmd_approve",
             {
                 "op": "approve",
+                "project_id": project_id,
+                "pipeline_id": pipeline_id,
+                "principal_id": principal_id,
+            },
+        )
+    except _client.RuntimeUnavailableError:
+        _add_check(result, "runtime", "error", "RUNTIME_UNAVAILABLE")
+        result.ok = False
+        result.exit_code = EXIT_FAIL
+        return result
+    body = reply.body or {}
+    receipt = body.get("receipt") if isinstance(body.get("receipt"), dict) else body
+    result.ok = bool(reply.ok and receipt.get("ok", True))
+    result.exit_code = EXIT_OK if result.ok else EXIT_FAIL
+    result.detail = {key: str(value) for key, value in receipt.items()}
+    if result.ok and result.detail.get("verify_status") == "READY":
+        result.detail.update(_host_github_publish(root, project_id, pipeline_id))
+    return result
+
+
+def retry_command(
+    home: Path,
+    *,
+    project_id: str,
+    pipeline_id: str,
+    principal_id: str,
+) -> LifecycleResult:
+    result = LifecycleResult(command="retry")
+    root = state_root(home)
+    document = read_descriptor(root)
+    if document is None or is_stale(root):
+        _add_check(result, "runtime", "error", "RUNTIME_UNAVAILABLE")
+        result.ok = False
+        result.exit_code = EXIT_FAIL
+        return result
+    try:
+        reply = _client.submit_command(
+            int(document["port"]),
+            str(document["token"]),
+            "cmd_retry",
+            {
+                "op": "retry",
                 "project_id": project_id,
                 "pipeline_id": pipeline_id,
                 "principal_id": principal_id,
@@ -732,6 +775,7 @@ __all__ = [
     "deliver_command",
     "doctor_command",
     "read_pipeline_command",
+    "retry_command",
     "setup_command",
     "start_command",
     "status_command",

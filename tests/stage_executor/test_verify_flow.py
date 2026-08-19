@@ -147,6 +147,27 @@ def test_missing_binding_is_denied(tmp_path: Path) -> None:
     assert result.status == "DENIED"
 
 
+def test_real_e2e_prefers_check_flag(tmp_path: Path) -> None:
+    work = tmp_path / "wt"
+    (work / "src").mkdir(parents=True)
+    (work / "src" / "app.py").write_text(
+        "import sys\n"
+        "if '--check' in sys.argv:\n"
+        "    print('login-ok')\n"
+        "    raise SystemExit(0)\n"
+        "raise SystemExit('should-not-run')\n",
+        encoding="utf-8",
+    )
+    flow, sandbox, artifacts = _flow(
+        tmp_path, candidate_root=work, bindings=_real_e2e_bindings()
+    )
+    result = flow.run(build_integration_candidate("c" * 64, "b" * 64))
+    assert result.status == "READY"
+    assert result.e2e_id is not None
+    assert b"login-ok" in artifacts.open(result.e2e_id)
+    assert sandbox.exists() is False
+
+
 def test_real_e2e_runs_candidate_script(tmp_path: Path) -> None:
     work = tmp_path / "wt"
     (work / "src").mkdir(parents=True)
