@@ -5,7 +5,10 @@ DISPOSITION: ADOPTED_BY_00-07
 
 from __future__ import annotations
 
+import subprocess
+import sys
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Literal
 
 from hermes_pipeline.artifacts.ports import ArtifactPutRequest, ArtifactsPort
@@ -47,6 +50,7 @@ class VerifyFlow:
         sandbox: VerificationSandbox,
         project_id: str = "prj_local",
         pipeline_id: str = "pl_local",
+        candidate_root: Path | None = None,
     ) -> None:
         self._bindings = bindings
         self._artifacts = artifacts
@@ -56,6 +60,7 @@ class VerifyFlow:
         self._sandbox = sandbox
         self._project_id = project_id
         self._pipeline_id = pipeline_id
+        self._candidate_root = candidate_root
         self._passed_sha: str | None = None
 
     def run(self, integration: IntegrationCandidate) -> VerifyResult:
@@ -68,19 +73,37 @@ class VerifyFlow:
             return VerifyResult(status="DRIFT")
         self._sandbox.create(integration.sha)
         try:
-            e2e_id = f"e2e-{integration.sha[:12]}"
-            e2e = self._e2e.launch(RuntimeLaunchRequest(runtime_id=e2e_id, role="e2e"))
-            if e2e.status != "COMPLETED":
+            scripted = self._run_staged_candidate()
+            if scripted == "failed":
                 return VerifyResult(status="REWORK")
-            e2e_art = self._artifacts.put(ArtifactPutRequest(payload=E2E_BYTES))
-            accept = self._reviewer.launch(
-                RuntimeLaunchRequest(
-                    runtime_id=f"acc-{integration.sha[:12]}", role="reviewer"
+            e2e_id = f"e2e-{integration.sha[:12]}"
+            if scripted == "passed":
+                output = (self._sandbox.root / "SCRIPT_OUT").read_bytes()
+                e2e_art = self._artifacts.put(ArtifactPutRequest(payload=output))
+            else:
+                e2e = self._e2e.launch(
+                    RuntimeLaunchRequest(
+                        runtime_id=e2e_id,
+                        role="e2e",
+                        prompt=self._e2e_prompt(),
+                    )
                 )
-            )
-            if accept.status != "COMPLETED":
-                return VerifyResult(status="REWORK", e2e_id=e2e_art.artifact_id)
-            acc_art = self._artifacts.put(ArtifactPutRequest(payload=ACCEPT_BYTES))
+                if e2e.status != "COMPLETED":
+                    return VerifyResult(status="REWORK")
+                e2e_art = self._artifacts.put(ArtifactPutRequest(payload=E2E_BYTES))
+            if scripted == "passed":
+                acc_art = self._artifacts.put(ArtifactPutRequest(payload=ACCEPT_BYTES))
+            else:
+                accept = self._reviewer.launch(
+                    RuntimeLaunchRequest(
+                        runtime_id=f"acc-{integration.sha[:12]}",
+                        role="reviewer",
+                        prompt=self._review_prompt(),
+                    )
+                )
+                if accept.status != "COMPLETED":
+                    return VerifyResult(status="REWORK", e2e_id=e2e_art.artifact_id)
+                acc_art = self._artifacts.put(ArtifactPutRequest(payload=ACCEPT_BYTES))
             published = self._delivery.publish(
                 DeliveryRequest(
                     name=integration.sha,
@@ -98,6 +121,45 @@ class VerifyFlow:
             )
         finally:
             self._sandbox.cleanup()
+
+    def _run_staged_candidate(self) -> str:
+        e2e = self._bindings.resolve("e2e")
+        if e2e.runtime == "fake" or self._candidate_root is None:
+            return "skip"
+        self._sandbox.stage_tree(self._candidate_root)
+        app = self._sandbox.root / "src" / "app.py"
+        if not app.is_file():
+            return "skip"
+        try:
+            completed = subprocess.run(
+                [sys.executable, str(app)],
+                cwd=str(self._sandbox.root / "src"),
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                timeout=20,
+                check=False,
+            )
+        except subprocess.TimeoutExpired:
+            return "timeout"
+        output = (completed.stdout or "") + (completed.stderr or "")
+        (self._sandbox.root / "SCRIPT_OUT").write_text(output, encoding="utf-8")
+        if completed.returncode != 0:
+            return "failed"
+        return "passed"
+
+    def _e2e_prompt(self) -> str:
+        return (
+            "Verify this candidate in this directory. "
+            "Run src/app.py if present. Write RESULT.md with only PASS or FAIL."
+        )
+
+    def _review_prompt(self) -> str:
+        return (
+            "Review the candidate in this directory. "
+            "Write REVIEW.md with only PASS or FAIL. Do not rewrite source."
+        )
 
 
 __all__ = [

@@ -696,6 +696,7 @@ class KernelBridge:
         artifacts = LocalCasArtifacts(self._dir.parent / "cas")
         sandbox = VerificationSandbox(self._dir.parent / "sandbox" / pipeline_id)
         passing = _PassingRuntime()
+        worktree = self._dir.parent / "worktrees" / pipeline_id
         result = VerifyFlow(
             self._bindings,
             artifacts,
@@ -705,6 +706,7 @@ class KernelBridge:
             sandbox,
             project_id=project_id,
             pipeline_id=pipeline_id,
+            candidate_root=worktree if worktree.is_dir() else None,
         ).run(build_integration_candidate(sha, "0" * 64))
         stored = self._delivery.lookup(pipeline_id)
         if stored is not None:

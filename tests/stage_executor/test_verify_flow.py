@@ -65,6 +65,7 @@ def _flow(
     *,
     e2e: RuntimeBrokerPort | None = None,
     reviewer: RuntimeBrokerPort | None = None,
+    candidate_root: Path | None = None,
 ) -> tuple[VerifyFlow, VerificationSandbox, LocalCasArtifacts]:
     artifacts = LocalCasArtifacts(tmp_path / "cas")
     sandbox = VerificationSandbox(tmp_path / "sandbox")
@@ -83,6 +84,7 @@ def _flow(
         _Completing() if reviewer is None else reviewer,
         FakeDelivery(),
         sandbox,
+        candidate_root=candidate_root,
     )
     return flow, sandbox, artifacts
 
@@ -124,6 +126,29 @@ def test_missing_binding_is_denied(tmp_path: Path) -> None:
     )
     result = flow.run(build_integration_candidate("c" * 64, "b" * 64))
     assert result.status == "DENIED"
+
+
+def test_real_e2e_runs_candidate_script(tmp_path: Path) -> None:
+    work = tmp_path / "wt"
+    (work / "src").mkdir(parents=True)
+    (work / "src" / "app.py").write_text("print('2+3=5')\n", encoding="utf-8")
+    flow, sandbox, artifacts = _flow(tmp_path, e2e=_Failing(), candidate_root=work)
+    result = flow.run(build_integration_candidate("c" * 64, "b" * 64))
+    assert result.status == "READY"
+    assert result.e2e_id is not None
+    assert b"2+3=5" in artifacts.open(result.e2e_id)
+    assert sandbox.exists() is False
+
+
+def test_real_e2e_script_failure_is_rework(tmp_path: Path) -> None:
+    work = tmp_path / "wt"
+    (work / "src").mkdir(parents=True)
+    (work / "src" / "app.py").write_text("raise SystemExit(1)\n", encoding="utf-8")
+    flow, sandbox, _artifacts = _flow(tmp_path, candidate_root=work)
+    result = flow.run(build_integration_candidate("c" * 64, "b" * 64))
+    assert result.status == "REWORK"
+    assert result.delivered is False
+    assert sandbox.exists() is False
 
 
 def test_new_sha_after_pass_is_drift(tmp_path: Path) -> None:
