@@ -41,7 +41,10 @@ def test_missing_role_fails_closed() -> None:
 
 def test_bound_broker_routes_planner_to_opencode_model(tmp_path: Path) -> None:
     script = tmp_path / "fake_opencode.py"
-    script.write_text("print('ok')\n", encoding="utf-8")
+    script.write_text(
+        "import json\nprint(json.dumps({'type':'session.status','status':'idle'}))\n",
+        encoding="utf-8",
+    )
     table = BindingTable({"planner": AgentBinding("planner", "opencode", "grok-4.6")})
     opencode = OpenCodeAdapter(executable=str(script))
     broker = BoundRuntimeBroker(
@@ -55,7 +58,10 @@ def test_bound_broker_routes_planner_to_opencode_model(tmp_path: Path) -> None:
 
 def test_bound_broker_forwards_prompt(tmp_path: Path) -> None:
     script = tmp_path / "fake_opencode.py"
-    script.write_text("print('ok')\n", encoding="utf-8")
+    script.write_text(
+        "import json\nprint(json.dumps({'type':'session.status','status':'idle'}))\n",
+        encoding="utf-8",
+    )
     table = BindingTable({"planner": AgentBinding("planner", "opencode", "grok-4.6")})
     opencode = OpenCodeAdapter(executable=str(script), cwd=str(tmp_path))
     broker = BoundRuntimeBroker(
@@ -65,7 +71,13 @@ def test_bound_broker_forwards_prompt(tmp_path: Path) -> None:
         RuntimeLaunchRequest(runtime_id="rt-fwd", role="planner", prompt="Write a PRD")
     )
     assert handle.status == "COMPLETED"
-    assert opencode.last_argv[-1] == "Write a PRD"
+    assert "Write a PRD" not in opencode.last_argv
+    assert "--format" in opencode.last_argv
+    assert "--dir" in opencode.last_argv
+    assert opencode.last_argv[-1] == ".hermes-stage-prompt.txt"
+    assert (tmp_path / ".hermes-stage-prompt.txt").read_text(
+        encoding="utf-8"
+    ) == "Write a PRD"
 
 
 def test_opencode_nonzero_exit_is_failed(tmp_path: Path) -> None:
@@ -78,7 +90,10 @@ def test_opencode_nonzero_exit_is_failed(tmp_path: Path) -> None:
 
 def test_opencode_passes_prompt_as_run_message(tmp_path: Path) -> None:
     script = tmp_path / "fake_opencode.py"
-    script.write_text("print('ok')\n", encoding="utf-8")
+    script.write_text(
+        "import json\nprint(json.dumps({'type':'session.status','status':'idle'}))\n",
+        encoding="utf-8",
+    )
     adapter = OpenCodeAdapter(executable=str(script), cwd=str(tmp_path))
     handle = adapter.launch(
         RuntimeLaunchRequest(
@@ -90,7 +105,9 @@ def test_opencode_passes_prompt_as_run_message(tmp_path: Path) -> None:
     )
     assert handle.status == "COMPLETED"
     assert "--auto" in adapter.last_argv
-    assert adapter.last_argv[-1] == "Write a PRD"
+    assert "--format" in adapter.last_argv
+    assert adapter.last_argv[-1] == ".hermes-stage-prompt.txt"
+    assert "Write a PRD" not in adapter.last_argv
     assert "input" not in " ".join(adapter.last_argv)
 
 
@@ -117,6 +134,20 @@ def test_unbound_role_is_unsupported() -> None:
     broker = BoundRuntimeBroker(BindingTable({}), {"fake": FakeRuntimeBroker()})
     handle = broker.launch(RuntimeLaunchRequest(runtime_id="rt-x", role="planner"))
     assert handle.status == "UNSUPPORTED"
+
+
+def test_long_prompt_is_not_an_argv_token(tmp_path: Path) -> None:
+    script = tmp_path / "fake_opencode.py"
+    script.write_text(
+        "import json\nprint(json.dumps({'type':'session.status','status':'idle'}))\n",
+        encoding="utf-8",
+    )
+    huge = "Write PRD.md. " * 200
+    adapter = OpenCodeAdapter(executable=str(script), cwd=str(tmp_path))
+    handle = adapter.launch(RuntimeLaunchRequest(runtime_id="rt-long", prompt=huge))
+    assert handle.status == "COMPLETED"
+    assert huge not in adapter.last_argv
+    assert (tmp_path / ".hermes-stage-prompt.txt").read_text(encoding="utf-8") == huge
 
 
 def test_real_opencode_name_is_not_blocked(tmp_path: Path) -> None:

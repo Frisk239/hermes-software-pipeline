@@ -76,7 +76,10 @@ def test_runtime_is_a_runtime_broker_port() -> None:
 
 def test_e2e_binds_to_opencode_model(tmp_path: Path) -> None:
     script = tmp_path / "fake_opencode.py"
-    script.write_text("print('ok')\n", encoding="utf-8")
+    script.write_text(
+        "import json\nprint(json.dumps({'type':'session.status','status':'idle'}))\n",
+        encoding="utf-8",
+    )
     table = BindingTable({"e2e": AgentBinding("e2e", "opencode", "grok-4.6")})
     opencode = OpenCodeAdapter(executable=str(script))
     broker = BoundRuntimeBroker(
@@ -155,7 +158,10 @@ def test_other_tool_names_are_denied() -> None:
 
 def test_e2e_opencode_plus_optional_chrome(tmp_path: Path) -> None:
     script = tmp_path / "fake_opencode.py"
-    script.write_text("print('ok')\n", encoding="utf-8")
+    script.write_text(
+        "import json\nprint(json.dumps({'type':'session.status','status':'idle'}))\n",
+        encoding="utf-8",
+    )
     table = BindingTable({"e2e": AgentBinding("e2e", "opencode", "grok-4.6")})
     opencode = OpenCodeAdapter(executable=str(script))
     broker = BoundRuntimeBroker(table, {"opencode": opencode})
@@ -172,7 +178,10 @@ def test_e2e_opencode_plus_optional_chrome(tmp_path: Path) -> None:
 
 def test_planner_binding_is_unchanged(tmp_path: Path) -> None:
     script = tmp_path / "fake_opencode.py"
-    script.write_text("print('ok')\n", encoding="utf-8")
+    script.write_text(
+        "import json\nprint(json.dumps({'type':'session.status','status':'idle'}))\n",
+        encoding="utf-8",
+    )
     table = BindingTable({"planner": AgentBinding("planner", "opencode", "grok-4.6")})
     opencode = OpenCodeAdapter(executable=str(script))
     broker = BoundRuntimeBroker(table, {"opencode": opencode})
