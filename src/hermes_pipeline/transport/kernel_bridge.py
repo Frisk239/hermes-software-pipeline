@@ -794,6 +794,7 @@ class KernelBridge:
         sandbox = VerificationSandbox(self._dir.parent / "sandbox" / pipeline_id)
         worktree = self._dir.parent / "worktrees" / pipeline_id
         cwd = str(sandbox.root)
+        testplan_id = self._arch.get(pipeline_id, {}).get("testplan_id", "")
         try:
             result = VerifyFlow(
                 self._bindings,
@@ -805,6 +806,8 @@ class KernelBridge:
                 project_id=project_id,
                 pipeline_id=pipeline_id,
                 candidate_root=worktree if worktree.is_dir() else None,
+                testplan_text=self._artifact_text(testplan_id),
+                candidate_sha=sha,
             ).run(build_integration_candidate(sha, "0" * 64))
         except Exception:
             self._verify[pipeline_id] = {

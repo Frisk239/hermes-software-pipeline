@@ -106,6 +106,7 @@ def _flow(
         FakeDelivery(),
         sandbox,
         candidate_root=candidate_root,
+        testplan_text="pytest or --check",
     )
     return flow, sandbox, artifacts
 
@@ -195,21 +196,65 @@ def test_real_e2e_runs_candidate_script(tmp_path: Path) -> None:
     assert sandbox.exists() is False
 
 
-def test_script_pass_skips_real_reviewer_launch(tmp_path: Path) -> None:
+class _ReviewWriter(_Completing):
+    def __init__(self, sandbox: VerificationSandbox, text: str) -> None:
+        self._sandbox = sandbox
+        self._text = text
+        self.prompts: list[str] = []
+
+    def launch(self, request: RuntimeLaunchRequest) -> RuntimeHandle:
+        self.prompts.append(request.prompt)
+        self._sandbox.write("REVIEW.md", self._text)
+        return RuntimeHandle(runtime_id=request.runtime_id, status="COMPLETED")
+
+
+def test_script_pass_still_launches_real_reviewer(tmp_path: Path) -> None:
     work = tmp_path / "wt"
     (work / "src").mkdir(parents=True)
     (work / "src" / "app.py").write_text("print('2+3=5')\n", encoding="utf-8")
-    flow, sandbox, artifacts = _flow(
-        tmp_path,
-        e2e=_Failing(),
-        reviewer=_Failing(),
+    sandbox = VerificationSandbox(tmp_path / "sandbox")
+    reviewer = _ReviewWriter(sandbox, "PASS\nmatches TESTPLAN login")
+    artifacts = LocalCasArtifacts(tmp_path / "cas")
+    flow = VerifyFlow(
+        _real_both_bindings(),
+        artifacts,
+        _Failing(),
+        reviewer,
+        FakeDelivery(),
+        sandbox,
         candidate_root=work,
-        bindings=_real_both_bindings(),
+        testplan_text="check login page",
+        candidate_sha="c" * 64,
     )
     result = flow.run(build_integration_candidate("c" * 64, "b" * 64))
     assert result.status == "READY"
-    assert result.e2e_id is not None
-    assert b"2+3=5" in artifacts.open(result.e2e_id)
+    assert reviewer.prompts
+    assert "BEGIN_UNTRUSTED_TESTPLAN" in reviewer.prompts[0]
+    assert "check login page" in reviewer.prompts[0]
+    assert "Candidate SHA:" in reviewer.prompts[0]
+    assert sandbox.exists() is False
+
+
+def test_real_reviewer_fail_keeps_testplan_findings(tmp_path: Path) -> None:
+    work = tmp_path / "wt"
+    (work / "src").mkdir(parents=True)
+    (work / "src" / "app.py").write_text("print('ok')\n", encoding="utf-8")
+    sandbox = VerificationSandbox(tmp_path / "sandbox")
+    reviewer = _ReviewWriter(sandbox, "FAIL\nTESTPLAN login missing")
+    flow = VerifyFlow(
+        _real_both_bindings(),
+        LocalCasArtifacts(tmp_path / "cas"),
+        _Failing(),
+        reviewer,
+        FakeDelivery(),
+        sandbox,
+        candidate_root=work,
+        testplan_text="login must work",
+        candidate_sha="c" * 64,
+    )
+    result = flow.run(build_integration_candidate("c" * 64, "b" * 64))
+    assert result.status == "REWORK"
+    assert "TESTPLAN login missing" in result.feedback
     assert sandbox.exists() is False
 
 
