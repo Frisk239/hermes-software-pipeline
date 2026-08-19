@@ -163,7 +163,7 @@ def submit_command(
         sort_keys=True,
         separators=(",", ":"),
     ).encode("utf-8")
-    return _request(_base_url(port), token, "POST", "/v1/commands", body, timeout=300)
+    return _request(_base_url(port), token, "POST", "/v1/commands", body, timeout=600)
 
 
 __all__ = [

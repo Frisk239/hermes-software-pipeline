@@ -17,6 +17,7 @@ from hermes_pipeline.runtime_broker.ports import (
 )
 
 _TIMEOUT_S = 10.0
+_PROMPT_TIMEOUT_S = 300.0
 
 
 @dataclass
@@ -48,7 +49,9 @@ class ProcessAdapter:
                 input=request.prompt or None,
                 capture_output=True,
                 text=True,
-                timeout=_TIMEOUT_S if not request.prompt else 120.0,
+                encoding="utf-8",
+                errors="replace",
+                timeout=_TIMEOUT_S if not request.prompt else _PROMPT_TIMEOUT_S,
                 check=False,
             )
         except (OSError, subprocess.TimeoutExpired) as exc:
