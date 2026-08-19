@@ -59,9 +59,10 @@ expected = {
 "admin",
 "deliver",
 "approve",
+"retry",
 }
 assert choices == expected, choices
-print("PLUGINMANAGER_PROBE_OK tools=1 hooks=1 commands=1 subcommands=10")
+print("PLUGINMANAGER_PROBE_OK tools=1 hooks=1 commands=1 subcommands=11")
 """
 
 BROKEN_PLUGIN_PROBE = r"""

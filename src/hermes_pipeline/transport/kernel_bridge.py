@@ -194,6 +194,7 @@ class KernelBridge:
             verified = self._verify.get(pipeline_id)
             if verified is not None:
                 result.update(verified)
+                result["verify_attempts"] = str(verified.get("verify_attempts", "0"))
             decision = self._approvals.get(pipeline_id)
             if decision is not None:
                 result["approval_status"] = decision.get("approval_status", "")
@@ -231,6 +232,8 @@ class KernelBridge:
             return receipt.model_dump(mode="json")
         if op == "approve":
             return self._approve_baseline(payload)
+        if op == "retry":
+            return self._retry_verify(payload)
         return self._inner.process(command_id, payload)
 
     def _load_registry(self) -> ProjectRegistry:
@@ -725,6 +728,9 @@ class KernelBridge:
                 "verify_status": "REWORK",
                 "e2e_id": "",
                 "acceptance_id": "",
+                "verify_attempts": str(
+                    self._verify.get(pipeline_id, {}).get("verify_attempts", "0")
+                ),
             }
             self._save_verify()
             return
@@ -741,6 +747,9 @@ class KernelBridge:
             "verify_status": result.status,
             "e2e_id": result.e2e_id or "",
             "acceptance_id": result.acceptance_id or "",
+            "verify_attempts": str(
+                self._verify.get(pipeline_id, {}).get("verify_attempts", "0")
+            ),
         }
         self._save_verify()
 
@@ -764,6 +773,7 @@ class KernelBridge:
                 "verify_status": str(row.get("verify_status", "")),
                 "e2e_id": str(row.get("e2e_id", "")),
                 "acceptance_id": str(row.get("acceptance_id", "")),
+                "verify_attempts": str(row.get("verify_attempts", "0")),
             }
         return loaded
 
@@ -772,6 +782,34 @@ class KernelBridge:
             json.dumps(self._verify, sort_keys=True),
             encoding="utf-8",
         )
+
+    def _retry_verify(self, payload: dict[str, Any]) -> dict[str, Any]:
+        pipeline_id = str(payload.get("pipeline_id", "pl_local"))
+        project_id = str(payload.get("project_id", "prj_local"))
+        principal = str(payload.get("principal_id", "operator"))
+        verified = self._verify.get(pipeline_id, {})
+        if verified.get("verify_status") != "REWORK":
+            return {"ok": False, "error": "not rework"}
+        used = int(verified.get("verify_attempts", "0") or 0)
+        if used >= 1:
+            return {"ok": False, "error": "retry exhausted"}
+        if self._registry.role_of(project_id, principal) is None:
+            return {"ok": False, "error": "not a project member"}
+        self._dev.pop(pipeline_id, None)
+        self._save_dev()
+        self._verify.pop(pipeline_id, None)
+        self._advance_development(pipeline_id, project_id, principal)
+        self._advance_verify(pipeline_id, project_id)
+        row = self._verify.get(pipeline_id, {})
+        row["verify_attempts"] = "1"
+        self._verify[pipeline_id] = row
+        self._save_verify()
+        status = row.get("verify_status", "")
+        return {
+            "ok": status == "READY",
+            "verify_status": status,
+            "verify_attempts": "1",
+        }
 
     def _approve_baseline(self, payload: dict[str, Any]) -> dict[str, Any]:
         pipeline_id = str(payload.get("pipeline_id", "pl_local"))

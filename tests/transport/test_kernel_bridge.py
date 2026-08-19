@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from hermes_pipeline.transport.kernel_bridge import (
@@ -258,6 +259,78 @@ def test_submit_with_verify_bindings_delivers(tmp_path: Path) -> None:
     )
     assert again["verify_status"] == "READY"
     assert again["branch"] == "hermes/prj_cli/pl_cli"
+
+
+def test_retry_once_after_rework(tmp_path: Path) -> None:
+    first = KernelBridge(tmp_path, _Inner())
+    first.process("cmd_reg", {"op": "register", "project_id": "prj_cli", "name": "Cli"})
+    first.process(
+        "cmd_adm",
+        {
+            "op": "admit",
+            "project_id": "prj_cli",
+            "principal_id": "operator",
+            "role": "CONTRIBUTOR",
+        },
+    )
+    for role, model in (
+        ("planner", "fake-prd"),
+        ("executor", "fake-dev"),
+        ("e2e", "fake-e2e"),
+        ("reviewer", "fake-acc"),
+    ):
+        first.process(
+            f"cmd_bind_{role}",
+            {"op": "bind", "role": role, "runtime": "fake", "model": model},
+        )
+    first.process(
+        "cmd_all",
+        {
+            "text": "need a login page",
+            "workspace_id": "ws_cli",
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+            "principal_id": "operator",
+        },
+    )
+    first.process(
+        "cmd_ok",
+        {
+            "op": "approve",
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+            "principal_id": "operator",
+        },
+    )
+    path = tmp_path / "descriptor" / "verify.json"
+    document = json.loads(path.read_text(encoding="utf-8"))
+    document["pl_cli"]["verify_status"] = "REWORK"
+    document["pl_cli"]["verify_attempts"] = "0"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    first = KernelBridge(tmp_path, _Inner())
+    retried = first.process(
+        "cmd_retry",
+        {
+            "op": "retry",
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+            "principal_id": "operator",
+        },
+    )
+    assert retried["ok"] is True
+    assert retried["verify_status"] == "READY"
+    assert retried["verify_attempts"] == "1"
+    again = first.process(
+        "cmd_retry_2",
+        {
+            "op": "retry",
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+            "principal_id": "operator",
+        },
+    )
+    assert again["ok"] is False
+    assert again["error"] == "not rework"
 
 
 def test_bindings_persist(tmp_path: Path) -> None:

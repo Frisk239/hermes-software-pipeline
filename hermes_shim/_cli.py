@@ -22,6 +22,7 @@ from ._lifecycle import (
     deliver_command,
     doctor_command,
     read_pipeline_command,
+    retry_command,
     setup_command,
     start_command,
     status_command,
@@ -41,6 +42,7 @@ SUBCOMMANDS = (
     "admin",
     "deliver",
     "approve",
+    "retry",
 )
 
 SUBCOMMAND_HELP = {
@@ -54,6 +56,7 @@ SUBCOMMAND_HELP = {
     "admin": "register a project, admit a member, or bind a stage role",
     "deliver": "record a namespaced PR, or a check/review/queue event",
     "approve": "approve the solution baseline before development",
+    "retry": "re-run development and verify once after REWORK",
 }
 
 
@@ -98,7 +101,7 @@ def build_pipeline_parser(parser: argparse.ArgumentParser) -> None:
             sub.add_argument("--check", default="")
             sub.add_argument("--review", default="")
             sub.add_argument("--queue", default="")
-        if name == "approve":
+        if name in {"approve", "retry"}:
             sub.add_argument("--project-id", default="prj_local")
             sub.add_argument("--pipeline-id", default="pl_local")
             sub.add_argument("--principal-id", default="operator")
@@ -173,6 +176,13 @@ def _run_handler(name: str, _args: argparse.Namespace) -> int:
             )
         elif name == "approve":
             result = approve_command(
+                home,
+                project_id=str(_args.project_id),
+                pipeline_id=str(_args.pipeline_id),
+                principal_id=str(_args.principal_id),
+            )
+        elif name == "retry":
+            result = retry_command(
                 home,
                 project_id=str(_args.project_id),
                 pipeline_id=str(_args.pipeline_id),
