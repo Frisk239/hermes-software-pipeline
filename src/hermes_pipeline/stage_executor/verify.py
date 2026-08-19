@@ -21,7 +21,11 @@ from hermes_pipeline.repository.integration import (
 )
 from hermes_pipeline.runtime_broker.binding import BindingNotFound, BindingTable
 from hermes_pipeline.runtime_broker.ports import RuntimeBrokerPort, RuntimeLaunchRequest
-from hermes_pipeline.stage_executor.contracts import ACCEPTANCE_CONTRACT, E2E_CONTRACT
+from hermes_pipeline.stage_executor.contracts import (
+    ACCEPTANCE_CONTRACT,
+    E2E_CONTRACT,
+    fence,
+)
 from hermes_pipeline.stage_executor.self_test import run_app, run_pytest
 
 E2E_BYTES = b"hermes-pipeline-e2e-v1\n"
@@ -52,6 +56,8 @@ class VerifyFlow:
         project_id: str = "prj_local",
         pipeline_id: str = "pl_local",
         candidate_root: Path | None = None,
+        testplan_text: str = "",
+        candidate_sha: str = "",
     ) -> None:
         self._bindings = bindings
         self._artifacts = artifacts
@@ -62,6 +68,8 @@ class VerifyFlow:
         self._project_id = project_id
         self._pipeline_id = pipeline_id
         self._candidate_root = candidate_root
+        self._testplan_text = testplan_text
+        self._candidate_sha = candidate_sha
         self._passed_sha: str | None = None
 
     def run(self, integration: IntegrationCandidate) -> VerifyResult:
@@ -97,7 +105,7 @@ class VerifyFlow:
                         RuntimeLaunchRequest(
                             runtime_id=e2e_id,
                             role="e2e",
-                            prompt=self._e2e_prompt(),
+                            prompt=self._e2e_prompt(integration.sha),
                         )
                     )
                 except (OSError, RuntimeError, ValueError):
@@ -115,7 +123,9 @@ class VerifyFlow:
                         or "e2e RESULT.md is not PASS",
                     )
                 e2e_art = self._artifacts.put(ArtifactPutRequest(payload=E2E_BYTES))
-            if scripted == "passed":
+            review_bind = self._bindings.resolve("reviewer")
+            real_reviewer = review_bind.runtime != "fake"
+            if scripted == "passed" and not real_reviewer:
                 acc_art = self._artifacts.put(ArtifactPutRequest(payload=ACCEPT_BYTES))
             else:
                 try:
@@ -123,7 +133,7 @@ class VerifyFlow:
                         RuntimeLaunchRequest(
                             runtime_id=f"acc-{integration.sha[:12]}",
                             role="reviewer",
-                            prompt=self._review_prompt(),
+                            prompt=self._review_prompt(integration.sha),
                         )
                     )
                 except (OSError, RuntimeError, ValueError):
@@ -196,16 +206,24 @@ class VerifyFlow:
         self._sandbox.write("SCRIPT_OUT", "\n".join(chunks))
         return status
 
-    def _e2e_prompt(self) -> str:
+    def _e2e_prompt(self, sha: str = "") -> str:
+        mark = sha or self._candidate_sha
         return (
             f"{E2E_CONTRACT}\n"
-            "Run src/app.py if present. Write RESULT.md with only PASS or FAIL."
+            f"Candidate SHA: {mark}\n"
+            f"{fence('TESTPLAN', self._testplan_text)}\n"
+            "Evaluate this directory only. Run src/app.py if present. "
+            "Write RESULT.md: first line PASS or FAIL, then findings."
         )
 
-    def _review_prompt(self) -> str:
+    def _review_prompt(self, sha: str = "") -> str:
+        mark = sha or self._candidate_sha
         return (
             f"{ACCEPTANCE_CONTRACT}\n"
-            "Write REVIEW.md with only PASS or FAIL. Do not rewrite source."
+            f"Candidate SHA: {mark}\n"
+            f"{fence('TESTPLAN', self._testplan_text)}\n"
+            "Evaluate this directory only. "
+            "Write REVIEW.md: first line PASS or FAIL, then findings."
         )
 
 
