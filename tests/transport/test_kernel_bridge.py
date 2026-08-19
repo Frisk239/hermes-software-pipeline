@@ -85,6 +85,53 @@ def test_stage_prompts_do_not_repeat_intake_as_prd_task() -> None:
     assert need in prd
 
 
+def test_viewer_cannot_approve(tmp_path: Path) -> None:
+    first = KernelBridge(tmp_path, _Inner())
+    first.process("cmd_reg", {"op": "register", "project_id": "prj_cli", "name": "Cli"})
+    first.process(
+        "cmd_adm",
+        {
+            "op": "admit",
+            "project_id": "prj_cli",
+            "principal_id": "operator",
+            "role": "CONTRIBUTOR",
+        },
+    )
+    first.process(
+        "cmd_view",
+        {
+            "op": "admit",
+            "project_id": "prj_cli",
+            "principal_id": "peek",
+            "role": "VIEWER",
+        },
+    )
+    first.process(
+        "cmd_bind",
+        {"op": "bind", "role": "planner", "runtime": "fake", "model": "fake-prd"},
+    )
+    first.process(
+        "cmd_prd",
+        {
+            "text": "need a login page",
+            "workspace_id": "ws_cli",
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+            "principal_id": "operator",
+        },
+    )
+    denied = first.process(
+        "cmd_ok",
+        {
+            "op": "approve",
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+            "principal_id": "peek",
+        },
+    )
+    assert denied["ok"] is False
+
+
 def test_submit_with_planner_records_prd(tmp_path: Path) -> None:
     first = KernelBridge(tmp_path, _Inner())
     first.process("cmd_reg", {"op": "register", "project_id": "prj_cli", "name": "Cli"})

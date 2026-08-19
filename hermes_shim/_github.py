@@ -282,9 +282,63 @@ def _run(argv: list[str], stdin: str = "") -> tuple[int, str, str]:
     return proc.returncode, proc.stdout, proc.stderr
 
 
+def observe_pr(repo: str, number: str, runner: Any = None) -> dict[str, str]:
+    if repo.count("/") != 1 or not number.isdigit():
+        return {}
+    run = runner or _run
+    code, out, _err = run(
+        [
+            "gh",
+            "pr",
+            "view",
+            number,
+            "--repo",
+            repo,
+            "--json",
+            "state,reviewDecision,statusCheckRollup",
+        ]
+    )
+    if code != 0 or not out:
+        return {}
+    try:
+        payload = json.loads(out)
+    except ValueError:
+        return {}
+    if not isinstance(payload, dict):
+        return {}
+    typed = cast(dict[str, Any], payload)
+    state = str(typed.get("state", ""))
+    review = str(typed.get("reviewDecision", "")).lower()
+    checks = typed.get("statusCheckRollup")
+    check_status = _rollup_status(checks)
+    merged = "merged" if state == "MERGED" else ""
+    return {
+        "check_status": check_status,
+        "review_status": review,
+        "merged": merged,
+    }
+
+
+def _rollup_status(checks: object) -> str:
+    if not isinstance(checks, list) or not checks:
+        return ""
+    names: list[str] = []
+    for item in checks:
+        if isinstance(item, dict):
+            names.append(str(cast(dict[str, Any], item).get("conclusion", "")).upper())
+    if any(name == "FAILURE" for name in names):
+        return "failure"
+    if any(name == "PENDING" for name in names):
+        return "pending"
+    if names and all(name == "SUCCESS" for name in names):
+        return "success"
+    return ""
+
+
 __all__ = [
     "gh_available",
     "load_published",
+    "observe_pr",
     "publish_with_gh",
     "resolve_gh",
     "worktree_files",

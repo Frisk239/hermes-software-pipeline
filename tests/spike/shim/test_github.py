@@ -11,6 +11,7 @@ from pathlib import Path
 from hermes_shim._github import (
     gh_available,
     load_published,
+    observe_pr,
     publish_with_gh,
     resolve_gh,
     worktree_files,
@@ -88,6 +89,23 @@ def test_publish_with_fake_gh_opens_pr() -> None:
     assert result["pr_number"] == "3"
     assert result["branch"] == "hermes/prj_a/pl_a"
     assert any("gh auth status" in item for item in calls)
+
+
+def test_observe_pr_maps_rollup_and_merged() -> None:
+    def _runner(argv: list[str], stdin: str = "") -> tuple[int, str, str]:
+        del stdin
+        if "pr" in argv and "view" in argv:
+            return (
+                0,
+                '{"state":"MERGED","reviewDecision":"APPROVED","statusCheckRollup":[{"conclusion":"SUCCESS"}]}',
+                "",
+            )
+        return 1, "", ""
+
+    seen = observe_pr("Frisk239/test-repository", "6", runner=_runner)
+    assert seen["merged"] == "merged"
+    assert seen["review_status"] == "approved"
+    assert seen["check_status"] == "success"
 
 
 def test_resolve_gh_uses_well_known_path(tmp_path: Path) -> None:

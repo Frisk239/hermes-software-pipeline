@@ -80,6 +80,38 @@ def test_changed_artifact_is_stale() -> None:
     )
 
 
+def test_viewer_cannot_designate_or_approve() -> None:
+    registry = ProjectRegistry()
+    registry.register("prj_demo", "Demo")
+    registry.admit("prj_demo", "viewer", "VIEWER")
+    approval = SolutionApproval(registry)
+    with pytest.raises(PermissionError):
+        approval.designate("pl_demo", "prj_demo", "viewer")
+
+
+def test_restore_keeps_fresh_baseline() -> None:
+    first = _approval()
+    first.approve(
+        pipeline_id="pl_demo",
+        project_id="prj_demo",
+        actor_id="approver",
+        prd_id="art_prd",
+        design_id="art_design",
+        testplan_id="art_test",
+    )
+    registry = ProjectRegistry()
+    registry.register("prj_demo", "Demo")
+    registry.admit("prj_demo", "approver", "ADMIN")
+    second = SolutionApproval(registry)
+    second.restore(first.dump())
+    assert second.is_fresh(
+        pipeline_id="pl_demo",
+        prd_id="art_prd",
+        design_id="art_design",
+        testplan_id="art_test",
+    )
+
+
 def test_undesignated_member_cannot_be_approver() -> None:
     registry = ProjectRegistry()
     registry.register("prj_demo", "Demo")
