@@ -9,10 +9,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
+from hermes_pipeline.artifacts.local_cas import ArtifactNotFound
 from hermes_pipeline.artifacts.ports import ArtifactPutRequest, ArtifactsPort
 from hermes_pipeline.controller.ports import ControllerPort, PipelineQuery
 from hermes_pipeline.runtime_broker.binding import BindingNotFound, BindingTable
 from hermes_pipeline.runtime_broker.ports import RuntimeBrokerPort, RuntimeLaunchRequest
+from hermes_pipeline.stage_executor.contracts import testplan_shape_ok
 from hermes_pipeline.stage_executor.harvest import (
     DESIGN_NAMES,
     TESTPLAN_NAMES,
@@ -134,6 +136,13 @@ class ArchitectureGate:
         if not self._artifacts.verify(result.design_id).ok:
             return ArchitectureGateVerdict(status="FAIL")
         if not self._artifacts.verify(result.testplan_id).ok:
+            return ArchitectureGateVerdict(status="FAIL")
+        try:
+            design = self._artifacts.open(result.design_id)
+            testplan = self._artifacts.open(result.testplan_id)
+        except (OSError, KeyError, ValueError, ArtifactNotFound):
+            return ArchitectureGateVerdict(status="FAIL")
+        if not design.strip() or not testplan_shape_ok(testplan):
             return ArchitectureGateVerdict(status="FAIL")
         return ArchitectureGateVerdict(status="PASS")
 

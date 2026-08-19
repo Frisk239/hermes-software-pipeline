@@ -4,6 +4,7 @@ import ast
 from pathlib import Path
 
 from hermes_pipeline.artifacts import LocalCasArtifacts
+from hermes_pipeline.artifacts.ports import ArtifactPutRequest
 from hermes_pipeline.contracts.runtime import Actor
 from hermes_pipeline.controller import KernelController
 from hermes_pipeline.operations.projects import ProjectRegistry, RequirementIntake
@@ -20,6 +21,7 @@ from hermes_pipeline.runtime_broker.ports import (
     RuntimeSignalReceipt,
     RuntimeSnapshot,
 )
+from hermes_pipeline.stage_executor.contracts import PRD_CONTRACT
 from hermes_pipeline.stage_executor.prd import PRD_BYTES, PrdGate, PrdStage
 
 _RECORDED = "2026-01-01T00:00:00Z"
@@ -148,6 +150,18 @@ def test_missing_planner_binding_is_fail_closed(tmp_path: Path) -> None:
     assert result.status == "DENIED"
     assert result.artifact_id is None
     assert _cas_ids(tmp_path) == []
+
+
+def test_gate_fails_when_prd_is_duty_echo(tmp_path: Path) -> None:
+    _, controller = _open_pipeline()
+    artifacts = LocalCasArtifacts(tmp_path)
+    record = artifacts.put(ArtifactPutRequest(payload=PRD_CONTRACT.encode("utf-8")))
+    verdict = PrdGate(controller, artifacts).evaluate(
+        pipeline_id="pl_demo",
+        workspace_id="ws_demo",
+        artifact_id=record.artifact_id,
+    )
+    assert verdict.status == "FAIL"
 
 
 def test_gate_fails_without_artifact(tmp_path: Path) -> None:

@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from hermes_pipeline.artifacts import LocalCasArtifacts
+from hermes_pipeline.artifacts.ports import ArtifactPutRequest
 from hermes_pipeline.contracts.runtime import Actor
 from hermes_pipeline.controller import KernelController
 from hermes_pipeline.operations.projects import ProjectRegistry, RequirementIntake
@@ -19,6 +20,7 @@ from hermes_pipeline.stage_executor.architecture import (
     ARCH_BYTES,
     TESTPLAN_BYTES,
     ArchitectureGate,
+    ArchitectureResult,
     ArchitectureStage,
 )
 from hermes_pipeline.stage_executor.prd import PRD_BYTES, PrdStage
@@ -74,6 +76,35 @@ def test_architecture_writes_design_and_testplan(tmp_path: Path) -> None:
         result=result,
     )
     assert verdict.status == "PASS"
+
+
+def test_architecture_gate_requires_test_mention(tmp_path: Path) -> None:
+    controller, artifacts, prd_id = _open_with_prd(tmp_path)
+    design = artifacts.put(ArtifactPutRequest(payload=b"# design\n"))
+    empty = artifacts.put(ArtifactPutRequest(payload=b"no checks here\n"))
+    verdict = ArchitectureGate(controller, artifacts).evaluate(
+        pipeline_id="pl_demo",
+        workspace_id="ws_demo",
+        prd_artifact_id=prd_id,
+        result=ArchitectureResult(
+            status="COMPLETED",
+            design_id=design.artifact_id,
+            testplan_id=empty.artifact_id,
+        ),
+    )
+    assert verdict.status == "FAIL"
+    checks = artifacts.put(ArtifactPutRequest(payload=b"run pytest --check\n"))
+    passed = ArchitectureGate(controller, artifacts).evaluate(
+        pipeline_id="pl_demo",
+        workspace_id="ws_demo",
+        prd_artifact_id=prd_id,
+        result=ArchitectureResult(
+            status="COMPLETED",
+            design_id=design.artifact_id,
+            testplan_id=checks.artifact_id,
+        ),
+    )
+    assert passed.status == "PASS"
 
 
 def test_requirement_question_does_not_rewrite_prd(tmp_path: Path) -> None:
