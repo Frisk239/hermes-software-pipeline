@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from hermes_pipeline.transport.kernel_bridge import (
     KernelBridge,
     architecture_prompt,
@@ -603,6 +605,70 @@ def test_retry_after_candidate_gate_fail(tmp_path: Path) -> None:
     )
     assert again["ok"] is False
     assert again["error"] in {"not rework", "retry exhausted"}
+
+
+def test_verify_oserror_is_infra_and_retry_keeps_attempts(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    first = KernelBridge(tmp_path, _Inner())
+    first.process("cmd_reg", {"op": "register", "project_id": "prj_cli", "name": "Cli"})
+    first.process(
+        "cmd_adm",
+        {
+            "op": "admit",
+            "project_id": "prj_cli",
+            "principal_id": "operator",
+            "role": "CONTRIBUTOR",
+        },
+    )
+    for role, model in (
+        ("planner", "fake-prd"),
+        ("executor", "fake-dev"),
+        ("e2e", "fake-e2e"),
+        ("reviewer", "fake-acc"),
+    ):
+        first.process(
+            f"cmd_bind_{role}",
+            {"op": "bind", "role": role, "runtime": "fake", "model": model},
+        )
+    first.process(
+        "cmd_all",
+        {
+            "text": "need a login page",
+            "workspace_id": "ws_cli",
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+            "principal_id": "operator",
+        },
+    )
+
+    def _boom(*_args: object, **_kwargs: object) -> object:
+        raise OSError("sandbox")
+
+    monkeypatch.setattr("hermes_pipeline.transport.kernel_bridge.VerifyFlow.run", _boom)
+    approved = first.process(
+        "cmd_ok",
+        {
+            "op": "approve",
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+            "principal_id": "operator",
+        },
+    )
+    assert approved["ok"] is False
+    assert approved["verify_status"] == "INFRA"
+    monkeypatch.undo()
+    retried = first.process(
+        "cmd_retry_infra",
+        {
+            "op": "retry",
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+            "principal_id": "operator",
+        },
+    )
+    assert retried["ok"] is True
+    assert retried["verify_attempts"] == "0"
 
 
 def test_retry_dev_gate_exhausted_without_verify(tmp_path: Path) -> None:
