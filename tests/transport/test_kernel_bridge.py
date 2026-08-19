@@ -531,6 +531,122 @@ def test_approve_fails_when_candidate_gate_fails(tmp_path: Path) -> None:
     assert approved["feedback"] == "self-test failed"
 
 
+def test_retry_after_candidate_gate_fail(tmp_path: Path) -> None:
+    first = KernelBridge(tmp_path, _Inner())
+    first.process("cmd_reg", {"op": "register", "project_id": "prj_cli", "name": "Cli"})
+    first.process(
+        "cmd_adm",
+        {
+            "op": "admit",
+            "project_id": "prj_cli",
+            "principal_id": "operator",
+            "role": "CONTRIBUTOR",
+        },
+    )
+    for role, model in (
+        ("planner", "fake-prd"),
+        ("executor", "fake-dev"),
+        ("e2e", "fake-e2e"),
+        ("reviewer", "fake-acc"),
+    ):
+        first.process(
+            f"cmd_bind_{role}",
+            {"op": "bind", "role": role, "runtime": "fake", "model": model},
+        )
+    first.process(
+        "cmd_all",
+        {
+            "text": "need a login page",
+            "workspace_id": "ws_cli",
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+            "principal_id": "operator",
+        },
+    )
+    first.process(
+        "cmd_ok",
+        {
+            "op": "approve",
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+            "principal_id": "operator",
+        },
+    )
+    path = tmp_path / "descriptor" / "development.json"
+    document = json.loads(path.read_text(encoding="utf-8"))
+    document["pl_cli"]["candidate_gate"] = "FAIL"
+    document["pl_cli"]["rework_attempts"] = "0"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    verify_path = tmp_path / "descriptor" / "verify.json"
+    if verify_path.is_file():
+        verify_path.unlink()
+    first = KernelBridge(tmp_path, _Inner())
+    retried = first.process(
+        "cmd_retry_dev",
+        {
+            "op": "retry",
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+            "principal_id": "operator",
+        },
+    )
+    assert retried["ok"] is True
+    assert retried["candidate_gate"] != "FAIL"
+    again = first.process(
+        "cmd_retry_dev_2",
+        {
+            "op": "retry",
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+            "principal_id": "operator",
+        },
+    )
+    assert again["ok"] is False
+    assert again["error"] in {"not rework", "retry exhausted"}
+
+
+def test_retry_dev_gate_exhausted_without_verify(tmp_path: Path) -> None:
+    first = KernelBridge(tmp_path, _Inner())
+    first.process("cmd_reg", {"op": "register", "project_id": "prj_cli", "name": "Cli"})
+    first.process(
+        "cmd_adm",
+        {
+            "op": "admit",
+            "project_id": "prj_cli",
+            "principal_id": "operator",
+            "role": "CONTRIBUTOR",
+        },
+    )
+    path = tmp_path / "descriptor" / "development.json"
+    path.write_text(
+        json.dumps(
+            {
+                "pl_cli": {
+                    "impl_id": "",
+                    "candidate_sha": "",
+                    "candidate_path": "",
+                    "dev_status": "DENIED",
+                    "candidate_gate": "FAIL",
+                    "rework_attempts": "1",
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    first = KernelBridge(tmp_path, _Inner())
+    denied = first.process(
+        "cmd_retry_ex",
+        {
+            "op": "retry",
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+            "principal_id": "operator",
+        },
+    )
+    assert denied["ok"] is False
+    assert denied["error"] == "retry exhausted"
+
+
 def test_corrupt_verify_json_is_fail_closed(tmp_path: Path) -> None:
     first = KernelBridge(tmp_path, _Inner())
     first.process("cmd_reg", {"op": "register", "project_id": "prj_cli", "name": "Cli"})
