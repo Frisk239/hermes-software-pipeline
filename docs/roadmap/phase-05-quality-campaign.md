@@ -31,6 +31,7 @@ Operator path today: `submit` → real PRD/Arch → `approve` → `src/` → scr
 **Must**
 
 - Persist `verify_attempts` (cap = 1) under the pipeline descriptor.
+- Scripted verify tries `python src/app.py --check` first (exit 0 = pass); if that flag is unsupported, fall back to bare `src/app.py` (20s). Web apps must implement `--check`.
 - On first REWORK, clear `_dev` for that pipeline and `_advance_development` + `_advance_verify` again in the same `approve` (or a `hermes pipeline retry` if approve already returned).
 - Prefer `retry` command if same `approve` would exceed the 600s client budget: `hermes pipeline retry --pipeline-id …` allowed only when status is REWORK and attempts < 1.
 - Fake bindings never enter rework (still READY first pass).
@@ -85,14 +86,26 @@ Operator path today: `submit` → real PRD/Arch → `approve` → `src/` → scr
 
 ## Final live test (after all four are on `main`)
 
-One new pipeline, real OpenCode binds, requirement harder than `print('login-page')` (e.g. C→F CLI or add-two-numbers):
+**Requirement (real small web app, not a one-line CLI):**
 
-1. `submit` → PENDING, named PRD/Arch files exist.
-2. `approve` → `src/app.py`, `verify_status=READY`, `pr_url` set.
-3. Hand-run `src/app.py` matches the requirement.
+> Build a parking-lot staff login web app. Write PRD.md. After approval, implement it under `src/`.  
+> Must include: a login page (username + password), submit, success page, error on bad credentials.  
+> Serve on `127.0.0.1` (stdlib `http.server` is enough; no extra deps).  
+> Also support `python src/app.py --check`: start briefly or validate handlers, print `login-ok`, exit 0.  
+> Default `python src/app.py` may serve until killed.
+
+`--check` exists so today's scripted verify can READY without hanging on a long-lived server. Browser-click e2e is **after** this campaign (05-35).
+
+**Operator path**
+
+1. `submit` that text → PENDING; `plans/…/prd/PRD.md` and architecture named files exist.
+2. `approve` → candidate under `src/` (page + server, not only `print`), `verify_status=READY` via `--check` or `pytest`, `pr_url` set.
+3. Hand-check: `python src/app.py --check` prints `login-ok`; optionally open `http://127.0.0.1:8000` and log in.
 4. `stop`/`start` → same approval + verify + `pr_url`.
 5. `read` shows GitHub-derived check/merged fields (empty is ok if the test repo has no CI).
-6. Optional negative: a pipeline whose `src/app.py` is `raise SystemExit(1)` → REWORK, no new PR; `retry` once can recover.
+6. Negative: a pipeline whose check/`src/app.py` exits 1 → REWORK, no new PR; `retry` once can recover.
+
+**Implement prompt hint (05-31+):** if the requirement describes a server, tell the executor to implement `--check` that exits 0 on success so verify can run without a 20s timeout.
 
 ## After this campaign (not in the four cuts)
 
