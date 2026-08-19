@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from typing import Any, cast
 
-from hermes_pipeline.artifacts.local_cas import LocalCasArtifacts
+from hermes_pipeline.artifacts.local_cas import ArtifactNotFound, LocalCasArtifacts
 from hermes_pipeline.contracts.runtime import Actor
 from hermes_pipeline.controller import KernelController
 from hermes_pipeline.delivery.fake import FakeDelivery
@@ -359,7 +359,7 @@ class KernelBridge:
         if pipeline_id in self._prd:
             return
         artifacts = LocalCasArtifacts(self._dir.parent / "cas")
-        folder = self._plans_dir(pipeline_id)
+        folder = self._plans_dir(pipeline_id, "prd")
         result = PrdStage(
             self._bindings,
             artifacts,
@@ -399,7 +399,7 @@ class KernelBridge:
             return
         prd_id = planning.get("prd_id", "")
         artifacts = LocalCasArtifacts(self._dir.parent / "cas")
-        folder = self._plans_dir(pipeline_id)
+        folder = self._plans_dir(pipeline_id, "architecture")
         result = ArchitectureStage(
             self._bindings,
             artifacts,
@@ -544,7 +544,7 @@ class KernelBridge:
             prd_id=prd_id,
             design_id=design_id,
             testplan_id=testplan_id,
-            prompt=self._implement_prompt(pipeline_id, prd_id, design_id, testplan_id),
+            prompt=self._implement_prompt(prd_id, design_id, testplan_id),
         )
         gate = (
             CandidateGate(self._approval, artifacts)
@@ -567,8 +567,8 @@ class KernelBridge:
         }
         self._save_dev()
 
-    def _plans_dir(self, pipeline_id: str) -> Path:
-        folder = self._dir.parent / "plans" / pipeline_id
+    def _plans_dir(self, pipeline_id: str, stage: str) -> Path:
+        folder = self._dir.parent / "plans" / pipeline_id / stage
         folder.mkdir(parents=True, exist_ok=True)
         return folder
 
@@ -586,28 +586,27 @@ class KernelBridge:
         return BoundRuntimeBroker(self._bindings, adapters)
 
     def _prd_prompt(self, pipeline_id: str) -> str:
-        need = self._requirements.get(pipeline_id, "").strip()
-        if need:
-            return f"Write a PRD for this requirement:\n{need}"
-        return "Write a PRD for the submitted requirement."
+        return prd_prompt(self._requirements.get(pipeline_id, ""))
 
     def _architecture_prompt(self, pipeline_id: str, prd_id: str) -> str:
-        need = self._requirements.get(pipeline_id, "").strip()
-        return f"Write architecture and a test plan for prd={prd_id}\n{need}".strip()
+        del pipeline_id
+        return architecture_prompt(self._artifact_text(prd_id))
 
-    def _implement_prompt(
-        self, pipeline_id: str, prd_id: str, design_id: str, testplan_id: str
-    ) -> str:
-        need = self._requirements.get(pipeline_id, "").strip()
-        if need:
-            return (
-                f"Implement this requirement in this directory:\n{need}\n"
-                f"prd={prd_id} design={design_id} testplan={testplan_id}"
-            )
-        return (
-            f"Implement the approved solution in this directory. "
-            f"prd={prd_id} design={design_id} testplan={testplan_id}"
+    def _implement_prompt(self, prd_id: str, design_id: str, testplan_id: str) -> str:
+        return implement_prompt(
+            self._artifact_text(prd_id),
+            self._artifact_text(design_id),
+            self._artifact_text(testplan_id),
         )
+
+    def _artifact_text(self, artifact_id: str) -> str:
+        if not artifact_id:
+            return ""
+        store = LocalCasArtifacts(self._dir.parent / "cas")
+        try:
+            return store.open(artifact_id).decode("utf-8", errors="replace")
+        except (OSError, KeyError, ValueError, ArtifactNotFound):
+            return ""
 
     def _load_requirements(self) -> dict[str, str]:
         path = self._dir / "requirements.json"
@@ -852,4 +851,30 @@ def _record_view(record: DeliveryRecord) -> dict[str, Any]:
     }
 
 
-__all__ = ["KernelBridge"]
+def prd_prompt(need: str) -> str:
+    duty = "Write a PRD and save it as PRD.md. Do not write implementation code."
+    text = need.strip()
+    if text:
+        return f"{duty}\n{text}"
+    return duty
+
+
+def architecture_prompt(prd_text: str) -> str:
+    return (
+        "Write ARCHITECTURE.md and TESTPLAN.md for this approved PRD. "
+        "Do not write or rewrite PRD.md.\n"
+        f"{prd_text}"
+    )
+
+
+def implement_prompt(prd_text: str, design_text: str, testplan_text: str) -> str:
+    return (
+        "Implement the approved solution. Write product code under src/. "
+        "Do not write or rewrite PRD.md, ARCHITECTURE.md, or TESTPLAN.md.\n"
+        f"PRD:\n{prd_text}\n"
+        f"DESIGN:\n{design_text}\n"
+        f"TESTPLAN:\n{testplan_text}"
+    )
+
+
+__all__ = ["KernelBridge", "architecture_prompt", "implement_prompt", "prd_prompt"]

@@ -2,7 +2,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from hermes_pipeline.transport.kernel_bridge import KernelBridge
+from hermes_pipeline.transport.kernel_bridge import (
+    KernelBridge,
+    architecture_prompt,
+    implement_prompt,
+    prd_prompt,
+)
 
 
 class _Inner:
@@ -65,6 +70,18 @@ def test_register_admit_submit_read(tmp_path: Path) -> None:
     )
     assert again["status"] == "OPEN"
     assert again["revision"] == "1" or again["revision"] == 1
+
+
+def test_stage_prompts_do_not_repeat_intake_as_prd_task() -> None:
+    need = "Put a short PRD in PRD.md then implement src/app.py"
+    impl = implement_prompt("approved prd", "approved design", "approved tests")
+    arch = architecture_prompt("approved prd")
+    prd = prd_prompt(need)
+    assert need not in impl
+    assert "src/" in impl
+    assert need not in arch
+    assert "ARCHITECTURE.md" in arch
+    assert need in prd
 
 
 def test_submit_with_planner_records_prd(tmp_path: Path) -> None:

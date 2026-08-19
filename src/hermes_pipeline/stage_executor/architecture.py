@@ -11,9 +11,13 @@ from typing import Literal
 
 from hermes_pipeline.artifacts.ports import ArtifactPutRequest, ArtifactsPort
 from hermes_pipeline.controller.ports import ControllerPort, PipelineQuery
-from hermes_pipeline.repository.worktree import SECRET_CANARY
 from hermes_pipeline.runtime_broker.binding import BindingNotFound, BindingTable
 from hermes_pipeline.runtime_broker.ports import RuntimeBrokerPort, RuntimeLaunchRequest
+from hermes_pipeline.stage_executor.harvest import (
+    DESIGN_NAMES,
+    TESTPLAN_NAMES,
+    named_file_bytes,
+)
 
 ARCH_BYTES = b"hermes-pipeline-architecture-v1\n"
 TESTPLAN_BYTES = b"hermes-pipeline-testplan-v1\n"
@@ -71,8 +75,7 @@ class ArchitectureStage:
             harvested = self._run_bound_planner(pipeline_id, binding.model, prompt)
             if harvested is None:
                 return ArchitectureResult(status="DENIED")
-            design_body = harvested
-            testplan_body = harvested
+            design_body, testplan_body = harvested
         design = self._artifacts.put(ArtifactPutRequest(payload=design_body))
         testplan = self._artifacts.put(ArtifactPutRequest(payload=testplan_body))
         return ArchitectureResult(
@@ -83,7 +86,7 @@ class ArchitectureStage:
 
     def _run_bound_planner(
         self, pipeline_id: str, model: str, prompt: str
-    ) -> bytes | None:
+    ) -> tuple[bytes, bytes] | None:
         if self._planner is None:
             return None
         runtime_id = f"arch-{pipeline_id or 'local'}"
@@ -95,24 +98,13 @@ class ArchitectureStage:
                 prompt=prompt,
             )
         )
-        text = ""
-        if handle.status == "COMPLETED":
-            text = self._planner.collect(runtime_id).final_text.strip()
-        if text:
-            return text.encode("utf-8")
-        return _first_file_bytes(self._folder)
-
-
-def _first_file_bytes(folder: Path | None) -> bytes | None:
-    if folder is None or not folder.is_dir():
-        return None
-    files = [path for path in sorted(folder.rglob("*")) if path.is_file()]
-    if not files:
-        return None
-    body = files[0].read_bytes()
-    if SECRET_CANARY.encode("utf-8") in body:
-        return None
-    return body
+        if handle.status != "COMPLETED":
+            return None
+        design = named_file_bytes(self._folder, DESIGN_NAMES)
+        testplan = named_file_bytes(self._folder, TESTPLAN_NAMES)
+        if design is None or testplan is None:
+            return None
+        return design, testplan
 
 
 class ArchitectureGate:
