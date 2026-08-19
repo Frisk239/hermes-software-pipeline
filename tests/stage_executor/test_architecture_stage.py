@@ -115,7 +115,7 @@ class _TextPlanner:
         )
 
 
-def test_bound_planner_stdout_becomes_design(tmp_path: Path) -> None:
+def test_bound_planner_stdout_without_named_files_is_denied(tmp_path: Path) -> None:
     _controller, artifacts, prd_id = _open_with_prd(tmp_path)
     bindings = BindingTable(
         {"planner": AgentBinding("planner", "opencode", "grok-4.6")}
@@ -123,18 +123,15 @@ def test_bound_planner_stdout_becomes_design(tmp_path: Path) -> None:
     result = ArchitectureStage(bindings, artifacts, _TextPlanner("real design")).run(
         prd_artifact_id=prd_id, pipeline_id="pl_demo", prompt="Write architecture"
     )
-    assert result.status == "COMPLETED"
-    assert result.design_id is not None
-    assert result.testplan_id is not None
-    assert artifacts.open(result.design_id) == b"real design"
-    assert artifacts.open(result.testplan_id) == b"real design"
+    assert result.status == "DENIED"
 
 
-def test_bound_planner_file_becomes_design_when_stdout_empty(tmp_path: Path) -> None:
+def test_bound_planner_named_files_become_design_and_testplan(tmp_path: Path) -> None:
     _controller, artifacts, prd_id = _open_with_prd(tmp_path)
     folder = tmp_path / "plans"
     folder.mkdir()
-    (folder / "design.md").write_text("file design", encoding="utf-8")
+    (folder / "ARCHITECTURE.md").write_text("file design", encoding="utf-8")
+    (folder / "TESTPLAN.md").write_text("file testplan", encoding="utf-8")
     bindings = BindingTable(
         {"planner": AgentBinding("planner", "opencode", "grok-4.6")}
     )
@@ -143,7 +140,9 @@ def test_bound_planner_file_becomes_design_when_stdout_empty(tmp_path: Path) -> 
     )
     assert result.status == "COMPLETED"
     assert result.design_id is not None
+    assert result.testplan_id is not None
     assert artifacts.open(result.design_id) == b"file design"
+    assert artifacts.open(result.testplan_id) == b"file testplan"
 
 
 def test_missing_prd_or_binding_is_denied(tmp_path: Path) -> None:

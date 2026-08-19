@@ -152,6 +152,36 @@ def test_bound_executor_must_write_worktree(tmp_path: Path) -> None:
     assert not (tmp_path / "wt-real" / "src" / "app.py").exists()
 
 
+def test_bound_executor_prefers_src_over_prd(tmp_path: Path) -> None:
+    _built, approval, artifacts = _stage(tmp_path)
+    del _built
+    worktree = ManagedWorktree(tmp_path / "wt-mix")
+    worktree.write("PRD.md", b"# leftover prd\n")
+
+    class _MixedExecutor(_WritingExecutor):
+        def launch(self, request: RuntimeLaunchRequest) -> RuntimeHandle:
+            del request
+            self._worktree.write("src/app.py", b"print('parking-login')\n")
+            return RuntimeHandle(runtime_id="dev", status="COMPLETED")
+
+    result = DevelopmentStage(
+        BindingTable({"executor": AgentBinding("executor", "opencode", "grok-4.6")}),
+        approval,
+        artifacts,
+        worktree,
+        executor=_MixedExecutor(worktree),
+    ).run(
+        pipeline_id="pl_demo",
+        prd_id="art_prd",
+        design_id="art_design",
+        testplan_id="art_test",
+    )
+    assert result.status == "COMPLETED"
+    assert result.candidate is not None
+    assert result.candidate.relative_path == "src/app.py"
+    assert artifacts.open(result.artifact_id or "") == b"print('parking-login')\n"
+
+
 def test_bound_executor_failure_is_denied_without_fixture(tmp_path: Path) -> None:
     _built, approval, artifacts = _stage(tmp_path)
     del _built

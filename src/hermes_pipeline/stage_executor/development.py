@@ -18,6 +18,7 @@ from hermes_pipeline.repository.worktree import (
 )
 from hermes_pipeline.runtime_broker.binding import BindingNotFound, BindingTable
 from hermes_pipeline.runtime_broker.ports import RuntimeBrokerPort, RuntimeLaunchRequest
+from hermes_pipeline.stage_executor.harvest import pick_implementation
 
 IMPL_NAME = "src/app.py"
 IMPL_BYTES = b"print('login-page')\n"
@@ -110,12 +111,11 @@ class DevelopmentStage:
                 prompt=prompt,
             )
         )
-        files = self._worktree.files()
-        if handle.status != "COMPLETED" and not files:
+        if handle.status != "COMPLETED":
             return None
-        if not files:
+        written = pick_implementation(self._worktree.files(), self._worktree.root)
+        if written is None:
             return None
-        written = files[0]
         body = written.read_bytes()
         if SECRET_CANARY.encode("utf-8") in body:
             return None

@@ -11,9 +11,9 @@ from typing import Literal
 
 from hermes_pipeline.artifacts.ports import ArtifactPutRequest, ArtifactsPort
 from hermes_pipeline.controller.ports import ControllerPort, PipelineQuery
-from hermes_pipeline.repository.worktree import SECRET_CANARY
 from hermes_pipeline.runtime_broker.binding import BindingNotFound, BindingTable
 from hermes_pipeline.runtime_broker.ports import RuntimeBrokerPort, RuntimeLaunchRequest
+from hermes_pipeline.stage_executor.harvest import PRD_NAMES, named_file_bytes
 
 PRD_BYTES = b"hermes-pipeline-prd-v1\n"
 
@@ -81,24 +81,15 @@ class PrdStage:
                 prompt=prompt,
             )
         )
-        text = ""
-        if handle.status == "COMPLETED":
-            text = self._planner.collect(runtime_id).final_text.strip()
+        if handle.status != "COMPLETED":
+            return None
+        named = named_file_bytes(self._folder, PRD_NAMES)
+        if named is not None:
+            return named
+        text = self._planner.collect(runtime_id).final_text.strip()
         if text:
             return text.encode("utf-8")
-        return _first_file_bytes(self._folder)
-
-
-def _first_file_bytes(folder: Path | None) -> bytes | None:
-    if folder is None or not folder.is_dir():
         return None
-    files = [path for path in sorted(folder.rglob("*")) if path.is_file()]
-    if not files:
-        return None
-    body = files[0].read_bytes()
-    if SECRET_CANARY.encode("utf-8") in body:
-        return None
-    return body
 
 
 class PrdGate:
