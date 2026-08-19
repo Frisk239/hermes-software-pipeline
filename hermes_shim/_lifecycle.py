@@ -537,9 +537,14 @@ def read_pipeline_command(
     ):
         if key in view:
             result.detail[key] = str(view[key])
-    from ._github import load_published
+    from ._github import load_published, observe_pr
 
-    result.detail.update(load_published(root, pipeline_id))
+    published = load_published(root, pipeline_id)
+    result.detail.update(published)
+    repo = result.detail.get("github_repo", "")
+    number = result.detail.get("pr_number", "")
+    if repo and number:
+        result.detail.update(observe_pr(repo, number))
     return result
 
 

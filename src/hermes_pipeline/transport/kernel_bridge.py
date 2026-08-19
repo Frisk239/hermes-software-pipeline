@@ -77,6 +77,7 @@ class KernelBridge:
         self._verify = self._load_verify()
         self._approvals = self._load_approvals()
         self._approval = SolutionApproval(self._registry)
+        self._approval.restore(self._approvals)
         self._github = self._load_github()
         self._runtimes = self._load_runtime_pins()
         self._requirements = self._load_requirements()
@@ -201,6 +202,9 @@ class KernelBridge:
                 result["approver_id"] = decision.get("approver_id", "")
             if self._github:
                 result["github_repo"] = self._github.get("repo", "")
+                result["check_status"] = ""
+                result["review_status"] = ""
+                result["queue_status"] = ""
             need = self._requirements.get(pipeline_id)
             if need:
                 result["requirement_text"] = need
@@ -838,11 +842,10 @@ class KernelBridge:
             )
         except PermissionError:
             return {"ok": False, "error": "approval denied"}
-        self._approvals[pipeline_id] = {
-            "approval_status": "APPROVED",
-            "approver_id": principal,
-            "project_id": project_id,
-        }
+        self._approvals = self._approval.dump()
+        row = self._approvals.get(pipeline_id, {})
+        row["project_id"] = project_id
+        self._approvals[pipeline_id] = row
         self._save_approvals()
         self._advance_development(pipeline_id, project_id, principal)
         self._advance_verify(pipeline_id, project_id)
@@ -874,6 +877,10 @@ class KernelBridge:
                 "approval_status": str(row.get("approval_status", "")),
                 "approver_id": str(row.get("approver_id", "")),
                 "project_id": str(row.get("project_id", "")),
+                "prd_id": str(row.get("prd_id", "")),
+                "design_id": str(row.get("design_id", "")),
+                "testplan_id": str(row.get("testplan_id", "")),
+                "designated_id": str(row.get("designated_id", "")),
             }
         return loaded
 
