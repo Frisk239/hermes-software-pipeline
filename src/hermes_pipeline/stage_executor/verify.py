@@ -154,24 +154,18 @@ class VerifyFlow:
             code, text = _run_pytest(self._sandbox.root)
             chunks.append(text)
             if code is None or code != 0:
-                (self._sandbox.root / "SCRIPT_OUT").write_text(
-                    "\n".join(chunks), encoding="utf-8"
-                )
+                self._sandbox.write("SCRIPT_OUT", "\n".join(chunks))
                 return "failed"
             tested = True
         app = self._sandbox.root / "src" / "app.py"
         if not app.is_file():
             if tested:
-                (self._sandbox.root / "SCRIPT_OUT").write_text(
-                    "\n".join(chunks), encoding="utf-8"
-                )
+                self._sandbox.write("SCRIPT_OUT", "\n".join(chunks))
                 return "passed"
             return "none"
         status, text = _run_app(app, self._sandbox.root / "src")
         chunks.append(text)
-        (self._sandbox.root / "SCRIPT_OUT").write_text(
-            "\n".join(chunks), encoding="utf-8"
-        )
+        self._sandbox.write("SCRIPT_OUT", "\n".join(chunks))
         return status
 
     def _e2e_prompt(self) -> str:

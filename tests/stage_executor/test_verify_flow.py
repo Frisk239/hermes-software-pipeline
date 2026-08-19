@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from hermes_pipeline.artifacts import LocalCasArtifacts
 from hermes_pipeline.delivery.fake import FakeDelivery
 from hermes_pipeline.repository.integration import (
@@ -130,6 +132,14 @@ def test_e2e_failure_is_rework_without_delivery(tmp_path: Path) -> None:
     assert result.status == "REWORK"
     assert result.delivered is False
     assert sandbox.exists() is False
+
+
+def test_sandbox_rejects_escaped_write(tmp_path: Path) -> None:
+    sandbox = VerificationSandbox(tmp_path / "sandbox")
+    sandbox.create("sha")
+    with pytest.raises(ValueError, match="path escape"):
+        sandbox.write("../escape.txt", "nope")
+    assert not (tmp_path / "escape.txt").exists()
 
 
 def test_missing_binding_is_denied(tmp_path: Path) -> None:
