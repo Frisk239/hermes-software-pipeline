@@ -645,9 +645,7 @@ def test_verify_oserror_is_infra_and_retry_keeps_attempts(
     def _boom(*_args: object, **_kwargs: object) -> object:
         raise OSError("sandbox")
 
-    monkeypatch.setattr(
-        "hermes_pipeline.transport.kernel_bridge.VerifyFlow.run", _boom
-    )
+    monkeypatch.setattr("hermes_pipeline.transport.kernel_bridge.VerifyFlow.run", _boom)
     approved = first.process(
         "cmd_ok",
         {
