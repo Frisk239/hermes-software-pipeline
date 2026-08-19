@@ -83,13 +83,7 @@ class PrdStage:
         )
         if handle.status != "COMPLETED":
             return None
-        named = named_file_bytes(self._folder, PRD_NAMES)
-        if named is not None:
-            return named
-        text = self._planner.collect(runtime_id).final_text.strip()
-        if text:
-            return text.encode("utf-8")
-        return None
+        return named_file_bytes(self._folder, PRD_NAMES)
 
 
 class PrdGate:

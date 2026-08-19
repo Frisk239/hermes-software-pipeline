@@ -5,8 +5,6 @@ DISPOSITION: ADOPTED_BY_00-07
 
 from __future__ import annotations
 
-import subprocess
-import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
@@ -23,6 +21,8 @@ from hermes_pipeline.repository.integration import (
 )
 from hermes_pipeline.runtime_broker.binding import BindingNotFound, BindingTable
 from hermes_pipeline.runtime_broker.ports import RuntimeBrokerPort, RuntimeLaunchRequest
+from hermes_pipeline.stage_executor.contracts import ACCEPTANCE_CONTRACT, E2E_CONTRACT
+from hermes_pipeline.stage_executor.self_test import run_app, run_pytest
 
 E2E_BYTES = b"hermes-pipeline-e2e-v1\n"
 ACCEPT_BYTES = b"hermes-pipeline-acceptance-v1\n"
@@ -37,6 +37,7 @@ class VerifyResult:
     acceptance_id: str | None = None
     delivered: bool = False
     delivery: DeliveryRecord | None = None
+    feedback: str = ""
 
 
 class VerifyFlow:
@@ -75,11 +76,17 @@ class VerifyFlow:
         try:
             scripted = self._run_staged_candidate()
             if scripted == "failed":
-                return VerifyResult(status="REWORK")
+                return VerifyResult(
+                    status="REWORK", feedback=_script_feedback(self._sandbox.root)
+                )
             e2e_bind = self._bindings.resolve("e2e")
             real_e2e = e2e_bind.runtime != "fake"
             if real_e2e and scripted in {"timeout", "none", "skip"}:
-                return VerifyResult(status="REWORK")
+                return VerifyResult(
+                    status="REWORK",
+                    feedback=_script_feedback(self._sandbox.root)
+                    or "scripted e2e unavailable",
+                )
             e2e_id = f"e2e-{integration.sha[:12]}"
             if scripted == "passed":
                 output = (self._sandbox.root / "SCRIPT_OUT").read_bytes()
@@ -94,11 +101,19 @@ class VerifyFlow:
                         )
                     )
                 except (OSError, RuntimeError, ValueError):
-                    return VerifyResult(status="REWORK")
+                    return VerifyResult(
+                        status="REWORK", feedback="e2e runtime did not complete"
+                    )
                 if e2e.status != "COMPLETED":
-                    return VerifyResult(status="REWORK")
+                    return VerifyResult(
+                        status="REWORK", feedback="e2e runtime did not complete"
+                    )
                 if real_e2e and _verdict(self._sandbox.root, "RESULT.md") != "pass":
-                    return VerifyResult(status="REWORK")
+                    return VerifyResult(
+                        status="REWORK",
+                        feedback=_named_feedback(self._sandbox.root, "RESULT.md")
+                        or "e2e RESULT.md is not PASS",
+                    )
                 e2e_art = self._artifacts.put(ArtifactPutRequest(payload=E2E_BYTES))
             if scripted == "passed":
                 acc_art = self._artifacts.put(ArtifactPutRequest(payload=ACCEPT_BYTES))
@@ -112,15 +127,28 @@ class VerifyFlow:
                         )
                     )
                 except (OSError, RuntimeError, ValueError):
-                    return VerifyResult(status="REWORK", e2e_id=e2e_art.artifact_id)
+                    return VerifyResult(
+                        status="REWORK",
+                        e2e_id=e2e_art.artifact_id,
+                        feedback="reviewer runtime did not complete",
+                    )
                 if accept.status != "COMPLETED":
-                    return VerifyResult(status="REWORK", e2e_id=e2e_art.artifact_id)
+                    return VerifyResult(
+                        status="REWORK",
+                        e2e_id=e2e_art.artifact_id,
+                        feedback="reviewer runtime did not complete",
+                    )
                 review_bind = self._bindings.resolve("reviewer")
                 if (
                     review_bind.runtime != "fake"
                     and _verdict(self._sandbox.root, "REVIEW.md") != "pass"
                 ):
-                    return VerifyResult(status="REWORK", e2e_id=e2e_art.artifact_id)
+                    return VerifyResult(
+                        status="REWORK",
+                        e2e_id=e2e_art.artifact_id,
+                        feedback=_named_feedback(self._sandbox.root, "REVIEW.md")
+                        or "REVIEW.md is not PASS",
+                    )
                 acc_art = self._artifacts.put(ArtifactPutRequest(payload=ACCEPT_BYTES))
             published = self._delivery.publish(
                 DeliveryRequest(
@@ -151,7 +179,7 @@ class VerifyFlow:
         tested = False
         tests = self._sandbox.root / "tests"
         if tests.is_dir():
-            code, text = _run_pytest(self._sandbox.root)
+            code, text = run_pytest(self._sandbox.root)
             chunks.append(text)
             if code is None or code != 0:
                 self._sandbox.write("SCRIPT_OUT", "\n".join(chunks))
@@ -163,74 +191,33 @@ class VerifyFlow:
                 self._sandbox.write("SCRIPT_OUT", "\n".join(chunks))
                 return "passed"
             return "none"
-        status, text = _run_app(app, self._sandbox.root / "src")
+        status, text = run_app(app, self._sandbox.root / "src")
         chunks.append(text)
         self._sandbox.write("SCRIPT_OUT", "\n".join(chunks))
         return status
 
     def _e2e_prompt(self) -> str:
         return (
-            "Verify this candidate in this directory. "
+            f"{E2E_CONTRACT}\n"
             "Run src/app.py if present. Write RESULT.md with only PASS or FAIL."
         )
 
     def _review_prompt(self) -> str:
         return (
-            "Review the candidate in this directory. "
+            f"{ACCEPTANCE_CONTRACT}\n"
             "Write REVIEW.md with only PASS or FAIL. Do not rewrite source."
         )
 
 
-def _run_app(app: Path, cwd: Path) -> tuple[str, str]:
-    checked = _run_python([str(app), "--check"], cwd)
-    if checked[0] == 0:
-        return "passed", checked[1]
-    if checked[0] is None:
-        return "timeout", checked[1]
-    lowered = checked[1].lower()
-    if checked[0] == 2 or "unrecognized" in lowered or "invalid" in lowered:
-        bare = _run_python([str(app)], cwd)
-        if bare[0] == 0:
-            return "passed", bare[1]
-        if bare[0] is None:
-            return "timeout", bare[1]
-        return "failed", bare[1]
-    return "failed", checked[1]
+def _named_feedback(root: Path, name: str) -> str:
+    path = root / name
+    if not path.is_file():
+        return ""
+    return path.read_text(encoding="utf-8", errors="replace")
 
 
-def _run_python(argv: list[str], cwd: Path) -> tuple[int | None, str]:
-    try:
-        completed = subprocess.run(
-            [sys.executable, *argv],
-            cwd=str(cwd),
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            timeout=20,
-            check=False,
-        )
-    except subprocess.TimeoutExpired:
-        return None, "timeout"
-    text = (completed.stdout or "") + (completed.stderr or "")
-    return completed.returncode, text
-
-
-def _run_pytest(root: Path) -> tuple[int | None, str]:
-    try:
-        completed = subprocess.run(
-            [sys.executable, "-m", "pytest", "tests", "-q"],
-            cwd=str(root),
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            timeout=60,
-            check=False,
-        )
-    except (OSError, subprocess.TimeoutExpired):
-        return None, "pytest unavailable"
-    return completed.returncode, (completed.stdout or "") + (completed.stderr or "")
+def _script_feedback(root: Path) -> str:
+    return _named_feedback(root, "SCRIPT_OUT").strip() or "scripted verify failed"
 
 
 def _verdict(folder: Path, name: str) -> str:

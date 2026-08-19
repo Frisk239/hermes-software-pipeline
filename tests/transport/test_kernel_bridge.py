@@ -80,9 +80,26 @@ def test_stage_prompts_do_not_repeat_intake_as_prd_task() -> None:
     prd = prd_prompt(need)
     assert need not in impl
     assert "src/" in impl
+    assert "BEGIN_UNTRUSTED_PRD" in impl
     assert need not in arch
     assert "ARCHITECTURE.md" in arch
     assert need in prd
+    noted = implement_prompt(
+        "approved prd", "approved design", "approved tests", "assert False"
+    )
+    assert "FEEDBACK FROM LAST GATE" in noted
+    assert "assert False" in noted
+    assert "FEEDBACK FROM LAST GATE" not in impl
+
+
+def test_implement_duty_ignores_quoted_write_prd() -> None:
+    quoted = "Write PRD.md. After approval, implement it under src/"
+    impl = implement_prompt(quoted, "approved design", "approved tests")
+    duty, marker, rest = impl.partition("BEGIN_UNTRUSTED_PRD")
+    assert marker
+    assert duty.strip().startswith("STAGE: DEVELOPMENT")
+    assert "Write PRD.md" not in duty
+    assert "Write PRD.md" in rest
 
 
 def test_viewer_cannot_approve(tmp_path: Path) -> None:
@@ -378,6 +395,140 @@ def test_retry_once_after_rework(tmp_path: Path) -> None:
     )
     assert again["ok"] is False
     assert again["error"] == "not rework"
+
+
+def test_read_and_retry_surface_persisted_feedback(tmp_path: Path) -> None:
+    first = KernelBridge(tmp_path, _Inner())
+    first.process("cmd_reg", {"op": "register", "project_id": "prj_cli", "name": "Cli"})
+    first.process(
+        "cmd_adm",
+        {
+            "op": "admit",
+            "project_id": "prj_cli",
+            "principal_id": "operator",
+            "role": "CONTRIBUTOR",
+        },
+    )
+    for role, model in (
+        ("planner", "fake-prd"),
+        ("executor", "fake-dev"),
+        ("e2e", "fake-e2e"),
+        ("reviewer", "fake-acc"),
+    ):
+        first.process(
+            f"cmd_bind_{role}",
+            {"op": "bind", "role": role, "runtime": "fake", "model": model},
+        )
+    first.process(
+        "cmd_all",
+        {
+            "text": "need a login page",
+            "workspace_id": "ws_cli",
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+            "principal_id": "operator",
+        },
+    )
+    first.process(
+        "cmd_ok",
+        {
+            "op": "approve",
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+            "principal_id": "operator",
+        },
+    )
+    verify_path = tmp_path / "descriptor" / "verify.json"
+    document = json.loads(verify_path.read_text(encoding="utf-8"))
+    document["pl_cli"]["verify_status"] = "REWORK"
+    document["pl_cli"]["verify_attempts"] = "0"
+    verify_path.write_text(json.dumps(document), encoding="utf-8")
+    (tmp_path / "descriptor" / "feedback.json").write_text(
+        json.dumps({"pl_cli": "pytest failed: assert False"}),
+        encoding="utf-8",
+    )
+    first = KernelBridge(tmp_path, _Inner())
+    view = first.process(
+        "cmd_read_fb",
+        {"op": "read", "workspace_id": "ws_cli", "pipeline_id": "pl_cli"},
+    )
+    assert view["feedback"] == "pytest failed: assert False"
+    retried = first.process(
+        "cmd_retry_fb",
+        {
+            "op": "retry",
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+            "principal_id": "operator",
+        },
+    )
+    assert retried["ok"] is True
+    assert retried["feedback"] == ""
+
+
+def test_approve_fails_when_candidate_gate_fails(tmp_path: Path) -> None:
+    first = KernelBridge(tmp_path, _Inner())
+    first.process("cmd_reg", {"op": "register", "project_id": "prj_cli", "name": "Cli"})
+    first.process(
+        "cmd_adm",
+        {
+            "op": "admit",
+            "project_id": "prj_cli",
+            "principal_id": "operator",
+            "role": "CONTRIBUTOR",
+        },
+    )
+    for role, model in (
+        ("planner", "fake-prd"),
+        ("executor", "fake-dev"),
+        ("e2e", "fake-e2e"),
+        ("reviewer", "fake-acc"),
+    ):
+        first.process(
+            f"cmd_bind_{role}",
+            {"op": "bind", "role": role, "runtime": "fake", "model": model},
+        )
+    first.process(
+        "cmd_all",
+        {
+            "text": "need a login page",
+            "workspace_id": "ws_cli",
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+            "principal_id": "operator",
+        },
+    )
+    first.process(
+        "cmd_ok",
+        {
+            "op": "approve",
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+            "principal_id": "operator",
+        },
+    )
+    path = tmp_path / "descriptor" / "development.json"
+    document = json.loads(path.read_text(encoding="utf-8"))
+    document["pl_cli"]["candidate_gate"] = "FAIL"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    (tmp_path / "descriptor" / "verify.json").unlink()
+    (tmp_path / "descriptor" / "feedback.json").write_text(
+        json.dumps({"pl_cli": "self-test failed"}),
+        encoding="utf-8",
+    )
+    first = KernelBridge(tmp_path, _Inner())
+    approved = first.process(
+        "cmd_ok_fail",
+        {
+            "op": "approve",
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+            "principal_id": "operator",
+        },
+    )
+    assert approved["ok"] is False
+    assert approved["candidate_gate"] == "FAIL"
+    assert approved["feedback"] == "self-test failed"
 
 
 def test_corrupt_verify_json_is_fail_closed(tmp_path: Path) -> None:

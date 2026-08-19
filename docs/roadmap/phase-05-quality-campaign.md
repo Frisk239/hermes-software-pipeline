@@ -109,7 +109,9 @@ Operator path today: `submit` → real PRD/Arch → `approve` → `src/` → scr
 
 ## After this campaign (not in the four cuts)
 
-Browser e2e (Chrome MCP), Feishu cards, Dashboard, Docker sandbox, training a critic.
+Execution moved to `docs/roadmap/phase-05-hardening-campaign.md` (05-36…05-46: contracts, retry/DEV_GATE, adapters, isolation lite).
+
+Still later: browser e2e (Chrome MCP), Feishu cards, Dashboard, Docker sandbox, training a critic.
 
 ## Session order
 
