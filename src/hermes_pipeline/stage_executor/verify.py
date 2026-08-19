@@ -85,31 +85,37 @@ class VerifyFlow:
                 output = (self._sandbox.root / "SCRIPT_OUT").read_bytes()
                 e2e_art = self._artifacts.put(ArtifactPutRequest(payload=output))
             else:
-                e2e = self._e2e.launch(
-                    RuntimeLaunchRequest(
-                        runtime_id=e2e_id,
-                        role="e2e",
-                        prompt=self._e2e_prompt(),
+                try:
+                    e2e = self._e2e.launch(
+                        RuntimeLaunchRequest(
+                            runtime_id=e2e_id,
+                            role="e2e",
+                            prompt=self._e2e_prompt(),
+                        )
                     )
-                )
+                except (OSError, RuntimeError, ValueError):
+                    return VerifyResult(status="REWORK")
                 if e2e.status != "COMPLETED":
                     return VerifyResult(status="REWORK")
                 if real_e2e and _verdict(self._sandbox.root, "RESULT.md") != "pass":
                     return VerifyResult(status="REWORK")
                 e2e_art = self._artifacts.put(ArtifactPutRequest(payload=E2E_BYTES))
-            review_bind = self._bindings.resolve("reviewer")
-            if scripted == "passed" and review_bind.runtime == "fake":
+            if scripted == "passed":
                 acc_art = self._artifacts.put(ArtifactPutRequest(payload=ACCEPT_BYTES))
             else:
-                accept = self._reviewer.launch(
-                    RuntimeLaunchRequest(
-                        runtime_id=f"acc-{integration.sha[:12]}",
-                        role="reviewer",
-                        prompt=self._review_prompt(),
+                try:
+                    accept = self._reviewer.launch(
+                        RuntimeLaunchRequest(
+                            runtime_id=f"acc-{integration.sha[:12]}",
+                            role="reviewer",
+                            prompt=self._review_prompt(),
+                        )
                     )
-                )
+                except (OSError, RuntimeError, ValueError):
+                    return VerifyResult(status="REWORK", e2e_id=e2e_art.artifact_id)
                 if accept.status != "COMPLETED":
                     return VerifyResult(status="REWORK", e2e_id=e2e_art.artifact_id)
+                review_bind = self._bindings.resolve("reviewer")
                 if (
                     review_bind.runtime != "fake"
                     and _verdict(self._sandbox.root, "REVIEW.md") != "pass"

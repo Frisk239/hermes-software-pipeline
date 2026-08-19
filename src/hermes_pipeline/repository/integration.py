@@ -49,7 +49,7 @@ class VerificationSandbox:
 
     def cleanup(self) -> None:
         if self._root.exists():
-            shutil.rmtree(self._root)
+            shutil.rmtree(self._root, ignore_errors=True)
 
     def exists(self) -> bool:
         return self._root.exists()
