@@ -63,6 +63,7 @@ class KernelBridge:
         self._inner = inner
         self._dir = state_root / "descriptor"
         self._dir.mkdir(parents=True, exist_ok=True)
+        self._corrupt = False
         self._store = self._load_kernel()
         self._controller = KernelController(self._store, recorded_at=_RECORDED)
         self._registry = self._load_registry()
@@ -78,6 +79,8 @@ class KernelBridge:
         self._approvals = self._load_approvals()
         self._approval = SolutionApproval(self._registry)
         self._approval.restore(self._approvals)
+        self._apply_stage_bundle()
+        self._approval.restore(self._approvals)
         self._github = self._load_github()
         self._runtimes = self._load_runtime_pins()
         self._requirements = self._load_requirements()
@@ -89,6 +92,8 @@ class KernelBridge:
         self._github_transport = transport
 
     def process(self, command_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        if self._corrupt:
+            return {"ok": False, "error": "corrupt state"}
         op = payload.get("op")
         if op == "register":
             record = self._registry.register(
@@ -323,16 +328,10 @@ class KernelBridge:
         return merged
 
     def _load_kernel(self) -> MemoryKernelStore:
-        path = self._dir / "kernel.json"
-        if not path.is_file():
+        document = self._parse_json(self._dir / "kernel.json")
+        if not document:
             return MemoryKernelStore()
-        try:
-            document = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            return MemoryKernelStore()
-        if isinstance(document, dict):
-            return MemoryKernelStore.load(cast(dict[str, Any], document))
-        return MemoryKernelStore()
+        return MemoryKernelStore.load(document)
 
     def _save_kernel(self) -> None:
         (self._dir / "kernel.json").write_text(
@@ -444,18 +443,51 @@ class KernelBridge:
             }
             self._save_approvals()
 
-    def _load_prd(self) -> dict[str, dict[str, str]]:
-        path = self._dir / "prd.json"
+    def _parse_json(self, path: Path) -> dict[str, Any]:
         if not path.is_file():
             return {}
         try:
             document = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, ValueError):
+            self._corrupt = True
             return {}
         if not isinstance(document, dict):
+            self._corrupt = True
             return {}
+        return cast(dict[str, Any], document)
+
+    def _apply_stage_bundle(self) -> None:
+        document = self._parse_json(self._dir / "stages.json")
+        if self._corrupt or not document:
+            return
+        approvals = document.get("approvals")
+        if isinstance(approvals, dict) and not (self._dir / "approvals.json").is_file():
+            self._approvals = self._coerce_approvals(cast(dict[str, Any], approvals))
+        developed = document.get("development")
+        if (
+            isinstance(developed, dict)
+            and not (self._dir / "development.json").is_file()
+        ):
+            self._dev = self._coerce_dev(cast(dict[str, Any], developed))
+        verified = document.get("verify")
+        if isinstance(verified, dict) and not (self._dir / "verify.json").is_file():
+            self._verify = self._coerce_verify(cast(dict[str, Any], verified))
+
+    def _save_stages(self) -> None:
+        payload = {
+            "approvals": self._approvals,
+            "development": self._dev,
+            "verify": self._verify,
+        }
+        (self._dir / "stages.json").write_text(
+            json.dumps(payload, sort_keys=True),
+            encoding="utf-8",
+        )
+
+    def _load_prd(self) -> dict[str, dict[str, str]]:
+        document = self._parse_json(self._dir / "prd.json")
         loaded: dict[str, dict[str, str]] = {}
-        typed = cast(dict[str, Any], document)
+        typed = document
         for raw_key, item in typed.items():
             if not isinstance(item, dict):
                 continue
@@ -673,19 +705,9 @@ class KernelBridge:
                 loaded[family] = raw
         return loaded
 
-    def _load_dev(self) -> dict[str, dict[str, str]]:
-        path = self._dir / "development.json"
-        if not path.is_file():
-            return {}
-        try:
-            document = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            return {}
-        if not isinstance(document, dict):
-            return {}
+    def _coerce_dev(self, document: dict[str, Any]) -> dict[str, dict[str, str]]:
         loaded: dict[str, dict[str, str]] = {}
-        typed = cast(dict[str, Any], document)
-        for raw_key, item in typed.items():
+        for raw_key, item in document.items():
             if not isinstance(item, dict):
                 continue
             row = cast(dict[str, Any], item)
@@ -698,11 +720,15 @@ class KernelBridge:
             }
         return loaded
 
+    def _load_dev(self) -> dict[str, dict[str, str]]:
+        return self._coerce_dev(self._parse_json(self._dir / "development.json"))
+
     def _save_dev(self) -> None:
         (self._dir / "development.json").write_text(
             json.dumps(self._dev, sort_keys=True),
             encoding="utf-8",
         )
+        self._save_stages()
 
     def _advance_verify(self, pipeline_id: str, project_id: str) -> None:
         if pipeline_id in self._verify:
@@ -757,19 +783,9 @@ class KernelBridge:
         }
         self._save_verify()
 
-    def _load_verify(self) -> dict[str, dict[str, str]]:
-        path = self._dir / "verify.json"
-        if not path.is_file():
-            return {}
-        try:
-            document = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            return {}
-        if not isinstance(document, dict):
-            return {}
+    def _coerce_verify(self, document: dict[str, Any]) -> dict[str, dict[str, str]]:
         loaded: dict[str, dict[str, str]] = {}
-        typed = cast(dict[str, Any], document)
-        for raw_key, item in typed.items():
+        for raw_key, item in document.items():
             if not isinstance(item, dict):
                 continue
             row = cast(dict[str, Any], item)
@@ -781,11 +797,15 @@ class KernelBridge:
             }
         return loaded
 
+    def _load_verify(self) -> dict[str, dict[str, str]]:
+        return self._coerce_verify(self._parse_json(self._dir / "verify.json"))
+
     def _save_verify(self) -> None:
         (self._dir / "verify.json").write_text(
             json.dumps(self._verify, sort_keys=True),
             encoding="utf-8",
         )
+        self._save_stages()
 
     def _retry_verify(self, payload: dict[str, Any]) -> dict[str, Any]:
         pipeline_id = str(payload.get("pipeline_id", "pl_local"))
@@ -857,19 +877,9 @@ class KernelBridge:
             "verify_status": verify_status,
         }
 
-    def _load_approvals(self) -> dict[str, dict[str, str]]:
-        path = self._dir / "approvals.json"
-        if not path.is_file():
-            return {}
-        try:
-            document = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            return {}
-        if not isinstance(document, dict):
-            return {}
+    def _coerce_approvals(self, document: dict[str, Any]) -> dict[str, dict[str, str]]:
         loaded: dict[str, dict[str, str]] = {}
-        typed = cast(dict[str, Any], document)
-        for raw_key, item in typed.items():
+        for raw_key, item in document.items():
             if not isinstance(item, dict):
                 continue
             row = cast(dict[str, Any], item)
@@ -884,11 +894,15 @@ class KernelBridge:
             }
         return loaded
 
+    def _load_approvals(self) -> dict[str, dict[str, str]]:
+        return self._coerce_approvals(self._parse_json(self._dir / "approvals.json"))
+
     def _save_approvals(self) -> None:
         (self._dir / "approvals.json").write_text(
             json.dumps(self._approvals, sort_keys=True),
             encoding="utf-8",
         )
+        self._save_stages()
 
 
 class _PassingRuntime:
