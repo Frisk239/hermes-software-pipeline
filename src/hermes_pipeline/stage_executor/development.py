@@ -110,9 +110,9 @@ class DevelopmentStage:
                 prompt=prompt,
             )
         )
-        if handle.status != "COMPLETED":
-            return None
         files = self._worktree.files()
+        if handle.status != "COMPLETED" and not files:
+            return None
         if not files:
             return None
         written = files[0]

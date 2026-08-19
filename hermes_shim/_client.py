@@ -90,6 +90,7 @@ def _request(
     method: str,
     path: str,
     body: bytes | None = None,
+    timeout: float = CLIENT_READ_TIMEOUT_SECONDS,
 ) -> ClientResult:
     headers = {
         PROTOCOL_HEADER: PROTOCOL_VALUE,
@@ -104,7 +105,7 @@ def _request(
         f"{base_url}{path}", data=data, headers=headers, method=method
     )
     try:
-        with _OPENER.open(request, timeout=CLIENT_READ_TIMEOUT_SECONDS) as response:
+        with _OPENER.open(request, timeout=timeout) as response:
             status = int(response.status)
             raw = response.read()
     except urllib.error.HTTPError as exc:
@@ -162,7 +163,7 @@ def submit_command(
         sort_keys=True,
         separators=(",", ":"),
     ).encode("utf-8")
-    return _request(_base_url(port), token, "POST", "/v1/commands", body)
+    return _request(_base_url(port), token, "POST", "/v1/commands", body, timeout=300)
 
 
 __all__ = [
