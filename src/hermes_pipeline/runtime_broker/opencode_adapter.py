@@ -47,6 +47,8 @@ class OpenCodeAdapter:
                 cwd=self._cwd,
                 capture_output=True,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
                 timeout=_TIMEOUT_S if not request.prompt else 120.0,
                 check=False,
             )

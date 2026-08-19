@@ -47,8 +47,18 @@ def resolve_runtime_executable(
         for candidate in (name, f"{name}.exe"):
             found = lookup(candidate)
             if found and Path(found).is_file():
-                return found
+                return _prefer_real_executable(found, family)
     return ""
+
+
+def _prefer_real_executable(path: str, family: str) -> str:
+    current = Path(path)
+    if family != "opencode" or current.suffix.lower() not in {".cmd", ".ps1"}:
+        return path
+    sibling = current.parent / "node_modules" / "opencode-ai" / "bin" / "opencode.exe"
+    if sibling.is_file():
+        return str(sibling)
+    return path
 
 
 def detect_runtime_executables(

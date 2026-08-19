@@ -53,6 +53,21 @@ def test_bound_broker_routes_planner_to_opencode_model(tmp_path: Path) -> None:
     assert "grok-4.6" in opencode.last_argv
 
 
+def test_bound_broker_forwards_prompt(tmp_path: Path) -> None:
+    script = tmp_path / "fake_opencode.py"
+    script.write_text("print('ok')\n", encoding="utf-8")
+    table = BindingTable({"planner": AgentBinding("planner", "opencode", "grok-4.6")})
+    opencode = OpenCodeAdapter(executable=str(script), cwd=str(tmp_path))
+    broker = BoundRuntimeBroker(
+        table, {"opencode": opencode, "fake": FakeRuntimeBroker()}
+    )
+    handle = broker.launch(
+        RuntimeLaunchRequest(runtime_id="rt-fwd", role="planner", prompt="Write a PRD")
+    )
+    assert handle.status == "COMPLETED"
+    assert opencode.last_argv[-1] == "Write a PRD"
+
+
 def test_opencode_passes_prompt_as_run_message(tmp_path: Path) -> None:
     script = tmp_path / "fake_opencode.py"
     script.write_text("print('ok')\n", encoding="utf-8")

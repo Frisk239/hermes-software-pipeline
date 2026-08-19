@@ -37,6 +37,20 @@ def test_cursor_uses_cursor_agent_name(tmp_path: Path) -> None:
     assert path == str(exe)
 
 
+def test_npm_cmd_shim_unwraps_to_exe(tmp_path: Path) -> None:
+    exe = tmp_path / "node_modules" / "opencode-ai" / "bin" / "opencode.exe"
+    exe.parent.mkdir(parents=True)
+    exe.write_text("x", encoding="utf-8")
+    shim = tmp_path / "opencode.CMD"
+    shim.write_text("x", encoding="utf-8")
+    path = resolve_runtime_executable(
+        "opencode",
+        environ={},
+        which=lambda name: str(shim) if name == "opencode" else None,
+    )
+    assert path == str(exe)
+
+
 def test_which_used_when_no_override(tmp_path: Path) -> None:
     exe = tmp_path / "opencode"
     exe.write_text("x", encoding="utf-8")

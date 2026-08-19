@@ -81,9 +81,9 @@ class PrdStage:
                 prompt=prompt,
             )
         )
-        if handle.status != "COMPLETED":
-            return None
-        text = self._planner.collect(runtime_id).final_text.strip()
+        text = ""
+        if handle.status == "COMPLETED":
+            text = self._planner.collect(runtime_id).final_text.strip()
         if text:
             return text.encode("utf-8")
         return _first_file_bytes(self._folder)
