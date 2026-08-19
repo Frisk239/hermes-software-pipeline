@@ -76,6 +76,10 @@ class VerifyFlow:
             scripted = self._run_staged_candidate()
             if scripted == "failed":
                 return VerifyResult(status="REWORK")
+            e2e_bind = self._bindings.resolve("e2e")
+            real_e2e = e2e_bind.runtime != "fake"
+            if real_e2e and scripted in {"timeout", "none", "skip"}:
+                return VerifyResult(status="REWORK")
             e2e_id = f"e2e-{integration.sha[:12]}"
             if scripted == "passed":
                 output = (self._sandbox.root / "SCRIPT_OUT").read_bytes()
@@ -90,8 +94,11 @@ class VerifyFlow:
                 )
                 if e2e.status != "COMPLETED":
                     return VerifyResult(status="REWORK")
+                if real_e2e and _verdict(self._sandbox.root, "RESULT.md") != "pass":
+                    return VerifyResult(status="REWORK")
                 e2e_art = self._artifacts.put(ArtifactPutRequest(payload=E2E_BYTES))
-            if scripted == "passed":
+            review_bind = self._bindings.resolve("reviewer")
+            if scripted == "passed" and review_bind.runtime == "fake":
                 acc_art = self._artifacts.put(ArtifactPutRequest(payload=ACCEPT_BYTES))
             else:
                 accept = self._reviewer.launch(
@@ -102,6 +109,11 @@ class VerifyFlow:
                     )
                 )
                 if accept.status != "COMPLETED":
+                    return VerifyResult(status="REWORK", e2e_id=e2e_art.artifact_id)
+                if (
+                    review_bind.runtime != "fake"
+                    and _verdict(self._sandbox.root, "REVIEW.md") != "pass"
+                ):
                     return VerifyResult(status="REWORK", e2e_id=e2e_art.artifact_id)
                 acc_art = self._artifacts.put(ArtifactPutRequest(payload=ACCEPT_BYTES))
             published = self._delivery.publish(
@@ -124,12 +136,31 @@ class VerifyFlow:
 
     def _run_staged_candidate(self) -> str:
         e2e = self._bindings.resolve("e2e")
-        if e2e.runtime == "fake" or self._candidate_root is None:
+        if e2e.runtime == "fake":
             return "skip"
+        if self._candidate_root is None:
+            return "none"
         self._sandbox.stage_tree(self._candidate_root)
+        chunks: list[str] = []
+        tested = False
+        tests = self._sandbox.root / "tests"
+        if tests.is_dir():
+            code, text = _run_pytest(self._sandbox.root)
+            chunks.append(text)
+            if code is None or code != 0:
+                (self._sandbox.root / "SCRIPT_OUT").write_text(
+                    "\n".join(chunks), encoding="utf-8"
+                )
+                return "failed"
+            tested = True
         app = self._sandbox.root / "src" / "app.py"
         if not app.is_file():
-            return "skip"
+            if tested:
+                (self._sandbox.root / "SCRIPT_OUT").write_text(
+                    "\n".join(chunks), encoding="utf-8"
+                )
+                return "passed"
+            return "none"
         try:
             completed = subprocess.run(
                 [sys.executable, str(app)],
@@ -143,8 +174,10 @@ class VerifyFlow:
             )
         except subprocess.TimeoutExpired:
             return "timeout"
-        output = (completed.stdout or "") + (completed.stderr or "")
-        (self._sandbox.root / "SCRIPT_OUT").write_text(output, encoding="utf-8")
+        chunks.append((completed.stdout or "") + (completed.stderr or ""))
+        (self._sandbox.root / "SCRIPT_OUT").write_text(
+            "\n".join(chunks), encoding="utf-8"
+        )
         if completed.returncode != 0:
             return "failed"
         return "passed"
@@ -160,6 +193,35 @@ class VerifyFlow:
             "Review the candidate in this directory. "
             "Write REVIEW.md with only PASS or FAIL. Do not rewrite source."
         )
+
+
+def _run_pytest(root: Path) -> tuple[int | None, str]:
+    try:
+        completed = subprocess.run(
+            [sys.executable, "-m", "pytest", "tests", "-q"],
+            cwd=str(root),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=60,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None, "pytest unavailable"
+    return completed.returncode, (completed.stdout or "") + (completed.stderr or "")
+
+
+def _verdict(folder: Path, name: str) -> str:
+    path = folder / name
+    if not path.is_file():
+        return "missing"
+    text = path.read_text(encoding="utf-8", errors="replace").strip().upper()
+    if text.startswith("PASS"):
+        return "pass"
+    if text.startswith("FAIL"):
+        return "fail"
+    return "missing"
 
 
 __all__ = [

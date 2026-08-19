@@ -23,9 +23,11 @@ from hermes_pipeline.repository.worktree import ManagedWorktree
 from hermes_pipeline.runtime_broker.binding import (
     RUNTIME_FAMILIES,
     AgentBinding,
+    BindingNotFound,
     BindingTable,
     BoundRuntimeBroker,
     RuntimeFamily,
+    StageRole,
 )
 from hermes_pipeline.runtime_broker.codex_adapter import CodexAdapter
 from hermes_pipeline.runtime_broker.fake import FakeRuntimeBroker
@@ -575,6 +577,15 @@ class KernelBridge:
     def _executor_broker(self, worktree: ManagedWorktree) -> BoundRuntimeBroker:
         return self._runtime_broker(str(worktree.root))
 
+    def _role_runtime(self, role: str, cwd: str) -> RuntimeBrokerPort:
+        try:
+            binding = self._bindings.resolve(cast(StageRole, role))
+        except BindingNotFound:
+            return _PassingRuntime()
+        if binding.runtime == "fake":
+            return _PassingRuntime()
+        return self._runtime_broker(cwd)
+
     def _runtime_broker(self, cwd: str) -> BoundRuntimeBroker:
         adapters: dict[RuntimeFamily, RuntimeBrokerPort] = {
             "fake": FakeRuntimeBroker(),
@@ -695,13 +706,13 @@ class KernelBridge:
         sha = developed.get("candidate_sha", "")
         artifacts = LocalCasArtifacts(self._dir.parent / "cas")
         sandbox = VerificationSandbox(self._dir.parent / "sandbox" / pipeline_id)
-        passing = _PassingRuntime()
         worktree = self._dir.parent / "worktrees" / pipeline_id
+        cwd = str(sandbox.root)
         result = VerifyFlow(
             self._bindings,
             artifacts,
-            passing,
-            passing,
+            self._role_runtime("e2e", cwd),
+            self._role_runtime("reviewer", cwd),
             self._delivery,
             sandbox,
             project_id=project_id,
@@ -788,10 +799,12 @@ class KernelBridge:
         self._save_approvals()
         self._advance_development(pipeline_id, project_id, principal)
         self._advance_verify(pipeline_id, project_id)
+        verify_status = self._verify.get(pipeline_id, {}).get("verify_status", "")
         return {
-            "ok": True,
+            "ok": verify_status != "REWORK",
             "approval_status": "APPROVED",
             "approver_id": principal,
+            "verify_status": verify_status,
         }
 
     def _load_approvals(self) -> dict[str, dict[str, str]]:
