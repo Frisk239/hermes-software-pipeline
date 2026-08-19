@@ -708,17 +708,26 @@ class KernelBridge:
         sandbox = VerificationSandbox(self._dir.parent / "sandbox" / pipeline_id)
         worktree = self._dir.parent / "worktrees" / pipeline_id
         cwd = str(sandbox.root)
-        result = VerifyFlow(
-            self._bindings,
-            artifacts,
-            self._role_runtime("e2e", cwd),
-            self._role_runtime("reviewer", cwd),
-            self._delivery,
-            sandbox,
-            project_id=project_id,
-            pipeline_id=pipeline_id,
-            candidate_root=worktree if worktree.is_dir() else None,
-        ).run(build_integration_candidate(sha, "0" * 64))
+        try:
+            result = VerifyFlow(
+                self._bindings,
+                artifacts,
+                self._role_runtime("e2e", cwd),
+                self._role_runtime("reviewer", cwd),
+                self._delivery,
+                sandbox,
+                project_id=project_id,
+                pipeline_id=pipeline_id,
+                candidate_root=worktree if worktree.is_dir() else None,
+            ).run(build_integration_candidate(sha, "0" * 64))
+        except Exception:
+            self._verify[pipeline_id] = {
+                "verify_status": "REWORK",
+                "e2e_id": "",
+                "acceptance_id": "",
+            }
+            self._save_verify()
+            return
         stored = self._delivery.lookup(pipeline_id)
         if stored is not None:
             self._mirror_github(

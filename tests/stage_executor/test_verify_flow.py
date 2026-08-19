@@ -60,6 +60,15 @@ def _bindings() -> BindingTable:
     )
 
 
+def _real_both_bindings() -> BindingTable:
+    return BindingTable(
+        {
+            "e2e": AgentBinding("e2e", "opencode", "grok-4.6"),
+            "reviewer": AgentBinding("reviewer", "opencode", "grok-4.6"),
+        }
+    )
+
+
 def _real_e2e_bindings() -> BindingTable:
     return BindingTable(
         {
@@ -147,6 +156,24 @@ def test_real_e2e_runs_candidate_script(tmp_path: Path) -> None:
         e2e=_Failing(),
         candidate_root=work,
         bindings=_real_e2e_bindings(),
+    )
+    result = flow.run(build_integration_candidate("c" * 64, "b" * 64))
+    assert result.status == "READY"
+    assert result.e2e_id is not None
+    assert b"2+3=5" in artifacts.open(result.e2e_id)
+    assert sandbox.exists() is False
+
+
+def test_script_pass_skips_real_reviewer_launch(tmp_path: Path) -> None:
+    work = tmp_path / "wt"
+    (work / "src").mkdir(parents=True)
+    (work / "src" / "app.py").write_text("print('2+3=5')\n", encoding="utf-8")
+    flow, sandbox, artifacts = _flow(
+        tmp_path,
+        e2e=_Failing(),
+        reviewer=_Failing(),
+        candidate_root=work,
+        bindings=_real_both_bindings(),
     )
     result = flow.run(build_integration_candidate("c" * 64, "b" * 64))
     assert result.status == "READY"
