@@ -9,10 +9,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
+from hermes_pipeline.artifacts.local_cas import ArtifactNotFound
 from hermes_pipeline.artifacts.ports import ArtifactPutRequest, ArtifactsPort
 from hermes_pipeline.controller.ports import ControllerPort, PipelineQuery
 from hermes_pipeline.runtime_broker.binding import BindingNotFound, BindingTable
 from hermes_pipeline.runtime_broker.ports import RuntimeBrokerPort, RuntimeLaunchRequest
+from hermes_pipeline.stage_executor.contracts import prd_shape_ok
 from hermes_pipeline.stage_executor.harvest import PRD_NAMES, named_file_bytes
 
 PRD_BYTES = b"hermes-pipeline-prd-v1\n"
@@ -106,6 +108,12 @@ class PrdGate:
         if view.status != "OPEN":
             return PrdGateVerdict(status="FAIL")
         if not self._artifacts.verify(artifact_id).ok:
+            return PrdGateVerdict(status="FAIL")
+        try:
+            body = self._artifacts.open(artifact_id)
+        except (OSError, KeyError, ValueError, ArtifactNotFound):
+            return PrdGateVerdict(status="FAIL")
+        if not prd_shape_ok(body):
             return PrdGateVerdict(status="FAIL")
         return PrdGateVerdict(status="PASS")
 

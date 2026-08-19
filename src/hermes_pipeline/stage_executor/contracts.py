@@ -46,6 +46,21 @@ STOP: Evaluate this directory only. Do not implement fixes.
 """.strip()
 
 
+def prd_shape_ok(body: bytes) -> bool:
+    text = body.decode("utf-8", errors="replace").strip()
+    if not text or text == PRD_CONTRACT or text.startswith("STAGE: PRD"):
+        return False
+    return text.startswith("#") or len(text) >= 16
+
+
+def testplan_shape_ok(body: bytes) -> bool:
+    text = body.decode("utf-8", errors="replace").strip()
+    if not text:
+        return False
+    lowered = text.lower()
+    return "pytest" in lowered or "--check" in lowered or "test" in lowered
+
+
 def fence(kind: str, text: str) -> str:
     label = kind.strip().upper() or "INPUT"
     body = text.strip()
@@ -61,4 +76,6 @@ __all__ = [
     "E2E_CONTRACT",
     "PRD_CONTRACT",
     "fence",
+    "prd_shape_ok",
+    "testplan_shape_ok",
 ]
