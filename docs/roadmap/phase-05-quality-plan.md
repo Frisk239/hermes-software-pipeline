@@ -1,5 +1,7 @@
 # Phase 5 quality plan (post 05-28)
 
+**Superseded for execution.** Remaining cuts and the final live test live in `docs/roadmap/phase-05-quality-campaign.md`. Keep this file only as the 05-28-era snapshot.
+
 - After: `origin/main` `6f9f03f` (05-28 merged)
 - Does not replace `ROADMAP.md` or ADRs. This is the next **execution order** for core pipeline quality. No Dashboard/UX.
 
