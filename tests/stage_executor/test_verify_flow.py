@@ -197,6 +197,50 @@ def test_real_e2e_check_is_preflight_then_browser(tmp_path: Path) -> None:
     assert sandbox.exists() is False
 
 
+def test_real_e2e_waits_for_login_port(tmp_path: Path) -> None:
+    work = tmp_path / "wt"
+    (work / "src").mkdir(parents=True)
+    (work / "src" / "app.py").write_text(
+        "import os, sys\n"
+        "from http.server import BaseHTTPRequestHandler, HTTPServer\n"
+        "if '--check' in sys.argv:\n"
+        "    print('login-ok')\n"
+        "    raise SystemExit(0)\n"
+        "port = int(os.environ['PORT'])\n"
+        "class H(BaseHTTPRequestHandler):\n"
+        "    def do_GET(self):\n"
+        "        self.send_response(200)\n"
+        "        self.end_headers()\n"
+        "        body = b'<form><input name=username><input type=password></form>'\n"
+        "        self.wfile.write(body)\n"
+        "    def log_message(self, *args):\n"
+        "        return\n"
+        "HTTPServer(('127.0.0.1', port), H).serve_forever()\n",
+        encoding="utf-8",
+    )
+    mcp = _FakeMcp()
+    chrome = ChromeMcpRuntime(
+        profile=compile_profile(
+            write_roots=["/work"],
+            browser="CHROME_DEVTOOLS_MCP",
+            stage_type="E2E",
+        ),
+        mcp=mcp,
+    )
+    flow, sandbox, artifacts = _flow(
+        tmp_path,
+        e2e=chrome,
+        candidate_root=work,
+        bindings=_real_e2e_bindings(),
+    )
+    result = flow.run(build_integration_candidate("c" * 64, "b" * 64))
+    assert result.status == "READY"
+    assert result.e2e_id is not None
+    assert artifacts.open(result.e2e_id) == b"ok"
+    assert str(mcp.arguments[0].get("url", "")).startswith("http://127.0.0.1:")
+    assert sandbox.exists() is False
+
+
 def test_real_e2e_missing_chrome_tools_is_rework(tmp_path: Path) -> None:
     work = tmp_path / "wt"
     (work / "src").mkdir(parents=True)

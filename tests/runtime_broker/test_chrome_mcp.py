@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ast
+import subprocess
 import sys
 from pathlib import Path
 from typing import Literal
@@ -16,6 +17,7 @@ from hermes_pipeline.runtime_broker.chrome_mcp import (
     ALLOWED_TOOLS,
     ChromeMcpRuntime,
     closed_mcp_argv,
+    drive_stdio_mcp,
 )
 from hermes_pipeline.runtime_broker.fake import FakeRuntimeBroker
 from hermes_pipeline.runtime_broker.opencode_adapter import OpenCodeAdapter
@@ -256,3 +258,24 @@ def test_controller_does_not_import_chrome_mcp() -> None:
         joined = " ".join(imported)
         assert "chrome_mcp" not in imported
         assert "chrome_mcp" not in joined
+
+
+def test_stdio_mcp_uses_native_tool_names() -> None:
+    script = Path(__file__).with_name("fake_stdio_mcp.py")
+    proc = subprocess.Popen(
+        [sys.executable, str(script)],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    try:
+        text = drive_stdio_mcp(proc, "http://127.0.0.1:4317/")
+    finally:
+        proc.kill()
+        proc.wait(timeout=5)
+    assert "login-ok" in text
+    assert "evaluate_script" in text
+    err = proc.stderr.read().decode() if proc.stderr else ""
+    assert "navigate_page" in err
+    assert "evaluate_script" in err
+    assert "chrome-devtools_navigate_page" not in err

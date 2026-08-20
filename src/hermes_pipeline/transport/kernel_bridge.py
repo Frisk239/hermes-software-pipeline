@@ -32,6 +32,10 @@ from hermes_pipeline.runtime_broker.binding import (
     RuntimeFamily,
     StageRole,
 )
+from hermes_pipeline.runtime_broker.browser_tools import (
+    BrowserToolsError,
+    materialize_browser_tools,
+)
 from hermes_pipeline.runtime_broker.capability import compile_profile
 from hermes_pipeline.runtime_broker.chrome_mcp import ChromeMcpRuntime
 from hermes_pipeline.runtime_broker.codex_adapter import CodexAdapter
@@ -599,6 +603,9 @@ class KernelBridge:
             return _PassingRuntime()
         if binding.runtime == "fake":
             return _PassingRuntime()
+        root = self._dir.parent / "verify-sandbox"
+        with contextlib.suppress(BrowserToolsError, OSError):
+            materialize_browser_tools(root)
         return ChromeMcpRuntime(
             profile=compile_profile(
                 write_roots=[cwd],
@@ -606,7 +613,7 @@ class KernelBridge:
                 stage_type="E2E",
                 profile_id="cap_e2e",
             ),
-            state_root=self._dir.parent / "verify-sandbox",
+            state_root=root,
         )
 
     def _role_runtime(self, role: str, cwd: str) -> RuntimeBrokerPort:
