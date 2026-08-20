@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import time
 from pathlib import Path
 
 import pytest
@@ -154,6 +155,45 @@ def test_restart_does_not_rerecord_prd(tmp_path: Path) -> None:
         if event.event_type == "PRD_RECORDED"
     ]
     assert len(recorded) == 1
+
+
+def test_approve_is_busy_when_lease_held(tmp_path: Path) -> None:
+    bridge = KernelBridge(tmp_path, _Inner())
+    assert bridge.process(
+        "cmd_reg", {"op": "register", "project_id": "prj_cli", "name": "Cli"}
+    )["ok"]
+    assert bridge.process(
+        "cmd_adm",
+        {
+            "op": "admit",
+            "project_id": "prj_cli",
+            "principal_id": "operator",
+            "role": "CONTRIBUTOR",
+        },
+    )["ok"]
+    bridge.process(
+        "cmd_cli_one",
+        {
+            "text": "need a login page",
+            "workspace_id": "ws_cli",
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+            "principal_id": "operator",
+        },
+    )
+    bridge._controller.acquire_lease("ws_cli", "pl_cli", "other", int(time.time()), 600)
+    result = bridge.process(
+        "cmd_approve",
+        {
+            "op": "approve",
+            "workspace_id": "ws_cli",
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+            "principal_id": "operator",
+        },
+    )
+    assert result["ok"] is False
+    assert result["error"] == "busy"
 
 
 def test_sqlite_kernel_imports_legacy_kernel_json(tmp_path: Path) -> None:

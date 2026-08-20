@@ -6,6 +6,7 @@ import contextlib
 import json
 import os
 import tempfile
+import time
 from pathlib import Path
 from typing import Any, cast
 
@@ -1062,6 +1063,10 @@ class KernelBridge:
         project_id = str(payload.get("project_id", "prj_local"))
         principal = str(payload.get("principal_id", "operator"))
         workspace_id = str(payload.get("workspace_id", "ws_local"))
+        now = int(time.time())
+        held = self._store.load_lease(workspace_id, pipeline_id)
+        if held is not None and now <= held.expires_at:
+            return {"ok": False, "error": "busy"}
         self._hydrate_from_events(workspace_id, pipeline_id)
         planning = self._prd.get(pipeline_id)
         design = self._arch.get(pipeline_id)
@@ -1074,6 +1079,28 @@ class KernelBridge:
             return {"ok": False, "error": "baseline not ready"}
         if self._registry.role_of(project_id, principal) is None:
             return {"ok": False, "error": "not a project member"}
+        holder = f"runtime-{os.getpid()}"
+        self._controller.acquire_lease(workspace_id, pipeline_id, holder, now, 120)
+        try:
+            return self._run_approved(
+                payload, pipeline_id, project_id, principal, workspace_id
+            )
+        finally:
+            self._controller.cancel(workspace_id, pipeline_id)
+
+    def _run_approved(
+        self,
+        payload: dict[str, Any],
+        pipeline_id: str,
+        project_id: str,
+        principal: str,
+        workspace_id: str,
+    ) -> dict[str, Any]:
+        del payload
+        planning = self._prd.get(pipeline_id)
+        design = self._arch.get(pipeline_id)
+        if planning is None or design is None:
+            return {"ok": False, "error": "baseline not ready"}
         try:
             self._approval.designate(pipeline_id, project_id, principal)
             self._approval.approve(
@@ -1092,7 +1119,7 @@ class KernelBridge:
         self._approvals[pipeline_id] = row
         self._save_approvals()
         self._record_station(
-            str(payload.get("workspace_id", "ws_local")),
+            workspace_id,
             project_id,
             pipeline_id,
             "approval",
@@ -1101,7 +1128,6 @@ class KernelBridge:
                 "approver_id": principal,
             },
         )
-        workspace_id = str(payload.get("workspace_id", "ws_local"))
         self._advance_development(pipeline_id, project_id, principal, workspace_id)
         self._advance_verify(pipeline_id, project_id, workspace_id)
         verify_status = self._verify.get(pipeline_id, {}).get("verify_status", "")
