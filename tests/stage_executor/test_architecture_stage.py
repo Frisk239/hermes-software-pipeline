@@ -173,9 +173,9 @@ def test_bound_planner_named_files_harvested_after_failed_launch(
     bindings = BindingTable(
         {"planner": AgentBinding("planner", "opencode", "grok-4.6")}
     )
-    result = ArchitectureStage(
-        bindings, artifacts, _FailThenFiles(""), folder
-    ).run(prd_artifact_id=prd_id, pipeline_id="pl_demo")
+    result = ArchitectureStage(bindings, artifacts, _FailThenFiles(""), folder).run(
+        prd_artifact_id=prd_id, pipeline_id="pl_demo"
+    )
     assert result.status == "COMPLETED"
     assert b"# design" in artifacts.open(result.design_id or "")
 
