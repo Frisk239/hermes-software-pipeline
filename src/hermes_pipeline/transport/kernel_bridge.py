@@ -122,6 +122,7 @@ class KernelBridge:
         self._feedback = self._load_feedback()
         self._github_transport: GitHubTransport | None = None
         self._github_token = ""
+        self._import_json_stations()
 
     def enable_github(self, token: str, transport: GitHubTransport) -> None:
         self._github_token = token
@@ -215,6 +216,8 @@ class KernelBridge:
         if op == "read":
             workspace_id = str(payload.get("workspace_id", ""))
             pipeline_id = str(payload.get("pipeline_id", ""))
+            if workspace_id:
+                self._drain_outbox(workspace_id)
             view = self._intake.read(pipeline_id, workspace_id)
             stored = self._delivery.lookup(pipeline_id)
             result: dict[str, Any] = {
@@ -397,6 +400,111 @@ class KernelBridge:
             submitted_at=UtcTimestampRef(_RECORDED),
         )
         self._controller.submit(command)
+
+    def _record_verify(
+        self, workspace_id: str, project_id: str, pipeline_id: str, sha: str
+    ) -> None:
+        row = dict(self._verify.get(pipeline_id, {}))
+        row["pipeline_id"] = pipeline_id
+        row["project_id"] = project_id
+        row["candidate_sha"] = sha
+        self._record_station(workspace_id, project_id, pipeline_id, "verify", row)
+        self._drain_outbox(workspace_id)
+
+    def _drain_outbox(self, workspace_id: str) -> None:
+        if not workspace_id:
+            return
+        for item in self._store.list_pending_outbox(workspace_id):
+            if item.effect_type != "PUBLISH_PR":
+                self._store.record_outbox_delivery(workspace_id, item.command_id, "{}")
+                continue
+            try:
+                payload = json.loads(item.payload_json)
+            except ValueError:
+                payload = {}
+            if not isinstance(payload, dict):
+                payload = {}
+            typed = cast(dict[str, Any], payload)
+            pipeline_id = str(typed.get("pipeline_id", ""))
+            project_id = str(typed.get("project_id", "prj_local"))
+            sha = str(typed.get("candidate_sha", ""))
+            stored = self._delivery.lookup(pipeline_id) if pipeline_id else None
+            if (stored is None or not stored.pr_url) and sha:
+                request = DeliveryRequest(
+                    name=sha, project_id=project_id, pipeline_id=pipeline_id
+                )
+                published = self._delivery.publish(request)
+                published = self._mirror_github(published, request)
+                self._save_delivery()
+                stored = published
+            receipt = json.dumps(
+                {
+                    "pr_url": stored.pr_url if stored is not None else "",
+                    "pr_number": stored.pr_number if stored is not None else "",
+                    "head_sha": stored.head_sha if stored is not None else "",
+                },
+                sort_keys=True,
+            )
+            self._store.record_outbox_delivery(workspace_id, item.command_id, receipt)
+
+    def _import_json_stations(self) -> None:
+        workspace_id = "ws_local"
+        ids = (
+            set(self._prd)
+            | set(self._arch)
+            | set(self._dev)
+            | set(self._verify)
+            | set(self._approvals)
+        )
+        for pipeline_id in ids:
+            snapshot = self._store.load_pipeline(workspace_id, pipeline_id)
+            if snapshot is None or snapshot.status != "OPEN":
+                continue
+            events = self._store.list_events(workspace_id, pipeline_id)
+            if any(event.event_type in _RECORD_EVENTS.values() for event in events):
+                continue
+            project_id = (
+                self._approvals.get(pipeline_id, {}).get("project_id", "prj_local")
+                or "prj_local"
+            )
+            if pipeline_id in self._prd:
+                self._record_station(
+                    workspace_id, project_id, pipeline_id, "prd", self._prd[pipeline_id]
+                )
+            if pipeline_id in self._arch:
+                self._record_station(
+                    workspace_id,
+                    project_id,
+                    pipeline_id,
+                    "architecture",
+                    self._arch[pipeline_id],
+                )
+            if pipeline_id in self._dev:
+                self._record_station(
+                    workspace_id,
+                    project_id,
+                    pipeline_id,
+                    "development",
+                    self._dev[pipeline_id],
+                )
+            if pipeline_id in self._verify:
+                sha = self._dev.get(pipeline_id, {}).get("candidate_sha", "")
+                self._record_verify(workspace_id, project_id, pipeline_id, sha)
+            if pipeline_id in self._approvals:
+                self._record_station(
+                    workspace_id,
+                    project_id,
+                    pipeline_id,
+                    "approval",
+                    {
+                        "approval_status": self._approvals[pipeline_id].get(
+                            "approval_status", ""
+                        ),
+                        "approver_id": self._approvals[pipeline_id].get(
+                            "approver_id", ""
+                        ),
+                    },
+                )
 
     def _load_github(self) -> dict[str, str]:
         document = self._parse_json(self._dir / "github.json")
@@ -945,13 +1053,7 @@ class KernelBridge:
                 "infra_attempts": str(prior.get("infra_attempts", "0")),
             }
             self._save_verify()
-            self._record_station(
-                workspace_id,
-                project_id,
-                pipeline_id,
-                "verify",
-                self._verify[pipeline_id],
-            )
+            self._record_verify(workspace_id, project_id, pipeline_id, sha="")
             return
         stored = self._delivery.lookup(pipeline_id)
         if stored is not None:
@@ -975,9 +1077,7 @@ class KernelBridge:
         elif result.status == "READY":
             self._clear_feedback(pipeline_id)
         self._save_verify()
-        self._record_station(
-            workspace_id, project_id, pipeline_id, "verify", self._verify[pipeline_id]
-        )
+        self._record_verify(workspace_id, project_id, pipeline_id, sha)
 
     def _coerce_verify(self, document: dict[str, Any]) -> dict[str, dict[str, str]]:
         loaded: dict[str, dict[str, str]] = {}

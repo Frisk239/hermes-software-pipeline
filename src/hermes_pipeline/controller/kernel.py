@@ -189,6 +189,12 @@ class KernelController:
         else:
             event_type = "REQUIREMENT_REJECTED"
             payload_json = canonical_json({"reason": event.reason})
+        publish = (
+            isinstance(event, StationRecorded)
+            and event.station == "verify"
+            and event.fields.get("verify_status") == "READY"
+        )
+        effect_type = "PUBLISH_PR" if publish else event_type
         receipt = self._receipt(
             command,
             status="ACCEPTED",
@@ -220,8 +226,9 @@ class KernelController:
             outbox=OutboxRecord(
                 workspace_id=command.workspace_id,
                 command_id=command.command_id,
-                effect_type=event_type,
+                effect_type=effect_type,
                 payload_json=payload_json,
+                delivery_receipt_json=None if publish else "{}",
             ),
         )
         try:
