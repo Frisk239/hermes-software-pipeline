@@ -131,6 +131,26 @@ def test_bound_planner_stdout_without_named_file_is_denied(tmp_path: Path) -> No
     assert planner.prompts == ["Write a PRD"]
 
 
+def test_bound_planner_named_file_harvested_after_failed_launch(
+    tmp_path: Path,
+) -> None:
+    artifacts = LocalCasArtifacts(tmp_path / "cas")
+    folder = tmp_path / "plans"
+    folder.mkdir()
+
+    class _FailThenFile(_TextPlanner):
+        def launch(self, request: RuntimeLaunchRequest) -> RuntimeHandle:
+            (folder / "PRD.md").write_text("# harvested\n", encoding="utf-8")
+            return RuntimeHandle(runtime_id=request.runtime_id, status="FAILED")
+
+    result = PrdStage(
+        _planner("opencode", "grok-4.6"), artifacts, _FailThenFile(""), folder
+    ).run("pl_demo", "ws_demo", "prj_demo")
+    assert result.status == "COMPLETED"
+    assert result.artifact_id is not None
+    assert b"# harvested" in artifacts.open(result.artifact_id)
+
+
 def test_bound_planner_file_becomes_prd_when_stdout_empty(tmp_path: Path) -> None:
     artifacts = LocalCasArtifacts(tmp_path / "cas")
     folder = tmp_path / "plans"

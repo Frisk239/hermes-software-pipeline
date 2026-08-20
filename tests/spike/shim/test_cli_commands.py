@@ -20,7 +20,9 @@ from pathlib import Path
 
 import pytest
 from hermes_shim._lifecycle import (
+    LifecycleResult,
     doctor_command,
+    read_pipeline_command,
     setup_command,
     status_command,
     stop_command,
@@ -160,3 +162,23 @@ def test_doctor_output_never_contains_sensitive_values(tmp_path: Path) -> None:
         for key in ("FAKE_HOSTNAME", "FAKE_USERNAME", "FAKE_ENV_VALUE", "FAKE_SECRET"):
             os.environ.pop(key, None)
     _assert_redacted(result)
+
+
+def test_read_revives_runtime_when_plugin_present(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    setup_command(tmp_path)
+    (tmp_path / "plugins" / "hermes-software-pipeline").mkdir(parents=True)
+    called: list[Path] = []
+
+    def fake_start(home: Path, plugin_dir: Path) -> LifecycleResult:
+        del home
+        called.append(plugin_dir)
+        return LifecycleResult(command="start", ok=False, exit_code=1)
+
+    monkeypatch.setattr("hermes_shim._lifecycle.start_command", fake_start)
+    result = read_pipeline_command(
+        tmp_path, workspace_id="ws_cli", pipeline_id="pl_cli"
+    )
+    assert called
+    assert result.ok is False

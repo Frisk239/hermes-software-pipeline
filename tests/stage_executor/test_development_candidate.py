@@ -390,6 +390,13 @@ def test_secret_or_escape_is_denied(tmp_path: Path) -> None:
     assert escape.status == "DENIED"
 
 
+def test_pytest_unavailable_text_is_detected() -> None:
+    from hermes_pipeline.stage_executor.self_test import pytest_unavailable
+
+    assert pytest_unavailable("No module named pytest")
+    assert not pytest_unavailable("1 failed")
+
+
 def test_prefix_sibling_write_is_escape(tmp_path: Path) -> None:
     tree = ManagedWorktree(tmp_path / "wt")
     with pytest.raises(ValueError, match="path escape"):

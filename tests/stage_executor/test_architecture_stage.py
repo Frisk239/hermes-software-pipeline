@@ -157,6 +157,29 @@ def test_bound_planner_stdout_without_named_files_is_denied(tmp_path: Path) -> N
     assert result.status == "DENIED"
 
 
+def test_bound_planner_named_files_harvested_after_failed_launch(
+    tmp_path: Path,
+) -> None:
+    _controller, artifacts, prd_id = _open_with_prd(tmp_path)
+    folder = tmp_path / "plans-fail"
+    folder.mkdir()
+
+    class _FailThenFiles(_TextPlanner):
+        def launch(self, request: RuntimeLaunchRequest) -> RuntimeHandle:
+            (folder / "ARCHITECTURE.md").write_text("# design\n", encoding="utf-8")
+            (folder / "TESTPLAN.md").write_text("run pytest\n", encoding="utf-8")
+            return RuntimeHandle(runtime_id=request.runtime_id, status="FAILED")
+
+    bindings = BindingTable(
+        {"planner": AgentBinding("planner", "opencode", "grok-4.6")}
+    )
+    result = ArchitectureStage(bindings, artifacts, _FailThenFiles(""), folder).run(
+        prd_artifact_id=prd_id, pipeline_id="pl_demo"
+    )
+    assert result.status == "COMPLETED"
+    assert b"# design" in artifacts.open(result.design_id or "")
+
+
 def test_bound_planner_named_files_become_design_and_testplan(tmp_path: Path) -> None:
     _controller, artifacts, prd_id = _open_with_prd(tmp_path)
     folder = tmp_path / "plans"

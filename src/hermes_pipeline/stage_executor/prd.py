@@ -75,7 +75,7 @@ class PrdStage:
         if self._planner is None:
             return None
         runtime_id = f"prd-{pipeline_id}"
-        handle = self._planner.launch(
+        self._planner.launch(
             RuntimeLaunchRequest(
                 runtime_id=runtime_id,
                 role="planner",
@@ -83,8 +83,6 @@ class PrdStage:
                 prompt=prompt,
             )
         )
-        if handle.status != "COMPLETED":
-            return None
         return named_file_bytes(self._folder, PRD_NAMES)
 
 

@@ -92,7 +92,7 @@ class ArchitectureStage:
         if self._planner is None:
             return None
         runtime_id = f"arch-{pipeline_id or 'local'}"
-        handle = self._planner.launch(
+        self._planner.launch(
             RuntimeLaunchRequest(
                 runtime_id=runtime_id,
                 role="planner",
@@ -100,8 +100,6 @@ class ArchitectureStage:
                 prompt=prompt,
             )
         )
-        if handle.status != "COMPLETED":
-            return None
         design = named_file_bytes(self._folder, DESIGN_NAMES)
         testplan = named_file_bytes(self._folder, TESTPLAN_NAMES)
         if design is None or testplan is None:
