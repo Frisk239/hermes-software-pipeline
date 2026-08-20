@@ -48,11 +48,13 @@ class CodexAdapter:
         profile: CapabilityProfile | None = None,
         prompt: str = "ok",
         cwd: str = ".",
+        sandbox: str = "read-only",
     ) -> None:
         self._executable = executable
         self._profile = profile
         self._prompt = prompt
         self._cwd = cwd
+        self._sandbox = sandbox
         self._runs: dict[str, _Run] = {}
         self.last_argv: list[str] = []
         self.spawned = False
@@ -60,8 +62,10 @@ class CodexAdapter:
     def launch(self, request: RuntimeLaunchRequest) -> RuntimeHandle:
         runtime_id = request.runtime_id
         if not self._may_launch():
-            self._runs[runtime_id] = _Run(status="UNSUPPORTED", detail="error")
-            return RuntimeHandle(runtime_id=runtime_id, status="UNSUPPORTED")
+            missing = self._executable is None or not Path(self._executable).is_file()
+            status: RuntimeStatus = "UNSUPPORTED" if missing else "FAILED"
+            self._runs[runtime_id] = _Run(status=status, detail="error")
+            return RuntimeHandle(runtime_id=runtime_id, status=status)
         prompt = request.prompt or self._prompt
         argv = self._build_argv(request.model, prompt)
         self.last_argv = list(argv)
@@ -153,7 +157,7 @@ class CodexAdapter:
             "exec",
             "--json",
             "--sandbox",
-            "read-only",
+            self._sandbox,
             "-C",
             self._cwd,
         ]

@@ -7,6 +7,8 @@ import threading
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from hermes_pipeline.contracts.runtime import CapabilityProfile
+from hermes_pipeline.runtime_broker.capability import CapabilityRequest, evaluate
 from hermes_pipeline.runtime_broker.fence import decode_out, spawn_fenced
 from hermes_pipeline.runtime_broker.ports import (
     RuntimeHandle,
@@ -30,9 +32,16 @@ class _Run:
 
 
 class ProcessAdapter:
-    def __init__(self, executable: str | None = None, *, cwd: str = ".") -> None:
+    def __init__(
+        self,
+        executable: str | None = None,
+        *,
+        cwd: str = ".",
+        profile: CapabilityProfile | None = None,
+    ) -> None:
         self._executable = executable
         self._cwd = cwd
+        self._profile = profile
         self._runs: dict[str, _Run] = {}
         self.last_argv: list[str] = []
 
@@ -42,6 +51,14 @@ class ProcessAdapter:
         if raw is None or not Path(raw).is_file():
             self._runs[runtime_id] = _Run(status="UNSUPPORTED", detail="error")
             return RuntimeHandle(runtime_id=runtime_id, status="UNSUPPORTED")
+        if (
+            self._profile is not None
+            and not evaluate(
+                self._profile, CapabilityRequest("EXECUTABLE", "process")
+            ).allowed
+        ):
+            self._runs[runtime_id] = _Run(status="FAILED", detail="error")
+            return RuntimeHandle(runtime_id=runtime_id, status="FAILED")
         argv = self._build_argv(request)
         self.last_argv = list(argv)
         run = _Run(status="FAILED")

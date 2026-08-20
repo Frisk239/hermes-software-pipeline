@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from hermes_pipeline.artifacts import LocalCasArtifacts
 from hermes_pipeline.operations.baseline import SolutionApproval
 from hermes_pipeline.operations.projects import ProjectRegistry
@@ -386,3 +388,35 @@ def test_secret_or_escape_is_denied(tmp_path: Path) -> None:
         relative_path="../escape.py",
     )
     assert escape.status == "DENIED"
+
+
+def test_prefix_sibling_write_is_escape(tmp_path: Path) -> None:
+    tree = ManagedWorktree(tmp_path / "wt")
+    with pytest.raises(ValueError, match="path escape"):
+        tree.write("../wt2/x.py", b"print(1)\n")
+
+
+def test_github_token_in_src_is_denied(tmp_path: Path) -> None:
+    _built, approval, artifacts = _stage(tmp_path)
+    del _built
+    worktree = ManagedWorktree(tmp_path / "wt-tok")
+
+    class _Token(_WritingExecutor):
+        def launch(self, request: RuntimeLaunchRequest) -> RuntimeHandle:
+            del request
+            self._worktree.write("src/app.py", b"GITHUB_TOKEN=ghp_example\n")
+            return RuntimeHandle(runtime_id="dev", status="COMPLETED")
+
+    denied = DevelopmentStage(
+        BindingTable({"executor": AgentBinding("executor", "opencode", "grok-4.6")}),
+        approval,
+        artifacts,
+        worktree,
+        executor=_Token(worktree),
+    ).run(
+        pipeline_id="pl_demo",
+        prd_id="art_prd",
+        design_id="art_design",
+        testplan_id="art_test",
+    )
+    assert denied.status == "DENIED"

@@ -57,6 +57,15 @@ def test_opencode_timeout_stops_grandchild_writes(
     assert first == second
 
 
+def test_cleaned_env_drops_github_token() -> None:
+    from hermes_pipeline.runtime_broker.fence import cleaned_child_env
+
+    env = cleaned_child_env({"PATH": "/bin", "GITHUB_TOKEN": "secret", "GH_TOKEN": "x"})
+    assert "GITHUB_TOKEN" not in env
+    assert "GH_TOKEN" not in env
+    assert env["PATH"] == "/bin"
+
+
 def test_signal_cancels_live_process_adapter(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

@@ -9,6 +9,22 @@ from pathlib import Path
 
 from hermes_pipeline.repository.worktree import SECRET_CANARY
 
+
+def _is_link(path: Path) -> bool:
+    if path.is_symlink():
+        return True
+    check = getattr(path, "is_junction", None)
+    return bool(check and check())
+
+
+def leaked_secret(body: bytes) -> bool:
+    if SECRET_CANARY.encode("utf-8") in body:
+        return True
+    if b"GITHUB_TOKEN=" in body or b"GH_TOKEN=" in body:
+        return True
+    return b"ghp_" in body
+
+
 PRD_NAMES = ("PRD.md", "prd.md")
 DESIGN_NAMES = ("ARCHITECTURE.md", "architecture.md", "design.md")
 TESTPLAN_NAMES = ("TESTPLAN.md", "testplan.md")
@@ -22,9 +38,9 @@ def named_file_bytes(folder: Path | None, names: tuple[str, ...]) -> bytes | Non
         return None
     wanted = {name.lower() for name in names}
     for path in sorted(folder.rglob("*")):
-        if path.is_file() and path.name.lower() in wanted:
+        if path.is_file() and not _is_link(path) and path.name.lower() in wanted:
             body = path.read_bytes()
-            if SECRET_CANARY.encode("utf-8") in body:
+            if leaked_secret(body):
                 return None
             return body
     return None
@@ -33,7 +49,7 @@ def named_file_bytes(folder: Path | None, names: tuple[str, ...]) -> bytes | Non
 def pick_implementation(files: list[Path], root: Path) -> Path | None:
     src: list[Path] = []
     for path in files:
-        if not path.is_file():
+        if not path.is_file() or _is_link(path):
             continue
         rel = path.relative_to(root).as_posix()
         if path.name.lower() in _PLANNING:
@@ -51,6 +67,7 @@ __all__ = [
     "DESIGN_NAMES",
     "PRD_NAMES",
     "TESTPLAN_NAMES",
+    "leaked_secret",
     "named_file_bytes",
     "pick_implementation",
 ]

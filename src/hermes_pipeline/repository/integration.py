@@ -53,8 +53,10 @@ class VerificationSandbox:
 
     def write(self, relative: str, text: str) -> None:
         target = (self._root / relative).resolve()
-        if not str(target).startswith(str(self._root)):
-            raise ValueError("path escape")
+        try:
+            target.relative_to(self._root.resolve())
+        except ValueError:
+            raise ValueError("path escape") from None
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(text, encoding="utf-8")
 

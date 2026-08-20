@@ -9,6 +9,14 @@ from pathlib import Path
 SECRET_CANARY = "SECRET_CANARY"
 
 
+def _inside(root: Path, target: Path) -> bool:
+    try:
+        target.resolve().relative_to(root.resolve())
+    except ValueError:
+        return False
+    return True
+
+
 @dataclass(frozen=True)
 class CandidateRecord:
     sha: str
@@ -28,7 +36,7 @@ class ManagedWorktree:
         if SECRET_CANARY.encode("utf-8") in payload:
             raise ValueError("secret canary")
         target = (self._root / relative_path).resolve()
-        if not str(target).startswith(str(self._root)):
+        if not _inside(self._root, target):
             raise ValueError("path escape")
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(payload)
