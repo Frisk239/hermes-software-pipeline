@@ -116,6 +116,46 @@ def test_read_keeps_prd_from_events_without_prd_json(tmp_path: Path) -> None:
     assert view.get("prd_status") == "DENIED"
 
 
+def test_restart_does_not_rerecord_prd(tmp_path: Path) -> None:
+    bridge = KernelBridge(tmp_path, _Inner())
+    assert bridge.process(
+        "cmd_reg", {"op": "register", "project_id": "prj_cli", "name": "Cli"}
+    )["ok"]
+    assert bridge.process(
+        "cmd_adm",
+        {
+            "op": "admit",
+            "project_id": "prj_cli",
+            "principal_id": "operator",
+            "role": "CONTRIBUTOR",
+        },
+    )["ok"]
+    assert (
+        bridge.process(
+            "cmd_cli_one",
+            {
+                "text": "need a login page",
+                "workspace_id": "ws_cli",
+                "project_id": "prj_cli",
+                "pipeline_id": "pl_cli",
+                "principal_id": "operator",
+            },
+        )["status"]
+        == "ACCEPTED"
+    )
+    prd_json = tmp_path / "descriptor" / "prd.json"
+    if prd_json.exists():
+        prd_json.unlink()
+    restarted = KernelBridge(tmp_path, _Inner())
+    restarted._advance_prd("pl_cli", "ws_cli", "prj_cli")
+    recorded = [
+        event
+        for event in restarted._store.list_events("ws_cli", "pl_cli")
+        if event.event_type == "PRD_RECORDED"
+    ]
+    assert len(recorded) == 1
+
+
 def test_sqlite_kernel_imports_legacy_kernel_json(tmp_path: Path) -> None:
     document = {
         "inbox": [],

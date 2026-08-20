@@ -409,9 +409,53 @@ class KernelBridge:
     def _save_github(self) -> None:
         self._write_json(self._dir / "github.json", self._github)
 
+    def _hydrate_from_events(self, workspace_id: str, pipeline_id: str) -> None:
+        folded = fold_stage_projection(
+            self._store.list_events(workspace_id, pipeline_id)
+        )
+        if not folded:
+            return
+        if folded.get("prd_status") and pipeline_id not in self._prd:
+            self._prd[pipeline_id] = {
+                "prd_id": folded.get("prd_id", ""),
+                "prd_status": folded.get("prd_status", ""),
+                "prd_gate": folded.get("prd_gate", ""),
+            }
+        if folded.get("arch_status") and pipeline_id not in self._arch:
+            self._arch[pipeline_id] = {
+                "design_id": folded.get("design_id", ""),
+                "testplan_id": folded.get("testplan_id", ""),
+                "arch_status": folded.get("arch_status", ""),
+                "arch_gate": folded.get("arch_gate", ""),
+            }
+        if folded.get("candidate_gate") == "PASS" and pipeline_id not in self._dev:
+            self._dev[pipeline_id] = {
+                "impl_id": folded.get("impl_id", ""),
+                "candidate_sha": folded.get("candidate_sha", ""),
+                "candidate_path": folded.get("candidate_path", ""),
+                "dev_status": folded.get("dev_status", ""),
+                "candidate_gate": folded.get("candidate_gate", ""),
+            }
+        if folded.get("verify_status") == "READY" and pipeline_id not in self._verify:
+            self._verify[pipeline_id] = {
+                "verify_status": folded.get("verify_status", ""),
+                "e2e_id": folded.get("e2e_id", ""),
+                "acceptance_id": folded.get("acceptance_id", ""),
+                "verify_attempts": folded.get("verify_attempts", "0"),
+                "infra_attempts": folded.get("infra_attempts", "0"),
+            }
+        approved = folded.get("approval_status") == "APPROVED"
+        if approved and pipeline_id not in self._approvals:
+            self._approvals[pipeline_id] = {
+                "approval_status": folded.get("approval_status", ""),
+                "approver_id": folded.get("approver_id", ""),
+                "project_id": "",
+            }
+
     def _advance_prd(
         self, pipeline_id: str, workspace_id: str, project_id: str
     ) -> None:
+        self._hydrate_from_events(workspace_id, pipeline_id)
         if pipeline_id in self._prd:
             return
         artifacts = LocalCasArtifacts(self._dir.parent / "cas")
@@ -455,6 +499,7 @@ class KernelBridge:
     def _advance_architecture(
         self, pipeline_id: str, workspace_id: str, project_id: str
     ) -> None:
+        self._hydrate_from_events(workspace_id, pipeline_id)
         if pipeline_id in self._arch:
             return
         planning = self._prd.get(pipeline_id)
@@ -601,6 +646,7 @@ class KernelBridge:
         principal_id: str,
         workspace_id: str = "ws_local",
     ) -> None:
+        self._hydrate_from_events(workspace_id, pipeline_id)
         if pipeline_id in self._dev:
             return
         planning = self._prd.get(pipeline_id)
@@ -862,6 +908,7 @@ class KernelBridge:
     def _advance_verify(
         self, pipeline_id: str, project_id: str, workspace_id: str = "ws_local"
     ) -> None:
+        self._hydrate_from_events(workspace_id, pipeline_id)
         if pipeline_id in self._verify:
             return
         developed = self._dev.get(pipeline_id)
@@ -957,6 +1004,8 @@ class KernelBridge:
         pipeline_id = str(payload.get("pipeline_id", "pl_local"))
         project_id = str(payload.get("project_id", "prj_local"))
         principal = str(payload.get("principal_id", "operator"))
+        workspace_id = str(payload.get("workspace_id", "ws_local"))
+        self._hydrate_from_events(workspace_id, pipeline_id)
         verified = self._verify.get(pipeline_id, {})
         developed = self._dev.get(pipeline_id, {})
         rework = verified.get("verify_status") == "REWORK"
@@ -978,7 +1027,6 @@ class KernelBridge:
         self._dev.pop(pipeline_id, None)
         self._save_dev()
         self._verify.pop(pipeline_id, None)
-        workspace_id = str(payload.get("workspace_id", "ws_local"))
         self._advance_development(pipeline_id, project_id, principal, workspace_id)
         self._advance_verify(pipeline_id, project_id, workspace_id)
         row = self._verify.get(pipeline_id, {})
@@ -1013,6 +1061,8 @@ class KernelBridge:
         pipeline_id = str(payload.get("pipeline_id", "pl_local"))
         project_id = str(payload.get("project_id", "prj_local"))
         principal = str(payload.get("principal_id", "operator"))
+        workspace_id = str(payload.get("workspace_id", "ws_local"))
+        self._hydrate_from_events(workspace_id, pipeline_id)
         planning = self._prd.get(pipeline_id)
         design = self._arch.get(pipeline_id)
         if (
