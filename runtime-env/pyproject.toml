@@ -22,6 +22,8 @@ dependencies = [
     "pydantic>=2,<3",
     "jsonschema>=4,<5",
     "rfc8785==0.1.4",
+    "sqlalchemy>=2,<3",
+    "alembic>=1.19,<2",
 ]
 
 [tool.uv.sources]
