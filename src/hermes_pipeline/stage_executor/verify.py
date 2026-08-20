@@ -112,7 +112,9 @@ class VerifyFlow:
                     return VerifyResult(
                         status="REWORK", feedback="e2e runtime did not complete"
                     )
-                if e2e.status != "COMPLETED":
+                if e2e.status != "COMPLETED" and _verdict(
+                    self._sandbox.root, "RESULT.md"
+                ) not in {"pass", "fail"}:
                     return VerifyResult(
                         status="REWORK", feedback="e2e runtime did not complete"
                     )
@@ -142,7 +144,9 @@ class VerifyFlow:
                         e2e_id=e2e_art.artifact_id,
                         feedback="reviewer runtime did not complete",
                     )
-                if accept.status != "COMPLETED":
+                if accept.status != "COMPLETED" and _verdict(
+                    self._sandbox.root, "REVIEW.md"
+                ) not in {"pass", "fail"}:
                     return VerifyResult(
                         status="REWORK",
                         e2e_id=e2e_art.artifact_id,

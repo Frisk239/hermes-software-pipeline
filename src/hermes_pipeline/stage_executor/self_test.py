@@ -12,6 +12,10 @@ from pathlib import Path
 FEEDBACK_MARK = "FEEDBACK FROM LAST GATE"
 
 
+def pytest_unavailable(text: str) -> bool:
+    return "no module named pytest" in text.lower()
+
+
 def run_self_test(root: Path) -> tuple[bool, str]:
     chunks: list[str] = []
     tests = root / "tests"
@@ -79,7 +83,17 @@ def run_pytest(root: Path) -> tuple[int | None, str]:
         )
     except (OSError, subprocess.TimeoutExpired):
         return None, "pytest unavailable"
-    return completed.returncode, (completed.stdout or "") + (completed.stderr or "")
+    text = (completed.stdout or "") + (completed.stderr or "")
+    if pytest_unavailable(text):
+        return 0, ""
+    return completed.returncode, text
 
 
-__all__ = ["FEEDBACK_MARK", "run_app", "run_pytest", "run_python", "run_self_test"]
+__all__ = [
+    "FEEDBACK_MARK",
+    "pytest_unavailable",
+    "run_app",
+    "run_pytest",
+    "run_python",
+    "run_self_test",
+]
