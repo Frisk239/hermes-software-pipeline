@@ -420,6 +420,21 @@ def _wait_for_ready(root: Path, budget_seconds: int) -> bool:
     return False
 
 
+def _plugin_checkout(home: Path) -> Path:
+    return home / "plugins" / "hermes-software-pipeline"
+
+
+def _ensure_runtime(home: Path) -> bool:
+    root = state_root(home)
+    document = read_descriptor(root)
+    if document is not None and not is_stale(root):
+        return True
+    plugin = _plugin_checkout(home)
+    if not plugin.is_dir():
+        return False
+    return start_command(home, plugin).ok
+
+
 def submit_requirement_command(
     home: Path,
     *,
@@ -431,6 +446,11 @@ def submit_requirement_command(
     principal_id: str,
 ) -> LifecycleResult:
     result = LifecycleResult(command="submit")
+    if not _ensure_runtime(home):
+        _add_check(result, "runtime", "error", "RUNTIME_UNAVAILABLE")
+        result.ok = False
+        result.exit_code = EXIT_FAIL
+        return result
     root = state_root(home)
     document = read_descriptor(root)
     if document is None or is_stale(root):
@@ -472,6 +492,11 @@ def read_pipeline_command(
     home: Path, *, workspace_id: str, pipeline_id: str
 ) -> LifecycleResult:
     result = LifecycleResult(command="read")
+    if not _ensure_runtime(home):
+        _add_check(result, "runtime", "error", "RUNTIME_UNAVAILABLE")
+        result.ok = False
+        result.exit_code = EXIT_FAIL
+        return result
     root = state_root(home)
     document = read_descriptor(root)
     if document is None or is_stale(root):
@@ -604,6 +629,11 @@ def approve_command(
     principal_id: str,
 ) -> LifecycleResult:
     result = LifecycleResult(command="approve")
+    if not _ensure_runtime(home):
+        _add_check(result, "runtime", "error", "RUNTIME_UNAVAILABLE")
+        result.ok = False
+        result.exit_code = EXIT_FAIL
+        return result
     root = state_root(home)
     document = read_descriptor(root)
     if document is None or is_stale(root):
@@ -646,6 +676,11 @@ def retry_command(
     principal_id: str,
 ) -> LifecycleResult:
     result = LifecycleResult(command="retry")
+    if not _ensure_runtime(home):
+        _add_check(result, "runtime", "error", "RUNTIME_UNAVAILABLE")
+        result.ok = False
+        result.exit_code = EXIT_FAIL
+        return result
     root = state_root(home)
     document = read_descriptor(root)
     if document is None or is_stale(root):
@@ -775,6 +810,7 @@ def admin_command(
 
 
 __all__ = [
+    "LifecycleResult",
     "admin_command",
     "approve_command",
     "deliver_command",
