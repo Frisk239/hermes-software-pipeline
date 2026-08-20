@@ -6,6 +6,8 @@ from pathlib import Path
 
 import pytest
 
+from hermes_pipeline.controller import KernelController
+from hermes_pipeline.persistence.kernel_sqlite import SqliteKernelStore
 from hermes_pipeline.transport.kernel_bridge import (
     KernelBridge,
     architecture_prompt,
@@ -147,13 +149,17 @@ def test_restart_does_not_rerecord_prd(tmp_path: Path) -> None:
     prd_json = tmp_path / "descriptor" / "prd.json"
     if prd_json.exists():
         prd_json.unlink()
-    restarted = KernelBridge(tmp_path, _Inner())
-    restarted._advance_prd("pl_cli", "ws_cli", "prj_cli")
+    KernelBridge(tmp_path, _Inner()).process(
+        "cmd_read_again",
+        {"op": "read", "workspace_id": "ws_cli", "pipeline_id": "pl_cli"},
+    )
+    store = SqliteKernelStore(str(tmp_path / "controller.sqlite"))
     recorded = [
         event
-        for event in restarted._store.list_events("ws_cli", "pl_cli")
+        for event in store.list_events("ws_cli", "pl_cli")
         if event.event_type == "PRD_RECORDED"
     ]
+    store.close()
     assert len(recorded) == 1
 
 
@@ -181,7 +187,11 @@ def test_approve_is_busy_when_lease_held(tmp_path: Path) -> None:
             "principal_id": "operator",
         },
     )
-    bridge._controller.acquire_lease("ws_cli", "pl_cli", "other", int(time.time()), 600)
+    store = SqliteKernelStore(str(tmp_path / "controller.sqlite"))
+    KernelController(store, recorded_at="2026-01-01T00:00:00Z").acquire_lease(
+        "ws_cli", "pl_cli", "other", int(time.time()), 600
+    )
+    store.close()
     result = bridge.process(
         "cmd_approve",
         {
