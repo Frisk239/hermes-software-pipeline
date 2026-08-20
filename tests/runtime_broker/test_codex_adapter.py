@@ -124,7 +124,7 @@ def test_denied_profile_does_not_spawn(tmp_path: Path) -> None:
     profile = compile_profile(write_roots=["/work"], executables=[])
     adapter = CodexAdapter(executable=script, profile=profile)
     handle = adapter.launch(RuntimeLaunchRequest(runtime_id="rt-deny"))
-    assert handle.status == "UNSUPPORTED"
+    assert handle.status == "FAILED"
     assert adapter.spawned is False
 
 
@@ -142,6 +142,16 @@ def test_adapter_does_not_import_keep_marked_probes() -> None:
     assert imported.isdisjoint(_FORBIDDEN_SPIKES)
     joined = " ".join(imported)
     assert all(name not in joined for name in _FORBIDDEN_SPIKES)
+
+
+def test_executor_sandbox_is_workspace_write(tmp_path: Path) -> None:
+    script = _write_script(tmp_path / "fake_codex.py", _OK_SCRIPT)
+    adapter = CodexAdapter(executable=script, sandbox="workspace-write")
+    adapter.launch(RuntimeLaunchRequest(runtime_id="rt-write"))
+    assert "workspace-write" in adapter.last_argv
+    assert adapter.last_argv[adapter.last_argv.index("--sandbox") + 1] == (
+        "workspace-write"
+    )
 
 
 def test_controller_does_not_import_codex_adapter() -> None:

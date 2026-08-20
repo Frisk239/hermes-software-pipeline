@@ -7,7 +7,9 @@ import threading
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from hermes_pipeline.contracts.runtime import CapabilityProfile
 from hermes_pipeline.runtime_broker._opencode import classify_opencode_events
+from hermes_pipeline.runtime_broker.capability import CapabilityRequest, evaluate
 from hermes_pipeline.runtime_broker.fence import decode_out, spawn_fenced
 from hermes_pipeline.runtime_broker.ports import (
     RuntimeHandle,
@@ -32,9 +34,16 @@ class _Run:
 
 
 class OpenCodeAdapter:
-    def __init__(self, executable: str | None = None, *, cwd: str = ".") -> None:
+    def __init__(
+        self,
+        executable: str | None = None,
+        *,
+        cwd: str = ".",
+        profile: CapabilityProfile | None = None,
+    ) -> None:
         self._executable = executable
         self._cwd = cwd
+        self._profile = profile
         self._runs: dict[str, _Run] = {}
         self.last_argv: list[str] = []
         self.spawned = False
@@ -42,8 +51,13 @@ class OpenCodeAdapter:
     def launch(self, request: RuntimeLaunchRequest) -> RuntimeHandle:
         runtime_id = request.runtime_id
         if not self._may_launch():
-            self._runs[runtime_id] = _Run(status="UNSUPPORTED", detail="error")
-            return RuntimeHandle(runtime_id=runtime_id, status="UNSUPPORTED")
+            status: RuntimeStatus = (
+                "FAILED" if self._profile is not None else "UNSUPPORTED"
+            )
+            if self._executable is None or not Path(self._executable).is_file():
+                status = "UNSUPPORTED"
+            self._runs[runtime_id] = _Run(status=status, detail="error")
+            return RuntimeHandle(runtime_id=runtime_id, status=status)
         argv = self._build_argv(request.model, request.prompt)
         self.last_argv = list(argv)
         run = _Run(status="FAILED")
@@ -118,7 +132,13 @@ class OpenCodeAdapter:
         raw = self._executable
         if raw is None:
             return False
-        return Path(raw).is_file()
+        if not Path(raw).is_file():
+            return False
+        if self._profile is None:
+            return True
+        return evaluate(
+            self._profile, CapabilityRequest("EXECUTABLE", "opencode")
+        ).allowed
 
     def _build_argv(self, model: str, prompt: str) -> list[str]:
         executable = self._executable

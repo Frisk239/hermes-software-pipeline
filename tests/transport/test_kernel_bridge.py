@@ -726,6 +726,32 @@ def test_corrupt_verify_json_is_fail_closed(tmp_path: Path) -> None:
     assert view["error"] == "corrupt state"
 
 
+def test_corrupt_architecture_json_is_fail_closed(tmp_path: Path) -> None:
+    first = KernelBridge(tmp_path, _Inner())
+    first.process("cmd_reg", {"op": "register", "project_id": "prj_cli", "name": "Cli"})
+    (tmp_path / "descriptor" / "architecture.json").write_text(
+        "not-json", encoding="utf-8"
+    )
+    second = KernelBridge(tmp_path, _Inner())
+    view = second.process(
+        "cmd_read_view",
+        {"op": "read", "workspace_id": "ws_cli", "pipeline_id": "pl_cli"},
+    )
+    assert view["ok"] is False
+    assert view["error"] == "corrupt state"
+    approved = second.process(
+        "cmd_ok",
+        {
+            "op": "approve",
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+            "principal_id": "operator",
+        },
+    )
+    assert approved["ok"] is False
+    assert approved["error"] == "corrupt state"
+
+
 def test_stages_bundle_restores_verify_if_sidecar_missing(tmp_path: Path) -> None:
     first = KernelBridge(tmp_path, _Inner())
     first.process("cmd_reg", {"op": "register", "project_id": "prj_cli", "name": "Cli"})

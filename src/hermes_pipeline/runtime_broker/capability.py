@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from collections.abc import Sequence
 from dataclasses import dataclass
-from pathlib import PurePosixPath, PureWindowsPath
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Literal
 from urllib.parse import urlparse
 
@@ -191,6 +191,14 @@ def _style(path: str) -> PathStyle | None:
     return None
 
 
+def path_inside(root: Path, target: Path) -> bool:
+    left = _normalize(str(root.resolve()))
+    right = _normalize(str(target.resolve()))
+    if left is None or right is None:
+        return False
+    return _contains(left, right)
+
+
 def _contains(root: _NormPath, path: _NormPath) -> bool:
     if root.style != path.style:
         return False
@@ -228,4 +236,5 @@ __all__ = [
     "CapabilityVerdict",
     "compile_profile",
     "evaluate",
+    "path_inside",
 ]

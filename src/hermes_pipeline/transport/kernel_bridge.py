@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import contextlib
 import json
+import os
+import tempfile
 from pathlib import Path
 from typing import Any, cast
 
@@ -29,6 +32,7 @@ from hermes_pipeline.runtime_broker.binding import (
     RuntimeFamily,
     StageRole,
 )
+from hermes_pipeline.runtime_broker.capability import compile_profile
 from hermes_pipeline.runtime_broker.codex_adapter import CodexAdapter
 from hermes_pipeline.runtime_broker.fake import FakeRuntimeBroker
 from hermes_pipeline.runtime_broker.opencode_adapter import OpenCodeAdapter
@@ -256,58 +260,31 @@ class KernelBridge:
         return self._inner.process(command_id, payload)
 
     def _load_registry(self) -> ProjectRegistry:
-        path = self._dir / "projects.json"
-        if not path.is_file():
+        document = self._parse_json(self._dir / "projects.json")
+        if self._corrupt or not document:
             return ProjectRegistry()
-        try:
-            document = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            return ProjectRegistry()
-        if isinstance(document, dict):
-            return ProjectRegistry.load(cast(dict[str, Any], document))
-        return ProjectRegistry()
+        return ProjectRegistry.load(document)
 
     def _save_registry(self) -> None:
-        (self._dir / "projects.json").write_text(
-            json.dumps(self._registry.dump(), sort_keys=True),
-            encoding="utf-8",
-        )
+        self._write_json(self._dir / "projects.json", self._registry.dump())
 
     def _load_bindings(self) -> BindingTable:
-        path = self._dir / "bindings.json"
-        if not path.is_file():
+        document = self._parse_json(self._dir / "bindings.json")
+        if self._corrupt or not document:
             return BindingTable({})
-        try:
-            document = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            return BindingTable({})
-        if isinstance(document, dict):
-            return BindingTable.load(cast(dict[str, Any], document))
-        return BindingTable({})
+        return BindingTable.load(document)
 
     def _save_bindings(self) -> None:
-        (self._dir / "bindings.json").write_text(
-            json.dumps(self._bindings.dump(), sort_keys=True),
-            encoding="utf-8",
-        )
+        self._write_json(self._dir / "bindings.json", self._bindings.dump())
 
     def _load_delivery(self) -> FakeDelivery:
-        path = self._dir / "delivery.json"
-        if not path.is_file():
+        document = self._parse_json(self._dir / "delivery.json")
+        if self._corrupt or not document:
             return FakeDelivery()
-        try:
-            document = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            return FakeDelivery()
-        if isinstance(document, dict):
-            return FakeDelivery.load(cast(dict[str, Any], document))
-        return FakeDelivery()
+        return FakeDelivery.load(document)
 
     def _save_delivery(self) -> None:
-        (self._dir / "delivery.json").write_text(
-            json.dumps(self._delivery.dump(), sort_keys=True),
-            encoding="utf-8",
-        )
+        self._write_json(self._dir / "delivery.json", self._delivery.dump())
 
     def _mirror_github(
         self, record: DeliveryRecord, request: DeliveryRequest
@@ -344,32 +321,19 @@ class KernelBridge:
         return MemoryKernelStore.load(document)
 
     def _save_kernel(self) -> None:
-        (self._dir / "kernel.json").write_text(
-            json.dumps(self._store.dump(), sort_keys=True),
-            encoding="utf-8",
-        )
+        self._write_json(self._dir / "kernel.json", self._store.dump())
 
     def _load_github(self) -> dict[str, str]:
-        path = self._dir / "github.json"
-        if not path.is_file():
+        document = self._parse_json(self._dir / "github.json")
+        if self._corrupt or not document:
             return {}
-        try:
-            document = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            return {}
-        if not isinstance(document, dict):
-            return {}
-        row = cast(dict[str, Any], document)
-        repo = str(row.get("repo", ""))
+        repo = str(document.get("repo", ""))
         if repo.count("/") != 1:
             return {}
-        return {"repo": repo, "base": str(row.get("base", "main"))}
+        return {"repo": repo, "base": str(document.get("base", "main"))}
 
     def _save_github(self) -> None:
-        (self._dir / "github.json").write_text(
-            json.dumps(self._github, sort_keys=True),
-            encoding="utf-8",
-        )
+        self._write_json(self._dir / "github.json", self._github)
 
     def _advance_prd(
         self, pipeline_id: str, workspace_id: str, project_id: str
@@ -381,7 +345,7 @@ class KernelBridge:
         result = PrdStage(
             self._bindings,
             artifacts,
-            planner=self._runtime_broker(str(folder)),
+            planner=self._runtime_broker(str(folder), "planner"),
             folder=folder,
         ).run(
             pipeline_id,
@@ -421,7 +385,7 @@ class KernelBridge:
         result = ArchitectureStage(
             self._bindings,
             artifacts,
-            planner=self._runtime_broker(str(folder)),
+            planner=self._runtime_broker(str(folder), "planner"),
             folder=folder,
         ).run(
             prd_artifact_id=prd_id,
@@ -466,6 +430,21 @@ class KernelBridge:
             return {}
         return cast(dict[str, Any], document)
 
+    def _write_json(self, path: Path, document: object) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        handle, name = tempfile.mkstemp(
+            prefix=f"{path.name}.", suffix=".tmp", dir=str(path.parent)
+        )
+        temp = Path(name)
+        try:
+            with os.fdopen(handle, "w", encoding="utf-8") as out:
+                out.write(json.dumps(document, sort_keys=True))
+            os.replace(temp, path)
+        except OSError:
+            with contextlib.suppress(OSError):
+                temp.unlink()
+            raise
+
     def _apply_stage_bundle(self) -> None:
         document = self._parse_json(self._dir / "stages.json")
         if self._corrupt or not document:
@@ -489,10 +468,7 @@ class KernelBridge:
             "development": self._dev,
             "verify": self._verify,
         }
-        (self._dir / "stages.json").write_text(
-            json.dumps(payload, sort_keys=True),
-            encoding="utf-8",
-        )
+        self._write_json(self._dir / "stages.json", payload)
 
     def _load_prd(self) -> dict[str, dict[str, str]]:
         document = self._parse_json(self._dir / "prd.json")
@@ -510,24 +486,12 @@ class KernelBridge:
         return loaded
 
     def _save_prd(self) -> None:
-        (self._dir / "prd.json").write_text(
-            json.dumps(self._prd, sort_keys=True),
-            encoding="utf-8",
-        )
+        self._write_json(self._dir / "prd.json", self._prd)
 
     def _load_arch(self) -> dict[str, dict[str, str]]:
-        path = self._dir / "architecture.json"
-        if not path.is_file():
-            return {}
-        try:
-            document = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            return {}
-        if not isinstance(document, dict):
-            return {}
+        document = self._parse_json(self._dir / "architecture.json")
         loaded: dict[str, dict[str, str]] = {}
-        typed = cast(dict[str, Any], document)
-        for raw_key, item in typed.items():
+        for raw_key, item in document.items():
             if not isinstance(item, dict):
                 continue
             row = cast(dict[str, Any], item)
@@ -540,10 +504,7 @@ class KernelBridge:
         return loaded
 
     def _save_arch(self) -> None:
-        (self._dir / "architecture.json").write_text(
-            json.dumps(self._arch, sort_keys=True),
-            encoding="utf-8",
-        )
+        self._write_json(self._dir / "architecture.json", self._arch)
 
     def _advance_development(
         self, pipeline_id: str, project_id: str, principal_id: str
@@ -628,7 +589,7 @@ class KernelBridge:
         return folder
 
     def _executor_broker(self, worktree: ManagedWorktree) -> BoundRuntimeBroker:
-        return self._runtime_broker(str(worktree.root))
+        return self._runtime_broker(str(worktree.root), "executor")
 
     def _role_runtime(self, role: str, cwd: str) -> RuntimeBrokerPort:
         try:
@@ -637,16 +598,44 @@ class KernelBridge:
             return _PassingRuntime()
         if binding.runtime == "fake":
             return _PassingRuntime()
-        return self._runtime_broker(cwd)
+        return self._runtime_broker(cwd, role)
 
-    def _runtime_broker(self, cwd: str) -> BoundRuntimeBroker:
+    def _profile_for(self, role: str, cwd: str, family: str) -> Any:
+        stage = {
+            "planner": "PRD",
+            "executor": "DEVELOPMENT",
+            "e2e": "E2E",
+            "reviewer": "ACCEPTANCE",
+        }.get(role, "DEVELOPMENT")
+        return compile_profile(
+            write_roots=[cwd],
+            executables=[family],
+            stage_type=stage,  # type: ignore[arg-type]
+            profile_id=f"cap_{role}",
+        )
+
+    def _runtime_broker(self, cwd: str, role: str = "executor") -> BoundRuntimeBroker:
+        sandbox = "workspace-write" if role == "executor" else "read-only"
         adapters: dict[RuntimeFamily, RuntimeBrokerPort] = {
             "fake": FakeRuntimeBroker(),
-            "opencode": OpenCodeAdapter(self._pinned_exe("opencode"), cwd=cwd),
-            "codex": CodexAdapter(self._pinned_exe("codex"), cwd=cwd),
+            "opencode": OpenCodeAdapter(
+                self._pinned_exe("opencode"),
+                cwd=cwd,
+                profile=self._profile_for(role, cwd, "opencode"),
+            ),
+            "codex": CodexAdapter(
+                self._pinned_exe("codex"),
+                cwd=cwd,
+                profile=self._profile_for(role, cwd, "codex"),
+                sandbox=sandbox,
+            ),
         }
         for family in ("claude", "cursor", "kiro", "grok"):
-            adapters[family] = ProcessAdapter(self._pinned_exe(family), cwd=cwd)
+            adapters[family] = ProcessAdapter(
+                self._pinned_exe(family),
+                cwd=cwd,
+                profile=self._profile_for(role, cwd, "process"),
+            )
         return BoundRuntimeBroker(self._bindings, adapters)
 
     def _prd_prompt(self, pipeline_id: str) -> str:
@@ -667,27 +656,15 @@ class KernelBridge:
         )
 
     def _load_feedback(self) -> dict[str, str]:
-        path = self._dir / "feedback.json"
-        if not path.is_file():
-            return {}
-        try:
-            document = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            return {}
-        if not isinstance(document, dict):
-            return {}
+        document = self._parse_json(self._dir / "feedback.json")
         loaded: dict[str, str] = {}
-        typed = cast(dict[str, Any], document)
-        for key, value in typed.items():
+        for key, value in document.items():
             if isinstance(value, str) and value.strip():
                 loaded[str(key)] = value
         return loaded
 
     def _save_feedback(self) -> None:
-        (self._dir / "feedback.json").write_text(
-            json.dumps(self._feedback, sort_keys=True),
-            encoding="utf-8",
-        )
+        self._write_json(self._dir / "feedback.json", self._feedback)
 
     def _set_feedback(self, pipeline_id: str, note: str) -> None:
         text = note.strip()
@@ -712,27 +689,15 @@ class KernelBridge:
             return ""
 
     def _load_requirements(self) -> dict[str, str]:
-        path = self._dir / "requirements.json"
-        if not path.is_file():
-            return {}
-        try:
-            document = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            return {}
-        if not isinstance(document, dict):
-            return {}
+        document = self._parse_json(self._dir / "requirements.json")
         loaded: dict[str, str] = {}
-        typed = cast(dict[str, Any], document)
-        for raw_key, item in typed.items():
+        for raw_key, item in document.items():
             if isinstance(item, str):
                 loaded[str(raw_key)] = item
         return loaded
 
     def _save_requirements(self) -> None:
-        (self._dir / "requirements.json").write_text(
-            json.dumps(self._requirements, sort_keys=True),
-            encoding="utf-8",
-        )
+        self._write_json(self._dir / "requirements.json", self._requirements)
 
     def _pinned_exe(self, family: str) -> str | None:
         path = self._runtimes.get(family, "")
@@ -741,19 +706,10 @@ class KernelBridge:
         return None
 
     def _load_runtime_pins(self) -> dict[str, str]:
-        path = self._dir / "runtimes.json"
-        if not path.is_file():
-            return {}
-        try:
-            document = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            return {}
-        if not isinstance(document, dict):
-            return {}
+        document = self._parse_json(self._dir / "runtimes.json")
         loaded: dict[str, str] = {}
-        typed = cast(dict[str, Any], document)
         for family in ("opencode", "codex", "claude", "cursor", "kiro", "grok"):
-            raw = str(typed.get(family, ""))
+            raw = str(document.get(family, ""))
             if raw and Path(raw).is_file():
                 loaded[family] = raw
         return loaded
@@ -778,10 +734,7 @@ class KernelBridge:
         return self._coerce_dev(self._parse_json(self._dir / "development.json"))
 
     def _save_dev(self) -> None:
-        (self._dir / "development.json").write_text(
-            json.dumps(self._dev, sort_keys=True),
-            encoding="utf-8",
-        )
+        self._write_json(self._dir / "development.json", self._dev)
         self._save_stages()
 
     def _advance_verify(self, pipeline_id: str, project_id: str) -> None:
@@ -863,10 +816,7 @@ class KernelBridge:
         return self._coerce_verify(self._parse_json(self._dir / "verify.json"))
 
     def _save_verify(self) -> None:
-        (self._dir / "verify.json").write_text(
-            json.dumps(self._verify, sort_keys=True),
-            encoding="utf-8",
-        )
+        self._write_json(self._dir / "verify.json", self._verify)
         self._save_stages()
 
     def _retry_verify(self, payload: dict[str, Any]) -> dict[str, Any]:
@@ -990,10 +940,7 @@ class KernelBridge:
         return self._coerce_approvals(self._parse_json(self._dir / "approvals.json"))
 
     def _save_approvals(self) -> None:
-        (self._dir / "approvals.json").write_text(
-            json.dumps(self._approvals, sort_keys=True),
-            encoding="utf-8",
-        )
+        self._write_json(self._dir / "approvals.json", self._approvals)
         self._save_stages()
 
 

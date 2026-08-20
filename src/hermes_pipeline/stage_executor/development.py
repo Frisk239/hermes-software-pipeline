@@ -11,14 +11,10 @@ from typing import Literal
 
 from hermes_pipeline.artifacts.ports import ArtifactPutRequest, ArtifactsPort
 from hermes_pipeline.operations.baseline import SolutionApproval
-from hermes_pipeline.repository.worktree import (
-    SECRET_CANARY,
-    CandidateRecord,
-    ManagedWorktree,
-)
+from hermes_pipeline.repository.worktree import CandidateRecord, ManagedWorktree
 from hermes_pipeline.runtime_broker.binding import BindingNotFound, BindingTable
 from hermes_pipeline.runtime_broker.ports import RuntimeBrokerPort, RuntimeLaunchRequest
-from hermes_pipeline.stage_executor.harvest import pick_implementation
+from hermes_pipeline.stage_executor.harvest import leaked_secret, pick_implementation
 from hermes_pipeline.stage_executor.self_test import FEEDBACK_MARK, run_self_test
 
 IMPL_NAME = "src/app.py"
@@ -133,7 +129,7 @@ class DevelopmentStage:
         if written is None:
             return None
         body = written.read_bytes()
-        if SECRET_CANARY.encode("utf-8") in body:
+        if leaked_secret(body):
             return None
         return written, body
 
