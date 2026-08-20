@@ -16,9 +16,11 @@ from hermes_pipeline.domain.errors import (
 from hermes_pipeline.domain.pipeline import (
     ConfirmRequirement,
     PipelineState,
+    RecordStation,
     RejectRequirement,
     RequirementConfirmed,
     RequirementRejected,
+    StationRecorded,
     apply,
 )
 
@@ -87,6 +89,29 @@ def test_illegal_transitions_from_open_and_rejected() -> None:
             assert result.outcome == INVALID_TRANSITION
             assert result.state == state
             assert result.event is None
+
+
+def test_record_station_from_open_increments_revision() -> None:
+    opened = apply(
+        PipelineState(status="UNCONFIRMED", revision=0, text=""),
+        ConfirmRequirement(text="need a login page"),
+    ).state
+    result = apply(
+        opened,
+        RecordStation(station="prd", fields={"prd_id": "art_1", "prd_gate": "PASS"}),
+    )
+    assert result.outcome == ACCEPTED
+    assert result.state.status == "OPEN"
+    assert result.state.revision == opened.revision + 1
+    assert isinstance(result.event, StationRecorded)
+    assert result.event.fields["prd_gate"] == "PASS"
+
+
+def test_record_station_from_unconfirmed_is_invalid() -> None:
+    state = PipelineState(status="UNCONFIRMED", revision=0, text="")
+    result = apply(state, RecordStation(station="prd", fields={"prd_gate": "FAIL"}))
+    assert result.outcome == INVALID_TRANSITION
+    assert result.state == state
 
 
 def test_second_confirm_is_invalid_transition_with_unchanged_revision() -> None:

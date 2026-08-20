@@ -6,18 +6,24 @@ import contextlib
 import json
 import os
 import tempfile
+import time
 from pathlib import Path
 from typing import Any, cast
 
 from hermes_pipeline.artifacts.local_cas import ArtifactNotFound, LocalCasArtifacts
-from hermes_pipeline.contracts.runtime import Actor
+from hermes_pipeline.contracts.definitions import FixedV1Integer, UtcTimestampRef
+from hermes_pipeline.contracts.runtime import Actor, ControllerCommand
 from hermes_pipeline.controller import KernelController
+from hermes_pipeline.controller.transaction_store import (
+    ControllerTransactionStore,
+    fold_stage_projection,
+)
 from hermes_pipeline.delivery.fake import FakeDelivery
 from hermes_pipeline.delivery.github import GitHubDelivery, GitHubTransport
 from hermes_pipeline.delivery.ports import DeliveryRecord, DeliveryRequest
 from hermes_pipeline.operations.baseline import SolutionApproval
 from hermes_pipeline.operations.projects import ProjectRegistry, RequirementIntake
-from hermes_pipeline.persistence.kernel_memory import MemoryKernelStore
+from hermes_pipeline.persistence.kernel_sqlite import SqliteKernelStore
 from hermes_pipeline.repository.integration import (
     VerificationSandbox,
     build_integration_candidate,
@@ -68,6 +74,20 @@ from hermes_pipeline.stage_executor.prd import PrdGate, PrdStage
 from hermes_pipeline.stage_executor.verify import VerifyFlow
 
 _RECORDED = "2026-01-01T00:00:00Z"
+_RECORD_COMMANDS = {
+    "prd": "RECORD_PRD",
+    "architecture": "RECORD_ARCHITECTURE",
+    "development": "RECORD_DEVELOPMENT",
+    "verify": "RECORD_VERIFY",
+    "approval": "RECORD_APPROVAL",
+}
+_RECORD_EVENTS = {
+    "prd": "PRD_RECORDED",
+    "architecture": "ARCHITECTURE_RECORDED",
+    "development": "DEVELOPMENT_RECORDED",
+    "verify": "VERIFY_RECORDED",
+    "approval": "APPROVAL_RECORDED",
+}
 _ROLES = {"ADMIN", "CONTRIBUTOR", "VIEWER"}
 _STAGE_ROLES = {"planner", "executor", "reviewer", "e2e"}
 _RUNTIMES = RUNTIME_FAMILIES
@@ -232,6 +252,11 @@ class KernelBridge:
             note = self._feedback.get(pipeline_id, "")
             if note:
                 result["feedback"] = note
+            folded = fold_stage_projection(
+                self._store.list_events(workspace_id, pipeline_id)
+            )
+            if folded:
+                result.update(folded)
             return result
         text = payload.get("text")
         if isinstance(text, str):
@@ -256,7 +281,6 @@ class KernelBridge:
                 self._save_requirements()
                 self._advance_prd(pipeline_id, workspace_id, project_id)
                 self._advance_architecture(pipeline_id, workspace_id, project_id)
-            self._save_kernel()
             return receipt.model_dump(mode="json")
         if op == "approve":
             return self._approve_baseline(payload)
@@ -319,14 +343,60 @@ class KernelBridge:
         self._delivery.remember(key, merged)
         return merged
 
-    def _load_kernel(self) -> MemoryKernelStore:
-        document = self._parse_json(self._dir / "kernel.json")
-        if not document:
-            return MemoryKernelStore()
-        return MemoryKernelStore.load(document)
+    def _load_kernel(self) -> ControllerTransactionStore:
+        path = self._dir.parent / "controller.sqlite"
+        store = SqliteKernelStore(str(path))
+        counts = store.counts()
+        empty = counts.inbox == 0 and counts.events == 0 and counts.pipelines == 0
+        if empty:
+            document = self._parse_json(self._dir / "kernel.json")
+            if document:
+                store.import_dump(document)
+        return store
 
-    def _save_kernel(self) -> None:
-        self._write_json(self._dir / "kernel.json", self._store.dump())
+    def _record_station(
+        self,
+        workspace_id: str,
+        project_id: str,
+        pipeline_id: str,
+        station: str,
+        fields: dict[str, str],
+    ) -> None:
+        command_type = _RECORD_COMMANDS.get(station)
+        event_type = _RECORD_EVENTS.get(station)
+        if command_type is None or event_type is None or not workspace_id:
+            return
+        attempt = 1 + sum(
+            1
+            for event in self._store.list_events(workspace_id, pipeline_id)
+            if event.event_type == event_type
+        )
+        command_id = f"cmd_{pipeline_id}_{station}_{attempt}"
+        snapshot = self._store.load_pipeline(workspace_id, pipeline_id)
+        if snapshot is None:
+            return
+        payload = {key: str(value) for key, value in fields.items()}
+        command = ControllerCommand(
+            schema_id="https://schemas.hermes-pipeline.dev/runtime/controller-command/v1",
+            schema_version=FixedV1Integer(1),
+            command_id=command_id,
+            idempotency_key=f"record-{command_id}-key000",
+            workspace_id=workspace_id,
+            project_id=project_id,
+            pipeline_id=pipeline_id,
+            expected_revision=snapshot.revision,
+            actor=Actor(
+                principal_id="runtime",
+                provider="SYSTEM",
+                provider_actor_id="kernel-bridge",
+            ),
+            ingress="SYSTEM_RECONCILER",
+            command_type=command_type,
+            payload=payload,
+            correlation_id=f"corr-{command_id}",
+            submitted_at=UtcTimestampRef(_RECORDED),
+        )
+        self._controller.submit(command)
 
     def _load_github(self) -> dict[str, str]:
         document = self._parse_json(self._dir / "github.json")
@@ -340,9 +410,53 @@ class KernelBridge:
     def _save_github(self) -> None:
         self._write_json(self._dir / "github.json", self._github)
 
+    def _hydrate_from_events(self, workspace_id: str, pipeline_id: str) -> None:
+        folded = fold_stage_projection(
+            self._store.list_events(workspace_id, pipeline_id)
+        )
+        if not folded:
+            return
+        if folded.get("prd_status") and pipeline_id not in self._prd:
+            self._prd[pipeline_id] = {
+                "prd_id": folded.get("prd_id", ""),
+                "prd_status": folded.get("prd_status", ""),
+                "prd_gate": folded.get("prd_gate", ""),
+            }
+        if folded.get("arch_status") and pipeline_id not in self._arch:
+            self._arch[pipeline_id] = {
+                "design_id": folded.get("design_id", ""),
+                "testplan_id": folded.get("testplan_id", ""),
+                "arch_status": folded.get("arch_status", ""),
+                "arch_gate": folded.get("arch_gate", ""),
+            }
+        if folded.get("candidate_gate") == "PASS" and pipeline_id not in self._dev:
+            self._dev[pipeline_id] = {
+                "impl_id": folded.get("impl_id", ""),
+                "candidate_sha": folded.get("candidate_sha", ""),
+                "candidate_path": folded.get("candidate_path", ""),
+                "dev_status": folded.get("dev_status", ""),
+                "candidate_gate": folded.get("candidate_gate", ""),
+            }
+        if folded.get("verify_status") == "READY" and pipeline_id not in self._verify:
+            self._verify[pipeline_id] = {
+                "verify_status": folded.get("verify_status", ""),
+                "e2e_id": folded.get("e2e_id", ""),
+                "acceptance_id": folded.get("acceptance_id", ""),
+                "verify_attempts": folded.get("verify_attempts", "0"),
+                "infra_attempts": folded.get("infra_attempts", "0"),
+            }
+        approved = folded.get("approval_status") == "APPROVED"
+        if approved and pipeline_id not in self._approvals:
+            self._approvals[pipeline_id] = {
+                "approval_status": folded.get("approval_status", ""),
+                "approver_id": folded.get("approver_id", ""),
+                "project_id": "",
+            }
+
     def _advance_prd(
         self, pipeline_id: str, workspace_id: str, project_id: str
     ) -> None:
+        self._hydrate_from_events(workspace_id, pipeline_id)
         if pipeline_id in self._prd:
             return
         artifacts = LocalCasArtifacts(self._dir.parent / "cas")
@@ -375,10 +489,18 @@ class KernelBridge:
             "prd_gate": gate,
         }
         self._save_prd()
+        self._record_station(
+            workspace_id,
+            project_id,
+            pipeline_id,
+            "prd",
+            self._prd[pipeline_id],
+        )
 
     def _advance_architecture(
         self, pipeline_id: str, workspace_id: str, project_id: str
     ) -> None:
+        self._hydrate_from_events(workspace_id, pipeline_id)
         if pipeline_id in self._arch:
             return
         planning = self._prd.get(pipeline_id)
@@ -414,6 +536,13 @@ class KernelBridge:
             "arch_gate": gate,
         }
         self._save_arch()
+        self._record_station(
+            workspace_id,
+            project_id,
+            pipeline_id,
+            "architecture",
+            self._arch[pipeline_id],
+        )
         if gate == "PASS" and pipeline_id not in self._approvals:
             self._approvals[pipeline_id] = {
                 "approval_status": "PENDING",
@@ -512,8 +641,13 @@ class KernelBridge:
         self._write_json(self._dir / "architecture.json", self._arch)
 
     def _advance_development(
-        self, pipeline_id: str, project_id: str, principal_id: str
+        self,
+        pipeline_id: str,
+        project_id: str,
+        principal_id: str,
+        workspace_id: str = "ws_local",
     ) -> None:
+        self._hydrate_from_events(workspace_id, pipeline_id)
         if pipeline_id in self._dev:
             return
         planning = self._prd.get(pipeline_id)
@@ -547,6 +681,13 @@ class KernelBridge:
                 "candidate_gate": "FAIL",
             }
             self._save_dev()
+            self._record_station(
+                workspace_id,
+                project_id,
+                pipeline_id,
+                "development",
+                self._dev[pipeline_id],
+            )
             return
         artifacts = LocalCasArtifacts(self._dir.parent / "cas")
         worktree = ManagedWorktree(self._dir.parent / "worktrees" / pipeline_id)
@@ -587,6 +728,9 @@ class KernelBridge:
             "candidate_gate": gate,
         }
         self._save_dev()
+        self._record_station(
+            workspace_id, project_id, pipeline_id, "development", self._dev[pipeline_id]
+        )
 
     def _plans_dir(self, pipeline_id: str, stage: str) -> Path:
         folder = self._dir.parent / "plans" / pipeline_id / stage
@@ -762,7 +906,10 @@ class KernelBridge:
         self._write_json(self._dir / "development.json", self._dev)
         self._save_stages()
 
-    def _advance_verify(self, pipeline_id: str, project_id: str) -> None:
+    def _advance_verify(
+        self, pipeline_id: str, project_id: str, workspace_id: str = "ws_local"
+    ) -> None:
+        self._hydrate_from_events(workspace_id, pipeline_id)
         if pipeline_id in self._verify:
             return
         developed = self._dev.get(pipeline_id)
@@ -798,6 +945,13 @@ class KernelBridge:
                 "infra_attempts": str(prior.get("infra_attempts", "0")),
             }
             self._save_verify()
+            self._record_station(
+                workspace_id,
+                project_id,
+                pipeline_id,
+                "verify",
+                self._verify[pipeline_id],
+            )
             return
         stored = self._delivery.lookup(pipeline_id)
         if stored is not None:
@@ -821,6 +975,9 @@ class KernelBridge:
         elif result.status == "READY":
             self._clear_feedback(pipeline_id)
         self._save_verify()
+        self._record_station(
+            workspace_id, project_id, pipeline_id, "verify", self._verify[pipeline_id]
+        )
 
     def _coerce_verify(self, document: dict[str, Any]) -> dict[str, dict[str, str]]:
         loaded: dict[str, dict[str, str]] = {}
@@ -848,6 +1005,8 @@ class KernelBridge:
         pipeline_id = str(payload.get("pipeline_id", "pl_local"))
         project_id = str(payload.get("project_id", "prj_local"))
         principal = str(payload.get("principal_id", "operator"))
+        workspace_id = str(payload.get("workspace_id", "ws_local"))
+        self._hydrate_from_events(workspace_id, pipeline_id)
         verified = self._verify.get(pipeline_id, {})
         developed = self._dev.get(pipeline_id, {})
         rework = verified.get("verify_status") == "REWORK"
@@ -869,8 +1028,8 @@ class KernelBridge:
         self._dev.pop(pipeline_id, None)
         self._save_dev()
         self._verify.pop(pipeline_id, None)
-        self._advance_development(pipeline_id, project_id, principal)
-        self._advance_verify(pipeline_id, project_id)
+        self._advance_development(pipeline_id, project_id, principal, workspace_id)
+        self._advance_verify(pipeline_id, project_id, workspace_id)
         row = self._verify.get(pipeline_id, {})
         if row:
             if infra:
@@ -903,6 +1062,12 @@ class KernelBridge:
         pipeline_id = str(payload.get("pipeline_id", "pl_local"))
         project_id = str(payload.get("project_id", "prj_local"))
         principal = str(payload.get("principal_id", "operator"))
+        workspace_id = str(payload.get("workspace_id", "ws_local"))
+        now = int(time.time())
+        held = self._store.load_lease(workspace_id, pipeline_id)
+        if held is not None and now <= held.expires_at:
+            return {"ok": False, "error": "busy"}
+        self._hydrate_from_events(workspace_id, pipeline_id)
         planning = self._prd.get(pipeline_id)
         design = self._arch.get(pipeline_id)
         if (
@@ -914,6 +1079,28 @@ class KernelBridge:
             return {"ok": False, "error": "baseline not ready"}
         if self._registry.role_of(project_id, principal) is None:
             return {"ok": False, "error": "not a project member"}
+        holder = f"runtime-{os.getpid()}"
+        self._controller.acquire_lease(workspace_id, pipeline_id, holder, now, 120)
+        try:
+            return self._run_approved(
+                payload, pipeline_id, project_id, principal, workspace_id
+            )
+        finally:
+            self._controller.cancel(workspace_id, pipeline_id)
+
+    def _run_approved(
+        self,
+        payload: dict[str, Any],
+        pipeline_id: str,
+        project_id: str,
+        principal: str,
+        workspace_id: str,
+    ) -> dict[str, Any]:
+        del payload
+        planning = self._prd.get(pipeline_id)
+        design = self._arch.get(pipeline_id)
+        if planning is None or design is None:
+            return {"ok": False, "error": "baseline not ready"}
         try:
             self._approval.designate(pipeline_id, project_id, principal)
             self._approval.approve(
@@ -931,8 +1118,18 @@ class KernelBridge:
         row["project_id"] = project_id
         self._approvals[pipeline_id] = row
         self._save_approvals()
-        self._advance_development(pipeline_id, project_id, principal)
-        self._advance_verify(pipeline_id, project_id)
+        self._record_station(
+            workspace_id,
+            project_id,
+            pipeline_id,
+            "approval",
+            {
+                "approval_status": "APPROVED",
+                "approver_id": principal,
+            },
+        )
+        self._advance_development(pipeline_id, project_id, principal, workspace_id)
+        self._advance_verify(pipeline_id, project_id, workspace_id)
         verify_status = self._verify.get(pipeline_id, {}).get("verify_status", "")
         gate = self._dev.get(pipeline_id, {}).get("candidate_gate", "")
         return {

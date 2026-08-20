@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from typing import Literal, Protocol, runtime_checkable
+from typing import Any, Literal, Protocol, cast, runtime_checkable
 
 
 class PersistenceError(Exception):
@@ -93,6 +93,15 @@ class StoreCounts:
     outbox: int
 
 
+_STAGE_EVENTS = {
+    "PRD_RECORDED": "prd",
+    "ARCHITECTURE_RECORDED": "architecture",
+    "DEVELOPMENT_RECORDED": "development",
+    "VERIFY_RECORDED": "verify",
+    "APPROVAL_RECORDED": "approval",
+}
+
+
 def fold_pipeline_events(
     workspace_id: str, pipeline_id: str, events: list[EventWrite]
 ) -> PipelineSnapshot:
@@ -100,14 +109,13 @@ def fold_pipeline_events(
     revision = 0
     text = ""
     for event in events:
+        revision = event.pipeline_revision
         if event.event_type == "REQUIREMENT_CONFIRMED":
             status = "OPEN"
-            revision = event.pipeline_revision
             payload = json.loads(event.payload_json)
             text = str(payload.get("text", ""))
         elif event.event_type == "REQUIREMENT_REJECTED":
             status = "REJECTED"
-            revision = event.pipeline_revision
     return PipelineSnapshot(
         workspace_id=workspace_id,
         pipeline_id=pipeline_id,
@@ -115,6 +123,26 @@ def fold_pipeline_events(
         revision=revision,
         text=text,
     )
+
+
+def fold_stage_projection(events: list[EventWrite]) -> dict[str, str]:
+    folded: dict[str, str] = {}
+    for event in events:
+        if event.event_type not in _STAGE_EVENTS:
+            continue
+        try:
+            payload = json.loads(event.payload_json)
+        except ValueError:
+            continue
+        if not isinstance(payload, dict):
+            continue
+        typed = cast(dict[str, Any], payload)
+        for raw_key, raw_value in typed.items():
+            key = str(raw_key)
+            if key == "station":
+                continue
+            folded[key] = str(raw_value)
+    return folded
 
 
 @runtime_checkable
@@ -171,4 +199,5 @@ __all__ = [
     "PipelineSnapshot",
     "StoreCounts",
     "fold_pipeline_events",
+    "fold_stage_projection",
 ]

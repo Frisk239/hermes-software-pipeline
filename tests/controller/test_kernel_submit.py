@@ -116,6 +116,32 @@ def test_accept_confirm_persists_inbox_event_and_open_pipeline(
     assert snapshot.text == "need a login page"
 
 
+def test_record_prd_appends_after_open(store: ControllerTransactionStore) -> None:
+    controller = _controller(store)
+    assert controller.submit(_command()).status == "ACCEPTED"
+    receipt = controller.submit(
+        _command(
+            command_id="cmd_pl_01-02_prd_1",
+            command_type="RECORD_PRD",
+            payload={
+                "prd_id": "art_prd",
+                "prd_status": "COMPLETED",
+                "prd_gate": "PASS",
+            },
+            expected_revision=1,
+            idempotency_key="record-prd-idem-key01",
+        )
+    )
+    assert receipt.status == "ACCEPTED"
+    assert receipt.observed_revision == 2
+    events = store.list_events("ws_01-02", "pl_01-02")
+    assert events[-1].event_type == "PRD_RECORDED"
+    snapshot = store.load_pipeline("ws_01-02", "pl_01-02")
+    assert snapshot is not None
+    assert snapshot.status == "OPEN"
+    assert snapshot.revision == 2
+
+
 def test_accept_reject_persists_rejected_pipeline(
     store: ControllerTransactionStore,
 ) -> None:

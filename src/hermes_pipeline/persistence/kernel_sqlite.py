@@ -41,6 +41,7 @@ from hermes_pipeline.controller.transaction_store import (
     StoreCounts,
     fold_pipeline_events,
 )
+from hermes_pipeline.persistence.kernel_memory import MemoryKernelStore
 
 _METADATA = MetaData()
 
@@ -126,6 +127,28 @@ class SqliteKernelStore:
 
     def close(self) -> None:
         self._engine.dispose()
+
+    def import_dump(self, document: dict[str, Any]) -> None:
+        memory = MemoryKernelStore.load(document)
+        payload = memory.dump()
+        failure: PersistenceError | None = None
+        try:
+            with self._engine.begin() as conn:
+                for item in payload["inbox"]:
+                    conn.execute(_INBOX.insert().values(**item))
+                for item in payload["events"]:
+                    conn.execute(_EVENTS.insert().values(**item))
+                for item in payload["pipelines"]:
+                    conn.execute(_PIPELINES.insert().values(**item))
+                for item in payload["outbox"]:
+                    conn.execute(_OUTBOX.insert().values(**item))
+                for item in payload["leases"]:
+                    conn.execute(_LEASES.insert().values(**item))
+        except Exception as exc:
+            failure = self._translate(exc)
+        else:
+            return
+        _raise_captured(failure)
 
     def find_inbox(self, workspace_id: str, command_id: str) -> InboxRecord | None:
         failure: PersistenceError | None = None

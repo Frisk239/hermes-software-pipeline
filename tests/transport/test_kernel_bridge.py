@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import json
+import time
 from pathlib import Path
 
 import pytest
 
+from hermes_pipeline.controller import KernelController
+from hermes_pipeline.persistence.kernel_sqlite import SqliteKernelStore
 from hermes_pipeline.transport.kernel_bridge import (
     KernelBridge,
     architecture_prompt,
@@ -72,7 +75,173 @@ def test_register_admit_submit_read(tmp_path: Path) -> None:
         {"op": "read", "workspace_id": "ws_cli", "pipeline_id": "pl_cli"},
     )
     assert again["status"] == "OPEN"
-    assert again["revision"] == "1" or again["revision"] == 1
+    assert int(again["revision"]) >= 1
+    assert not (tmp_path / "descriptor" / "kernel.json").exists()
+    assert (tmp_path / "controller.sqlite").is_file()
+
+
+def test_read_keeps_prd_from_events_without_prd_json(tmp_path: Path) -> None:
+    bridge = KernelBridge(tmp_path, _Inner())
+    assert bridge.process(
+        "cmd_reg", {"op": "register", "project_id": "prj_cli", "name": "Cli"}
+    )["ok"]
+    assert bridge.process(
+        "cmd_adm",
+        {
+            "op": "admit",
+            "project_id": "prj_cli",
+            "principal_id": "operator",
+            "role": "CONTRIBUTOR",
+        },
+    )["ok"]
+    assert (
+        bridge.process(
+            "cmd_cli_one",
+            {
+                "text": "need a login page",
+                "workspace_id": "ws_cli",
+                "project_id": "prj_cli",
+                "pipeline_id": "pl_cli",
+                "principal_id": "operator",
+            },
+        )["status"]
+        == "ACCEPTED"
+    )
+    prd_json = tmp_path / "descriptor" / "prd.json"
+    if prd_json.exists():
+        prd_json.unlink()
+    restarted = KernelBridge(tmp_path, _Inner())
+    view = restarted.process(
+        "cmd_read_events",
+        {"op": "read", "workspace_id": "ws_cli", "pipeline_id": "pl_cli"},
+    )
+    assert view["status"] == "OPEN"
+    assert view.get("prd_status") == "DENIED"
+
+
+def test_restart_does_not_rerecord_prd(tmp_path: Path) -> None:
+    bridge = KernelBridge(tmp_path, _Inner())
+    assert bridge.process(
+        "cmd_reg", {"op": "register", "project_id": "prj_cli", "name": "Cli"}
+    )["ok"]
+    assert bridge.process(
+        "cmd_adm",
+        {
+            "op": "admit",
+            "project_id": "prj_cli",
+            "principal_id": "operator",
+            "role": "CONTRIBUTOR",
+        },
+    )["ok"]
+    assert (
+        bridge.process(
+            "cmd_cli_one",
+            {
+                "text": "need a login page",
+                "workspace_id": "ws_cli",
+                "project_id": "prj_cli",
+                "pipeline_id": "pl_cli",
+                "principal_id": "operator",
+            },
+        )["status"]
+        == "ACCEPTED"
+    )
+    prd_json = tmp_path / "descriptor" / "prd.json"
+    if prd_json.exists():
+        prd_json.unlink()
+    KernelBridge(tmp_path, _Inner()).process(
+        "cmd_read_again",
+        {"op": "read", "workspace_id": "ws_cli", "pipeline_id": "pl_cli"},
+    )
+    store = SqliteKernelStore(str(tmp_path / "controller.sqlite"))
+    recorded = [
+        event
+        for event in store.list_events("ws_cli", "pl_cli")
+        if event.event_type == "PRD_RECORDED"
+    ]
+    store.close()
+    assert len(recorded) == 1
+
+
+def test_approve_is_busy_when_lease_held(tmp_path: Path) -> None:
+    bridge = KernelBridge(tmp_path, _Inner())
+    assert bridge.process(
+        "cmd_reg", {"op": "register", "project_id": "prj_cli", "name": "Cli"}
+    )["ok"]
+    assert bridge.process(
+        "cmd_adm",
+        {
+            "op": "admit",
+            "project_id": "prj_cli",
+            "principal_id": "operator",
+            "role": "CONTRIBUTOR",
+        },
+    )["ok"]
+    bridge.process(
+        "cmd_cli_one",
+        {
+            "text": "need a login page",
+            "workspace_id": "ws_cli",
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+            "principal_id": "operator",
+        },
+    )
+    store = SqliteKernelStore(str(tmp_path / "controller.sqlite"))
+    KernelController(store, recorded_at="2026-01-01T00:00:00Z").acquire_lease(
+        "ws_cli", "pl_cli", "other", int(time.time()), 600
+    )
+    store.close()
+    result = bridge.process(
+        "cmd_approve",
+        {
+            "op": "approve",
+            "workspace_id": "ws_cli",
+            "project_id": "prj_cli",
+            "pipeline_id": "pl_cli",
+            "principal_id": "operator",
+        },
+    )
+    assert result["ok"] is False
+    assert result["error"] == "busy"
+
+
+def test_sqlite_kernel_imports_legacy_kernel_json(tmp_path: Path) -> None:
+    document = {
+        "inbox": [],
+        "events": [
+            {
+                "event_id": "evt_1",
+                "workspace_id": "ws_cli",
+                "pipeline_id": "pl_legacy",
+                "event_type": "REQUIREMENT_CONFIRMED",
+                "payload_json": '{"text":"legacy need"}',
+                "pipeline_revision": 1,
+            }
+        ],
+        "pipelines": [
+            {
+                "workspace_id": "ws_cli",
+                "pipeline_id": "pl_legacy",
+                "status": "OPEN",
+                "revision": 1,
+                "text": "legacy need",
+            }
+        ],
+        "outbox": [],
+        "leases": [],
+    }
+    (tmp_path / "descriptor").mkdir()
+    (tmp_path / "descriptor" / "kernel.json").write_text(
+        json.dumps(document), encoding="utf-8"
+    )
+    imported = KernelBridge(tmp_path, _Inner())
+    view = imported.process(
+        "cmd_read_legacy",
+        {"op": "read", "workspace_id": "ws_cli", "pipeline_id": "pl_legacy"},
+    )
+    assert view["status"] == "OPEN"
+    assert view["revision"] == "1" or view["revision"] == 1
 
 
 def test_stage_prompts_do_not_repeat_intake_as_prd_task() -> None:
