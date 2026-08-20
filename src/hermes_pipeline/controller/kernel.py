@@ -36,10 +36,28 @@ from hermes_pipeline.domain.errors import (
 from hermes_pipeline.domain.pipeline import (
     ConfirmRequirement,
     PipelineState,
+    RecordStation,
     RejectRequirement,
     RequirementConfirmed,
+    Station,
+    StationRecorded,
     apply,
 )
+
+_STATIONS: dict[str, Station] = {
+    "RECORD_PRD": "prd",
+    "RECORD_ARCHITECTURE": "architecture",
+    "RECORD_DEVELOPMENT": "development",
+    "RECORD_VERIFY": "verify",
+    "RECORD_APPROVAL": "approval",
+}
+_EVENT_TYPES = {
+    "prd": "PRD_RECORDED",
+    "architecture": "ARCHITECTURE_RECORDED",
+    "development": "DEVELOPMENT_RECORDED",
+    "verify": "VERIFY_RECORDED",
+    "approval": "APPROVAL_RECORDED",
+}
 
 _RECEIPT_SCHEMA = "https://schemas.hermes-pipeline.dev/runtime/command-receipt/v1"
 _STATUSES = frozenset({"UNCONFIRMED", "OPEN", "REJECTED"})
@@ -47,7 +65,7 @@ _STATUSES = frozenset({"UNCONFIRMED", "OPEN", "REJECTED"})
 
 def _domain_command(
     command: ControllerCommand,
-) -> ConfirmRequirement | RejectRequirement | None:
+) -> ConfirmRequirement | RejectRequirement | RecordStation | None:
     payload = command.payload
     if command.command_type == "CONFIRM_REQUIREMENT":
         text = payload.get("text")
@@ -59,7 +77,14 @@ def _domain_command(
         if type(reason) is str:
             return RejectRequirement(reason=reason)
         return None
-    return None
+    station = _STATIONS.get(command.command_type)
+    if station is None:
+        return None
+    fields: dict[str, str] = {}
+    for key, value in payload.items():
+        if type(value) is str:
+            fields[str(key)] = value
+    return RecordStation(station=station, fields=fields)
 
 
 class KernelController:
@@ -157,6 +182,10 @@ class KernelController:
         if isinstance(event, RequirementConfirmed):
             event_type = "REQUIREMENT_CONFIRMED"
             payload_json = canonical_json({"text": event.text})
+        elif isinstance(event, StationRecorded):
+            event_type = _EVENT_TYPES[event.station]
+            payload = {"station": event.station, **event.fields}
+            payload_json = canonical_json(payload)
         else:
             event_type = "REQUIREMENT_REJECTED"
             payload_json = canonical_json({"reason": event.reason})

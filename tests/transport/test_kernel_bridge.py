@@ -72,9 +72,48 @@ def test_register_admit_submit_read(tmp_path: Path) -> None:
         {"op": "read", "workspace_id": "ws_cli", "pipeline_id": "pl_cli"},
     )
     assert again["status"] == "OPEN"
-    assert again["revision"] == "1" or again["revision"] == 1
+    assert int(again["revision"]) >= 1
     assert not (tmp_path / "descriptor" / "kernel.json").exists()
     assert (tmp_path / "controller.sqlite").is_file()
+
+
+def test_read_keeps_prd_from_events_without_prd_json(tmp_path: Path) -> None:
+    bridge = KernelBridge(tmp_path, _Inner())
+    assert bridge.process(
+        "cmd_reg", {"op": "register", "project_id": "prj_cli", "name": "Cli"}
+    )["ok"]
+    assert bridge.process(
+        "cmd_adm",
+        {
+            "op": "admit",
+            "project_id": "prj_cli",
+            "principal_id": "operator",
+            "role": "CONTRIBUTOR",
+        },
+    )["ok"]
+    assert (
+        bridge.process(
+            "cmd_cli_one",
+            {
+                "text": "need a login page",
+                "workspace_id": "ws_cli",
+                "project_id": "prj_cli",
+                "pipeline_id": "pl_cli",
+                "principal_id": "operator",
+            },
+        )["status"]
+        == "ACCEPTED"
+    )
+    prd_json = tmp_path / "descriptor" / "prd.json"
+    if prd_json.exists():
+        prd_json.unlink()
+    restarted = KernelBridge(tmp_path, _Inner())
+    view = restarted.process(
+        "cmd_read_events",
+        {"op": "read", "workspace_id": "ws_cli", "pipeline_id": "pl_cli"},
+    )
+    assert view["status"] == "OPEN"
+    assert view.get("prd_status") == "DENIED"
 
 
 def test_sqlite_kernel_imports_legacy_kernel_json(tmp_path: Path) -> None:

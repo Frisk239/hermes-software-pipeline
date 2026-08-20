@@ -15,6 +15,8 @@ from hermes_pipeline.domain.errors import (
     INVALID_TRANSITION,
 )
 
+Station = Literal["prd", "architecture", "development", "verify", "approval"]
+
 
 @dataclass(frozen=True)
 class PipelineState:
@@ -34,6 +36,12 @@ class RejectRequirement:
 
 
 @dataclass(frozen=True)
+class RecordStation:
+    station: Station
+    fields: dict[str, str]
+
+
+@dataclass(frozen=True)
 class RequirementConfirmed:
     text: str
 
@@ -44,15 +52,33 @@ class RequirementRejected:
 
 
 @dataclass(frozen=True)
+class StationRecorded:
+    station: Station
+    fields: dict[str, str]
+
+
+@dataclass(frozen=True)
 class PipelineResult:
     state: PipelineState
     outcome: Literal["ACCEPTED", "EMPTY_REQUIREMENT", "INVALID_TRANSITION"]
-    event: RequirementConfirmed | RequirementRejected | None
+    event: RequirementConfirmed | RequirementRejected | StationRecorded | None
 
 
 def apply(
-    state: PipelineState, command: ConfirmRequirement | RejectRequirement
+    state: PipelineState,
+    command: ConfirmRequirement | RejectRequirement | RecordStation,
 ) -> PipelineResult:
+    if isinstance(command, RecordStation):
+        if state.status != "OPEN":
+            return PipelineResult(state=state, outcome=INVALID_TRANSITION, event=None)
+        new_state = PipelineState(
+            status="OPEN", revision=state.revision + 1, text=state.text
+        )
+        return PipelineResult(
+            state=new_state,
+            outcome=ACCEPTED,
+            event=StationRecorded(station=command.station, fields=dict(command.fields)),
+        )
     if isinstance(command, ConfirmRequirement):
         payload = command.text.strip()
     else:
@@ -78,3 +104,17 @@ def apply(
         outcome=ACCEPTED,
         event=RequirementRejected(reason=payload),
     )
+
+
+__all__ = [
+    "ConfirmRequirement",
+    "PipelineResult",
+    "PipelineState",
+    "RecordStation",
+    "RejectRequirement",
+    "RequirementConfirmed",
+    "RequirementRejected",
+    "Station",
+    "StationRecorded",
+    "apply",
+]
