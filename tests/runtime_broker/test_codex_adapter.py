@@ -111,6 +111,14 @@ def test_argv_requires_json_and_sandbox(tmp_path: Path) -> None:
     assert _DANGEROUS not in adapter.last_argv
 
 
+def test_mixed_tui_without_json_is_failed(tmp_path: Path) -> None:
+    script = _write_script(tmp_path / "fake_codex.py", "print('not-json spinner')\n")
+    adapter = CodexAdapter(executable=script)
+    handle = adapter.launch(RuntimeLaunchRequest(runtime_id="rt-tui"))
+    assert handle.status == "FAILED"
+    assert adapter.collect("rt-tui").detail == "error"
+
+
 def test_denied_profile_does_not_spawn(tmp_path: Path) -> None:
     script = _write_script(tmp_path / "fake_codex.py", _OK_SCRIPT)
     profile = compile_profile(write_roots=["/work"], executables=[])

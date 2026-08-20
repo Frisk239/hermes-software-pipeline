@@ -7,6 +7,7 @@ import threading
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from hermes_pipeline.runtime_broker._opencode import classify_opencode_events
 from hermes_pipeline.runtime_broker.fence import decode_out, spawn_fenced
 from hermes_pipeline.runtime_broker.ports import (
     RuntimeHandle,
@@ -19,6 +20,7 @@ from hermes_pipeline.runtime_broker.ports import (
 
 _TIMEOUT_S = 10.0
 _PROMPT_TIMEOUT_S = 300.0
+_PROMPT_FILE = ".hermes-stage-prompt.txt"
 
 
 @dataclass
@@ -72,9 +74,18 @@ class OpenCodeAdapter:
             run.detail = "error"
             run.final_text = text
             return RuntimeHandle(runtime_id=runtime_id, status="FAILED")
+        classified = classify_opencode_events(text)
+        if not classified.events:
+            run.detail = "error"
+            run.final_text = text
+            return RuntimeHandle(runtime_id=runtime_id, status="FAILED")
+        if classified.outcome != "idle":
+            run.detail = classified.outcome
+            run.final_text = classified.final_text or text
+            return RuntimeHandle(runtime_id=runtime_id, status="FAILED")
         run.status = "COMPLETED"
         run.detail = "ok"
-        run.final_text = text
+        run.final_text = classified.final_text or text
         return RuntimeHandle(runtime_id=runtime_id, status="COMPLETED")
 
     def signal(self, runtime_id: str) -> RuntimeSignalReceipt:
@@ -118,11 +129,13 @@ class OpenCodeAdapter:
             if executable.lower().endswith(".py")
             else [executable]
         )
-        argv = [*prefix, "run", "--auto"]
+        folder = str(Path(self._cwd))
+        argv = [*prefix, "run", "--auto", "--format", "json", "--dir", folder]
         if model:
             argv.extend(["--model", model])
         if prompt:
-            argv.append(prompt)
+            (Path(self._cwd) / _PROMPT_FILE).write_text(prompt, encoding="utf-8")
+            argv.append(_PROMPT_FILE)
         return argv
 
 

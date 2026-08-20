@@ -37,6 +37,7 @@ class _Run:
 class _Classified:
     outcome: CodexOutcome
     final_text: str
+    parsed: int = 0
 
 
 class CodexAdapter:
@@ -89,6 +90,10 @@ class CodexAdapter:
             run.final_text = text
             return RuntimeHandle(runtime_id=runtime_id, status="FAILED")
         classified = _classify(text)
+        if classified.parsed == 0:
+            run.detail = "error"
+            run.final_text = text
+            return RuntimeHandle(runtime_id=runtime_id, status="FAILED")
         status, detail = _status_for(classified.outcome)
         run.status = status
         run.detail = detail
@@ -161,6 +166,7 @@ class CodexAdapter:
 def _classify(text: str) -> _Classified:
     outcome: CodexOutcome = "error"
     final = ""
+    parsed = 0
     for raw in text.splitlines():
         line = raw.strip()
         if not line:
@@ -171,6 +177,7 @@ def _classify(text: str) -> _Classified:
             continue
         if not isinstance(event, dict):
             continue
+        parsed += 1
         typed = cast(dict[str, Any], event)
         kind = str(typed.get("type") or typed.get("item") or "")
         error_obj = typed.get("error")
@@ -204,7 +211,7 @@ def _classify(text: str) -> _Classified:
             kind.endswith("completed") or typed.get("status") == "completed"
         ):
             outcome = "ok"
-    return _Classified(outcome=outcome, final_text=final)
+    return _Classified(outcome=outcome, final_text=final, parsed=parsed)
 
 
 def _status_for(outcome: CodexOutcome) -> tuple[RuntimeStatus, str]:
