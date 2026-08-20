@@ -9,6 +9,7 @@ import os
 import socket
 import subprocess
 import sys
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
@@ -250,6 +251,7 @@ class VerifyFlow:
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
+        _wait_loopback(proc, port)
         return f"http://127.0.0.1:{port}/", proc
 
     def _e2e_payload(self, runtime_id: str, real_e2e: bool) -> bytes:
@@ -288,6 +290,18 @@ def _reserve_port() -> int:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.bind(("127.0.0.1", 0))
         return int(sock.getsockname()[1])
+
+
+def _wait_loopback(proc: subprocess.Popen[bytes], port: int) -> None:
+    deadline = time.monotonic() + 8.0
+    while time.monotonic() < deadline:
+        if proc.poll() is not None:
+            return
+        try:
+            with socket.create_connection(("127.0.0.1", port), timeout=0.2):
+                return
+        except OSError:
+            time.sleep(0.05)
 
 
 def _stop(proc: subprocess.Popen[bytes] | None) -> None:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import json
 import subprocess
 import sys
@@ -29,6 +30,8 @@ _DRIVE_ORDER = (
 ALLOWED_TOOLS = frozenset(_DRIVE_ORDER)
 _NAV = _DRIVE_ORDER[0]
 _EVAL = _DRIVE_ORDER[1]
+_CLOSED_NAV = "navigate_page"
+_CLOSED_EVAL = "evaluate_script"
 _EVAL_FN = "() => document.body ? document.body.innerText : ''"
 _BLOCKED_NAMES = frozenset(
     {
@@ -279,29 +282,16 @@ class ChromeMcpRuntime:
             return None
         self.spawned = True
         try:
-            _rpc(
-                proc,
-                "initialize",
-                {
-                    "protocolVersion": "2024-11-05",
-                    "capabilities": {},
-                    "clientInfo": {"name": "hermes-pipeline", "version": "0.1.0"},
-                },
-            )
-            _notify(proc, "notifications/initialized")
-            _rpc(proc, "tools/call", {"name": _NAV, "arguments": {"url": origin}})
-            self.calls.append(_NAV)
-            result = _rpc(
-                proc, "tools/call", {"name": _EVAL, "arguments": {"function": _EVAL_FN}}
-            )
-            self.calls.append(_EVAL)
-            self._last_text = result
-            return result
+            text = drive_stdio_mcp(proc, origin)
         except (OSError, RuntimeError, ValueError, TimeoutError):
             return None
         finally:
             proc.kill()
-            proc.wait(timeout=5)
+            with contextlib.suppress(subprocess.TimeoutExpired):
+                proc.wait(timeout=5)
+        self.calls.extend([_NAV, _EVAL])
+        self._last_text = text
+        return text
 
     def _build_argv(self, tool_name: str) -> list[str]:
         executable = self._executable
@@ -315,23 +305,75 @@ class ChromeMcpRuntime:
         return [*prefix, tool_name]
 
 
-def _rpc(proc: subprocess.Popen[bytes], method: str, params: dict[str, object]) -> str:
+def drive_stdio_mcp(proc: subprocess.Popen[bytes], origin: str) -> str:
+    _rpc(
+        proc,
+        1,
+        "initialize",
+        {
+            "protocolVersion": "2024-11-05",
+            "capabilities": {},
+            "clientInfo": {"name": "hermes-pipeline", "version": "0.1.0"},
+        },
+    )
+    _notify(proc, "notifications/initialized")
+    _rpc(
+        proc,
+        2,
+        "tools/call",
+        {"name": _CLOSED_NAV, "arguments": {"type": "url", "url": origin}},
+    )
+    result = _rpc(
+        proc,
+        3,
+        "tools/call",
+        {"name": _CLOSED_EVAL, "arguments": {"function": _EVAL_FN}},
+    )
+    return _tool_text(result)
+
+
+def _rpc(
+    proc: subprocess.Popen[bytes],
+    req_id: int,
+    method: str,
+    params: dict[str, object],
+) -> Any:
     if proc.stdin is None or proc.stdout is None:
         raise RuntimeError("stdio closed")
     message: dict[str, Any] = {
         "jsonrpc": "2.0",
-        "id": method,
+        "id": req_id,
         "method": method,
         "params": params,
     }
     _write_frame(proc.stdin, message)
-    reply = _read_frame(proc.stdout)
-    if "error" in reply:
-        raise RuntimeError("mcp error")
-    result = reply.get("result", "")
+    while True:
+        reply = _read_frame(proc.stdout)
+        if reply.get("id") != req_id:
+            continue
+        if "error" in reply:
+            raise RuntimeError("mcp error")
+        return reply.get("result", "")
+
+
+def _tool_text(result: Any) -> str:
     if isinstance(result, str):
         return result
-    return json.dumps(result)
+    if not isinstance(result, dict):
+        return json.dumps(result)
+    payload = cast(dict[str, Any], result)
+    raw = payload.get("content", [])
+    chunks: list[str] = []
+    if isinstance(raw, list):
+        for item in cast(list[Any], raw):
+            if not isinstance(item, dict):
+                continue
+            typed = cast(dict[str, Any], item)
+            if typed.get("type") == "text":
+                chunks.append(str(typed.get("text", "")))
+    if chunks:
+        return "\n".join(chunks)
+    return json.dumps(payload)
 
 
 def _notify(proc: subprocess.Popen[bytes], method: str) -> None:
@@ -373,5 +415,6 @@ __all__ = [
     "ChromeMcpRuntime",
     "McpTransport",
     "closed_mcp_argv",
+    "drive_stdio_mcp",
     "origin_port",
 ]
