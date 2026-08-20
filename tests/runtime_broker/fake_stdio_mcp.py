@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import sys
+from typing import Any, cast
 
 
 def _read() -> dict[str, object]:
@@ -20,7 +21,7 @@ def _read() -> dict[str, object]:
     loaded = json.loads(sys.stdin.buffer.read(size))
     if not isinstance(loaded, dict):
         raise SystemExit(1)
-    return loaded
+    return cast(dict[str, object], loaded)
 
 
 def _write(payload: dict[str, object]) -> None:
@@ -47,10 +48,11 @@ def main() -> None:
                 }
             )
         elif method == "tools/call":
-            params = msg.get("params", {})
+            params: Any = msg.get("params", {})
             name = ""
             if isinstance(params, dict):
-                name = str(params.get("name", ""))
+                typed = cast(dict[str, Any], params)
+                name = str(typed.get("name", ""))
             seen.append(name)
             _write(
                 {

@@ -119,10 +119,18 @@ def test_materialize_writes_closed_argv_paths(tmp_path: Path) -> None:
     argv = closed_mcp_argv(tmp_path, 4317)
     assert argv is not None
     assert argv[1].endswith("chrome-devtools-mcp.js")
+
+    def refuse_fetch(url: str) -> bytes:
+        raise AssertionError(url)
+
+    def refuse_npm(argv: list[str], cwd: Path, env: dict[str, str]) -> int:
+        del argv, cwd, env
+        raise AssertionError("npm")
+
     materialize_browser_tools(
         tmp_path,
-        fetch=lambda url: (_ for _ in ()).throw(AssertionError(url)),
-        npm=lambda *_a: (_ for _ in ()).throw(AssertionError("npm")),
+        fetch=refuse_fetch,
+        npm=refuse_npm,
         pins=_pins(node),
     )
 
