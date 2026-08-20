@@ -98,6 +98,7 @@ class BoundRuntimeBroker:
             role=binding.role,
             model=binding.model,
             prompt=request.prompt,
+            origin=request.origin,
         )
         handle = adapter.launch(bound)
         self._owners[request.runtime_id] = adapter

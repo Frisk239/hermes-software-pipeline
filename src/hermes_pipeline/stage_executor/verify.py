@@ -5,6 +5,10 @@ DISPOSITION: ADOPTED_BY_00-07
 
 from __future__ import annotations
 
+import os
+import socket
+import subprocess
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
@@ -96,35 +100,49 @@ class VerifyFlow:
                     or "scripted e2e unavailable",
                 )
             e2e_id = f"e2e-{integration.sha[:12]}"
-            if scripted == "passed":
-                output = (self._sandbox.root / "SCRIPT_OUT").read_bytes()
-                e2e_art = self._artifacts.put(ArtifactPutRequest(payload=output))
-            else:
-                try:
-                    e2e = self._e2e.launch(
-                        RuntimeLaunchRequest(
-                            runtime_id=e2e_id,
-                            role="e2e",
-                            prompt=self._e2e_prompt(integration.sha),
-                        )
+            origin, server = self._serve_if_needed(real_e2e)
+            try:
+                e2e = self._e2e.launch(
+                    RuntimeLaunchRequest(
+                        runtime_id=e2e_id,
+                        role="e2e",
+                        prompt=self._e2e_prompt(integration.sha),
+                        origin=origin,
                     )
-                except (OSError, RuntimeError, ValueError):
-                    return VerifyResult(
-                        status="REWORK", feedback="e2e runtime did not complete"
-                    )
-                if e2e.status != "COMPLETED" and _verdict(
-                    self._sandbox.root, "RESULT.md"
-                ) not in {"pass", "fail"}:
-                    return VerifyResult(
-                        status="REWORK", feedback="e2e runtime did not complete"
-                    )
-                if real_e2e and _verdict(self._sandbox.root, "RESULT.md") != "pass":
-                    return VerifyResult(
-                        status="REWORK",
-                        feedback=_named_feedback(self._sandbox.root, "RESULT.md")
-                        or "e2e RESULT.md is not PASS",
-                    )
-                e2e_art = self._artifacts.put(ArtifactPutRequest(payload=E2E_BYTES))
+                )
+            except (OSError, RuntimeError, ValueError):
+                _stop(server)
+                return VerifyResult(
+                    status="REWORK", feedback="e2e runtime did not complete"
+                )
+            _stop(server)
+            if e2e.status != "COMPLETED" and _verdict(
+                self._sandbox.root, "RESULT.md"
+            ) not in {"pass", "fail"}:
+                return VerifyResult(
+                    status="REWORK",
+                    feedback=self._e2e_feedback(e2e_id)
+                    or "e2e runtime did not complete",
+                )
+            if real_e2e and e2e.status != "COMPLETED":
+                return VerifyResult(
+                    status="REWORK",
+                    feedback=self._e2e_feedback(e2e_id)
+                    or _named_feedback(self._sandbox.root, "RESULT.md")
+                    or "e2e RESULT.md is not PASS",
+                )
+            if real_e2e and _verdict(self._sandbox.root, "RESULT.md") not in {
+                "pass",
+                "missing",
+            }:
+                return VerifyResult(
+                    status="REWORK",
+                    feedback=_named_feedback(self._sandbox.root, "RESULT.md")
+                    or "e2e RESULT.md is not PASS",
+                )
+            e2e_art = self._artifacts.put(
+                ArtifactPutRequest(payload=self._e2e_payload(e2e_id, real_e2e))
+            )
             review_bind = self._bindings.resolve("reviewer")
             real_reviewer = review_bind.runtime != "fake"
             if scripted == "passed" and not real_reviewer:
@@ -210,6 +228,41 @@ class VerifyFlow:
         self._sandbox.write("SCRIPT_OUT", "\n".join(chunks))
         return status
 
+    def _serve_if_needed(
+        self, real_e2e: bool
+    ) -> tuple[str, subprocess.Popen[bytes] | None]:
+        if not real_e2e:
+            return "", None
+        app = self._sandbox.root / "src" / "app.py"
+        if not app.is_file():
+            return "http://127.0.0.1/", None
+        port = _reserve_port()
+        env = {
+            "PATH": os.environ.get("PATH", ""),
+            "SYSTEMROOT": os.environ.get("SYSTEMROOT", ""),
+            "PORT": str(port),
+            "HERMES_E2E_PORT": str(port),
+        }
+        proc = subprocess.Popen(
+            [sys.executable, str(app)],
+            cwd=str(app.parent),
+            env=env,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        return f"http://127.0.0.1:{port}/", proc
+
+    def _e2e_payload(self, runtime_id: str, real_e2e: bool) -> bytes:
+        if not real_e2e:
+            return E2E_BYTES
+        text = self._e2e.collect(runtime_id).final_text.strip()
+        if text:
+            return text.encode("utf-8")
+        return E2E_BYTES
+
+    def _e2e_feedback(self, runtime_id: str) -> str:
+        return self._e2e.collect(runtime_id).detail.strip()
+
     def _e2e_prompt(self, sha: str = "") -> str:
         mark = sha or self._candidate_sha
         return (
@@ -229,6 +282,22 @@ class VerifyFlow:
             "Evaluate this directory only. "
             "Write REVIEW.md: first line PASS or FAIL, then findings."
         )
+
+
+def _reserve_port() -> int:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.bind(("127.0.0.1", 0))
+        return int(sock.getsockname()[1])
+
+
+def _stop(proc: subprocess.Popen[bytes] | None) -> None:
+    if proc is None:
+        return
+    proc.terminate()
+    try:
+        proc.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        proc.kill()
 
 
 def _named_feedback(root: Path, name: str) -> str:
