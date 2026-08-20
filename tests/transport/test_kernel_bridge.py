@@ -6,6 +6,8 @@ from pathlib import Path
 
 import pytest
 
+from hermes_pipeline.contracts.definitions import FixedV1Integer, UtcTimestampRef
+from hermes_pipeline.contracts.runtime import Actor, ControllerCommand
 from hermes_pipeline.controller import KernelController
 from hermes_pipeline.persistence.kernel_sqlite import SqliteKernelStore
 from hermes_pipeline.transport.kernel_bridge import (
@@ -242,6 +244,135 @@ def test_sqlite_kernel_imports_legacy_kernel_json(tmp_path: Path) -> None:
     )
     assert view["status"] == "OPEN"
     assert view["revision"] == "1" or view["revision"] == 1
+
+
+def test_json_stations_import_once(tmp_path: Path) -> None:
+    document = {
+        "inbox": [],
+        "events": [
+            {
+                "event_id": "evt_1",
+                "workspace_id": "ws_local",
+                "pipeline_id": "pl_old",
+                "event_type": "REQUIREMENT_CONFIRMED",
+                "payload_json": '{"text":"old need"}',
+                "pipeline_revision": 1,
+            }
+        ],
+        "pipelines": [
+            {
+                "workspace_id": "ws_local",
+                "pipeline_id": "pl_old",
+                "status": "OPEN",
+                "revision": 1,
+                "text": "old need",
+            }
+        ],
+        "outbox": [],
+        "leases": [],
+    }
+    (tmp_path / "descriptor").mkdir()
+    (tmp_path / "descriptor" / "kernel.json").write_text(
+        json.dumps(document), encoding="utf-8"
+    )
+    (tmp_path / "descriptor" / "prd.json").write_text(
+        json.dumps(
+            {
+                "pl_old": {
+                    "prd_id": "art_old",
+                    "prd_status": "COMPLETED",
+                    "prd_gate": "PASS",
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    KernelBridge(tmp_path, _Inner())
+    store = SqliteKernelStore(str(tmp_path / "controller.sqlite"))
+    first = [
+        event
+        for event in store.list_events("ws_local", "pl_old")
+        if event.event_type == "PRD_RECORDED"
+    ]
+    store.close()
+    KernelBridge(tmp_path, _Inner())
+    store = SqliteKernelStore(str(tmp_path / "controller.sqlite"))
+    second = [
+        event
+        for event in store.list_events("ws_local", "pl_old")
+        if event.event_type == "PRD_RECORDED"
+    ]
+    store.close()
+    assert len(first) == 1
+    assert len(second) == 1
+
+
+def test_read_drains_publish_pr_outbox(tmp_path: Path) -> None:
+    bridge = KernelBridge(tmp_path, _Inner())
+    assert bridge.process(
+        "cmd_reg", {"op": "register", "project_id": "prj_cli", "name": "Cli"}
+    )["ok"]
+    assert bridge.process(
+        "cmd_adm",
+        {
+            "op": "admit",
+            "project_id": "prj_cli",
+            "principal_id": "operator",
+            "role": "CONTRIBUTOR",
+        },
+    )["ok"]
+    assert (
+        bridge.process(
+            "cmd_cli_one",
+            {
+                "text": "need a login page",
+                "workspace_id": "ws_cli",
+                "project_id": "prj_cli",
+                "pipeline_id": "pl_cli",
+                "principal_id": "operator",
+            },
+        )["status"]
+        == "ACCEPTED"
+    )
+    store = SqliteKernelStore(str(tmp_path / "controller.sqlite"))
+    snapshot = store.load_pipeline("ws_cli", "pl_cli")
+    assert snapshot is not None
+    KernelController(store, recorded_at="2026-01-01T00:00:00Z").submit(
+        ControllerCommand(
+            schema_id="https://schemas.hermes-pipeline.dev/runtime/controller-command/v1",
+            schema_version=FixedV1Integer(1),
+            command_id="cmd_pl_cli_verify_1",
+            idempotency_key="record-verify-drain-key",
+            workspace_id="ws_cli",
+            project_id="prj_cli",
+            pipeline_id="pl_cli",
+            expected_revision=snapshot.revision,
+            actor=Actor(
+                principal_id="runtime",
+                provider="SYSTEM",
+                provider_actor_id="test",
+            ),
+            ingress="SYSTEM_RECONCILER",
+            command_type="RECORD_VERIFY",
+            payload={
+                "verify_status": "READY",
+                "pipeline_id": "pl_cli",
+                "project_id": "prj_cli",
+                "candidate_sha": "b" * 64,
+            },
+            correlation_id="corr-verify-drain",
+            submitted_at=UtcTimestampRef("2026-01-01T00:00:00Z"),
+        )
+    )
+    store.close()
+    view = KernelBridge(tmp_path, _Inner()).process(
+        "cmd_read_drain",
+        {"op": "read", "workspace_id": "ws_cli", "pipeline_id": "pl_cli"},
+    )
+    assert view.get("action") == "RECORDED"
+    store = SqliteKernelStore(str(tmp_path / "controller.sqlite"))
+    assert store.list_pending_outbox("ws_cli") == []
+    store.close()
 
 
 def test_stage_prompts_do_not_repeat_intake_as_prd_task() -> None:

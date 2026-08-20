@@ -73,7 +73,7 @@ def _controller(store: ControllerTransactionStore) -> KernelController:
     return KernelController(store, recorded_at=_RECORDED_AT)
 
 
-def test_accept_confirm_writes_one_pending_outbox(
+def test_accept_confirm_writes_delivered_outbox(
     store: ControllerTransactionStore,
 ) -> None:
     receipt = _controller(store).submit(_command())
@@ -85,10 +85,32 @@ def test_accept_confirm_writes_one_pending_outbox(
     assert record.command_id == "cmd_01-04-a"
     assert record.effect_type
     assert record.payload_json
-    assert record.delivery_receipt_json is None
+    assert record.delivery_receipt_json == "{}"
+    assert store.list_pending_outbox("ws_01-04") == []
+
+
+def test_ready_verify_enqueues_publish_pr(
+    store: ControllerTransactionStore,
+) -> None:
+    controller = _controller(store)
+    assert controller.submit(_command()).status == "ACCEPTED"
+    receipt = controller.submit(
+        _command(
+            command_id="cmd_pl_01-04_verify_1",
+            command_type="RECORD_VERIFY",
+            payload={
+                "verify_status": "READY",
+                "pipeline_id": "pl_01-04",
+                "candidate_sha": "a" * 64,
+            },
+            expected_revision=1,
+        )
+    )
+    assert receipt.status == "ACCEPTED"
     pending = store.list_pending_outbox("ws_01-04")
     assert len(pending) == 1
-    assert pending[0].command_id == "cmd_01-04-a"
+    assert pending[0].effect_type == "PUBLISH_PR"
+    assert pending[0].delivery_receipt_json is None
 
 
 def test_replay_records_receipt_without_new_event(
@@ -117,8 +139,19 @@ def test_restart_pending_replays_and_delivered_stays_idempotent(tmp_path: Path) 
     path = tmp_path / "kernel.db"
     store = SqliteKernelStore(str(path))
     try:
-        receipt = KernelController(store, recorded_at=_RECORDED_AT).submit(_command())
-        assert receipt.status == "ACCEPTED"
+        controller = KernelController(store, recorded_at=_RECORDED_AT)
+        assert controller.submit(_command()).status == "ACCEPTED"
+        assert (
+            controller.submit(
+                _command(
+                    command_id="cmd_pl_01-04_verify_1",
+                    command_type="RECORD_VERIFY",
+                    payload={"verify_status": "READY", "pipeline_id": "pl_01-04"},
+                    expected_revision=1,
+                )
+            ).status
+            == "ACCEPTED"
+        )
         assert store.list_pending_outbox("ws_01-04")
     finally:
         store.close()
@@ -128,18 +161,18 @@ def test_restart_pending_replays_and_delivered_stays_idempotent(tmp_path: Path) 
         pending = store2.list_pending_outbox("ws_01-04")
         assert len(pending) == 1
         assert pending[0].delivery_receipt_json is None
-        first = controller.replay("ws_01-04", "cmd_01-04-a")
+        first = controller.replay("ws_01-04", "cmd_pl_01-04_verify_1")
         assert first.delivery_receipt_json
-        assert store2.counts().events == 1
+        assert store2.counts().events == 2
     finally:
         store2.close()
     store3 = SqliteKernelStore(str(path))
     try:
         again = KernelController(store3, recorded_at="2026-03-03T00:00:00Z").replay(
-            "ws_01-04", "cmd_01-04-a"
+            "ws_01-04", "cmd_pl_01-04_verify_1"
         )
         assert again.delivery_receipt_json == first.delivery_receipt_json
-        assert store3.counts() == StoreCounts(inbox=1, events=1, pipelines=1, outbox=1)
+        assert store3.counts() == StoreCounts(inbox=2, events=2, pipelines=1, outbox=2)
         assert store3.list_pending_outbox("ws_01-04") == []
     finally:
         store3.close()
