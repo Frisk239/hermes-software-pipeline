@@ -48,6 +48,7 @@ from ._descriptor import (
     remove_descriptor_if_inside,
     write_descriptor,
 )
+from ._exitlog import record_runtime_exit
 from ._identity import process_matches_identity, read_process_start_marker
 from ._lock import StateRootLock, StateRootLockError
 from ._protocol import FixedWindowRateLimiter, ServerState
@@ -266,11 +267,27 @@ def main(argv: list[str] | None = None) -> int:
         _emit_failure(CODE_DEPENDENCY_UNAVAILABLE, "identity unavailable")
         return EXIT_UNAVAILABLE
 
+    import atexit
+
+    finished = False
+
+    def _on_exit() -> None:
+        if not finished:
+            record_runtime_exit(root, "atexit")
+
+    def _on_exception(exc_type: Any, exc: Any, tb: Any) -> None:
+        record_runtime_exit(root, getattr(exc_type, "__name__", "error"))
+        sys.__excepthook__(exc_type, exc, tb)
+
+    atexit.register(_on_exit)
+    sys.excepthook = _on_exception
     state = _build_state(root, port=0, token=token, ready=True)
     from ._server import create_app
 
     app = create_app(state)
     code = _serve(app, state, root, token)
+    finished = True
+    record_runtime_exit(root, "serve-returned")
     lock.release()
     return code
 
