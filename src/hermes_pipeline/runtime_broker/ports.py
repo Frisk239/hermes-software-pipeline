@@ -17,6 +17,7 @@ class RuntimeLaunchRequest:
     role: str = ""
     model: str = ""
     prompt: str = ""
+    origin: str = ""
 
 
 @dataclass(frozen=True)

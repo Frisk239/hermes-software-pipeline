@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ast
+import sys
 from pathlib import Path
 from typing import Literal
 
@@ -11,7 +12,11 @@ from hermes_pipeline.runtime_broker.binding import (
     BoundRuntimeBroker,
 )
 from hermes_pipeline.runtime_broker.capability import compile_profile
-from hermes_pipeline.runtime_broker.chrome_mcp import ALLOWED_TOOLS, ChromeMcpRuntime
+from hermes_pipeline.runtime_broker.chrome_mcp import (
+    ALLOWED_TOOLS,
+    ChromeMcpRuntime,
+    closed_mcp_argv,
+)
 from hermes_pipeline.runtime_broker.fake import FakeRuntimeBroker
 from hermes_pipeline.runtime_broker.opencode_adapter import OpenCodeAdapter
 from hermes_pipeline.runtime_broker.ports import (
@@ -188,6 +193,52 @@ def test_planner_binding_is_unchanged(tmp_path: Path) -> None:
     handle = broker.launch(RuntimeLaunchRequest(runtime_id="rt-p", role="planner"))
     assert handle.status == "COMPLETED"
     assert "grok-4.6" in opencode.last_argv
+
+
+def _place_closed_tools(root: Path) -> None:
+    if sys.platform == "win32":
+        node = root / "tools/node/windows-x64/node-v22.23.2-win-x64/node.exe"
+        chrome = (
+            root
+            / "tools/browser-runtime/chrome-for-testing/win64/chrome-win64/chrome.exe"
+        )
+    else:
+        node = root / "tools/node/linux-x64/node-v22.23.2-linux-x64/bin/node"
+        chrome = (
+            root
+            / "tools/browser-runtime/chrome-for-testing/linux64/chrome-linux64/chrome"
+        )
+    mcp = (
+        root
+        / "tools/browser-runtime/project/node_modules/"
+        / "chrome-devtools-mcp/build/src/bin/chrome-devtools-mcp.js"
+    )
+    for path in (node, chrome, mcp):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("x", encoding="utf-8")
+
+
+def test_closed_argv_uses_locked_paths(tmp_path: Path) -> None:
+    _place_closed_tools(tmp_path)
+    argv = closed_mcp_argv(tmp_path, 4317)
+    assert argv is not None
+    assert argv[2:] == [
+        "--headless",
+        "--isolated",
+        "--executable-path",
+        argv[5],
+        "--allowed-url-pattern",
+        "http://127.0.0.1:4317/*",
+        "--no-usage-statistics",
+        "--no-performance-crux",
+    ]
+    assert argv[0].endswith("node.exe") or argv[0].endswith("node")
+    assert argv[1].endswith("chrome-devtools-mcp.js")
+    assert "chrome" in Path(argv[5]).name.lower()
+
+
+def test_closed_argv_missing_tools_is_none(tmp_path: Path) -> None:
+    assert closed_mcp_argv(tmp_path, 80) is None
 
 
 def test_runtime_does_not_import_keep_marked_probes() -> None:

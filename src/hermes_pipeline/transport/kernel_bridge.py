@@ -33,6 +33,7 @@ from hermes_pipeline.runtime_broker.binding import (
     StageRole,
 )
 from hermes_pipeline.runtime_broker.capability import compile_profile
+from hermes_pipeline.runtime_broker.chrome_mcp import ChromeMcpRuntime
 from hermes_pipeline.runtime_broker.codex_adapter import CodexAdapter
 from hermes_pipeline.runtime_broker.fake import FakeRuntimeBroker
 from hermes_pipeline.runtime_broker.opencode_adapter import OpenCodeAdapter
@@ -591,6 +592,23 @@ class KernelBridge:
     def _executor_broker(self, worktree: ManagedWorktree) -> BoundRuntimeBroker:
         return self._runtime_broker(str(worktree.root), "executor")
 
+    def _e2e_runtime(self, cwd: str) -> RuntimeBrokerPort:
+        try:
+            binding = self._bindings.resolve("e2e")
+        except BindingNotFound:
+            return _PassingRuntime()
+        if binding.runtime == "fake":
+            return _PassingRuntime()
+        return ChromeMcpRuntime(
+            profile=compile_profile(
+                write_roots=[cwd],
+                browser="CHROME_DEVTOOLS_MCP",
+                stage_type="E2E",
+                profile_id="cap_e2e",
+            ),
+            state_root=self._dir.parent / "verify-sandbox",
+        )
+
     def _role_runtime(self, role: str, cwd: str) -> RuntimeBrokerPort:
         try:
             binding = self._bindings.resolve(cast(StageRole, role))
@@ -753,7 +771,7 @@ class KernelBridge:
             result = VerifyFlow(
                 self._bindings,
                 artifacts,
-                self._role_runtime("e2e", cwd),
+                self._e2e_runtime(cwd),
                 self._role_runtime("reviewer", cwd),
                 self._delivery,
                 sandbox,
