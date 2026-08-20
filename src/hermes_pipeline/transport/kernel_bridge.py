@@ -12,12 +12,13 @@ from typing import Any, cast
 from hermes_pipeline.artifacts.local_cas import ArtifactNotFound, LocalCasArtifacts
 from hermes_pipeline.contracts.runtime import Actor
 from hermes_pipeline.controller import KernelController
+from hermes_pipeline.controller.transaction_store import ControllerTransactionStore
 from hermes_pipeline.delivery.fake import FakeDelivery
 from hermes_pipeline.delivery.github import GitHubDelivery, GitHubTransport
 from hermes_pipeline.delivery.ports import DeliveryRecord, DeliveryRequest
 from hermes_pipeline.operations.baseline import SolutionApproval
 from hermes_pipeline.operations.projects import ProjectRegistry, RequirementIntake
-from hermes_pipeline.persistence.kernel_memory import MemoryKernelStore
+from hermes_pipeline.persistence.kernel_sqlite import SqliteKernelStore
 from hermes_pipeline.repository.integration import (
     VerificationSandbox,
     build_integration_candidate,
@@ -256,7 +257,6 @@ class KernelBridge:
                 self._save_requirements()
                 self._advance_prd(pipeline_id, workspace_id, project_id)
                 self._advance_architecture(pipeline_id, workspace_id, project_id)
-            self._save_kernel()
             return receipt.model_dump(mode="json")
         if op == "approve":
             return self._approve_baseline(payload)
@@ -319,14 +319,16 @@ class KernelBridge:
         self._delivery.remember(key, merged)
         return merged
 
-    def _load_kernel(self) -> MemoryKernelStore:
-        document = self._parse_json(self._dir / "kernel.json")
-        if not document:
-            return MemoryKernelStore()
-        return MemoryKernelStore.load(document)
-
-    def _save_kernel(self) -> None:
-        self._write_json(self._dir / "kernel.json", self._store.dump())
+    def _load_kernel(self) -> ControllerTransactionStore:
+        path = self._dir.parent / "controller.sqlite"
+        store = SqliteKernelStore(str(path))
+        counts = store.counts()
+        empty = counts.inbox == 0 and counts.events == 0 and counts.pipelines == 0
+        if empty:
+            document = self._parse_json(self._dir / "kernel.json")
+            if document:
+                store.import_dump(document)
+        return store
 
     def _load_github(self) -> dict[str, str]:
         document = self._parse_json(self._dir / "github.json")

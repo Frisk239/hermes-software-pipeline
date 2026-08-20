@@ -73,6 +73,46 @@ def test_register_admit_submit_read(tmp_path: Path) -> None:
     )
     assert again["status"] == "OPEN"
     assert again["revision"] == "1" or again["revision"] == 1
+    assert not (tmp_path / "descriptor" / "kernel.json").exists()
+    assert (tmp_path / "controller.sqlite").is_file()
+
+
+def test_sqlite_kernel_imports_legacy_kernel_json(tmp_path: Path) -> None:
+    document = {
+        "inbox": [],
+        "events": [
+            {
+                "event_id": "evt_1",
+                "workspace_id": "ws_cli",
+                "pipeline_id": "pl_legacy",
+                "event_type": "REQUIREMENT_CONFIRMED",
+                "payload_json": '{"text":"legacy need"}',
+                "pipeline_revision": 1,
+            }
+        ],
+        "pipelines": [
+            {
+                "workspace_id": "ws_cli",
+                "pipeline_id": "pl_legacy",
+                "status": "OPEN",
+                "revision": 1,
+                "text": "legacy need",
+            }
+        ],
+        "outbox": [],
+        "leases": [],
+    }
+    (tmp_path / "descriptor").mkdir()
+    (tmp_path / "descriptor" / "kernel.json").write_text(
+        json.dumps(document), encoding="utf-8"
+    )
+    imported = KernelBridge(tmp_path, _Inner())
+    view = imported.process(
+        "cmd_read_legacy",
+        {"op": "read", "workspace_id": "ws_cli", "pipeline_id": "pl_legacy"},
+    )
+    assert view["status"] == "OPEN"
+    assert view["revision"] == "1" or view["revision"] == 1
 
 
 def test_stage_prompts_do_not_repeat_intake_as_prd_task() -> None:
