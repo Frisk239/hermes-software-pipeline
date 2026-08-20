@@ -182,27 +182,31 @@ if sys.platform == "win32":
             cancelled = False
             if cancel_event is not None:
                 finished = threading.Event()
+                captured: list[tuple[bytes, bytes]] = []
 
                 def _wait() -> None:
                     with contextlib.suppress(Exception):
-                        child.communicate(timeout=timeout_s)
+                        captured.append(child.communicate())
                     finished.set()
 
                 worker = threading.Thread(target=_wait, daemon=True)
                 worker.start()
-                if cancel_event.wait(timeout_s):
-                    cancelled = True
-                    _KERNEL32.TerminateJobObject(job, 1)
-                elif not finished.wait(0):
-                    timed_out = True
-                    _KERNEL32.TerminateJobObject(job, 1)
+                stop_at = time.monotonic() + timeout_s
+                while not finished.is_set():
+                    if cancel_event.is_set():
+                        cancelled = True
+                        _KERNEL32.TerminateJobObject(job, 1)
+                        break
+                    if time.monotonic() >= stop_at:
+                        timed_out = True
+                        _KERNEL32.TerminateJobObject(job, 1)
+                        break
+                    finished.wait(0.05)
                 worker.join(timeout=5)
-                stdout = b""
-                stderr = b""
-                if child.stdout is not None and not child.stdout.closed:
-                    stdout = child.stdout.read()
-                if child.stderr is not None and not child.stderr.closed:
-                    stderr = child.stderr.read()
+                if captured:
+                    stdout, stderr = captured[0]
+                else:
+                    stdout, stderr = b"", b""
             else:
                 try:
                     stdout, stderr = child.communicate(timeout=timeout_s)
@@ -216,7 +220,7 @@ if sys.platform == "win32":
                 time.sleep(0.05)
                 survivors = tuple(pid for pid in _job_pids(job) if _pid_alive(pid))
             return BoundedResult(
-                returncode=int(child.returncode or 1),
+                returncode=1 if child.returncode is None else int(child.returncode),
                 stdout=stdout[:output_bytes],
                 stderr=stderr[:output_bytes],
                 timed_out=timed_out,
@@ -354,19 +358,33 @@ def run_fenced(
     timed_out = False
     cancelled = False
     try:
-        if cancel_event is not None and cancel_event.wait(timeout_s):
-            cancelled = True
-            with contextlib.suppress(ProcessLookupError):
-                os.killpg(child.pid, signal.SIGKILL)
-            stdout, stderr = child.communicate(timeout=5)
+        if cancel_event is None:
+            stdout, stderr = child.communicate(timeout=timeout_s)
         else:
-            try:
-                stdout, stderr = child.communicate(timeout=timeout_s)
-            except subprocess.TimeoutExpired:
-                timed_out = True
-                with contextlib.suppress(ProcessLookupError):
-                    os.killpg(child.pid, signal.SIGKILL)
-                stdout, stderr = child.communicate(timeout=5)
+            finished = threading.Event()
+            captured: list[tuple[bytes, bytes]] = []
+
+            def _wait() -> None:
+                with contextlib.suppress(Exception):
+                    captured.append(child.communicate())
+                finished.set()
+
+            threading.Thread(target=_wait, daemon=True).start()
+            stop_at = time.monotonic() + timeout_s
+            while not finished.is_set():
+                if cancel_event.is_set():
+                    cancelled = True
+                    with contextlib.suppress(ProcessLookupError):
+                        os.killpg(child.pid, signal.SIGKILL)
+                    break
+                if time.monotonic() >= stop_at:
+                    timed_out = True
+                    with contextlib.suppress(ProcessLookupError):
+                        os.killpg(child.pid, signal.SIGKILL)
+                    break
+                finished.wait(0.05)
+            finished.wait(5)
+            stdout, stderr = captured[0] if captured else (b"", b"")
     except subprocess.TimeoutExpired:
         timed_out = True
         with contextlib.suppress(ProcessLookupError):
@@ -374,7 +392,7 @@ def run_fenced(
         stdout, stderr = child.communicate(timeout=5)
     survivors = zero_survivors(child.pid)
     return BoundedResult(
-        returncode=int(child.returncode or 1),
+        returncode=1 if child.returncode is None else int(child.returncode),
         stdout=stdout[:output_bytes],
         stderr=stderr[:output_bytes],
         timed_out=timed_out,
