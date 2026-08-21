@@ -215,16 +215,25 @@ def test_read_publishes_pr_when_verify_ready(
             "pr_url": "https://github.com/org/repo/pull/9",
         }
 
+    def fake_descriptor(_root: Path) -> dict[str, object]:
+        return {"port": 1, "token": "t"}
+
+    def fake_stale(_root: Path) -> bool:
+        return False
+
+    def fake_published(*_args: object, **_kwargs: object) -> dict[str, str]:
+        return {}
+
+    def fake_observe(*_args: object, **_kwargs: object) -> dict[str, str]:
+        return {}
+
     monkeypatch.setattr("hermes_shim._lifecycle.start_command", fake_start)
-    monkeypatch.setattr(
-        "hermes_shim._lifecycle.read_descriptor",
-        lambda _root: {"port": 1, "token": "t"},
-    )
-    monkeypatch.setattr("hermes_shim._lifecycle.is_stale", lambda _root: False)
+    monkeypatch.setattr("hermes_shim._lifecycle.read_descriptor", fake_descriptor)
+    monkeypatch.setattr("hermes_shim._lifecycle.is_stale", fake_stale)
     monkeypatch.setattr("hermes_shim._client.submit_command", fake_submit)
     monkeypatch.setattr("hermes_shim._lifecycle._host_github_publish", fake_publish)
-    monkeypatch.setattr("hermes_shim._github.load_published", lambda *_a, **_k: {})
-    monkeypatch.setattr("hermes_shim._github.observe_pr", lambda *_a, **_k: {})
+    monkeypatch.setattr("hermes_shim._github.load_published", fake_published)
+    monkeypatch.setattr("hermes_shim._github.observe_pr", fake_observe)
     result = read_pipeline_command(
         tmp_path, workspace_id="ws_cli", pipeline_id="pl_cli"
     )
