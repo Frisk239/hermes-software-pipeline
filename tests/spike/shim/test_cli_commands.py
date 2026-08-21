@@ -19,6 +19,7 @@ import os
 from pathlib import Path
 
 import pytest
+from hermes_shim._client import ClientResult
 from hermes_shim._lifecycle import (
     LifecycleResult,
     doctor_command,
@@ -182,3 +183,60 @@ def test_read_revives_runtime_when_plugin_present(
     )
     assert called
     assert result.ok is False
+
+
+def test_read_publishes_pr_when_verify_ready(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    setup_command(tmp_path)
+    called: list[tuple[str, str]] = []
+
+    def fake_start(home: Path, plugin_dir: Path) -> LifecycleResult:
+        del home, plugin_dir
+        return LifecycleResult(command="start", ok=True, exit_code=0)
+
+    def fake_submit(*_args: object, **_kwargs: object) -> ClientResult:
+        return ClientResult(
+            ok=True,
+            status=202,
+            body={
+                "pipeline_id": "pl_cli",
+                "status": "OPEN",
+                "verify_status": "READY",
+                "github_repo": "org/repo",
+            },
+        )
+
+    def fake_publish(root: Path, project_id: str, pipeline_id: str) -> dict[str, str]:
+        del root
+        called.append((project_id, pipeline_id))
+        return {
+            "pr_number": "9",
+            "pr_url": "https://github.com/org/repo/pull/9",
+        }
+
+    def fake_descriptor(_root: Path) -> dict[str, object]:
+        return {"port": 1, "token": "t"}
+
+    def fake_stale(_root: Path) -> bool:
+        return False
+
+    def fake_published(*_args: object, **_kwargs: object) -> dict[str, str]:
+        return {}
+
+    def fake_observe(*_args: object, **_kwargs: object) -> dict[str, str]:
+        return {}
+
+    monkeypatch.setattr("hermes_shim._lifecycle.start_command", fake_start)
+    monkeypatch.setattr("hermes_shim._lifecycle.read_descriptor", fake_descriptor)
+    monkeypatch.setattr("hermes_shim._lifecycle.is_stale", fake_stale)
+    monkeypatch.setattr("hermes_shim._client.submit_command", fake_submit)
+    monkeypatch.setattr("hermes_shim._lifecycle._host_github_publish", fake_publish)
+    monkeypatch.setattr("hermes_shim._github.load_published", fake_published)
+    monkeypatch.setattr("hermes_shim._github.observe_pr", fake_observe)
+    result = read_pipeline_command(
+        tmp_path, workspace_id="ws_cli", pipeline_id="pl_cli"
+    )
+    assert called == [("prj_local", "pl_cli")]
+    assert result.ok is True
+    assert result.detail.get("pr_url") == "https://github.com/org/repo/pull/9"

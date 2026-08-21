@@ -565,6 +565,15 @@ def read_pipeline_command(
     from ._github import load_published, observe_pr
 
     published = load_published(root, pipeline_id)
+    ready = str(result.detail.get("verify_status", "")) == "READY"
+    has_url = bool(
+        str(published.get("pr_url", "")).strip()
+        or str(result.detail.get("pr_url", "")).strip()
+    )
+    if ready and not has_url:
+        project_id = str(view.get("project_id", "prj_local") or "prj_local")
+        result.detail.update(_host_github_publish(root, project_id, pipeline_id))
+        published = load_published(root, pipeline_id)
     result.detail.update(published)
     repo = result.detail.get("github_repo", "")
     number = result.detail.get("pr_number", "")
