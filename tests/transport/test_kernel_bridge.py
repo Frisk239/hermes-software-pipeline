@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import sys
 import time
 from pathlib import Path
 
@@ -206,6 +207,107 @@ def test_approve_is_busy_when_lease_held(tmp_path: Path) -> None:
     )
     assert result["ok"] is False
     assert result["error"] == "busy"
+
+
+def test_approve_returns_running_when_worker_spawned(tmp_path: Path) -> None:
+    marker = tmp_path / "worker.txt"
+    script = tmp_path / "worker.py"
+    script.write_text(
+        "from pathlib import Path\nimport sys\nPath(sys.argv[1]).write_text('ok')\n",
+        encoding="utf-8",
+    )
+    document = {
+        "inbox": [],
+        "events": [
+            {
+                "event_id": "evt_1",
+                "workspace_id": "ws_local",
+                "pipeline_id": "pl_run",
+                "event_type": "REQUIREMENT_CONFIRMED",
+                "payload_json": '{"text":"need login"}',
+                "pipeline_revision": 1,
+            }
+        ],
+        "pipelines": [
+            {
+                "workspace_id": "ws_local",
+                "pipeline_id": "pl_run",
+                "status": "OPEN",
+                "revision": 1,
+                "text": "need login",
+            }
+        ],
+        "outbox": [],
+        "leases": [],
+    }
+    (tmp_path / "descriptor").mkdir()
+    (tmp_path / "descriptor" / "kernel.json").write_text(
+        json.dumps(document), encoding="utf-8"
+    )
+    (tmp_path / "descriptor" / "prd.json").write_text(
+        json.dumps(
+            {
+                "pl_run": {
+                    "prd_id": "art_prd",
+                    "prd_status": "COMPLETED",
+                    "prd_gate": "PASS",
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    (tmp_path / "descriptor" / "architecture.json").write_text(
+        json.dumps(
+            {
+                "pl_run": {
+                    "design_id": "art_d",
+                    "testplan_id": "art_t",
+                    "arch_status": "COMPLETED",
+                    "arch_gate": "PASS",
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    bridge = KernelBridge(
+        tmp_path,
+        _Inner(),
+        spawn_worker=True,
+        worker_cmd=[sys.executable, str(script), str(marker)],
+    )
+    assert bridge.process(
+        "cmd_reg", {"op": "register", "project_id": "prj_local", "name": "Cli"}
+    )["ok"]
+    assert bridge.process(
+        "cmd_adm",
+        {
+            "op": "admit",
+            "project_id": "prj_local",
+            "principal_id": "operator",
+            "role": "CONTRIBUTOR",
+        },
+    )["ok"]
+    result = bridge.process(
+        "cmd_approve",
+        {
+            "op": "approve",
+            "workspace_id": "ws_local",
+            "project_id": "prj_local",
+            "pipeline_id": "pl_run",
+            "principal_id": "operator",
+        },
+    )
+    assert result["ok"] is True
+    assert result.get("running") is True
+    deadline = time.monotonic() + 5
+    while time.monotonic() < deadline and not marker.is_file():
+        time.sleep(0.05)
+    assert marker.read_text(encoding="utf-8") == "ok"
+    view = bridge.process(
+        "cmd_read_run",
+        {"op": "read", "workspace_id": "ws_local", "pipeline_id": "pl_run"},
+    )
+    assert view["status"] == "OPEN"
 
 
 def test_sqlite_kernel_imports_legacy_kernel_json(tmp_path: Path) -> None:

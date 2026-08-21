@@ -105,6 +105,7 @@ def build_pipeline_parser(parser: argparse.ArgumentParser) -> None:
             sub.add_argument("--project-id", default="prj_local")
             sub.add_argument("--pipeline-id", default="pl_local")
             sub.add_argument("--principal-id", default="operator")
+            sub.add_argument("--workspace-id", default="ws_local")
         sub.set_defaults(pipeline_handler=name)
     # The top-level fallback handler prints usage as bounded JSON.
     parser.set_defaults(pipeline_handler="__root__")
@@ -180,6 +181,7 @@ def _run_handler(name: str, _args: argparse.Namespace) -> int:
                 project_id=str(_args.project_id),
                 pipeline_id=str(_args.pipeline_id),
                 principal_id=str(_args.principal_id),
+                workspace_id=str(_args.workspace_id),
             )
         elif name == "retry":
             result = retry_command(
@@ -187,6 +189,7 @@ def _run_handler(name: str, _args: argparse.Namespace) -> int:
                 project_id=str(_args.project_id),
                 pipeline_id=str(_args.pipeline_id),
                 principal_id=str(_args.principal_id),
+                workspace_id=str(_args.workspace_id),
             )
         else:
             result = {"command": "pipeline", "ok": False, "error": "no subcommand"}
