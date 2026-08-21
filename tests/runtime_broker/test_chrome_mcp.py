@@ -279,3 +279,21 @@ def test_stdio_mcp_uses_native_tool_names() -> None:
     assert "navigate_page" in err
     assert "evaluate_script" in err
     assert "chrome-devtools_navigate_page" not in err
+
+
+def test_stdio_mcp_times_out_when_server_silent() -> None:
+    proc = subprocess.Popen(
+        [sys.executable, "-c", "import time; time.sleep(30)"],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+    )
+    try:
+        try:
+            drive_stdio_mcp(proc, "http://127.0.0.1:4317/", timeout_s=0.3)
+        except TimeoutError:
+            return
+        raise AssertionError("expected timeout")
+    finally:
+        proc.kill()
+        proc.wait(timeout=5)
