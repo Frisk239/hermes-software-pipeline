@@ -6,6 +6,8 @@ import contextlib
 import json
 import subprocess
 import sys
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import TimeoutError as FuturesTimeout
 from dataclasses import dataclass
 from pathlib import Path
 from typing import IO, Any, Protocol, cast
@@ -305,31 +307,43 @@ class ChromeMcpRuntime:
         return [*prefix, tool_name]
 
 
-def drive_stdio_mcp(proc: subprocess.Popen[bytes], origin: str) -> str:
-    _rpc(
-        proc,
-        1,
-        "initialize",
-        {
-            "protocolVersion": "2024-11-05",
-            "capabilities": {},
-            "clientInfo": {"name": "hermes-pipeline", "version": "0.1.0"},
-        },
-    )
-    _notify(proc, "notifications/initialized")
-    _rpc(
-        proc,
-        2,
-        "tools/call",
-        {"name": _CLOSED_NAV, "arguments": {"type": "url", "url": origin}},
-    )
-    result = _rpc(
-        proc,
-        3,
-        "tools/call",
-        {"name": _CLOSED_EVAL, "arguments": {"function": _EVAL_FN}},
-    )
-    return _tool_text(result)
+def drive_stdio_mcp(
+    proc: subprocess.Popen[bytes],
+    origin: str,
+    timeout_s: float = _MCP_TIMEOUT_S,
+) -> str:
+    def _run() -> str:
+        _rpc(
+            proc,
+            1,
+            "initialize",
+            {
+                "protocolVersion": "2024-11-05",
+                "capabilities": {},
+                "clientInfo": {"name": "hermes-pipeline", "version": "0.1.0"},
+            },
+        )
+        _notify(proc, "notifications/initialized")
+        _rpc(
+            proc,
+            2,
+            "tools/call",
+            {"name": _CLOSED_NAV, "arguments": {"type": "url", "url": origin}},
+        )
+        result = _rpc(
+            proc,
+            3,
+            "tools/call",
+            {"name": _CLOSED_EVAL, "arguments": {"function": _EVAL_FN}},
+        )
+        return _tool_text(result)
+
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        future = pool.submit(_run)
+        try:
+            return future.result(timeout=timeout_s)
+        except FuturesTimeout as exc:
+            raise TimeoutError("mcp timeout") from exc
 
 
 def _rpc(
@@ -383,31 +397,37 @@ def _notify(proc: subprocess.Popen[bytes], method: str) -> None:
 
 
 def _write_frame(stream: IO[bytes], payload: dict[str, Any]) -> None:
-    raw = json.dumps(payload).encode("utf-8")
-    header = f"Content-Length: {len(raw)}\r\n\r\n".encode("ascii")
-    stream.write(header + raw)
+    raw = json.dumps(payload).encode("utf-8") + b"\n"
+    stream.write(raw)
     stream.flush()
 
 
 def _read_frame(stream: IO[bytes]) -> dict[str, Any]:
-    headers: dict[str, str] = {}
     while True:
         line = stream.readline()
         if not line:
             raise RuntimeError("eof")
-        if line in (b"\r\n", b"\n"):
-            if headers:
-                break
+        stripped = line.strip()
+        if not stripped:
             continue
-        text = line.decode("ascii", errors="replace")
-        key, _, value = text.partition(":")
-        headers[key.strip().lower()] = value.strip()
-    size = int(headers.get("content-length", "0"))
-    body = stream.read(size)
-    loaded = json.loads(body.decode("utf-8"))
-    if not isinstance(loaded, dict):
-        raise RuntimeError("bad frame")
-    return cast(dict[str, Any], loaded)
+        if stripped.lower().startswith(b"content-length:"):
+            headers: dict[str, str] = {
+                "content-length": stripped.split(b":", 1)[1].strip().decode("ascii")
+            }
+            while True:
+                header_line = stream.readline()
+                if header_line in (b"", b"\r\n", b"\n"):
+                    break
+            size = int(headers.get("content-length", "0"))
+            body = stream.read(size)
+            loaded = json.loads(body.decode("utf-8"))
+            if not isinstance(loaded, dict):
+                raise RuntimeError("bad frame")
+            return cast(dict[str, Any], loaded)
+        loaded = json.loads(stripped.decode("utf-8"))
+        if not isinstance(loaded, dict):
+            raise RuntimeError("bad frame")
+        return cast(dict[str, Any], loaded)
 
 
 __all__ = [

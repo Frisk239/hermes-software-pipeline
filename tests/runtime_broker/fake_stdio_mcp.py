@@ -6,27 +6,21 @@ from typing import Any, cast
 
 
 def _read() -> dict[str, object]:
-    headers: dict[str, str] = {}
     while True:
         line = sys.stdin.buffer.readline()
-        if line in (b"", b"\r\n", b"\n"):
-            if headers:
-                break
-            if line == b"":
-                raise SystemExit(0)
+        if not line:
+            raise SystemExit(0)
+        stripped = line.strip()
+        if not stripped:
             continue
-        key, _, value = line.decode().partition(":")
-        headers[key.strip().lower()] = value.strip()
-    size = int(headers.get("content-length", "0"))
-    loaded = json.loads(sys.stdin.buffer.read(size))
-    if not isinstance(loaded, dict):
-        raise SystemExit(1)
-    return cast(dict[str, object], loaded)
+        loaded = json.loads(stripped.decode("utf-8"))
+        if not isinstance(loaded, dict):
+            raise SystemExit(1)
+        return cast(dict[str, object], loaded)
 
 
 def _write(payload: dict[str, object]) -> None:
-    raw = json.dumps(payload).encode()
-    sys.stdout.buffer.write(f"Content-Length: {len(raw)}\r\n\r\n".encode() + raw)
+    sys.stdout.buffer.write(json.dumps(payload).encode() + b"\n")
     sys.stdout.buffer.flush()
 
 
