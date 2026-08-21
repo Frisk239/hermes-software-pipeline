@@ -91,6 +91,36 @@ def _controller(store: ControllerTransactionStore) -> KernelController:
     return KernelController(store, recorded_at=_RECORDED_AT)
 
 
+def test_acquire_without_replace_rejects_live_lease(
+    store: ControllerTransactionStore,
+) -> None:
+    controller = _controller(store)
+    first = controller.acquire_lease(
+        "ws_01-05", "pl_01-05", "holder-a", _NOW, ttl_seconds=_TTL
+    )
+    with pytest.raises(LeaseError):
+        controller.acquire_lease(
+            "ws_01-05",
+            "pl_01-05",
+            "holder-b",
+            _NOW,
+            ttl_seconds=_TTL,
+            replace=False,
+        )
+    loaded = store.load_lease("ws_01-05", "pl_01-05")
+    assert loaded == first
+    later = controller.acquire_lease(
+        "ws_01-05",
+        "pl_01-05",
+        "holder-b",
+        _NOW + _TTL + 1,
+        ttl_seconds=_TTL,
+        replace=False,
+    )
+    assert later.holder == "holder-b"
+    assert later.generation == 2
+
+
 def test_acquire_starts_at_generation_one(store: ControllerTransactionStore) -> None:
     lease = _controller(store).acquire_lease(
         "ws_01-05", "pl_01-05", "holder-a", _NOW, ttl_seconds=_TTL
