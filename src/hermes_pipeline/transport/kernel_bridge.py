@@ -18,6 +18,7 @@ from hermes_pipeline.contracts.runtime import Actor, ControllerCommand
 from hermes_pipeline.controller import KernelController
 from hermes_pipeline.controller.transaction_store import (
     ControllerTransactionStore,
+    LeaseError,
     fold_stage_projection,
 )
 from hermes_pipeline.delivery.fake import FakeDelivery
@@ -1136,18 +1137,23 @@ class KernelBridge:
             return {"ok": False, "error": "retry exhausted"}
         if self._registry.role_of(project_id, principal) is None:
             return {"ok": False, "error": "not a project member"}
-        self._dev.pop(pipeline_id, None)
-        self._save_dev()
-        self._verify.pop(pipeline_id, None)
         if self._spawn_worker:
             now = int(time.time())
-            held = self._store.load_lease(workspace_id, pipeline_id)
-            if held is not None and now <= held.expires_at:
-                return {"ok": False, "error": "busy"}
             holder = f"worker-{pipeline_id}"
-            lease = self._controller.acquire_lease(
-                workspace_id, pipeline_id, holder, now, 1800
-            )
+            try:
+                lease = self._controller.acquire_lease(
+                    workspace_id,
+                    pipeline_id,
+                    holder,
+                    now,
+                    1800,
+                    replace=False,
+                )
+            except LeaseError:
+                return {"ok": False, "error": "busy"}
+            self._dev.pop(pipeline_id, None)
+            self._save_dev()
+            self._verify.pop(pipeline_id, None)
             self._spawn_stage_worker(
                 workspace_id,
                 project_id,
@@ -1157,6 +1163,9 @@ class KernelBridge:
                 lease.generation,
             )
             return {"ok": True, "running": True}
+        self._dev.pop(pipeline_id, None)
+        self._save_dev()
+        self._verify.pop(pipeline_id, None)
         self._advance_development(pipeline_id, project_id, principal, workspace_id)
         self._advance_verify(pipeline_id, project_id, workspace_id)
         row = self._verify.get(pipeline_id, {})
@@ -1209,9 +1218,12 @@ class KernelBridge:
         if self._registry.role_of(project_id, principal) is None:
             return {"ok": False, "error": "not a project member"}
         holder = f"worker-{pipeline_id}"
-        lease = self._controller.acquire_lease(
-            workspace_id, pipeline_id, holder, now, 1800
-        )
+        try:
+            lease = self._controller.acquire_lease(
+                workspace_id, pipeline_id, holder, now, 1800, replace=False
+            )
+        except LeaseError:
+            return {"ok": False, "error": "busy"}
         if self._spawn_worker:
             committed = self._commit_approval(
                 pipeline_id, project_id, principal, workspace_id

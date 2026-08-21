@@ -271,8 +271,11 @@ class KernelController:
         holder: str,
         now: int,
         ttl_seconds: int = 60,
+        replace: bool = True,
     ) -> LeaseRecord:
         current = self._store.load_lease(workspace_id, pipeline_id)
+        if current is not None and now <= current.expires_at and not replace:
+            raise LeaseError("busy")
         generation = 1 if current is None else current.generation + 1
         record = LeaseRecord(
             workspace_id=workspace_id,
