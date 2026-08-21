@@ -627,6 +627,7 @@ def approve_command(
     project_id: str,
     pipeline_id: str,
     principal_id: str,
+    workspace_id: str = "ws_local",
 ) -> LifecycleResult:
     result = LifecycleResult(command="approve")
     if not _ensure_runtime(home):
@@ -651,6 +652,7 @@ def approve_command(
                 "project_id": project_id,
                 "pipeline_id": pipeline_id,
                 "principal_id": principal_id,
+                "workspace_id": workspace_id,
             },
         )
     except _client.RuntimeUnavailableError:
@@ -660,6 +662,16 @@ def approve_command(
         return result
     body = reply.body or {}
     receipt = body.get("receipt") if isinstance(body.get("receipt"), dict) else body
+    if not isinstance(receipt, dict):
+        receipt = {}
+    if receipt.get("running"):
+        receipt = _wait_for_verify(home, workspace_id, pipeline_id, receipt)
+        document = read_descriptor(root)
+        if document is None or is_stale(root):
+            _add_check(result, "runtime", "error", "RUNTIME_UNAVAILABLE")
+            result.ok = False
+            result.exit_code = EXIT_FAIL
+            return result
     result.ok = bool(reply.ok and receipt.get("ok", True))
     result.exit_code = EXIT_OK if result.ok else EXIT_FAIL
     result.detail = {key: str(value) for key, value in receipt.items()}
@@ -668,12 +680,46 @@ def approve_command(
     return result
 
 
+def _wait_for_verify(
+    home: Path,
+    workspace_id: str,
+    pipeline_id: str,
+    started: dict[str, Any],
+) -> dict[str, Any]:
+    import time
+
+    deadline = time.monotonic() + 1200
+    latest: dict[str, Any] = dict(started)
+    while time.monotonic() < deadline:
+        view = read_pipeline_command(
+            home, workspace_id=workspace_id, pipeline_id=pipeline_id
+        )
+        detail = view.detail if view.ok else {}
+        latest = {**started, **detail}
+        status = str(detail.get("verify_status", ""))
+        gate = str(detail.get("candidate_gate", ""))
+        if status in {"READY", "REWORK", "INFRA", "DENIED", "DRIFT"}:
+            latest["ok"] = status == "READY" and gate != "FAIL"
+            latest["running"] = False
+            return latest
+        if gate == "FAIL" and status != "":
+            latest["ok"] = False
+            latest["running"] = False
+            return latest
+        time.sleep(2)
+    latest["ok"] = False
+    latest["error"] = "timeout"
+    latest["running"] = False
+    return latest
+
+
 def retry_command(
     home: Path,
     *,
     project_id: str,
     pipeline_id: str,
     principal_id: str,
+    workspace_id: str = "ws_local",
 ) -> LifecycleResult:
     result = LifecycleResult(command="retry")
     if not _ensure_runtime(home):
@@ -698,6 +744,7 @@ def retry_command(
                 "project_id": project_id,
                 "pipeline_id": pipeline_id,
                 "principal_id": principal_id,
+                "workspace_id": workspace_id,
             },
         )
     except _client.RuntimeUnavailableError:
@@ -707,6 +754,10 @@ def retry_command(
         return result
     body = reply.body or {}
     receipt = body.get("receipt") if isinstance(body.get("receipt"), dict) else body
+    if not isinstance(receipt, dict):
+        receipt = {}
+    if receipt.get("running"):
+        receipt = _wait_for_verify(home, workspace_id, pipeline_id, receipt)
     result.ok = bool(reply.ok and receipt.get("ok", True))
     result.exit_code = EXIT_OK if result.ok else EXIT_FAIL
     result.detail = {key: str(value) for key, value in receipt.items()}

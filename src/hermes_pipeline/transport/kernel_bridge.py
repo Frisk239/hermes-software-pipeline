@@ -5,6 +5,8 @@ from __future__ import annotations
 import contextlib
 import json
 import os
+import subprocess
+import sys
 import tempfile
 import time
 from pathlib import Path
@@ -94,8 +96,17 @@ _RUNTIMES = RUNTIME_FAMILIES
 
 
 class KernelBridge:
-    def __init__(self, state_root: Path, inner: Any) -> None:
+    def __init__(
+        self,
+        state_root: Path,
+        inner: Any,
+        *,
+        spawn_worker: bool = False,
+        worker_cmd: list[str] | None = None,
+    ) -> None:
         self._inner = inner
+        self._spawn_worker = spawn_worker
+        self._worker_cmd = worker_cmd
         self._dir = state_root / "descriptor"
         self._dir.mkdir(parents=True, exist_ok=True)
         self._corrupt = False
@@ -1128,6 +1139,24 @@ class KernelBridge:
         self._dev.pop(pipeline_id, None)
         self._save_dev()
         self._verify.pop(pipeline_id, None)
+        if self._spawn_worker:
+            now = int(time.time())
+            held = self._store.load_lease(workspace_id, pipeline_id)
+            if held is not None and now <= held.expires_at:
+                return {"ok": False, "error": "busy"}
+            holder = f"worker-{pipeline_id}"
+            lease = self._controller.acquire_lease(
+                workspace_id, pipeline_id, holder, now, 1800
+            )
+            self._spawn_stage_worker(
+                workspace_id,
+                project_id,
+                pipeline_id,
+                principal,
+                holder,
+                lease.generation,
+            )
+            return {"ok": True, "running": True}
         self._advance_development(pipeline_id, project_id, principal, workspace_id)
         self._advance_verify(pipeline_id, project_id, workspace_id)
         row = self._verify.get(pipeline_id, {})
@@ -1179,8 +1208,31 @@ class KernelBridge:
             return {"ok": False, "error": "baseline not ready"}
         if self._registry.role_of(project_id, principal) is None:
             return {"ok": False, "error": "not a project member"}
-        holder = f"runtime-{os.getpid()}"
-        self._controller.acquire_lease(workspace_id, pipeline_id, holder, now, 120)
+        holder = f"worker-{pipeline_id}"
+        lease = self._controller.acquire_lease(
+            workspace_id, pipeline_id, holder, now, 1800
+        )
+        if self._spawn_worker:
+            committed = self._commit_approval(
+                pipeline_id, project_id, principal, workspace_id
+            )
+            if not committed.get("ok"):
+                self._controller.cancel(workspace_id, pipeline_id)
+                return committed
+            self._spawn_stage_worker(
+                workspace_id,
+                project_id,
+                pipeline_id,
+                principal,
+                holder,
+                lease.generation,
+            )
+            return {
+                "ok": True,
+                "running": True,
+                "approval_status": "APPROVED",
+                "approver_id": principal,
+            }
         try:
             return self._run_approved(
                 payload, pipeline_id, project_id, principal, workspace_id
@@ -1188,15 +1240,13 @@ class KernelBridge:
         finally:
             self._controller.cancel(workspace_id, pipeline_id)
 
-    def _run_approved(
+    def _commit_approval(
         self,
-        payload: dict[str, Any],
         pipeline_id: str,
         project_id: str,
         principal: str,
         workspace_id: str,
     ) -> dict[str, Any]:
-        del payload
         planning = self._prd.get(pipeline_id)
         design = self._arch.get(pipeline_id)
         if planning is None or design is None:
@@ -1228,18 +1278,119 @@ class KernelBridge:
                 "approver_id": principal,
             },
         )
-        self._advance_development(pipeline_id, project_id, principal, workspace_id)
+        return {"ok": True}
+
+    def _run_approved(
+        self,
+        payload: dict[str, Any],
+        pipeline_id: str,
+        project_id: str,
+        principal: str,
+        workspace_id: str,
+    ) -> dict[str, Any]:
+        del payload
+        committed = self._commit_approval(
+            pipeline_id, project_id, principal, workspace_id
+        )
+        if not committed.get("ok"):
+            return committed
+        return self.run_leased_stages(
+            workspace_id=workspace_id,
+            project_id=project_id,
+            pipeline_id=pipeline_id,
+            principal_id=principal,
+            as_receipt=True,
+        )
+
+    def run_leased_stages(
+        self,
+        *,
+        workspace_id: str,
+        project_id: str,
+        pipeline_id: str,
+        principal_id: str,
+        as_receipt: bool = False,
+    ) -> Any:
+        self._hydrate_from_events(workspace_id, pipeline_id)
+        self._advance_development(pipeline_id, project_id, principal_id, workspace_id)
         self._advance_verify(pipeline_id, project_id, workspace_id)
         verify_status = self._verify.get(pipeline_id, {}).get("verify_status", "")
         gate = self._dev.get(pipeline_id, {}).get("candidate_gate", "")
-        return {
-            "ok": verify_status not in {"REWORK", "INFRA"} and gate != "FAIL",
-            "approval_status": "APPROVED",
-            "approver_id": principal,
-            "verify_status": verify_status,
-            "candidate_gate": gate,
-            "feedback": self._feedback.get(pipeline_id, ""),
+        if as_receipt:
+            return {
+                "ok": verify_status not in {"REWORK", "INFRA"} and gate != "FAIL",
+                "approval_status": "APPROVED",
+                "approver_id": principal_id,
+                "verify_status": verify_status,
+                "candidate_gate": gate,
+                "feedback": self._feedback.get(pipeline_id, ""),
+            }
+        if verify_status == "READY" and gate != "FAIL":
+            return 0
+        return 1
+
+    def heartbeat_lease(
+        self,
+        workspace_id: str,
+        pipeline_id: str,
+        holder: str,
+        generation: int,
+        now: int,
+    ) -> None:
+        self._controller.heartbeat_lease(
+            workspace_id, pipeline_id, holder, generation, now, 180
+        )
+
+    def release_lease(self, workspace_id: str, pipeline_id: str) -> None:
+        self._controller.cancel(workspace_id, pipeline_id)
+
+    def _spawn_stage_worker(
+        self,
+        workspace_id: str,
+        project_id: str,
+        pipeline_id: str,
+        principal: str,
+        holder: str,
+        generation: int,
+    ) -> None:
+        if self._worker_cmd is not None:
+            argv = list(self._worker_cmd)
+        else:
+            argv = [
+                sys.executable,
+                "-m",
+                "hermes_pipeline.transport.stage_worker",
+                "--state-root",
+                str(self._dir.parent),
+                "--workspace-id",
+                workspace_id,
+                "--project-id",
+                project_id,
+                "--pipeline-id",
+                pipeline_id,
+                "--principal-id",
+                principal,
+                "--holder",
+                holder,
+                "--generation",
+                str(generation),
+            ]
+        env = {
+            key: value
+            for key, value in os.environ.items()
+            if key not in {"GITHUB_TOKEN", "GH_TOKEN"}
         }
+        kwargs: dict[str, Any] = {
+            "cwd": str(self._dir.parent),
+            "env": env,
+            "stdout": subprocess.DEVNULL,
+            "stderr": subprocess.DEVNULL,
+        }
+        if sys.platform == "win32":
+            kwargs["creationflags"] = (
+                subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.DETACHED_PROCESS
+            )
+        subprocess.Popen(argv, **kwargs)
 
     def _coerce_approvals(self, document: dict[str, Any]) -> dict[str, dict[str, str]]:
         loaded: dict[str, dict[str, str]] = {}

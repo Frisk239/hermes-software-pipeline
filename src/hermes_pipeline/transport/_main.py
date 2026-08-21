@@ -205,7 +205,7 @@ def _build_state(
     try:
         from hermes_pipeline.transport.kernel_bridge import KernelBridge
 
-        store = KernelBridge(root, inner)
+        store = KernelBridge(root, inner, spawn_worker=True)
     except Exception:
         store = inner
     if os.environ.get(SPIKE_CRASH_AFTER_PERSIST) == "1":
